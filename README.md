@@ -62,7 +62,7 @@ This re-renders global files (cheap, idempotent) and drops `CLAUDE.md` into the 
 
 Voice rules live in a per-project `voice.md` rendered from a named voice in the voice library. Voice is per-project, so concurrent Claude Code sessions on different projects can carry different voices without conflict.
 
-The shipped `academic` voice is the author's own — personal register plus specific analogy anchors (Clever Hans, chicken sexing, split-brain) calibrated to one writer. Treat it as an example, not a neutral academic default. For a different author or a different register, copy it to a new name and edit.
+The shipped `academic` voice is the author's own: personal register plus specific analogy anchors (Clever Hans, chicken sexing, split-brain) calibrated to one writer. Treat it as an example, not a neutral academic default. For a different author or a different register, copy it to a new name and edit.
 
 Pick a voice at install:
 
@@ -132,7 +132,7 @@ git pull
 
 Then refresh each project (see below).
 
-### Updating a project's CLAUDE.md
+### Updating a project
 
 To refresh a project's CLAUDE.md in place without losing content you've added outside the managed block (project-specific notes, active briefs, TODO lists):
 
@@ -141,7 +141,9 @@ cd ~/writing/my-paper
 /path/to/sourced/install.sh --update
 ```
 
-This replaces only the content between the `<!-- sourced:begin managed -->` and `<!-- sourced:end managed -->` sentinels. Everything outside the sentinels is preserved.
+`--update` does two things. First, it replaces only the content between the `<!-- sourced:begin managed -->` and `<!-- sourced:end managed -->` sentinels in CLAUDE.md; everything outside those sentinels is preserved. Second, it refreshes `voice.md` from the library voice the project was installed with (read from the marker on voice.md line 1), so upstream voice-rule changes propagate.
+
+To switch to a different voice on an existing project, pass `--update --voice <new>` (explicit switch) or `--force --voice <new>` (replace).
 
 ### Overwriting outright
 
@@ -158,7 +160,7 @@ If a CLAUDE.md exists but you want a fresh render regardless:
 | `--global-only` | Install or refresh global files only (source-finder, schema, brief template, voice library). Skip per-project files. |
 | `--project <path>` | Drop per-project files into `<path>` instead of `$PWD`. |
 | `--force` | Overwrite existing CLAUDE.md, voice.md, and brief (if `--brief`) without asking. |
-| `--update` | Refresh the managed block of an existing CLAUDE.md (preserving content outside the sentinels) and refresh `voice.md` from the project's installed voice (stored in a marker on voice.md line 1). |
+| `--update` | Refresh the managed block of CLAUDE.md (preserving content outside sentinels) and refresh `voice.md` from the project's installed voice. |
 | `--voice <name>` | Pick the voice rendered into this project's `voice.md` (default: `academic`). Shipped voices live in `templates/voices/`; custom voices can be placed at `~/.claude/voice/<name>.md`. |
 | `--brief <name>` | Also drop `<name>.brief.md` into the project from `templates/brief.template.md`. |
 
@@ -195,7 +197,7 @@ sourced/
 │   ├── CLAUDE.md                 # template with {{USER}}, rendered into each project
 │   ├── brief.template.md         # template with {{USER}}, installs globally and rendered per-project on --brief
 │   └── voices/
-│       └── academic.md           # shipped voice; renders to ~/.claude/voice/academic.md and per-project voice.md
+│       └── academic.md           # shipped voice; copies verbatim to ~/.claude/voice/academic.md, renders per-project via install.sh --voice
 ├── install.sh                    # global + per-project install
 └── README.md
 ```
