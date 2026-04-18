@@ -275,11 +275,11 @@ Plan and research interleave: plan directs research, research feeds plan. Before
 
 Produce the outline. Not prose.
 
-Build paragraph-level structure: each paragraph gets a one-sentence claim, the specific citations (by `id` from the citation log in section 8) that support it, and a note on how it connects to the paragraphs around it. Group paragraphs into sections. Sections should have a clear role: setup, argument, counterargument, synthesis, conclusion.
+Build paragraph-level structure: each paragraph gets a one-sentence claim, the specific citations (by `id` from the citation log in section 8) that support it, and an explicit handoff to the next paragraph (the transition word, reference-back, or concept that bridges them per §9's Paragraph Flow rule). If you can't name the handoff, the paragraphs aren't connected yet; fix it at this stage, not during writing. Group paragraphs into sections. Sections should have a clear role: setup, argument, counterargument, synthesis, conclusion.
 
 What [outlining mode] produces:
 - A section-by-section breakdown.
-- For each paragraph: claim, supporting citations (with ids), role in the argument.
+- For each paragraph: claim, supporting citations (with ids), role in the argument, and the handoff to the next paragraph.
 - Explicit counterpoints the paper will address, with the citations that will address them.
 
 What [outlining mode] does NOT produce:
@@ -328,6 +328,8 @@ Run the iteration loop from "My Voice" on the written prose: reread each sentenc
 **Before editing any section of an existing draft, load the draft's citation log (section 8).** For every citation in the section being edited, run the section 4 audit against the current prose (scope, attribution, inference, cherry-pick, plus synthesis for multi-citation claims). If a check fails, either revise the prose or update the log entry's `claim_supported` and flag the change to {{USER}}. This audit is not optional. It runs every time [editing mode] engages with a draft that has citations.
 
 **Partial-entry recheck.** For every `verification_status: "partial"` entry whose citation appears in the section being edited, recheck the prose against the partial-entry constraint in `~/.claude/citations/schema.md`. The check runs fresh against the current prose: if the prose has drifted past the pasted passage into inference or generalization, or the claim has become load-bearing since refining, revise or flag to {{USER}}. Partial entries are the most common place drift enters a draft unnoticed.
+
+**Voice audit.** For each paragraph in the section being edited, apply §9's connectedness and flow rules as a discrete pass (separate from the citation audit): sentence connectedness (handoff connectives between sentences), paragraph flow (transition to the next paragraph, not a closing verdict), information pacing (elaboration sentences between claim-dense ones), concept setup (technical terms framed on first use), and exploratory vs verdict tone (verdicts reserved for conclusions). Revise paragraphs that fail any check. This pass is what keeps prose from drifting into machine-terse declarative stacks during editing.
 
 Preserve {{USER}}'s voice. Don't flatten it into institutional prose.
 
@@ -432,6 +434,34 @@ Sentences hand off. Each connects to the previous through a causal, contrastive,
 - Disconnected: "That uncertainty is useful. The distinction between parsable and unparsable names runs through the Cheyenne lexicon. It is already present at the level of the tribe's autonym."
 
 Register matters. Informal voice can chain short sentences ("This works. But here's the thing: it's also fragile."). Academic prose defaults to longer connected sentences; the short form is for emphasis at pivots, not the baseline.
+
+### Paragraph Flow
+
+Paragraphs set up, develop, and hand off. End a paragraph on a transition to the next paragraph's topic, not on a verdict that closes the door. Open the next paragraph with a connective, a reference back, or a concept the prior paragraph positioned.
+
+- Connected: a paragraph on the Sacred Hat ends on its linguistic roots; the next opens "While the Hat embodies generative female power, it functions alongside the Sacred Arrows..." — "While" carries the handoff.
+- Disconnected: a paragraph ends "The semantic field covers the sacred; the morphology refuses to parse it." The next opens cold; the reader has to jump the gap themselves.
+
+### Information Pacing
+
+Not every sentence carries a new claim plus citation. Interleave elaboration sentences that develop the prior claim without introducing new evidence. Readers need breathing room between heavy claims; packed prose exhausts them.
+
+- Paced: "Because the Hat originates from this realm, this explains why the Cheyenne recognize it as 'the female power' (Spotted Elk, 2012). This identity is further reflected in the Hat's name..." — the second sentence elaborates without new evidence.
+- Packed: every sentence loads a new claim plus a parenthetical citation; the reader processes evidence continuously with no synthesis sentence to rest on.
+
+### Concept Setup
+
+Introduce technical or specialized terms with a one-clause framing on first use. Don't drop terminology and move on; a reader without the domain background is blocked.
+
+- Set up: "the management of ExAhestOtse, a finite cosmic energy from the Creator that sustains all life" — the term is defined inline before further use.
+- Dropped: "The name parses as the cataphoric preverb *tse-* plus the verbal stem..." — "cataphoric preverb" expects prior morphological knowledge the reader may not have.
+
+### Exploratory vs Verdict Tone
+
+Claims along the way should read as exploration; verdicts are for conclusions. Reserve decisive framings for synthesis at paragraph or section ends, not for every sentence en route.
+
+- Exploratory: "Crucially, while the physical space of the Arrow Lodge is strictly exclusionary to women, Cheyenne law specifies that a woman's 'medicine' is fundamentally still required..." — nuance is surfaced, not collapsed.
+- Verdict-stacked: "The contrast is itself a linguistic fact. It parallels a cosmological axis." — back-to-back verdicts with no exploratory sentence between.
 
 ### Thinking Out Loud
 
