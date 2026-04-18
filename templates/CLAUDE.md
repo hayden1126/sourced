@@ -154,43 +154,9 @@ Before starting any paper workflow, collect or confirm an **intake brief**. The 
 
 ### Brief schema
 
-```markdown
-# Intake brief: <working title>
+The canonical layout lives in `~/.claude/templates/brief.template.md`. Read that file for the field set and structure; propagating changes to it propagates to new briefs via `install.sh --brief <name>`.
 
-## Assignment
-<verbatim prompt, rubric, or task description>
-
-## Topic / question / thesis
-- Topic: <one sentence>
-- Research question: <one sentence>
-- Thesis: <one sentence; may be empty or TBD early>
-
-## Existing material
-<{{USER}}'s prior reasoning, notes, partial drafts. Paste inline or link to a file.>
-
-## Length expectation
-- Target word count: <number>
-- Hard limit: <number or "none">
-
-## Audience
-<who grades, publishes, or reads this>
-
-## Deadline
-<date or "none">
-
-## Known sources
-<anything already in hand, by short reference>
-
-## Constraints
-- Sources to avoid: <...>
-- Disciplines to stay within: <...>
-- Other constraints: <...>
-
-## Autonomy level
-<low | medium | high> — see definitions below.
-```
-
-Fields may be empty if genuinely not applicable, but write "none" or "TBD" rather than omitting. An omitted field is silent; a "TBD" field prompts a follow-up.
+Field-handling rule: write "none" or "TBD" rather than omitting a field. An omitted field is silent; a "TBD" field prompts a follow-up. Fields may be "TBD" early (the thesis in particular) and get filled in as work progresses.
 
 ### Autonomy levels
 
@@ -255,15 +221,7 @@ The round trip completes (and the return announcement fires) when one of: (a) th
 
 If you can't read a source you need, do not give up and fabricate the content. Pause and ask {{USER}} to open a browser, pull the PDF, and paste the relevant passages.
 
-**Parallel research.** When research has three or more genuinely independent sub-topics (each looking for a different kind of source), dispatch `source-finder` subagents in parallel instead of searching sequentially. Each source-finder gets:
-
-- One sub-topic and the claim or question it supports.
-- The paper's broader context (working title, overall argument, audience).
-- The path to the current citation log (read-only for the finder).
-- A unique `<finder-id>` token assigned by you for this dispatch batch (e.g., `sf1`, `sf2`, `sf3`).
-- The path to the finder's assigned shard file: `.claude/citations/working.<finder-id>.json`. The finder writes verified entries here, not to the main log.
-- The full contents of `~/.claude/citations/schema.md` inlined into the dispatch prompt (read the file at dispatch time).
-- Any constraints: date range, disciplinary boundaries, language, sources to avoid.
+**Parallel research.** When research has three or more genuinely independent sub-topics (each looking for a different kind of source), dispatch `source-finder` subagents in parallel instead of searching sequentially. Use the dispatch template below literally; each of its fields is what a finder needs to run.
 
 Source-finders read the existing log for context, search by concept, verify each candidate, write verified entries to their shard, and report back with logged ids, rejected sources, gaps, and alternative framings.
 

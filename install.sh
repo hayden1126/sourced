@@ -14,6 +14,7 @@ REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_FILE="${HOME}/.claude/sourced.config"
 CLAUDE_AGENTS_DIR="${HOME}/.claude/agents"
 CLAUDE_CITATIONS_DIR="${HOME}/.claude/citations"
+CLAUDE_TEMPLATES_DIR="${HOME}/.claude/templates"
 
 # ---- flag parsing ----------------------------------------------------------
 GLOBAL_ONLY=0
@@ -96,10 +97,11 @@ render() {
 }
 
 # ---- step 1: global files (always) -----------------------------------------
-mkdir -p "${CLAUDE_AGENTS_DIR}" "${CLAUDE_CITATIONS_DIR}"
+mkdir -p "${CLAUDE_AGENTS_DIR}" "${CLAUDE_CITATIONS_DIR}" "${CLAUDE_TEMPLATES_DIR}"
 echo "Rendering global files..."
-render "${REPO_DIR}/agents/source-finder.md" "${CLAUDE_AGENTS_DIR}/source-finder.md"
-render "${REPO_DIR}/citations/schema.md"     "${CLAUDE_CITATIONS_DIR}/schema.md"
+render "${REPO_DIR}/agents/source-finder.md"     "${CLAUDE_AGENTS_DIR}/source-finder.md"
+render "${REPO_DIR}/citations/schema.md"         "${CLAUDE_CITATIONS_DIR}/schema.md"
+render "${REPO_DIR}/templates/brief.template.md" "${CLAUDE_TEMPLATES_DIR}/brief.template.md"
 
 # Clean up legacy academic-researcher.md from prior installs. Academic-researcher
 # now lives in per-project CLAUDE.md, not as a subagent.
