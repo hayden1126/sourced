@@ -73,6 +73,37 @@ Open the project in Claude Code and start a conversation. A few things to expect
 - **Voice is protected.** The agent follows explicit rules against AI-flavored academic phrasing, em dashes, filler adverbs, and synthesis drift. It writes in a voice calibrated from your input, not a generic institutional tone.
 - **Scope escape.** Prefix a message with the literal token `[non-academic]` to step out of the framework for one turn (shell scripts, unrelated tasks). Add "stay non-academic" to extend beyond one turn.
 
+## Modes at a glance
+
+Nine cognitive modes, one announced per transition. Full definitions live in `CLAUDE.md` section 7; this is the reference card.
+
+| Mode | Purpose |
+|------|---------|
+| `[collaborative]` | Default. Think aloud with forward momentum. |
+| `[red team]` | Systematically attack your own argument. |
+| `[babble]` | Stream-of-consciousness, no structure. |
+| `[research]` | Find and vet sources. Auto-triggered when any other mode hits an unsourced claim. |
+| `[plan]` | Map sources to arguments before writing. Requires a brief. |
+| `[outlining]` | Paragraph-level structure, citations attached by id, no prose. |
+| `[refining]` | Stress-test the outline against the citation log. Runs the five-check audit. |
+| `[writing]` | Outline to prose, applying voice rules and inline APA citations. |
+| `[editing]` | Polish prose; re-audit citations against the log. |
+
+## Typical workflow
+
+One end-to-end session, showing where modes announce and where the gates fire:
+
+1. `install.sh --brief cheyenne_essay` renders `CLAUDE.md` and an empty `cheyenne_essay.brief.md`.
+2. Open Claude Code. First turn is `[collaborative]` (no announcement on the first message). The agent proposes filling out the brief; you fill it.
+3. You say "start planning." Agent announces `Switching to [plan mode].`, reads the brief, re-states the autonomy level, proposes a research strategy, and waits.
+4. You approve. Agent auto-triggers `[research mode]`, dispatches `source-finder` subagents in parallel if three-plus sub-topics warrant it, runs the merge protocol, and returns with `Switching back to [plan mode].` plus a merged report of logged citations, gaps, and rejected sources.
+5. Back in `[plan mode]`, the agent maps sources to arguments and presents the plan. **Gate:** you approve before advancing.
+6. Agent switches to `[outlining mode]`, builds paragraph-level structure with citations attached by id. **Gate:** you approve ("ready to refine, or more outlining?").
+7. `[refining mode]` runs the five-check audit (scope, attribution, inference, cherry-pick, synthesis) against the log. **Gate:** you approve the refined outline.
+8. `[writing mode]` turns outline into prose, applying voice rules. Then `[editing mode]` polishes and re-audits.
+
+At any point, `[red team]` and `[babble]` are available for stress-testing or unstructured thinking. `[non-academic]` escapes the framework for one turn.
+
 ## Updating
 
 ### Updating the sourced install
