@@ -18,9 +18,19 @@ Claude Code agents for rigorous academic research, drafting, and editing. A two-
 
 ## Install
 
+Clone wherever you keep repos. `install.sh` finds itself via `$BASH_SOURCE`, so the clone path doesn't matter.
+
 ```bash
-git clone https://github.com/hayden1126/sourced.git ~/sourced
-cd ~/sourced
+git clone https://github.com/hayden1126/sourced.git
+cd sourced
+./install.sh
+```
+
+If you prefer a specific location, pass it to `git clone`:
+
+```bash
+git clone https://github.com/hayden1126/sourced.git ~/code/sourced
+cd ~/code/sourced
 ./install.sh
 ```
 
@@ -32,10 +42,13 @@ After install, the agents are available to Claude Code from any working director
 - `~/.claude/agents/source-finder.md`
 - `~/.claude/citations/schema.md`
 
+These paths are fixed — the install targets always go to `~/.claude/`, regardless of where the repo itself lives.
+
 ## Update
 
+From inside your cloned repo directory (wherever you put it):
+
 ```bash
-cd ~/sourced
 git pull
 ./install.sh
 ```
