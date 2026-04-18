@@ -1,6 +1,6 @@
 # Citation log schema
 
-Single source of truth for the structure of entries in any citation log (`<draft>.citations.json` or `.claude/citations/working.citations.json`). Semantic rules for when to use each value live in the agent files (`academic-researcher.md`, `source-finder.md`); this file defines structure, allowed values, and ID format only.
+Single source of truth for the structure of entries in any citation log (`<draft>.citations.json` or `.claude/citations/working.citations.json`). Semantic rules for when to use each value live in the project's `CLAUDE.md` and in `source-finder.md`; this file defines structure, allowed values, and ID format only.
 
 ## Entry structure
 
