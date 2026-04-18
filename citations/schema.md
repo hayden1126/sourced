@@ -46,9 +46,9 @@ Each in-text citation is one entry. Same source cited three times = three entrie
 Two fields track where a citation lives over its lifecycle:
 
 - `provisional_reference`: set by source-finder at logging time, format `"subtopic:<name>"` where `<name>` is the sub-topic the source-finder was assigned. Provenance only. Never rewritten, never cleared. Always present on entries created during research.
-- `draft_reference`: set lazily by academic-researcher the first time the citation is placed into an outline paragraph or draft prose. Format: section-level while the outline is still section-scoped (e.g., `"section:counterargument"`); paragraph-level once specific paragraph positions exist (e.g., `"paragraph:3.2"`, meaning section 3 paragraph 2). Start at section-level during `[drafting mode]`; narrow to paragraph-level during `[refining mode]` or `[writing mode]` once the outline resolves to specific paragraphs. `null` until first placed.
+- `draft_reference`: set lazily by academic-researcher the first time the citation is placed into an outline paragraph or draft prose. Format: section-level while the outline is still section-scoped (e.g., `"section:counterargument"`); paragraph-level once specific paragraph positions exist (e.g., `"paragraph:3.2"`, meaning section 3 paragraph 2). Start at section-level during `[outlining mode]`; narrow to paragraph-level during `[refining mode]` or `[writing mode]` once the outline resolves to specific paragraphs. `null` until first placed.
 
-Entries written directly by academic-researcher during drafting (no source-finder involvement) may set `draft_reference` immediately and leave `provisional_reference` as `null`.
+Entries written directly by academic-researcher (no source-finder involvement) may set `draft_reference` immediately and leave `provisional_reference` as `null`.
 
 ## ID format
 
