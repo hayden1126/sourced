@@ -6,12 +6,6 @@ For students and researchers who want Claude-generated scholarship they can defe
 
 The primary agent (academic-researcher) lives in each project's `CLAUDE.md`; a parallel-research subagent (source-finder) lives globally in `~/.claude/agents/`.
 
-## What's in here
-
-- **Academic-researcher rules** (inlined into per-project `CLAUDE.md`). Runs across nine modes (collaborative, red team, babble, research, plan, outlining, refining, writing, editing) with an explicit intake-brief step and autonomy-level controls before planning.
-- **`source-finder`**: a globally-installed subagent, dispatched in parallel by the main thread for multi-topic research. Each finder verifies its own sources, writes to a shard file, and returns a structured report. The main thread merges shards with ID collision resolution.
-- **Citation log schema**: machine-readable record of every citation with `exact_quote`, `surrounding_context`, and `claim_supported` fields. Source of truth for the References section.
-
 ## What it does differently
 
 - **No fabricated citations.** Sources must be peer-reviewed (or field-appropriate) AND full-text accessible. Abstract-only, paywalled, or content-mill sources are rejected, not approximated.
@@ -63,16 +57,6 @@ This re-renders global files (cheap, idempotent) and drops `CLAUDE.md` into the 
 # → creates CLAUDE.md and my_paper.brief.md in the current directory
 ```
 
-## Your first session
-
-Open the project in Claude Code and start a conversation. A few things to expect:
-
-- **Brief first.** Before the agent enters `[plan mode]`, it proposes filling out an intake brief. Run `install.sh --brief <name>` ahead of time to render a blank one, or let the agent prompt you.
-- **Mode announcements are load-bearing.** The agent outputs `Switching to [X mode].` on every mode transition, before anything else. That line is how you sanity-check what the agent thinks it's doing; watch for it.
-- **Stage gates are explicit.** After planning, outlining, and refining, the agent stops and asks before advancing to the next stage. "Looks good, continue" is approval; silence is not.
-- **Voice is protected.** The agent follows explicit rules against AI-flavored academic phrasing, em dashes, filler adverbs, and synthesis drift. It writes in a voice calibrated from your input, not a generic institutional tone.
-- **Scope escape.** Prefix a message with the literal token `[non-academic]` to step out of the framework for one turn (shell scripts, unrelated tasks). Add "stay non-academic" to extend beyond one turn.
-
 ## Modes at a glance
 
 Nine cognitive modes, one announced per transition. Full definitions live in `CLAUDE.md` section 7; this is the reference card.
@@ -90,6 +74,8 @@ Nine cognitive modes, one announced per transition. Full definitions live in `CL
 | `[editing]` | Polish prose; re-audit citations against the log. |
 
 ## Typical workflow
+
+The agent is announcement-driven: every mode transition outputs `Switching to [X].` before anything else (that line is your sanity check on what it thinks it's doing), and three stage gates (before refining, before writing, before research ends) stop and wait for your approval. Prefix a turn with `[non-academic]` to skip the framework for one turn; add "stay non-academic" to extend.
 
 One end-to-end session, showing where modes announce and where the gates fire:
 
