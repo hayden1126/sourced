@@ -54,7 +54,7 @@ Return to academic-researcher in under 300 words:
 - [id-002]: [...]
 
 ### Rejected:
-- [Title, Author, Year]: [reason: paywalled, abstract-only, doesn't address claim, predatory journal, etc.]
+- [Title, Author, Year] — [category]: [reason, including URL or DOI if render-failed]
 
 ### Gaps:
 - [Any claim or sub-question still lacking accessible sources]
@@ -66,6 +66,19 @@ Return to academic-researcher in under 300 words:
 ### Search strategy:
 - [Brief description of what you searched for, what worked, what didn't]
 ```
+
+## Rejection categories
+
+Tag every entry in `### Rejected` with exactly one of these categories. The tag decides what academic-researcher does with it.
+
+- **`paywalled`** — full text exists but is not accessible without credentials. academic-researcher surfaces to {{USER}} if the source is strong enough to pursue manually.
+- **`not-found`** — URL dead, DOI unresolved, citation leads nowhere.
+- **`off-topic`** — source is accessible but does not actually address the claim. Do not downgrade claims to fit mismatched sources; reject and move on.
+- **`predatory`** — publisher fails the reliability check (content mill, predatory journal, AI-slop repository, unattributed blog standing in for scholarship).
+- **`abstract-only`** — only the abstract or first page is accessible; the full work is blocked by something you cannot circumvent. Distinct from `paywalled` in that the blocker may not be a paywall (JSTOR preview limits, scanned excerpt, etc.).
+- **`subagent-render-failed`** — candidate looks strong and you have a working URL or local path, but your tools (Read, WebFetch) could not render the full text in your subagent context. Include the URL or path in the rejection reason. academic-researcher will retry from the main thread before accepting this as a gap. Use this category **only** when you have a specific candidate you couldn't render, not as a catch-all for sources you didn't try hard enough to open.
+
+If a rejection genuinely doesn't fit, pick the closest category and explain in the reason. Do not invent new categories.
 
 ## Rules
 
