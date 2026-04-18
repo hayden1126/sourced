@@ -38,7 +38,7 @@ After `--global-only`, the global files are available to Claude Code from any wo
 - `~/.claude/agents/source-finder.md`
 - `~/.claude/citations/schema.md`
 - `~/.claude/templates/brief.template.md`
-- `~/.claude/voice/style.md`
+- `~/.claude/voice/<name>.md` (voice library; shipped voices land here, custom voices can be added alongside)
 
 These paths are fixed; the install targets always go to `~/.claude/`, regardless of where the repo itself lives.
 
@@ -57,6 +57,27 @@ This re-renders global files (cheap, idempotent) and drops `CLAUDE.md` into the 
 /path/to/sourced/install.sh --brief my_paper
 # → creates CLAUDE.md and my_paper.brief.md in the current directory
 ```
+
+## Voices
+
+Voice rules live in a per-project `voice.md` rendered from a named voice in the voice library. The library ships with `academic`; customize by adding a file at `~/.claude/voice/<name>.md` and selecting it with `--voice <name>`. Voice is per-project, so concurrent sessions on different projects can carry different voices.
+
+Pick a voice at install:
+
+```bash
+/path/to/sourced/install.sh --voice academic   # default
+/path/to/sourced/install.sh --voice mycustom   # requires ~/.claude/voice/mycustom.md
+```
+
+Author a custom voice by copying a shipped one and editing:
+
+```bash
+cp ~/.claude/voice/academic.md ~/.claude/voice/mycustom.md
+# edit ~/.claude/voice/mycustom.md
+/path/to/sourced/install.sh --voice mycustom   # inside the target project directory
+```
+
+Shipped voices at `~/.claude/voice/<shipped-name>.md` are refreshed on every `--global-only` run. To customize without losing your edits, copy to a new name first. Per-project tweaks go directly in `<project>/voice.md`; `install.sh` won't touch that file without `--force`.
 
 ## Modes at a glance
 
@@ -128,10 +149,11 @@ If a CLAUDE.md exists but you want a fresh render regardless:
 
 | Flag | Effect |
 |------|--------|
-| `--global-only` | Install or refresh global files (source-finder, schema, brief template, voice rules) only. Skip CLAUDE.md. |
-| `--project <path>` | Drop CLAUDE.md into `<path>` instead of `$PWD`. |
-| `--force` | Overwrite existing CLAUDE.md (and brief, if `--brief`) without asking. |
-| `--update` | Refresh the managed block of an existing CLAUDE.md, preserving content outside the sentinels. |
+| `--global-only` | Install or refresh global files only (source-finder, schema, brief template, voice library). Skip per-project files. |
+| `--project <path>` | Drop per-project files into `<path>` instead of `$PWD`. |
+| `--force` | Overwrite existing CLAUDE.md, voice.md, and brief (if `--brief`) without asking. |
+| `--update` | Refresh the managed block of an existing CLAUDE.md, preserving content outside the sentinels. Does not touch voice.md. |
+| `--voice <name>` | Pick the voice rendered into this project's `voice.md` (default: `academic`). Shipped voices live in `templates/voices/`; custom voices can be placed at `~/.claude/voice/<name>.md`. |
 | `--brief <name>` | Also drop `<name>.brief.md` into the project from `templates/brief.template.md`. |
 
 ## File layout
@@ -143,8 +165,9 @@ Global files (installed once, shared across projects) and per-project files (ren
 | `~/.claude/agents/source-finder.md` | global subagent |
 | `~/.claude/citations/schema.md` | global citation log schema |
 | `~/.claude/templates/brief.template.md` | global brief template |
-| `~/.claude/voice/style.md` | global voice rules, read by outlining/writing/editing |
+| `~/.claude/voice/<name>.md` | voice library (shipped + custom voices available for project selection) |
 | `<project>/CLAUDE.md` | per-project; contains the inlined academic-researcher rules |
+| `<project>/voice.md` | per-project; the active voice for this project, rendered from the voice library |
 | `<project>/<draft>.brief.md` | per-project, next to the draft |
 | `<project>/<draft>.citations.json` | per-project, next to the draft |
 | `<project>/.claude/citations/working.citations.json` | per-project, pre-draft |
@@ -165,7 +188,8 @@ sourced/
 ├── templates/
 │   ├── CLAUDE.md                 # template with {{USER}}, rendered into each project
 │   ├── brief.template.md         # template with {{USER}}, installs globally and rendered per-project on --brief
-│   └── voice.md                  # template with {{USER}}, installs globally to ~/.claude/voice/style.md
+│   └── voices/
+│       └── academic.md           # shipped voice; renders to ~/.claude/voice/academic.md and per-project voice.md
 ├── install.sh                    # global + per-project install
 └── README.md
 ```
