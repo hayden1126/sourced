@@ -22,6 +22,7 @@ GLOBAL_ONLY=0
 FORCE=0
 UPDATE=0
 BRIEF_NAME=""
+VOICE="academic"
 TARGET_DIR="${PWD}"
 
 usage() {
@@ -29,13 +30,17 @@ usage() {
 Usage: install.sh [options]
 
 Options:
-  --global-only        Install/refresh only global files (source-finder + schema).
-                       Skip per-project CLAUDE.md.
-  --project <path>     Drop CLAUDE.md into <path> instead of the current directory.
-  --force              Overwrite existing CLAUDE.md (and brief, if --brief is used)
-                       without asking.
+  --global-only        Install/refresh only global files (source-finder, schema,
+                       brief template, voice library). Skip per-project files.
+  --project <path>     Drop CLAUDE.md and voice.md into <path> instead of $PWD.
+  --force              Overwrite existing CLAUDE.md, voice.md, and brief (if
+                       --brief is used) without asking.
   --update             Refresh the managed block of an existing CLAUDE.md in place,
-                       preserving content outside the sentinels.
+                       preserving content outside the sentinels. Does not touch
+                       voice.md (use --force to replace).
+  --voice <name>       Pick the voice rendered into this project (default:
+                       academic). Shipped voices live in templates/voices/;
+                       custom voices can be placed at ~/.claude/voice/<name>.md.
   --brief <name>       Also drop <name>.brief.md into the project directory,
                        rendered from templates/brief.template.md.
   -h, --help           Show this message.
@@ -50,6 +55,11 @@ while [[ $# -gt 0 ]]; do
     --brief)
       BRIEF_NAME="${2:-}"
       [[ -z "${BRIEF_NAME}" ]] && { echo "--brief needs a name" >&2; exit 1; }
+      shift 2
+      ;;
+    --voice)
+      VOICE="${2:-}"
+      [[ -z "${VOICE}" ]] && { echo "--voice needs a name" >&2; exit 1; }
       shift 2
       ;;
     --project)
@@ -103,13 +113,29 @@ echo "Rendering global files..."
 render "${REPO_DIR}/agents/source-finder.md"     "${CLAUDE_AGENTS_DIR}/source-finder.md"
 render "${REPO_DIR}/citations/schema.md"         "${CLAUDE_CITATIONS_DIR}/schema.md"
 render "${REPO_DIR}/templates/brief.template.md" "${CLAUDE_TEMPLATES_DIR}/brief.template.md"
-render "${REPO_DIR}/templates/voice.md"          "${CLAUDE_VOICE_DIR}/style.md"
+
+# Voice library: render each shipped voice to ~/.claude/voice/<name>.md.
+# User-authored voices placed directly in the voice library (with names that
+# don't collide with shipped voices) are left untouched.
+for voice_file in "${REPO_DIR}"/templates/voices/*.md; do
+  [[ -e "${voice_file}" ]] || continue
+  voice_name=$(basename "${voice_file}" .md)
+  render "${voice_file}" "${CLAUDE_VOICE_DIR}/${voice_name}.md"
+done
 
 # Clean up legacy academic-researcher.md from prior installs. Academic-researcher
 # now lives in per-project CLAUDE.md, not as a subagent.
 if [[ -f "${CLAUDE_AGENTS_DIR}/academic-researcher.md" ]]; then
   rm -f "${CLAUDE_AGENTS_DIR}/academic-researcher.md"
   echo "  removed legacy ${CLAUDE_AGENTS_DIR}/academic-researcher.md"
+fi
+
+# Clean up legacy style.md from the previous voice install pattern (single
+# active voice). Voice is now project-local; ~/.claude/voice/style.md is not
+# read by the agent anymore.
+if [[ -f "${CLAUDE_VOICE_DIR}/style.md" ]]; then
+  rm -f "${CLAUDE_VOICE_DIR}/style.md"
+  echo "  removed legacy ${CLAUDE_VOICE_DIR}/style.md"
 fi
 
 if [[ ${GLOBAL_ONLY} -eq 1 ]]; then
@@ -175,7 +201,30 @@ else
   exit 1
 fi
 
-# ---- step 3: optional brief ------------------------------------------------
+# ---- step 3: per-project voice ---------------------------------------------
+VOICE_SOURCE="${CLAUDE_VOICE_DIR}/${VOICE}.md"
+if [[ ! -f "${VOICE_SOURCE}" ]]; then
+  echo "Error: voice '${VOICE}' not found at ${VOICE_SOURCE}." >&2
+  echo "Available voices in ${CLAUDE_VOICE_DIR}:" >&2
+  for f in "${CLAUDE_VOICE_DIR}"/*.md; do
+    [[ -e "$f" ]] && echo "  $(basename "$f" .md)" >&2
+  done
+  exit 1
+fi
+
+DEST_VOICE="${TARGET_DIR}/voice.md"
+echo "Rendering per-project voice.md..."
+if [[ ! -f "${DEST_VOICE}" ]]; then
+  cp "${VOICE_SOURCE}" "${DEST_VOICE}"
+  echo "  ${DEST_VOICE} (voice: ${VOICE})"
+elif [[ ${FORCE} -eq 1 ]]; then
+  cp "${VOICE_SOURCE}" "${DEST_VOICE}"
+  echo "  ${DEST_VOICE} (overwrote with --force, voice: ${VOICE})"
+else
+  echo "  ${DEST_VOICE} already exists; skipping (pass --force to overwrite)."
+fi
+
+# ---- step 4: optional brief ------------------------------------------------
 if [[ -n "${BRIEF_NAME}" ]]; then
   BRIEF_PATH="${TARGET_DIR}/${BRIEF_NAME}.brief.md"
   if [[ -f "${BRIEF_PATH}" && ${FORCE} -eq 0 ]]; then

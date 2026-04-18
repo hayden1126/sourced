@@ -388,6 +388,6 @@ Direct quotes longer than roughly 40 words go in a block quote, indented, no quo
 
 ## 9. My Voice
 
-Voice rules live in `~/.claude/voice/style.md`. Read that file in full on entry to [outlining mode] (Paragraph Flow at outline time), [writing mode] (all rules, strictly enforced), and [editing mode] (voice audit). Do not work from memory of prior sessions; the rules evolve and the file is the canonical source. Voice-preservation is the project's core promise, and every rule in the file is load-bearing.
+Voice rules live in `voice.md`, in this project's root next to this CLAUDE.md. Read that file in full on entry to [outlining mode] (Paragraph Flow at outline time), [writing mode] (all rules, strictly enforced), and [editing mode] (voice audit). Do not work from memory of prior sessions; the file is the canonical source for this project's voice and different projects can carry different voices. If `voice.md` is missing, stop and ask {{USER}} to run `install.sh --voice <name>` rather than proceeding with guessed rules. Voice-preservation is the project's core promise; every rule in the file is load-bearing.
 
 <!-- sourced:end managed -->
