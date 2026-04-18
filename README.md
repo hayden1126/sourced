@@ -1,11 +1,11 @@
 # Sourced
 
-Claude Code agents for rigorous academic research, drafting, and editing. A two-agent system that enforces source verification, prevents paraphrase drift, and preserves the writer's voice.
+A Claude Code setup for rigorous academic research, drafting, and editing. The primary agent (academic-researcher) lives in each project's `CLAUDE.md`; a parallel-research subagent (source-finder) lives globally in `~/.claude/agents/`.
 
 ## What's in here
 
-- **`academic-researcher`** — the primary orchestrator. Runs across nine modes (collaborative, red team, babble, research, plan, drafting, refining, writing, editing) with an explicit intake-brief step and autonomy-level controls before planning.
-- **`source-finder`** — dispatched in parallel by academic-researcher for multi-topic research. Each finder verifies its own sources, writes to a shard file, and returns a structured report. Parent merges shards with ID collision resolution.
+- **Academic-researcher rules** (inlined into per-project `CLAUDE.md`). Runs across nine modes (collaborative, red team, babble, research, plan, drafting, refining, writing, editing) with an explicit intake-brief step and autonomy-level controls before planning.
+- **`source-finder`** — a globally-installed subagent, dispatched in parallel by the main thread for multi-topic research. Each finder verifies its own sources, writes to a shard file, and returns a structured report. The main thread merges shards with ID collision resolution.
 - **Citation log schema** — machine-readable record of every citation with `exact_quote`, `surrounding_context`, and `claim_supported` fields. Source of truth for the References section.
 
 ## What it does differently
@@ -23,69 +23,97 @@ Clone wherever you keep repos. `install.sh` finds itself via `$BASH_SOURCE`, so 
 ```bash
 git clone https://github.com/hayden1126/sourced.git
 cd sourced
-./install.sh
+./install.sh --global-only      # first time, from inside the repo
 ```
 
-If you prefer a specific location, pass it to `git clone`:
+On first run you'll be prompted for your name. It gets saved to `~/.claude/sourced.config` and substituted into the templates on every render.
 
-```bash
-git clone https://github.com/hayden1126/sourced.git ~/code/sourced
-cd ~/code/sourced
-./install.sh
-```
+After `--global-only`, the global files are available to Claude Code from any working directory:
 
-On first run you'll be prompted for your name. It gets saved to `~/.claude/sourced.config` and substituted into the templates on every install.
-
-After install, the agents are available to Claude Code from any working directory:
-
-- `~/.claude/agents/academic-researcher.md`
 - `~/.claude/agents/source-finder.md`
 - `~/.claude/citations/schema.md`
 
 These paths are fixed — the install targets always go to `~/.claude/`, regardless of where the repo itself lives.
 
-## Update
+## Per-project setup
 
-From inside your cloned repo directory (wherever you put it):
+Each writing project gets its own `CLAUDE.md` (the academic-researcher definition, rendered with your name). Run `install.sh` from inside the project:
 
 ```bash
-git pull
-./install.sh
+cd ~/writing/my-paper
+/path/to/sourced/install.sh
 ```
 
-The install script re-renders with your saved name. No re-prompt.
+This re-renders global files (cheap, idempotent) and drops `CLAUDE.md` into the project directory. With `--brief <name>` it also drops an empty `<name>.brief.md` matching the section-6 schema:
+
+```bash
+/path/to/sourced/install.sh --brief my_paper
+# → creates CLAUDE.md and my_paper.brief.md in the current directory
+```
+
+### Updating a project's CLAUDE.md
+
+When you pull new changes to the sourced repo and want to refresh a project's CLAUDE.md without losing your "Active project state" section:
+
+```bash
+cd ~/writing/my-paper
+/path/to/sourced/install.sh --update
+```
+
+This replaces only the content between the `<!-- sourced:begin managed -->` and `<!-- sourced:end managed -->` sentinels. Everything outside the sentinels (your project-specific notes, active briefs, etc.) is preserved.
+
+### Overwriting outright
+
+If a CLAUDE.md exists but you want a fresh render regardless:
+
+```bash
+/path/to/sourced/install.sh --force
+```
+
+## Flags reference
+
+| Flag | Effect |
+|------|--------|
+| `--global-only` | Install or refresh `~/.claude/agents/source-finder.md` and `~/.claude/citations/schema.md` only. Skip CLAUDE.md. |
+| `--project <path>` | Drop CLAUDE.md into `<path>` instead of `$PWD`. |
+| `--force` | Overwrite existing CLAUDE.md (and brief, if `--brief`) without asking. |
+| `--update` | Refresh the managed block of an existing CLAUDE.md, preserving content outside the sentinels. |
+| `--brief <name>` | Also drop `<name>.brief.md` into the project from `templates/brief.template.md`. |
 
 ## Per-project files
 
-The agents use two kinds of paths:
-
-| Path | Scope | Lives at |
-|------|-------|----------|
-| `~/.claude/citations/schema.md` | global (same for every paper) | user-level |
-| `~/.claude/agents/*.md` | global | user-level |
-| `.claude/citations/working.citations.json` | project-local pre-draft | per-paper |
-| `.claude/citations/working.<finder-id>.json` | project-local shards | per-paper |
-| `<draft>.brief.md` | next to the draft | per-paper |
-| `<draft>.citations.json` | next to the draft | per-paper |
-
-Schema and agents install once per user. Citation logs, briefs, and shards live inside each paper's working directory.
+| Path | Scope |
+|------|-------|
+| `~/.claude/agents/source-finder.md` | global subagent |
+| `~/.claude/citations/schema.md` | global schema |
+| `<project>/CLAUDE.md` | per-project; contains the inlined academic-researcher rules |
+| `<project>/<draft>.brief.md` | per-project, next to the draft |
+| `<project>/<draft>.citations.json` | per-project, next to the draft |
+| `<project>/.claude/citations/working.citations.json` | per-project, pre-draft |
+| `<project>/.claude/citations/working.<finder-id>.json` | per-project, source-finder shards |
 
 ## Change your name
 
-Edit or delete `~/.claude/sourced.config` and re-run `./install.sh`.
+Edit or delete `~/.claude/sourced.config` and re-run `./install.sh --global-only`.
 
 ## Structure
 
 ```
 sourced/
 ├── agents/
-│   ├── academic-researcher.md    # template with {{USER}}
-│   └── source-finder.md          # template with {{USER}}
+│   └── source-finder.md          # template with {{USER}}, installs to ~/.claude/agents/
 ├── citations/
-│   └── schema.md                 # template with {{USER}}
-├── install.sh                    # render + install
+│   └── schema.md                 # template with {{USER}}, installs to ~/.claude/citations/
+├── templates/
+│   ├── CLAUDE.md                 # template with {{USER}}, rendered into each project
+│   └── brief.template.md         # template with {{USER}}, rendered on --brief
+├── install.sh                    # global + per-project install
 └── README.md
 ```
+
+## Migration from earlier versions
+
+If you installed an earlier version of sourced that placed `academic-researcher.md` as a subagent at `~/.claude/agents/academic-researcher.md`, running the new `install.sh` will remove that file automatically. The agent content now lives in each project's `CLAUDE.md`.
 
 ## License
 
