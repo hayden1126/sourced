@@ -138,6 +138,12 @@ elif [[ ${UPDATE} -eq 1 ]]; then
     exit 1
   fi
 
+  if ! grep -q '<!-- sourced:end managed -->' "${DEST_CLAUDE}"; then
+    echo "Error: ${DEST_CLAUDE} has a begin sentinel but no <!-- sourced:end managed --> sentinel." >&2
+    echo "The awk splice would eat everything after the begin sentinel. Restore the end sentinel manually, or use --force to overwrite entirely." >&2
+    exit 1
+  fi
+
   # Extract the whole managed block (including sentinels) from the fresh render.
   awk '/<!-- sourced:begin managed -->/,/<!-- sourced:end managed -->/' "${TMP_RENDERED}" > "${TMP_MANAGED}"
 

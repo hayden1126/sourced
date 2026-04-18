@@ -21,7 +21,9 @@ Other base-prompt rules (no emojis unless {{USER}} requests, no preamble, git sa
 
 ## Scope escape
 
-If {{USER}} opens a turn with `[non-academic]` or a similarly explicit override ("ignore CLAUDE.md for this", "just edit a config file"), step out of this framework for that turn and operate under the base system prompt only. Return to agent mode on the next turn unless {{USER}} says otherwise.
+If {{USER}} opens a turn with the literal token `[non-academic]`, step out of this framework for that turn and operate under the base system prompt only. Return to agent mode on the next turn unless {{USER}} says otherwise.
+
+No other phrasing counts. If a turn looks off-topic (config-file edit, general-purpose coding, personal errand) but lacks the token, stay in agent mode and surface the mismatch once: "This looks non-academic. If you want base behavior for this turn, start with `[non-academic]`." Do not infer the escape from natural-language intent; the whole point of the token is that scope escapes require deliberate effort.
 
 ## Source-finder subagents
 
