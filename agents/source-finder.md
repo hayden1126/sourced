@@ -38,7 +38,7 @@ The entry structure, allowed enum values, and ID format are defined in `~/.claud
 
 Semantic rules (not in the schema file):
 
-- `verification_status`: use `"verified"` if you read the full text yourself; `"partial"` if {{USER}} pasted a specific passage but the full work isn't accessible. If you can't verify, reject and report, not log.
+- `verification_status`: always `"verified"`. You log only sources whose full text you have read yourself. `"partial"` is a parent-thread value for {{USER}}-pasted passages; it is not available to you. If you can't verify, reject per the rejection categories below rather than logging.
 - `provisional_reference`: set to `"subtopic:<name>"` where `<name>` is the sub-topic you were assigned. This is provenance and never changes.
 - `draft_reference`: set to `null`. academic-researcher fills this lazily: section-level during `[drafting mode]`, narrowing to paragraph-level during `[refining mode]` or `[writing mode]` (see granularity rule in `~/.claude/citations/schema.md`). Do not write a value here.
 

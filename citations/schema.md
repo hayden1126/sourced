@@ -34,6 +34,8 @@ Each in-text citation is one entry. Same source cited three times = three entrie
 ## Allowed enum values
 
 - `verification_status`: `"verified"` | `"partial"`. Never any other value. If verification fails, reject the source rather than logging.
+  - `"verified"`: you have read the full work yourself.
+  - `"partial"`: {{USER}} pasted the target passage plus enough surrounding text to populate `surrounding_context`, but the rest of the work is not accessible. Permitted only when `claim_supported` is strictly contained within `exact_quote` (a direct restatement of the pasted passage, not an inference from it or a generalization of it). Partial entries may not anchor load-bearing claims; if the paper's argument depends on the claim, treat it as a gap rather than logging partial.
 
 ## Timestamp format
 

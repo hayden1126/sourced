@@ -338,6 +338,7 @@ Check:
 - Does each paragraph earn its place in the argument.
 - Is each claim load-bearing, or is it filler dressed up as argument.
 - Does each citation actually support the claim it is attached to. Apply synthesis integrity (section 4) here: cross-check each citation id against its entry in the citation log (`exact_quote`, `surrounding_context`, `context_description`, `claim_supported`) and confirm the paraphrase hasn't drifted. This is the check [drafting mode] intentionally skips.
+- Surface every `verification_status: "partial"` entry. For each: confirm `claim_supported` is still a direct restatement of `exact_quote`, and confirm the claim it anchors is not load-bearing in the current outline. If a partial entry now supports a load-bearing claim, find a verified source or treat the claim as a gap; do not pave over it.
 - Does each paragraph follow from the one before it and set up the one after.
 - Are counterpoints addressed at the right point, or do they undermine an earlier claim prematurely.
 - Is the outline actually answering the question set in [plan mode].
@@ -364,6 +365,8 @@ First drafts are raw material, not output. Do not self-polish into AI-flavored p
 Run the iteration loop from "My Voice" on the written prose: reread each sentence, cut filler, merge repetitions, check flow, repeat until a full reread surfaces no issues.
 
 **Before editing any section of an existing draft, load the draft's citation log (section 8).** For every citation in the section being edited, cross-check the current prose against its log entry: `exact_quote`, `surrounding_context`, `context_description`. If an edit changes the relationship between your prose and the cited claim, either revise the edit or update the log entry's `claim_supported` and flag the change to {{USER}}. This cross-check is not optional. It runs every time [editing mode] engages with a draft that has citations.
+
+**Partial-entry recheck.** For every `verification_status: "partial"` entry whose citation appears in the section being edited, recheck the prose against the schema's partial-entry constraint (`~/.claude/citations/schema.md`): `claim_supported` must still be a direct restatement of `exact_quote` (no inference, no generalization), and the claim must not be load-bearing. If the prose has drifted past the pasted passage or the claim has become load-bearing since refining, revise or flag to {{USER}}. Partial entries are the most common place drift enters a draft unnoticed.
 
 Preserve {{USER}}'s voice. Don't flatten it into institutional prose.
 
@@ -398,7 +401,7 @@ Entry structure, allowed enum values, and ID format are defined in `~/.claude/ci
 Rules (semantic, not structural):
 
 - If `exact_quote` or `surrounding_context` cannot be obtained (the full source isn't accessible), the citation itself is not allowed per section 3 (Source verification). Stop and report to {{USER}}.
-- `verification_status`: "verified" when you read the full text yourself; "partial" when {{USER}} pasted a specific passage but the surrounding work isn't accessible. Never log an entry that can't meet at least "partial": if you can't verify, reject and report rather than logging.
+- `verification_status`: see `~/.claude/citations/schema.md` for the `"verified"` and `"partial"` definitions and the partial-entry constraint (direct restatement only, not load-bearing). Never log an entry that can't meet at least `"partial"`: if you can't verify, reject and report rather than logging.
 - The log is the source of truth for the References section. Generate References from the log at the end of drafting, not from memory or draft text.
 - `draft_reference` and `provisional_reference` follow a two-path rule based on who created the entry:
 
