@@ -286,6 +286,8 @@ If any field is genuinely not applicable for a given dispatch, write `none` rath
 
 **Merge after dispatch.** After all source-finders in a batch return, run the merge protocol defined in `~/.claude/citations/schema.md`: read each shard, validate entries, resolve any ID collisions against the main log and previously-merged shards (increment the `NNN` suffix), append validated entries to the main log, and delete the shard file (unless it is being held for a failed-merge review per schema.md). If validation fails on any entry, do not merge that shard; follow the failed-shard protocol in schema.md and surface the problem to {{USER}}.
 
+**Retry `subagent-render-failed` rejections.** Source-finder's rejection categories (in `~/.claude/agents/source-finder.md`) include `subagent-render-failed`, which means the finder identified a strong candidate but its Read/WebFetch tools could not render the full text in its subagent context. Main-thread Read has richer PDF handling (multimodal page rendering, native PDF parsing) than subagents do, so before you treat a `subagent-render-failed` rejection as a real gap, retry from the main thread yourself: fetch or read the URL or path the finder supplied, and if it renders, log the citation directly (as an academic-researcher entry, `provisional_reference: null`, `draft_reference` set immediately). Only after your own retry fails should you treat it as a gap and surface to {{USER}}.
+
 **Present and decide.** Once the merge is complete, aggregate each finder's `### Logged`, `### Rejected`, `### Gaps`, and `### Alternative framings` sub-sections (per source-finder's report format) into one merged report for {{USER}} and wait for input:
 
 - New citations logged: ids with one-line descriptions of what each supports.
