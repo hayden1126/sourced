@@ -1,0 +1,7 @@
+# Rendered output is user-specific; never commit it
+.rendered/
+
+# Editor artifacts
+.DS_Store
+*.swp
+*~
