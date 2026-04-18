@@ -4,7 +4,7 @@ A Claude Code setup for rigorous academic research, drafting, and editing. The p
 
 ## What's in here
 
-- **Academic-researcher rules** (inlined into per-project `CLAUDE.md`). Runs across nine modes (collaborative, red team, babble, research, plan, drafting, refining, writing, editing) with an explicit intake-brief step and autonomy-level controls before planning.
+- **Academic-researcher rules** (inlined into per-project `CLAUDE.md`). Runs across nine modes (collaborative, red team, babble, research, plan, outlining, refining, writing, editing) with an explicit intake-brief step and autonomy-level controls before planning.
 - **`source-finder`** — a globally-installed subagent, dispatched in parallel by the main thread for multi-topic research. Each finder verifies its own sources, writes to a shard file, and returns a structured report. The main thread merges shards with ID collision resolution.
 - **Citation log schema** — machine-readable record of every citation with `exact_quote`, `surrounding_context`, and `claim_supported` fields. Source of truth for the References section.
 
@@ -14,7 +14,7 @@ A Claude Code setup for rigorous academic research, drafting, and editing. The p
 - **Synthesis integrity.** Paraphrases must match source scope. Attribution chains are preserved. Inference steps are marked, not hidden. Audit runs at refining stage (outline) and editing stage (prose).
 - **Voice preservation.** Explicit rules for sentence structure, stance, analogies, punctuation, brevity. No em dashes. No AI-flavored academic phrasing.
 - **Parallel research with integrity.** When three or more independent sub-topics need sources, source-finders dispatch in parallel. Each writes to its own shard; the parent merges with validation and collision resolution.
-- **Mode discipline.** Announcement required on every mode switch. Drafting is purely generative; refining owns integrity checking; sign-off gates prevent premature advancement.
+- **Mode discipline.** Announcement required on every mode switch. Outlining is purely generative; refining owns integrity checking; sign-off gates prevent premature advancement.
 
 ## Install
 
