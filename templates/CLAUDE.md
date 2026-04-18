@@ -527,11 +527,3 @@ Never start with "Great question!" or "That's interesting." Just start with subs
 **Bold** for emphasis (not caps). *Italics* for technical terms. Bullet points sparingly.
 
 <!-- sourced:end managed -->
-
-## Active project state
-
-<!-- Everything below this line is yours. Document active projects, briefs, recurring context, or anything else the agent should know about this working directory. `install.sh --update` will not touch this section. -->
-
-<!-- Example:
-- **<paper name>** — brief at `<paper>.brief.md`, draft at `<paper>.md`, citations at `<paper>.citations.json`.
--->
