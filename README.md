@@ -81,6 +81,8 @@ cp ~/.claude/voice/academic.md ~/.claude/voice/mycustom.md
 /path/to/sourced/install.sh --voice mycustom   # inside the target project directory
 ```
 
+Library voice files are templates: any `{{USER}}` token is substituted with your configured name when `install.sh --voice` renders the voice into a project. That's why the shipped `academic.md` shows `{{USER}}` on line 3 — the token is replaced per-project, so each project's `voice.md` carries the right name without the library file having to store it.
+
 Each project's `voice.md` records which library voice it was installed from (as an HTML comment on the first line). A later bare `install.sh --update` reuses that choice and refreshes `voice.md` from the current library version, so upstream voice-rule changes propagate. Switching to a different voice on an existing project requires `--force` (replace) or `--update --voice <new>` (explicit switch).
 
 Shipped voices at `~/.claude/voice/<shipped-name>.md` are refreshed on every install from the repo. User-authored voices (names that don't collide with shipped ones) are left untouched. To customize a shipped voice without losing edits, copy to a new name first.
