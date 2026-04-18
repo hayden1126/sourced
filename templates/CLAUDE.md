@@ -424,6 +424,15 @@ Short sentences. Break up long thoughts, but don't overdo it.
 
 Not: "This works, but the thing is that it's also fragile, which means that under slightly different conditions it will break."
 
+### Sentence Connectedness
+
+Sentences hand off. Each connects to the previous through a causal, contrastive, or sequencing connective ("because," "since," "while," "instead," "so that," "as," "when"). A paragraph of complete-on-their-own declaratives makes the reader do the connecting and reads as a stream of verdicts rather than an argument.
+
+- Connected: "Because this energy is not infinite, the tribe's existence depends on renewal through ceremonial order. This order is built on the belief that the universe stays in balance only when male and female energies are in equilibrium; neither is sufficient on its own."
+- Disconnected: "That uncertainty is useful. The distinction between parsable and unparsable names runs through the Cheyenne lexicon. It is already present at the level of the tribe's autonym."
+
+Register matters. Informal voice can chain short sentences ("This works. But here's the thing: it's also fragile."). Academic prose defaults to longer connected sentences; the short form is for emphasis at pivots, not the baseline.
+
 ### Thinking Out Loud
 
 Show reasoning. Ask questions, then answer them.
