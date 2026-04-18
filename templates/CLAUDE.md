@@ -96,7 +96,18 @@ Section 3 tells you which sources are usable. This section tells you how to use 
 
 **Quote verbatim.** No ellipsis-trickery that reverses or softens meaning. No cherry-picking a phrase whose surrounding context would invalidate the point. If a quote needs context to be honest, include the context or don't use the quote.
 
-**Audit after drafting.** For each citation in a paragraph, ask: would this author agree with how I just used their work? If the answer isn't a clear yes, rework the sentence, find a better source, or drop the claim. This audit is not optional. It runs in two places: [refining mode] audits the outline against the citation log before prose is written; [editing mode] audits the prose against the same log after. The first catches scope drift at the claim level; the second catches it at the sentence level.
+**Audit after drafting.** For each citation, run these checks against its citation-log entry. Any "no" or "unclear" means rework the sentence, replace the citation, or drop the claim.
+
+1. **Scope.** Does the prose carry every qualifier in `exact_quote` (hedges, conditions, population)? Qualifier collapse ("X sometimes under Z" → "X") is the most common failure mode.
+2. **Attribution.** If `exact_quote` reports someone else's claim, does the prose preserve the attribution? Do not collapse reporter and reported.
+3. **Inference.** Is the prose stating what `exact_quote` says, or extending past it? If extending, is the extension marked ("extending Smith...", "reading Smith's results as implying...")?
+4. **Cherry-pick.** Would `surrounding_context` change the interpretation of `exact_quote`? If so, include the context or drop the citation.
+
+Then, for each claim supported by more than one citation, one additional check:
+
+5. **Synthesis.** Does each cited source, on its own terms, support the claim? Stacked weak supports are not one strong support.
+
+This audit is not optional. [refining mode] runs it on the outline against the log before prose exists; [editing mode] runs it on the prose against the log after. The first catches scope drift at the claim level; the second catches it at the sentence level.
 
 ## 5. When to ask {{USER}} (decision threshold)
 
@@ -364,7 +375,7 @@ First drafts are raw material, not output. Do not self-polish into AI-flavored p
 
 Run the iteration loop from "My Voice" on the written prose: reread each sentence, cut filler, merge repetitions, check flow, repeat until a full reread surfaces no issues.
 
-**Before editing any section of an existing draft, load the draft's citation log (section 8).** For every citation in the section being edited, cross-check the current prose against its log entry: `exact_quote`, `surrounding_context`, `context_description`. If an edit changes the relationship between your prose and the cited claim, either revise the edit or update the log entry's `claim_supported` and flag the change to {{USER}}. This cross-check is not optional. It runs every time [editing mode] engages with a draft that has citations.
+**Before editing any section of an existing draft, load the draft's citation log (section 8).** For every citation in the section being edited, run the section 4 audit against the current prose (scope, attribution, inference, cherry-pick, plus synthesis for multi-citation claims). If a check fails, either revise the prose or update the log entry's `claim_supported` and flag the change to {{USER}}. This audit is not optional. It runs every time [editing mode] engages with a draft that has citations.
 
 **Partial-entry recheck.** For every `verification_status: "partial"` entry whose citation appears in the section being edited, recheck the prose against the schema's partial-entry constraint (`~/.claude/citations/schema.md`): `claim_supported` must still be a direct restatement of `exact_quote` (no inference, no generalization), and the claim must not be load-bearing. If the prose has drifted past the pasted passage or the claim has become load-bearing since refining, revise or flag to {{USER}}. Partial entries are the most common place drift enters a draft unnoticed.
 
