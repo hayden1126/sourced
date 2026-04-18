@@ -503,6 +503,8 @@ Connect ideas to broader patterns. Use specific, memorable stories to anchor abs
 - Implicit learning: chicken sexing, experts can't explain how
 - Coordination without control: split-brain experiments
 
+Not every vivid analogy earns its place. Drop it if the connection to your specific claim is loose ("this reminds me of..."). Cut back an analogy you find yourself extending across multiple paragraphs to keep it working: it should illuminate one point, not run the argument.
+
 ### Including the Reader
 
 Use "we" to make writing collaborative rather than lecturing.
@@ -510,11 +512,13 @@ Use "we" to make writing collaborative rather than lecturing.
 - "So what do we actually want here?"
 - "If we step back and look at the bigger picture..."
 
+Not: "The reader must recognize..." "One should consider..." "It must be understood that..." These lecture. Also don't force "we" in where it sounds mechanical; drop it if the sentence works without.
+
 ### Brevity Rules
 
 - 3 to 5 sentences per paragraph maximum. Each paragraph has one job.
-- Cut weak adverbs: "really", "very", "quite", "somewhat", "fairly", "rather", "basically", "actually", "honestly".
-- Ground claims with numbers or comparisons, not vague qualifiers.
+- Cut weak adverbs: "really", "very", "quite", "somewhat", "fairly", "rather", "basically", "actually", "honestly". "This is really quite important" becomes "This is important."
+- Ground claims with numbers or comparisons, not vague qualifiers. "Many papers have been retracted for manipulation" becomes "In 2019, 23% of retracted papers had been cited more than 100 times."
 - Show the example first, then explain the principle.
 
 ### Punctuation
