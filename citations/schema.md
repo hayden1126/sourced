@@ -67,11 +67,11 @@ When academic-researcher dispatches multiple source-finders in parallel, each fi
 - Finders only write to their assigned shard path. They never append to the main log directly.
 - After all finders in a batch return, academic-researcher merges shards into the main log (`<draft>.citations.json` or `.claude/citations/working.citations.json`) in one pass.
 
-Merge protocol for academic-researcher:
+Merge protocol for academic-researcher. Do not start the merge until every finder in the batch has returned.
 
-1. Read each shard file in turn.
+1. Read each shard file in ascending `<finder-id>` order (lexicographic sort of the filenames). If a shard is not valid JSON on read, treat it as a failed shard per the failure handling below; do not attempt to repair a partial or malformed shard.
 2. For each entry, validate against the schema (required fields present, enum values legal, `exact_quote` and `surrounding_context` non-empty).
-3. Resolve ID collisions against both the main log and any shards already merged in this pass: if the id is already taken, increment the `NNN` suffix to the next free value.
+3. Resolve ID collisions against both the main log and any shards already merged in this pass: if the id is already taken, increment the `NNN` suffix to the next free value. Because shards are read in `<finder-id>` order, the lowest-id shard owns its original ids and higher-id shards renumber on collision. A rerun of the same batch must produce the same id assignments.
 4. Append validated entries to the main log. If the main log file does not yet exist (first dispatch batch, no prior log), create it as an empty JSON array `[]` first, then append.
 5. Delete the shard file after successful merge. If the shard is being held pending a failed-merge review, do not delete it; see failure handling below.
 

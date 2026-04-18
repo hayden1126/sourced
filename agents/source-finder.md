@@ -32,7 +32,7 @@ academic-researcher gives you:
 
 ## Citation log entry schema
 
-Append each verified entry to the JSON array in your assigned shard file (`.claude/citations/working.<finder-id>.json`). Do not write to the main citation log; academic-researcher merges shards into the main log after your report returns.
+Collect verified entries in memory and write your shard file as a single JSON array in one write at the end of your run. Do not write entries incrementally: a crash or partial run would leave the shard in an invalid state, and academic-researcher treats invalid JSON as a failed shard rather than attempting repair. Do not write to the main citation log; academic-researcher merges shards into the main log after your report returns.
 
 The entry structure, allowed enum values, and ID format are defined in `~/.claude/citations/schema.md`. academic-researcher will inline the schema contents into your dispatch prompt; if it is missing, read the file directly before logging. Follow the schema exactly.
 
