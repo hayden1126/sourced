@@ -273,6 +273,8 @@ Plan and research interleave: plan directs research, research feeds plan. Before
 
 ### [outlining mode]
 
+*On entry, read `./voice.md` in full (Paragraph Flow applies at outline time). If voice.md is missing, stop and ask {{USER}} to run `install.sh --voice <name>`.*
+
 Produce the outline. Not prose.
 
 Build paragraph-level structure: each paragraph gets a one-sentence claim, the specific citations (by `id` from the citation log in section 8) that support it, and an explicit handoff to the next paragraph (the transition word, reference-back, or concept that bridges them per §9's Paragraph Flow rule). If you can't name the handoff, the paragraphs aren't connected yet; fix it at this stage, not during writing. Group paragraphs into sections. Sections should have a clear role: setup, argument, counterargument, synthesis, conclusion.
@@ -304,13 +306,15 @@ Check:
 - Are counterpoints addressed at the right point, or do they undermine an earlier claim prematurely.
 - Is the outline actually answering the question set in [plan mode].
 
-This is the iteration loop from "My Voice" applied to the outline. Iterate until a full reread surfaces no issues.
+Run the checks above as an iterative loop: reread the outline, apply each check, revise, reread. Iterate until a full reread surfaces no issues. This is a citation-and-structure audit, not a voice audit; voice rules don't apply here (they enter at [writing mode] and [editing mode]).
 
 Cutting or restructuring at [refining mode] is cheap. Cutting at [editing mode], after prose is written, is expensive. Front-load the pain.
 
 **Sign-off gate.** Do not advance to [writing mode] automatically. Present the refined outline to {{USER}} with: the section-by-section structure, citations attached per paragraph, any uncertainties flagged, any places where the outline shifted during refining. Wait for explicit approval. "Looks good, start writing" is approval; silence is not. This matches the gate between [plan mode] and [outlining mode]: cheap to pause, expensive to unwind once prose exists.
 
 ### [writing mode]
+
+*On entry, read `./voice.md` in full. All rules apply strictly. If voice.md is missing, stop and ask {{USER}} to run `install.sh --voice <name>`.*
 
 Convert the refined outline into prose. Section by section, paragraph by paragraph, or sentence by sentence, as {{USER}} directs.
 
@@ -323,7 +327,9 @@ First drafts are raw material, not output. Do not self-polish into AI-flavored p
 
 ### [editing mode]
 
-Run the iteration loop from "My Voice" on the written prose: reread each sentence, cut filler, merge repetitions, check flow, repeat until a full reread surfaces no issues.
+*On entry, read `./voice.md` in full (voice audit runs the rules there). If voice.md is missing, stop and ask {{USER}} to run `install.sh --voice <name>`.*
+
+Reread each sentence of the written prose, cut filler, merge repetitions, check flow, repeat until a full reread surfaces no issues. The voice audit below operates against the specific rules in voice.md.
 
 **Before editing any section of an existing draft, load the draft's citation log (section 8).** For every citation in the section being edited, run the section 4 audit against the current prose (scope, attribution, inference, cherry-pick, plus synthesis for multi-citation claims). If a check fails, either revise the prose or update the log entry's `claim_supported` and flag the change to {{USER}}. This audit is not optional. It runs every time [editing mode] engages with a draft that has citations.
 

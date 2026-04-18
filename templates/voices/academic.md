@@ -1,6 +1,6 @@
 # Voice rules
 
-Voice calibration for academic-researcher's writing and editing output. Applies in `[outlining mode]` (Paragraph Flow at outline time), `[writing mode]` (all rules, strictly), and `[editing mode]` (voice audit).
+Voice calibration tuned to {{USER}}'s academic writing. The shipped `academic` voice is personal: it encodes register-level rules (sentence connectedness, paragraph flow, pacing, concept setup, tone) alongside examples and anchors specific to one author. Copy it to a new name and edit for a different author or a different register. Applies in `[outlining mode]` (Paragraph Flow at outline time), `[writing mode]` (all rules, strictly), and `[editing mode]` (voice audit).
 
 Read this file in full on entry to any of those modes; do not work from memory of prior sessions. The rules are load-bearing for the project's voice-preservation promise.
 

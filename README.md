@@ -60,7 +60,9 @@ This re-renders global files (cheap, idempotent) and drops `CLAUDE.md` into the 
 
 ## Voices
 
-Voice rules live in a per-project `voice.md` rendered from a named voice in the voice library. The library ships with `academic`; customize by adding a file at `~/.claude/voice/<name>.md` and selecting it with `--voice <name>`. Voice is per-project, so concurrent sessions on different projects can carry different voices.
+Voice rules live in a per-project `voice.md` rendered from a named voice in the voice library. Voice is per-project, so concurrent Claude Code sessions on different projects can carry different voices without conflict.
+
+The shipped `academic` voice is the author's own — personal register plus specific analogy anchors (Clever Hans, chicken sexing, split-brain) calibrated to one writer. Treat it as an example, not a neutral academic default. For a different author or a different register, copy it to a new name and edit.
 
 Pick a voice at install:
 
@@ -69,7 +71,9 @@ Pick a voice at install:
 /path/to/sourced/install.sh --voice mycustom   # requires ~/.claude/voice/mycustom.md
 ```
 
-Author a custom voice by copying a shipped one and editing:
+`--voice` is validated before any project file is written. An invalid name errors out cleanly with the list of available voices; no half-installed project.
+
+Author a custom voice by copying the shipped one and editing:
 
 ```bash
 cp ~/.claude/voice/academic.md ~/.claude/voice/mycustom.md
@@ -77,7 +81,9 @@ cp ~/.claude/voice/academic.md ~/.claude/voice/mycustom.md
 /path/to/sourced/install.sh --voice mycustom   # inside the target project directory
 ```
 
-Shipped voices at `~/.claude/voice/<shipped-name>.md` are refreshed on every `--global-only` run. To customize without losing your edits, copy to a new name first. Per-project tweaks go directly in `<project>/voice.md`; `install.sh` won't touch that file without `--force`.
+Each project's `voice.md` records which library voice it was installed from (as an HTML comment on the first line). A later bare `install.sh --update` reuses that choice and refreshes `voice.md` from the current library version, so upstream voice-rule changes propagate. Switching to a different voice on an existing project requires `--force` (replace) or `--update --voice <new>` (explicit switch).
+
+Shipped voices at `~/.claude/voice/<shipped-name>.md` are refreshed on every install from the repo. User-authored voices (names that don't collide with shipped ones) are left untouched. To customize a shipped voice without losing edits, copy to a new name first.
 
 ## Modes at a glance
 
@@ -152,7 +158,7 @@ If a CLAUDE.md exists but you want a fresh render regardless:
 | `--global-only` | Install or refresh global files only (source-finder, schema, brief template, voice library). Skip per-project files. |
 | `--project <path>` | Drop per-project files into `<path>` instead of `$PWD`. |
 | `--force` | Overwrite existing CLAUDE.md, voice.md, and brief (if `--brief`) without asking. |
-| `--update` | Refresh the managed block of an existing CLAUDE.md, preserving content outside the sentinels. Does not touch voice.md. |
+| `--update` | Refresh the managed block of an existing CLAUDE.md (preserving content outside the sentinels) and refresh `voice.md` from the project's installed voice (stored in a marker on voice.md line 1). |
 | `--voice <name>` | Pick the voice rendered into this project's `voice.md` (default: `academic`). Shipped voices live in `templates/voices/`; custom voices can be placed at `~/.claude/voice/<name>.md`. |
 | `--brief <name>` | Also drop `<name>.brief.md` into the project from `templates/brief.template.md`. |
 
