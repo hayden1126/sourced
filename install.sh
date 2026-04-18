@@ -144,6 +144,19 @@ if [[ ${GLOBAL_ONLY} -eq 1 ]]; then
   exit 0
 fi
 
+# ---- voice preflight: validate before touching project files ---------------
+# Resolving the voice source now, before CLAUDE.md is written, avoids leaving
+# the project half-installed if --voice points at a voice that doesn't exist.
+VOICE_SOURCE="${CLAUDE_VOICE_DIR}/${VOICE}.md"
+if [[ ! -f "${VOICE_SOURCE}" ]]; then
+  echo "Error: voice '${VOICE}' not found at ${VOICE_SOURCE}." >&2
+  echo "Available voices in ${CLAUDE_VOICE_DIR}:" >&2
+  for f in "${CLAUDE_VOICE_DIR}"/*.md; do
+    [[ -e "$f" ]] && echo "  $(basename "$f" .md)" >&2
+  done
+  exit 1
+fi
+
 # ---- step 2: per-project CLAUDE.md -----------------------------------------
 DEST_CLAUDE="${TARGET_DIR}/CLAUDE.md"
 TMP_RENDERED="$(mktemp)"
@@ -202,16 +215,7 @@ else
 fi
 
 # ---- step 3: per-project voice ---------------------------------------------
-VOICE_SOURCE="${CLAUDE_VOICE_DIR}/${VOICE}.md"
-if [[ ! -f "${VOICE_SOURCE}" ]]; then
-  echo "Error: voice '${VOICE}' not found at ${VOICE_SOURCE}." >&2
-  echo "Available voices in ${CLAUDE_VOICE_DIR}:" >&2
-  for f in "${CLAUDE_VOICE_DIR}"/*.md; do
-    [[ -e "$f" ]] && echo "  $(basename "$f" .md)" >&2
-  done
-  exit 1
-fi
-
+# VOICE_SOURCE is set and validated in the voice preflight above.
 DEST_VOICE="${TARGET_DIR}/voice.md"
 echo "Rendering per-project voice.md..."
 if [[ ! -f "${DEST_VOICE}" ]]; then
