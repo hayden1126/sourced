@@ -1,12 +1,16 @@
 # Sourced
 
-A Claude Code setup for rigorous academic research, drafting, and editing. The primary agent (academic-researcher) lives in each project's `CLAUDE.md`; a parallel-research subagent (source-finder) lives globally in `~/.claude/agents/`.
+A Claude Code setup for writing academic papers with the model in the loop. Built around three non-negotiables: every citation is verified and full-text accessible, every paraphrase matches source scope, and the writer's voice stays theirs instead of getting flattened into AI-flavored academic prose.
+
+For students and researchers who want Claude-generated scholarship they can defend without rewriting it line by line.
+
+The primary agent (academic-researcher) lives in each project's `CLAUDE.md`; a parallel-research subagent (source-finder) lives globally in `~/.claude/agents/`.
 
 ## What's in here
 
 - **Academic-researcher rules** (inlined into per-project `CLAUDE.md`). Runs across nine modes (collaborative, red team, babble, research, plan, outlining, refining, writing, editing) with an explicit intake-brief step and autonomy-level controls before planning.
-- **`source-finder`** — a globally-installed subagent, dispatched in parallel by the main thread for multi-topic research. Each finder verifies its own sources, writes to a shard file, and returns a structured report. The main thread merges shards with ID collision resolution.
-- **Citation log schema** — machine-readable record of every citation with `exact_quote`, `surrounding_context`, and `claim_supported` fields. Source of truth for the References section.
+- **`source-finder`**: a globally-installed subagent, dispatched in parallel by the main thread for multi-topic research. Each finder verifies its own sources, writes to a shard file, and returns a structured report. The main thread merges shards with ID collision resolution.
+- **Citation log schema**: machine-readable record of every citation with `exact_quote`, `surrounding_context`, and `claim_supported` fields. Source of truth for the References section.
 
 ## What it does differently
 
@@ -15,6 +19,13 @@ A Claude Code setup for rigorous academic research, drafting, and editing. The p
 - **Voice preservation.** Explicit rules for sentence structure, stance, analogies, punctuation, brevity. No em dashes. No AI-flavored academic phrasing.
 - **Parallel research with integrity.** When three or more independent sub-topics need sources, source-finders dispatch in parallel. Each writes to its own shard; the parent merges with validation and collision resolution.
 - **Mode discipline.** Announcement required on every mode switch. Outlining is purely generative; refining owns integrity checking; sign-off gates prevent premature advancement.
+
+## Prerequisites
+
+- [Claude Code](https://claude.com/product/claude-code) installed. This project configures it; it does not replace it.
+- `bash` available for running `install.sh`.
+- `~/.claude/` writable (the installer creates it on first run).
+- A directory for your paper. Any directory works: a fresh folder, a git repo you already have, or an existing project.
 
 ## Install
 
@@ -34,7 +45,7 @@ After `--global-only`, the global files are available to Claude Code from any wo
 - `~/.claude/citations/schema.md`
 - `~/.claude/templates/brief.template.md`
 
-These paths are fixed — the install targets always go to `~/.claude/`, regardless of where the repo itself lives.
+These paths are fixed; the install targets always go to `~/.claude/`, regardless of where the repo itself lives.
 
 ## Per-project setup
 
@@ -45,23 +56,47 @@ cd ~/writing/my-paper
 /path/to/sourced/install.sh
 ```
 
-This re-renders global files (cheap, idempotent) and drops `CLAUDE.md` into the project directory. With `--brief <name>` it also drops an empty `<name>.brief.md` matching the section-6 schema:
+This re-renders global files (cheap, idempotent) and drops `CLAUDE.md` into the project directory. With `--brief <name>` it also drops an empty `<name>.brief.md` rendered from the brief template:
 
 ```bash
 /path/to/sourced/install.sh --brief my_paper
 # → creates CLAUDE.md and my_paper.brief.md in the current directory
 ```
 
+## Your first session
+
+Open the project in Claude Code and start a conversation. A few things to expect:
+
+- **Brief first.** Before the agent enters `[plan mode]`, it proposes filling out an intake brief. Run `install.sh --brief <name>` ahead of time to render a blank one, or let the agent prompt you.
+- **Mode announcements are load-bearing.** The agent outputs `Switching to [X mode].` on every mode transition, before anything else. That line is how you sanity-check what the agent thinks it's doing; watch for it.
+- **Stage gates are explicit.** After planning, outlining, and refining, the agent stops and asks before advancing to the next stage. "Looks good, continue" is approval; silence is not.
+- **Voice is protected.** The agent follows explicit rules against AI-flavored academic phrasing, em dashes, filler adverbs, and synthesis drift. It writes in a voice calibrated from your input, not a generic institutional tone.
+- **Scope escape.** Prefix a message with the literal token `[non-academic]` to step out of the framework for one turn (shell scripts, unrelated tasks). Add "stay non-academic" to extend beyond one turn.
+
+## Updating
+
+### Updating the sourced install
+
+When you pull new changes to the `sourced` repo, re-render the global files:
+
+```bash
+cd /path/to/sourced
+git pull
+./install.sh --global-only
+```
+
+Then refresh each project (see below).
+
 ### Updating a project's CLAUDE.md
 
-When you pull new changes to the sourced repo and want to refresh a project's CLAUDE.md without losing your "Active project state" section:
+To refresh a project's CLAUDE.md in place without losing content you've added outside the managed block (project-specific notes, active briefs, TODO lists):
 
 ```bash
 cd ~/writing/my-paper
 /path/to/sourced/install.sh --update
 ```
 
-This replaces only the content between the `<!-- sourced:begin managed -->` and `<!-- sourced:end managed -->` sentinels. Everything outside the sentinels (your project-specific notes, active briefs, etc.) is preserved.
+This replaces only the content between the `<!-- sourced:begin managed -->` and `<!-- sourced:end managed -->` sentinels. Everything outside the sentinels is preserved.
 
 ### Overwriting outright
 
@@ -81,7 +116,9 @@ If a CLAUDE.md exists but you want a fresh render regardless:
 | `--update` | Refresh the managed block of an existing CLAUDE.md, preserving content outside the sentinels. |
 | `--brief <name>` | Also drop `<name>.brief.md` into the project from `templates/brief.template.md`. |
 
-## Per-project files
+## File layout
+
+Global files (installed once, shared across projects) and per-project files (rendered per-paper):
 
 | Path | Scope |
 |------|-------|
@@ -113,10 +150,10 @@ sourced/
 └── README.md
 ```
 
-## Migration from earlier versions
-
-If you installed an earlier version of sourced that placed `academic-researcher.md` as a subagent at `~/.claude/agents/academic-researcher.md`, running the new `install.sh` will remove that file automatically. The agent content now lives in each project's `CLAUDE.md`.
-
 ## License
 
 None specified. Private repo for now.
+
+## Migration from earlier versions
+
+If you installed an earlier version of sourced that placed `academic-researcher.md` as a subagent at `~/.claude/agents/academic-researcher.md`, running the new `install.sh` will remove that file automatically. The agent content now lives in each project's `CLAUDE.md`.
