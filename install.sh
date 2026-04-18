@@ -23,6 +23,7 @@ FORCE=0
 UPDATE=0
 BRIEF_NAME=""
 VOICE="academic"
+VOICE_EXPLICIT=0
 TARGET_DIR="${PWD}"
 
 usage() {
@@ -35,12 +36,15 @@ Options:
   --project <path>     Drop CLAUDE.md and voice.md into <path> instead of $PWD.
   --force              Overwrite existing CLAUDE.md, voice.md, and brief (if
                        --brief is used) without asking.
-  --update             Refresh the managed block of an existing CLAUDE.md in place,
-                       preserving content outside the sentinels. Does not touch
-                       voice.md (use --force to replace).
-  --voice <name>       Pick the voice rendered into this project (default:
-                       academic). Shipped voices live in templates/voices/;
-                       custom voices can be placed at ~/.claude/voice/<name>.md.
+  --update             Refresh the managed block of an existing CLAUDE.md in place
+                       (preserving content outside the sentinels) and refresh
+                       voice.md from the project's installed voice.
+  --voice <name>       Pick the voice for this project (default: academic). The
+                       choice is recorded inside voice.md; --update reuses it.
+                       Shipped voices live in templates/voices/; custom voices
+                       can be placed at ~/.claude/voice/<name>.md. Switching to
+                       a different --voice on an existing project requires
+                       --force or --update.
   --brief <name>       Also drop <name>.brief.md into the project directory,
                        rendered from templates/brief.template.md.
   -h, --help           Show this message.
@@ -60,6 +64,7 @@ while [[ $# -gt 0 ]]; do
     --voice)
       VOICE="${2:-}"
       [[ -z "${VOICE}" ]] && { echo "--voice needs a name" >&2; exit 1; }
+      VOICE_EXPLICIT=1
       shift 2
       ;;
     --project)
@@ -114,13 +119,18 @@ render "${REPO_DIR}/agents/source-finder.md"     "${CLAUDE_AGENTS_DIR}/source-fi
 render "${REPO_DIR}/citations/schema.md"         "${CLAUDE_CITATIONS_DIR}/schema.md"
 render "${REPO_DIR}/templates/brief.template.md" "${CLAUDE_TEMPLATES_DIR}/brief.template.md"
 
-# Voice library: render each shipped voice to ~/.claude/voice/<name>.md.
-# User-authored voices placed directly in the voice library (with names that
-# don't collide with shipped voices) are left untouched.
+# Voice library: copy each shipped voice to ~/.claude/voice/<name>.md verbatim
+# (no {{USER}} substitution). Library files are treated as templates; the
+# per-project step substitutes {{USER}} and prepends the voice marker when
+# rendering into <project>/voice.md. Keeping the library unrendered means
+# user-authored voices with {{USER}} tokens work the same way as shipped
+# voices. User-authored voices at names that don't collide with shipped ones
+# are left untouched.
 for voice_file in "${REPO_DIR}"/templates/voices/*.md; do
   [[ -e "${voice_file}" ]] || continue
   voice_name=$(basename "${voice_file}" .md)
-  render "${voice_file}" "${CLAUDE_VOICE_DIR}/${voice_name}.md"
+  cp "${voice_file}" "${CLAUDE_VOICE_DIR}/${voice_name}.md"
+  echo "  ${CLAUDE_VOICE_DIR}/${voice_name}.md"
 done
 
 # Clean up legacy academic-researcher.md from prior installs. Academic-researcher
@@ -144,9 +154,20 @@ if [[ ${GLOBAL_ONLY} -eq 1 ]]; then
   exit 0
 fi
 
-# ---- voice preflight: validate before touching project files ---------------
-# Resolving the voice source now, before CLAUDE.md is written, avoids leaving
-# the project half-installed if --voice points at a voice that doesn't exist.
+# ---- voice preflight: resolve and validate before touching project files --
+# Priority for which voice to use:
+#   1. --voice <name> passed explicitly
+#   2. marker in the project's existing voice.md
+#   3. default ("academic")
+DEST_VOICE="${TARGET_DIR}/voice.md"
+MARKER_VOICE=""
+if [[ -f "${DEST_VOICE}" ]]; then
+  MARKER_VOICE=$(sed -n '1s/^<!-- sourced:voice=\([a-zA-Z0-9_-]*\) -->$/\1/p' "${DEST_VOICE}")
+fi
+if [[ ${VOICE_EXPLICIT} -eq 0 && -n "${MARKER_VOICE}" ]]; then
+  VOICE="${MARKER_VOICE}"
+fi
+
 VOICE_SOURCE="${CLAUDE_VOICE_DIR}/${VOICE}.md"
 if [[ ! -f "${VOICE_SOURCE}" ]]; then
   echo "Error: voice '${VOICE}' not found at ${VOICE_SOURCE}." >&2
@@ -156,6 +177,16 @@ if [[ ! -f "${VOICE_SOURCE}" ]]; then
   done
   exit 1
 fi
+
+# Renders a voice library file to the project with the voice marker prepended.
+render_voice() {
+  local src="$1" dest="$2" voice_name="$3"
+  {
+    echo "<!-- sourced:voice=${voice_name} -->"
+    echo ""
+    sed "s/{{USER}}/${ESCAPED_USER}/g" "${src}"
+  } > "${dest}"
+}
 
 # ---- step 2: per-project CLAUDE.md -----------------------------------------
 DEST_CLAUDE="${TARGET_DIR}/CLAUDE.md"
@@ -215,17 +246,23 @@ else
 fi
 
 # ---- step 3: per-project voice ---------------------------------------------
-# VOICE_SOURCE is set and validated in the voice preflight above.
-DEST_VOICE="${TARGET_DIR}/voice.md"
+# VOICE, VOICE_SOURCE, DEST_VOICE, MARKER_VOICE are set in the preflight above.
 echo "Rendering per-project voice.md..."
 if [[ ! -f "${DEST_VOICE}" ]]; then
-  cp "${VOICE_SOURCE}" "${DEST_VOICE}"
+  render_voice "${VOICE_SOURCE}" "${DEST_VOICE}" "${VOICE}"
   echo "  ${DEST_VOICE} (voice: ${VOICE})"
 elif [[ ${FORCE} -eq 1 ]]; then
-  cp "${VOICE_SOURCE}" "${DEST_VOICE}"
+  render_voice "${VOICE_SOURCE}" "${DEST_VOICE}" "${VOICE}"
   echo "  ${DEST_VOICE} (overwrote with --force, voice: ${VOICE})"
+elif [[ ${UPDATE} -eq 1 ]]; then
+  render_voice "${VOICE_SOURCE}" "${DEST_VOICE}" "${VOICE}"
+  echo "  ${DEST_VOICE} (refreshed via --update, voice: ${VOICE})"
+elif [[ ${VOICE_EXPLICIT} -eq 1 && "${VOICE}" != "${MARKER_VOICE}" ]]; then
+  echo "Error: ${DEST_VOICE} is installed with voice '${MARKER_VOICE:-unknown}'; refusing to silently switch to '${VOICE}'." >&2
+  echo "Pass --force to replace, or --update to refresh with the new voice." >&2
+  exit 1
 else
-  echo "  ${DEST_VOICE} already exists; skipping (pass --force to overwrite)."
+  echo "  ${DEST_VOICE} already exists; skipping (pass --update to refresh, --force to replace)."
 fi
 
 # ---- step 4: optional brief ------------------------------------------------
