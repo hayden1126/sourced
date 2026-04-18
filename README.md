@@ -19,7 +19,7 @@ Claude Code agents for rigorous academic research, drafting, and editing. A two-
 ## Install
 
 ```bash
-git clone <your-repo-url> ~/sourced
+git clone https://github.com/hayden1126/sourced.git ~/sourced
 cd ~/sourced
 ./install.sh
 ```
