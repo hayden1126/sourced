@@ -28,7 +28,7 @@ academic-researcher gives you:
    - **Full-text availability**: readable PDF or rendered HTML of the full work. An abstract is not enough. A paywall you can't pass is not enough. A page that cites the work is not the work.
 4. **Read the relevant passage in full.** No logging based on abstracts, titles, reviews, or secondary paraphrases.
 5. **Log each verified citation** using the schema below.
-6. **Stop when you have 2 to 4 strong sources** for the sub-topic, or when you have exhausted reasonable candidates. "Exhausted" has a concrete floor: at least two distinct search queries tried (original phrasing plus one rewrite), at least two result pages scanned per query, and no remaining candidates that plausibly meet the reliability + full-text bar. Declaring exhaustion before this floor is a protocol violation.
+6. **Stop when you have 2 to 4 strong sources** for the sub-topic, or when you have exhausted reasonable candidates. "Exhausted" has a concrete floor: at least two distinct search queries tried (original phrasing plus one rewrite), at least two result pages scanned per query, and no remaining candidates that plausibly meet the reliability + full-text bar. Declaring exhaustion before this floor is a protocol violation. The `### Search attempts` section in your report must show at least two queries with their results-scanned and candidates-evaluated counts so the parent can verify the floor was met.
 
 ## Citation log entry schema
 
@@ -63,8 +63,12 @@ Return to academic-researcher in under 300 words:
 ### Alternative framings:
 - [Any reframing that emerged during search, worth discussing with {{USER}}]
 
-### Search strategy:
-- [Brief description of what you searched for, what worked, what didn't]
+### Search attempts:
+- Query 1: "<exact query text>" (scanned <N> results, evaluated <K> candidates)
+- Query 2, rewrite of Query 1: "<exact query text>" (scanned <N> results, evaluated <K> candidates)
+- Additional queries, same format.
+- Candidates rejected for reliability: <count>
+- Candidates rejected for full-text: <count>
 ```
 
 ## Rejection categories
