@@ -153,43 +153,24 @@ for locating the passage.
     book.chapter).
   - Aquinas: part, question, article (e.g., `ST I-II, q. 94, a. 2`).
 - **Standard title abbreviations** per CMOS 17 §10.45 (use Latin or
-  English forms; consistent within a paper). Common philosophy works:
-  - Plato: `Rep.` (Republic), `Phd.` (Phaedo), `Symp.` (Symposium),
-    `Phdr.` (Phaedrus), `Tht.` (Theaetetus).
-  - Aristotle: `NE` (Nicomachean Ethics), `Met.` (Metaphysics), `Pol.`
-    (Politics), `DA` (De anima), `Phys.` (Physics).
-  - Plotinus: `Enn.` (Enneads).
-  - Diogenes Laertius: `DL` or `Lives`.
-  - Sextus Empiricus: `PH` (Outlines of Pyrrhonism), `M` (Against the
-    Mathematicians).
-  - Stoic fragment collections: `SVF` (von Arnim), `LS` (Long-Sedley).
-  - Cicero: `Off.` (De officiis), `Fin.` (De finibus), `ND` (De natura
-    deorum), `Tusc.` (Tusculan Disputations), `Rep.` (De re publica),
-    `Leg.` (De legibus), `Acad.` (Academica). For Cicero's letters,
-    use the addressee-keyed forms: `Att.` (Ad Atticum), `Fam.` (Ad
-    familiares), `QFr.` (Ad Quintum fratrem) — not the bare `Ep.`,
-    which is ambiguous across authors.
-  - Seneca: `Ep.` (Epistulae morales), `Ira` (De ira), `Brev. vit.`
-    (De brevitate vitae), `Ben.` (De beneficiis).
-  - Marcus Aurelius: `Med.` (Meditations).
-  - Epicurus: `Ep. Hdt.` (Letter to Herodotus), `Ep. Men.` (Letter to
-    Menoeceus), `Ep. Pyth.` (Letter to Pythocles), `KD` (Kyriai Doxai
-    / Principal Doctrines), `SV` (Vatican Sayings).
-  - Lucretius: `DRN` (De rerum natura).
-  - Epictetus: `Diss.` (Discourses), `Ench.` (Enchiridion).
-  - Augustine: `Conf.` (Confessions), `Civ.` (City of God).
-  - Aquinas: `ST` (Summa Theologiae), `SCG` (Summa contra Gentiles).
-- **Abbreviations are author-scoped**: the same abbreviation can refer
+  English forms; consistent within a paper). When a citation resolves
+  to a classical work, read
+  `~/.claude/style/chicago17-ad/classical-abbreviations.md` for the
+  per-author abbreviation table (Plato, Aristotle, Cicero, Seneca,
+  Augustine, Aquinas, etc.) before emitting the id. The file is
+  shipped with this style; `install.sh --style chicago17-ad` installs
+  it automatically.
+- **Abbreviations are author-scoped.** The same abbreviation can refer
   to different works by different authors (`Rep.` is Plato's Republic
   AND Cicero's De re publica; `Ep.` is used for the letters of Seneca,
   Pliny, Horace, and others). Always include the author name in the
   citation to disambiguate: `(Plato, Rep. 514a)` vs. `(Cicero, Rep. 1.39)`,
   `(Seneca, Ep. 9.6)` vs. `(Pliny, Ep. 6.16)`.
-- **Pandoc syntax**: `[@plato-republic-001, 514a]` resolves to
-  `(Plato, Rep. 514a)`. The locator slot carries the standard pagination;
-  the year is suppressed for classical works. The formatter detects a
+- **Pandoc syntax.** `[@plato-republic-001, 514a]` resolves to
+  `(Plato, Rep. 514a)`. The locator carries standard pagination; the
+  year is suppressed for classical works. The formatter detects a
   classical work from the log entry's content (ancient author, standard
-  pagination format in the locator) — no schema change required.
+  pagination format in the locator); no schema change required.
 
 ### Personal communication / interview
 - In-text only: `(J. Smith, pers. comm., March 15, 2023)`. Use the
