@@ -6,10 +6,15 @@ Citation and document-layout rules live in a per-project `style.md` rendered fro
 
 ## Shipped styles
 
-- **`apa7`** — APA 7 author-date. Default for new projects.
-- **`chicago17-ad`** — Chicago 17 author-date.
+| Name | Shape | Typical domain |
+|------|-------|----------------|
+| `apa7` | author-date | Behavioral and social sciences. Default for new projects. |
+| `chicago17-ad` | author-date | Humanities / social science with parenthetical Chicago. |
+| `chicago17-nb` | footnote + bibliography | History, theology, art history; footnote-centric humanities work. |
+| `ieee` | numeric-sequence | Electrical / computer engineering, computer science, IEEE venues. |
+| `mla9` | author-page | Literary studies, languages, humanities essays. |
 
-Both render citations from Pandoc-style IDs (`[@id]`, `@id`, `[@id, p. N]`) in source prose into style-compliant inline citations and References entries at `[formatting mode]` time.
+Each renders citations from Pandoc-style IDs (`[@id]`, `@id`, `[@id, p. N]`) in source prose into style-compliant inline citations (or footnotes, for `chicago17-nb`) and References entries (or Bibliography / Works Cited per the style's terminology) at `[formatting mode]` time. Additional styles in the ROADMAP (Vancouver, AMA, Harvard, ACM, ACS, Turabian 9, CSE, MHRA) follow the same structural patterns.
 
 ## Pick a style at install
 

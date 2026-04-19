@@ -23,19 +23,24 @@ Items that require a schema change, new mode, or new gate are called out in the 
 Current shipped: `apa7`, `chicago17-ad`. Each new style is a `templates/styles/<name>.md` file plus (optionally) a `templates/styles/<name>/` asset dir for CSL or reference docs.
 
 ### MLA 9
-**Priority:** next · **Effort:** M · **Status:** open.
+**Priority:** next · **Effort:** M · **Status:** shipped (commit 3c870c6).
 
-Modern Language Association 9th edition. Rounds out humanities coverage (literature, languages, cultural studies). Uses in-text `(Author Page)` with no year, full publication details in a Works Cited list. Paste targets: `plain-markdown`, `google-docs`, `word` (pandoc + MLA CSL). No on-demand reference needed.
+Modern Language Association 9th edition. Rounds out humanities coverage (literature, languages, cultural studies). Uses in-text `(Author Page)` with no year, full publication details in a Works Cited list. Author-page proof-of-concept for the `shape: author-page` branch added in commit 2ff3ab5. CSL shipped: `modern-language-association.csl`.
 
 ### Chicago 17 notes-bibliography
-**Priority:** next · **Effort:** M · **Status:** open.
+**Priority:** next · **Effort:** M · **Status:** shipped (commit dbfa41f).
 
-Sibling to the already-shipped `chicago17-ad` (author-date). Notes-bibliography is the footnote-centric form preferred in history, theology, art history. Requires a `[formatting mode]` extension because citations become footnotes rather than parenthetical; source prose still carries Pandoc IDs, formatter emits footnote markers. Probably ship the same CSL asset dir structure and add a `chicago17-nb/reference-styled.docx` separately.
+Sibling to the already-shipped `chicago17-ad` (author-date). Notes-bibliography is the footnote-centric form preferred in history, theology, art history. Footnote proof-of-concept for the `shape: footnote` branch added in commit 2ff3ab5; exercises the §Footnote citations / §Bibliography section pair and the footnote-body array handling in CLAUDE.md §7 step 6. CSL shipped: `chicago-notes-bibliography-17th-edition.csl` (filename-pinned to the 17th-edition variant because the repo's unsuffixed file has migrated to CMOS 18).
 
-### IEEE, ACM
-**Priority:** later · **Effort:** M each · **Status:** open.
+### IEEE
+**Priority:** next · **Effort:** M · **Status:** shipped (commit fba4a05).
 
-STEM/engineering. Numeric citations (`[1]`, `[2]`) resolved in order of first appearance. Different formatter behavior from author-date: the formatter assigns numbers during step 3, not the log's ID. Pandoc+CSL handles this natively.
+Electrical / computer engineering. Numeric-sequence proof-of-concept for the `shape: numeric-sequence` branch added in commit 2ff3ab5. Numbers assigned by first appearance through source prose; References sorted by assigned number. CSL shipped: `ieee.csl` (version 11.29.2023, tracks IEEE 2023 editorial guidelines).
+
+### ACM
+**Priority:** later · **Effort:** M · **Status:** open.
+
+STEM/engineering. Numeric citations (`[1]`, `[2]`) resolved in order of first appearance. Same shape as IEEE; file follows the pattern established by ieee.md. ACM supports both numeric and author-year in-text forms depending on venue; ship numeric as the default variant (acm-numeric.md); author-year variant (acm-author-year.md) as a separate file if demand surfaces.
 
 ### Bluebook
 **Priority:** maybe · **Effort:** XL · **Status:** open.
