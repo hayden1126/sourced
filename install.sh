@@ -34,8 +34,9 @@ usage() {
 Usage: install.sh [options]
 
 Options:
-  --global-only        Install/refresh only global files (source-finder, schema,
-                       brief template, voice library). Skip per-project files.
+  --global-only        Install/refresh only global files (source-finder,
+                       voice-extractor, schema, brief template, voice library,
+                       style library). Skip per-project files.
   --project <path>     Drop CLAUDE.md, voice.md, and style.md into <path>
                        instead of $PWD.
   --force              Overwrite existing CLAUDE.md, voice.md, style.md, and
@@ -134,6 +135,7 @@ render() {
 mkdir -p "${CLAUDE_AGENTS_DIR}" "${CLAUDE_CITATIONS_DIR}" "${CLAUDE_TEMPLATES_DIR}" "${CLAUDE_VOICE_DIR}" "${CLAUDE_STYLE_DIR}"
 echo "Rendering global files..."
 render "${REPO_DIR}/agents/source-finder.md"     "${CLAUDE_AGENTS_DIR}/source-finder.md"
+render "${REPO_DIR}/agents/voice-extractor.md"   "${CLAUDE_AGENTS_DIR}/voice-extractor.md"
 render "${REPO_DIR}/citations/schema.md"         "${CLAUDE_CITATIONS_DIR}/schema.md"
 render "${REPO_DIR}/templates/brief.template.md" "${CLAUDE_TEMPLATES_DIR}/brief.template.md"
 

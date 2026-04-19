@@ -478,6 +478,28 @@ Drafts authored before this restructure may carry rendered author-year strings i
 
 Voice rules live in `voice.md`, in this project's root next to this CLAUDE.md. Read that file in full on entry to [outlining mode] (Paragraph Flow at outline time), [writing mode] (all rules, strictly enforced), and [editing mode] (voice audit). Do not work from memory of prior sessions; the file is the canonical source for this project's voice and different projects can carry different voices. If `voice.md` is missing, stop and ask {{USER}} to run `install.sh --voice <name>` rather than proceeding with guessed rules. Voice-preservation is the project's core promise; every rule in the file is load-bearing.
 
+### Generating a new library voice from writing samples
+
+{{USER}} may ask for a new library voice calibrated to a specific writer's prose rather than picking an existing one. When that happens, dispatch the `voice-extractor` subagent. The subagent definition lives at `~/.claude/agents/voice-extractor.md`; it reads a directory of writing samples and a skeleton voice file (default `~/.claude/voice/academic.md`), mirrors the skeleton's section structure, and writes a new library file at `~/.claude/voice/<voice_name>.md` with `{{USER}}` tokens preserved for install-time substitution.
+
+Voice-extractor is **not a mode** and does **not** auto-trigger. It runs only in `[collaborative mode]` and always in a single dispatch (never in parallel; this is unlike `source-finder`). If {{USER}} asks from another mode, announce the switch to `[collaborative mode]` first (`Switching to [collaborative mode].`), dispatch the subagent, present its report, and stay in collaborative until {{USER}} directs otherwise. Voice calibration is a setup operation, not part of the research/write/edit pipeline, so returning to the prior mode after the dispatch would mislead {{USER}} about where the conversation is.
+
+After the subagent returns, surface its report to {{USER}} — especially the `### Sections left TBD` and `### Anchor candidates` lists, which require {{USER}}'s hand to resolve. Do not silently pre-fill TBD sections; the subagent left them open because the corpus didn't settle the question, and filling them requires judgment the subagent deliberately deferred.
+
+Next step after a successful run is always: {{USER}} runs `install.sh --voice <voice_name>` from inside the target project directory to render the new library voice into `<project>/voice.md`. Do not run `install.sh` yourself; rendering into a project is a {{USER}} action.
+
+**Dispatch template.** Use the following literal template as the `prompt` argument. Fill every placeholder. If an optional field is not applicable, write `omit` rather than removing the line; the subagent parses the structure.
+
+```
+samples_dir: <absolute path to a directory containing the writing samples>
+voice_name: <name for the new library voice; must match [a-z0-9_-]+>
+register: <academic | technical | casual | journalistic, or "omit" to let the subagent classify>
+overwrite: <true | false; default false. True permits overwriting an existing ~/.claude/voice/<voice_name>.md>
+skeleton_path: <absolute path to the skeleton voice to mirror, or "omit" for the default ~/.claude/voice/academic.md>
+```
+
+Do not invoke `voice-extractor` from inside another mode's auto-trigger path. Unlike `[research mode]`, which fires automatically when a claim lacks a source, voice-extractor only fires on an explicit request from {{USER}}. The voice library is stable state; generating a new one without being asked is scope creep, not helpfulness.
+
 See §10 for the parallel `style.md` file, which carries citation and document-formatting rules.
 
 ## 10. Style

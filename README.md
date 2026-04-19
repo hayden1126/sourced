@@ -4,7 +4,7 @@ A Claude Code setup for writing academic papers with the model in the loop. Buil
 
 For students and researchers who want Claude-generated scholarship they can defend without rewriting it line by line.
 
-The primary agent (academic-researcher) lives in each project's `CLAUDE.md`; a parallel-research subagent (source-finder) lives globally in `~/.claude/agents/`.
+The primary agent (academic-researcher) lives in each project's `CLAUDE.md`. Two subagents live globally in `~/.claude/agents/`: source-finder (parallel source research, dispatched during `[research mode]`) and voice-extractor (one-shot voice calibration from a corpus of writing samples).
 
 ## What it does differently
 
@@ -36,6 +36,7 @@ On first run you'll be prompted for your name. It gets saved to `~/.claude/sourc
 After `--global-only`, the global files are available to Claude Code from any working directory:
 
 - `~/.claude/agents/source-finder.md`
+- `~/.claude/agents/voice-extractor.md`
 - `~/.claude/citations/schema.md`
 - `~/.claude/templates/brief.template.md`
 - `~/.claude/voice/<name>.md` (voice library; shipped voices land here, custom voices can be added alongside)
@@ -82,6 +83,47 @@ cp ~/.claude/voice/academic.md ~/.claude/voice/mycustom.md
 ```
 
 Library voice files are templates: any `{{USER}}` token is substituted with your configured name when `install.sh --voice` renders the voice into a project. That's why the shipped `academic.md` shows `{{USER}}` on line 3 — the token is replaced per-project, so each project's `voice.md` carries the right name without the library file having to store it.
+
+### Generating a voice from writing samples
+
+Hand-authoring a voice file is slow. If you have a corpus of the writer's prose (past papers, essays, reports, blog posts — whatever is representative), the `voice-extractor` subagent produces a calibrated first draft of the library file.
+
+**Requirements.** At least 5 files and 5,000 words combined, in `.md` or `.txt`. Other file types (PDF, `.docx`, `.rtf`) are silently skipped and listed in the report. More samples produce more stable patterns; the 5-file / 5,000-word floor is a hard minimum, not a target. 15,000–30,000 words across 10+ files is where the output gets genuinely useful.
+
+**Usage.** Open Claude Code in any project that already has a rendered `CLAUDE.md`. The agent reads `CLAUDE.md` §9 at startup and knows how to dispatch the subagent. Ask in natural language:
+
+> *"Generate a new library voice called `mycustom` from the samples at `~/writing/papers/`. The register is academic."*
+
+The agent will announce a switch to `[collaborative mode]` if needed, dispatch `voice-extractor` in a single Agent call, and present the report when the subagent returns. Name hygiene: pick a name matching `[a-z0-9_-]+` (lowercase letters, digits, underscore, hyphen — uppercase is rejected). The name `academic` is reserved because the shipped voice lives there; the subagent refuses with `shipped-name-collision` if you try it, regardless of the `overwrite` flag.
+
+**What the subagent does:**
+
+- Mirrors the section structure of a skeleton voice (default: the shipped `academic.md`).
+- Fills each section from patterns found in the samples, with verbatim exemplars attributed to their source file in HTML comments.
+- Leaves sections `TBD —` where the samples don't settle the question. Never fabricates rules or exemplars.
+- Surfaces recurring named references as "anchor candidates" in the report. The Anchors block in the output file is always TBD by design; anchors are a judgment call only you can make.
+- Classifies the corpus register if you don't pass one. Refuses with `register-mismatch` if the label you passed contradicts what the samples show, or `mixed-register` if no single register accounts for at least 70% of the corpus.
+
+**After the subagent returns:**
+
+1. Read the report — especially `### Sections filled` (low-confidence sections deserve a look), `### Sections left TBD`, `### Anchor candidates`, and `### Exemplar audit` (spot-check a few quotes against their source files).
+2. Open `~/.claude/voice/<voice_name>.md` in an editor. Search for `TBD —` markers. Each one needs either a hand-written rule (drawing on the report's guidance) or deletion. At minimum, fill in the Anchors block from the `### Anchor candidates` list, or delete it if none fit.
+3. Once no TBDs remain, render the voice into a project:
+
+```bash
+cd ~/writing/my-paper
+/path/to/sourced/install.sh --voice mycustom
+```
+
+**Re-running:**
+
+- **Corpus was too thin.** Add samples, re-run with `overwrite: true`. Without `overwrite`, the subagent refuses to clobber an existing library file.
+- **Register was inferred and came out wrong.** Re-run with the correct `register:` label (`academic | technical | casual | journalistic`).
+- **Want a different skeleton.** Pass `skeleton_path: <absolute path>` pointing at another voice in `~/.claude/voice/`. Useful if a register-specific skeleton ships later.
+
+**Scope.**
+
+Voice-extractor is a one-shot setup utility. It runs only when you ask, never auto-triggers during writing or research, and never runs in parallel with itself. It does not modify your project's `CLAUDE.md`, `voice.md`, or anything under the project directory — it writes exactly one file, `~/.claude/voice/<voice_name>.md`. Rendering into a project is always a deliberate `install.sh --voice <voice_name>` step you run yourself.
 
 Each project's `voice.md` records which library voice it was installed from (as an HTML comment on the first line). A later bare `install.sh --update` reuses that choice and refreshes `voice.md` from the current library version, so upstream voice-rule changes propagate. Switching to a different voice on an existing project requires `--force` (replace) or `--update --voice <new>` (explicit switch).
 
@@ -159,11 +201,12 @@ If a CLAUDE.md exists but you want a fresh render regardless:
 
 | Flag | Effect |
 |------|--------|
-| `--global-only` | Install or refresh global files only (source-finder, schema, brief template, voice library). Skip per-project files. |
+| `--global-only` | Install or refresh global files only (source-finder, voice-extractor, schema, brief template, voice library, style library). Skip per-project files. |
 | `--project <path>` | Drop per-project files into `<path>` instead of `$PWD`. |
-| `--force` | Overwrite existing CLAUDE.md, voice.md, and brief (if `--brief`) without asking. |
-| `--update` | Refresh the managed block of CLAUDE.md (preserving content outside sentinels) and refresh `voice.md` from the project's installed voice. |
+| `--force` | Overwrite existing CLAUDE.md, voice.md, style.md, and brief (if `--brief`) without asking. |
+| `--update` | Refresh the managed block of CLAUDE.md (preserving content outside sentinels) and refresh `voice.md` and `style.md` from the project's installed voice and style. |
 | `--voice <name>` | Pick the voice rendered into this project's `voice.md` (default: `academic`). Shipped voices live in `templates/voices/`; custom voices can be placed at `~/.claude/voice/<name>.md`. |
+| `--style <name>` | Pick the citation/document style rendered into this project's `style.md` (default: `apa7`). Shipped styles live in `templates/styles/`; custom styles can be placed at `~/.claude/style/<name>.md`. |
 | `--brief <name>` | Also drop `<name>.brief.md` into the project from `templates/brief.template.md`. |
 
 ## File layout
@@ -172,7 +215,8 @@ Global files (installed once, shared across projects) and per-project files (ren
 
 | Path | Scope |
 |------|-------|
-| `~/.claude/agents/source-finder.md` | global subagent |
+| `~/.claude/agents/source-finder.md` | global subagent (parallel source research) |
+| `~/.claude/agents/voice-extractor.md` | global subagent (one-shot voice calibration from samples) |
 | `~/.claude/citations/schema.md` | global citation log schema |
 | `~/.claude/templates/brief.template.md` | global brief template |
 | `~/.claude/voice/<name>.md` | voice library (shipped + custom voices available for project selection) |
@@ -192,7 +236,8 @@ Edit or delete `~/.claude/sourced.config` and re-run `./install.sh --global-only
 ```
 sourced/
 ├── agents/
-│   └── source-finder.md          # template with {{USER}}, installs to ~/.claude/agents/
+│   ├── source-finder.md          # template with {{USER}}, installs to ~/.claude/agents/
+│   └── voice-extractor.md        # template with {{USER}}, installs to ~/.claude/agents/
 ├── citations/
 │   └── schema.md                 # template with {{USER}}, installs to ~/.claude/citations/
 ├── templates/
