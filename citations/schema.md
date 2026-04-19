@@ -27,9 +27,26 @@ Each in-text citation is one entry. Same source cited three times = three entrie
   "draft_reference": null,
   "verification_status": "verified | partial",
   "retrieval": "URL, PDF path, library access, or 'pasted by {{USER}}'",
+  "retrieved_at": "2026-04-17T14:18:00Z",
   "added_at": "2026-04-17T14:23:00Z"
 }
 ```
+
+## Author-field provenance
+
+`source.authors` must reflect what the source itself states, not what the cataloging context implies. Three cases:
+
+- **Byline present.** Use the byline as printed (author name, editor, "by X"). Normalize to APA surname-first format.
+- **No byline, institutional source.** Use the group author per APA 7.21 (the organization, project, or site name as it appears on the page). Do not infer an individual author from site ownership, maintainer history, or publication patterns.
+- **No byline, non-institutional source.** Treat as anonymous per APA 9.12 (title moves to the author position in References). Do not assign a person.
+
+If you assign an individual author whose name is not printed in or signed on the source itself (initials, editorial signature, "compiled by"), record the evidence in a new `author_evidence` field with the verbatim text and its location on the page (e.g., `"author_evidence": "signed 'WL' at end of page"`). Absence of this field on an entry with a named individual author asserts that the byline is printed verbatim somewhere on the source.
+
+`source.authors` is also the source of truth for author names rendered into prose. `[formatting mode]` (CLAUDE.md §7) reads `source.authors` to render every inline citation; if the byline is wrong here, every rendered citation that resolves through this entry is wrong. Verify it once at logging time and re-verify it any time the entry is touched in a later session (see `retrieved_at` below for the re-verification trigger).
+
+## `citation_string` is informational
+
+`citation_string` is a portability hint and a grep target; it is not load-bearing. The authoritative rendering of an inline citation comes from `source.authors` + `source.year` resolved per the project's `style.md` in `[formatting mode]` (CLAUDE.md §10). Setting `citation_string` to an APA-7 string at logging time is fine and recommended for portability across projects with different styles, but downstream rendering does not depend on it. `[formatting mode]` does not read this field during normal operation.
 
 ## Allowed enum values
 
@@ -39,7 +56,20 @@ Each in-text citation is one entry. Same source cited three times = three entrie
 
 ## Timestamp format
 
-- `added_at`: ISO 8601 in UTC, seconds precision, with trailing `Z`. Example: `2026-04-17T14:23:00Z`. No fractional seconds, no local-time offsets.
+- `added_at`: ISO 8601 in UTC, seconds precision, with trailing `Z`. Example: `2026-04-17T14:23:00Z`. No fractional seconds, no local-time offsets. Set when the entry is first written to the log; never updated.
+- `retrieved_at`: ISO 8601 in UTC, same format as `added_at`. Marks when the source was actually fetched and read for this entry, distinct from when the entry was logged. For sources read in the same session as logging, the two timestamps are typically minutes apart. For entries created from text {{USER}} pasted, `retrieved_at` is the time of the paste. Update `retrieved_at` whenever the source is re-fetched and re-verified in a later session (e.g., during an `[editing mode]` byline recheck or a `[formatting mode]` staleness prompt).
+
+Every entry must carry both timestamps. Legacy entries logged before this field was introduced have no `retrieved_at` and are treated as stale on first encounter; see "Staleness" below.
+
+## Staleness
+
+Web pages mutate. The byline, year, title, and even the verbatim text can change between sessions without notice. `retrieved_at` exists to make staleness visible.
+
+- An entry is **fresh** if `retrieved_at` is within 90 days of the current date.
+- An entry is **stale** if `retrieved_at` is older than 90 days, or if `retrieved_at` is missing entirely (legacy entries).
+- The 90-day threshold applies to web pages, preprints, and other mutable sources. For published journal articles, books, and stable PDFs accessed by DOI, staleness is informational only: the underlying work doesn't change, but verifying that you still have access (and that `source.authors` still matches what you'd extract today) is cheap insurance.
+
+Stale entries are not errors at logging time; they only matter when the entry is touched again. `[editing mode]` (CLAUDE.md §7, byline recheck) and `[formatting mode]` (CLAUDE.md §7, pre-flight) both surface staleness and ask {{USER}} how to proceed (re-fetch and update, accept as-is, or treat the citation as a gap). Re-fetching and re-verifying updates `retrieved_at` to the new timestamp; `added_at` is never updated.
 
 ## Reference fields
 
