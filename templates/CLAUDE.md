@@ -98,7 +98,7 @@ Section 3 tells you which sources are usable. This section tells you how to use 
 
 **Synthesis across sources needs independent support.** "A says X, B says Y, therefore both support Z" is a logical leap unless X and Y each independently support Z. Check that each source actually makes the joint claim on its own terms. Two weak supports stacked are not one strong support.
 
-**Quote verbatim.** No ellipsis-trickery that reverses or softens meaning. No cherry-picking a phrase whose surrounding context would invalidate the point. If a quote needs context to be honest, include the context or don't use the quote.
+**Quote verbatim.** No ellipsis-trickery that reverses or softens meaning. No cherry-picking a phrase whose surrounding context would invalidate the point. If a quote needs context to be honest, include the context or don't use the quote. Verbatim extends to punctuation: preserve the source's em dashes, commas, colons, and semicolons as printed. Voice-level punctuation rules and §10 generation signatures are suspended inside the quoted span (see §10 *Direct quotations*). If a substitution is unavoidable, mark it with a bracketed editorial note rather than replacing silently.
 
 **Audit after drafting.** For each citation, run these checks against its citation-log entry. Any "no" or "unclear" means rework the sentence, replace the citation, or drop the claim.
 
@@ -537,6 +537,18 @@ The patterns below are not claims about good prose. They are patterns this agent
 ### Precedence
 
 If `voice.md` explicitly permits one of the patterns above ("this author uses em-dashes for appositives"), voice.md wins for that item only. Silence in `voice.md` is not permission; this section wins by default. When `voice.md` and this section conflict, surface the conflict to {{USER}} on first occurrence in a draft rather than resolving silently.
+
+### Direct quotations
+
+Text inside a direct quotation is not generated prose; it is evidence. The Never list above applies to the writer's prose, not to punctuation the source itself uses. Preserve the source's punctuation verbatim inside a direct quote, including em dashes, ornamental triads, and any other pattern this section would otherwise flag. §4 verbatim-quotation is the governing rule; §10 is suspended inside the quoted span.
+
+This carve-out is narrow. It covers punctuation and word-order choices printed in the source. It does not permit:
+
+- Introducing a §10 pattern in the writer's framing sentence next to the quote ("Hegel — writing in 1807 — argues..."). The quote is the carve-out, not its surrounding prose.
+- Paraphrase that preserves the source's em-dash cadence. Paraphrase is generated prose; §10 applies.
+- Silent editorial replacement ("—" → ",") inside the quoted span. If a substitution is genuinely required (e.g., a downstream renderer cannot emit the character), mark it with a bracketed editorial note per §4's no-ellipsis-trickery discipline: `adequate to them [,] i.e., the state` makes the substitution visible; silent replacement does not.
+
+The `[editing mode]` AI-tell pass (§7 pass 5) walks each paragraph looking for §10 patterns; skip span-level matches whose surrounding markers identify them as direct quotations (double quotation marks enclosing the span; block-quote indentation). Flag any §10 pattern in the writer's framing sentence the same as any other generated prose.
 
 ### Restructure, don't retokenize
 
