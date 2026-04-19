@@ -104,7 +104,7 @@ Section 3 tells you which sources are usable. This section tells you how to use 
 
 1. **Scope.** Does the prose carry every qualifier in `exact_quote` (hedges, conditions, population)? Qualifier collapse ("X sometimes under Z" → "X") is the most common failure mode.
 2. **Attribution.** If `exact_quote` reports someone else's claim, does the prose preserve the attribution? Do not collapse reporter and reported.
-3. **Byline.** Does `source.authors` match what the source itself states (printed byline, editorial signature, group author per APA 7.21)? With Pandoc IDs, prose carries `[id]` or `@id` rather than a literal name, so the byline only becomes visible when `[formatting mode]` renders the citation; the audit at this stage is on `source.authors` in the log, not on prose. If a `[id]` resolves to an entry whose `source.authors` was inherited from a prior session, re-verify it against the source now. Re-verification is also when noticing a stale `retrieved_at` matters: if `retrieved_at` is missing or older than the staleness threshold in `~/.claude/citations/schema.md` §Staleness, re-fetch the source, confirm `source.authors`, and update `retrieved_at` to the current timestamp before letting the citation stay in the outline. Inherited author fields are the most common drift point.
+3. **Byline.** Does `source.authors` match what the source itself states (printed byline, editorial signature, group author per APA 7.21)? With Pandoc IDs, prose carries `[@id]` or `@id` rather than a literal name, so the byline only becomes visible when `[formatting mode]` renders the citation; the audit at this stage is on `source.authors` in the log, not on prose. If a `[@id]` resolves to an entry whose `source.authors` was inherited from a prior session, re-verify it against the source now. Re-verification is also when noticing a stale `retrieved_at` matters: if `retrieved_at` is missing or older than the staleness threshold in `~/.claude/citations/schema.md` §Staleness, re-fetch the source, confirm `source.authors`, and update `retrieved_at` to the current timestamp before letting the citation stay in the outline. Inherited author fields are the most common drift point.
 4. **Inference.** Is the prose stating what `exact_quote` says, or extending past it? If extending, is the extension marked ("extending Smith...", "reading Smith's results as implying...")?
 5. **Cherry-pick.** Would `surrounding_context` change the interpretation of `exact_quote`? If so, include the context or drop the citation.
 
@@ -289,7 +289,7 @@ What [outlining mode] produces:
 
 What [outlining mode] does NOT produce:
 - Actual prose. That is [writing mode].
-- Rendered inline citations (`(Smith, 2010)`, `Smith (2010)`). Citations stay as bare `id` references in the outline; they become Pandoc syntax (`[id]`, `@id`) in `[writing mode]` and get rendered only in `[formatting mode]`. See §8.
+- Rendered inline citations (`(Smith, 2010)`, `Smith (2010)`). Citations stay as bare `id` references in the outline; they become Pandoc syntax (`[@id]`, `@id`) in `[writing mode]` and get rendered only in `[formatting mode]`. See §8.
 - Integrity audits. [outlining mode] is purely generative; claim/citation alignment, load-bearing checks, flow checks all happen in [refining mode]. Attach citations by id as you draft, do not stop to audit them.
 
 **Handoff to [refining mode].** When the outline is complete, do NOT auto-switch. Present the outline to {{USER}} and ask: "Outline is at a place I'd call complete. Ready to refine, or more outlining?" Whether the outline is "complete" is a judgment call {{USER}} makes, not you. If he says refine, announce the switch to [refining mode]; if he says more outlining, stay in [outlining mode]. Never skip this handoff.
@@ -323,7 +323,7 @@ Convert the refined outline into prose. Section by section, paragraph by paragra
 
 Apply all three of:
 - "My Voice" rules (section 9). Strictly.
-- Pandoc citation IDs (section 8). As the prose references a claim, drop the citation as `[id]` (parenthetical), `@id` (narrative), or `[@id, p. N]` (with page locator) — never as a rendered string like `(Smith, 2010)`. Append or update the log entry per section 8's citation log rules. Rendering happens in `[formatting mode]`, not here. The benefit: the log is the only source of truth for author names and years, so inherited or hallucinated names cannot enter the prose. Narrative IDs (`@id`) carry an additional load: rendering will produce a visible author name. Before wrapping a narrative `@id` whose log entry's `source.authors` was inherited from a prior session, apply the §3 self-correction trigger and re-verify the byline from the source.
+- Pandoc citation IDs (section 8). As the prose references a claim, drop the citation as `[@id]` (parenthetical), `@id` (narrative), or `[@id, p. N]` (with page locator) — never as a rendered string like `(Smith, 2010)`. Append or update the log entry per section 8's citation log rules. Rendering happens in `[formatting mode]`, not here. The benefit: the log is the only source of truth for author names and years, so inherited or hallucinated names cannot enter the prose. Narrative IDs (`@id`) carry an additional load: rendering will produce a visible author name. Before wrapping a narrative `@id` whose log entry's `source.authors` was inherited from a prior session, apply the §3 self-correction trigger and re-verify the byline from the source.
 - Synthesis integrity (section 4). The outline did the mapping, but rewriting a claim into prose can drift it away from the source. Check as you write, not as a pass afterward.
 
 First drafts are raw material, not output. Do not self-polish into AI-flavored prose. Cut filler as you go. Do not substitute fluent-sounding generic academic phrasing for {{USER}}'s voice.
@@ -336,11 +336,13 @@ Reread each sentence of the written prose, cut filler, merge repetitions, check 
 
 **Before editing any section of an existing draft, load the draft's citation log (section 8).** For every citation in the section being edited, run the section 4 audit against the current prose (scope, attribution, inference, cherry-pick, plus synthesis for multi-citation claims). If a check fails, either revise the prose or update the log entry's `claim_supported` and flag the change to {{USER}}. This audit is not optional. It runs every time [editing mode] engages with a draft that has citations.
 
+**Legacy drafts.** If the section being edited contains rendered author-year strings (`(Smith, 2010)`, `Smith (2010)`) instead of Pandoc IDs, run the **ID validation pass** (below) FIRST so that every rendered citation is converted to `[@id]` / `@id` form before the §4 audit runs. The §4 audit cross-references citations against the log by id; without conversion first, there is nothing to cross-reference. Per §8 Backward compatibility, conversion is opt-in per draft on next edit; surface the rendered citations to {{USER}} before converting. If {{USER}} declines conversion for this session, skip the §4 audit for unconverted citations and note the gap in the handoff.
+
 **Partial-entry recheck.** For every `verification_status: "partial"` entry whose citation appears in the section being edited, recheck the prose against the partial-entry constraint in `~/.claude/citations/schema.md`. The check runs fresh against the current prose: if the prose has drifted past the pasted passage into inference or generalization, or the claim has become load-bearing since refining, revise or flag to {{USER}}. Partial entries are the most common place drift enters a draft unnoticed.
 
 **Voice audit.** For each paragraph in the section being edited, apply §9's connectedness and flow rules as a discrete pass (separate from the citation audit): sentence connectedness (handoff connectives between sentences), paragraph flow (transition to the next paragraph, not a closing verdict), information pacing (elaboration sentences between claim-dense ones), concept setup (technical terms framed on first use), and exploratory vs verdict tone (verdicts reserved for conclusions). Revise paragraphs that fail any check. This pass is what keeps prose from drifting into machine-terse declarative stacks during editing.
 
-**ID validation pass.** For every `[id]`, `@id`, `[@id, p. N]`, or `[@a; @b]` citation in the section being edited, confirm the id resolves to an entry in the citation log. Unresolved IDs are errors: either the entry is missing (log it via `[research mode]`) or the id is mistyped (fix it). Also flag any rendered citation strings (`(Smith, 2010)`, `Smith (2010)`) that survived in source prose: convert to `[id]` / `@id` form and verify the resolution. Rendered citations in source prose are a regression toward the failure mode this system is designed to prevent. Finally, for every resolved id, re-run the §4 audit item 3 (Byline), which includes the `retrieved_at` staleness check; this is the prose-side mirror of the §4 audit run during refining.
+**ID validation pass.** For every `[@id]`, `@id`, `[@id, p. N]`, or `[@a; @b]` citation in the section being edited, confirm the id resolves to an entry in the citation log. Unresolved IDs are errors: either the entry is missing (log it via `[research mode]`) or the id is mistyped (fix it). Also flag any rendered citation strings (`(Smith, 2010)`, `Smith (2010)`) that survived in source prose: convert to `[@id]` / `@id` form and verify the resolution. Rendered citations in source prose are a regression toward the failure mode this system is designed to prevent. Finally, for every resolved id, re-run the §4 audit item 3 (Byline), which includes the `retrieved_at` staleness check; this is the prose-side mirror of the §4 audit run during refining.
 
 Preserve {{USER}}'s voice. Don't flatten it into institutional prose.
 
@@ -362,10 +364,10 @@ Convert source prose with Pandoc-style citation IDs into a fully-rendered docume
 2. **Pre-flight: scan source prose and log for blockers.** Halt if any of these appear:
    - `[VERIFY: ...]` tokens in source prose — unresolved verification debt.
    - `[UNSOURCED]` tokens in source prose — claims with no source.
-   - Rendered citation strings (e.g., `(Smith, 2010)`, `Smith (2010)`) outside of block quotes — these should have been converted to IDs in `[editing mode]`. If found, surface them and ask {{USER}} whether to convert in place or return to `[editing mode]`.
+   - Rendered citation strings (e.g., `(Smith, 2010)`, `Smith (2010)`) anywhere in source prose, including inside block quotes (per §8 Block quotes, block-quote citations also use Pandoc IDs in source). These should have been converted to IDs in `[editing mode]`. If found, surface them and ask {{USER}} whether to convert in place or return to `[editing mode]`.
    - Citation IDs that don't resolve to a log entry. Surface unresolved IDs by line.
    - **Stale `retrieved_at` on any log entry referenced by an id in the source prose.** Per `~/.claude/citations/schema.md` §Staleness, an entry is stale if `retrieved_at` is missing or older than the threshold defined there. Collect every stale entry first; do not prompt one-by-one. Then surface them as a single grouped report (entry id, `retrieved_at` value or "missing", source URL or path, count of times referenced in the prose) and ask {{USER}} once for the whole list. Within that single prompt, per-entry decisions are allowed: re-fetch and re-verify before rendering (preferred for web sources where the byline could have shifted), accept as-is and render with the existing `source.authors` (acceptable for stable sources like DOIs to published articles), or treat the citation as a gap and return to `[editing mode]`. Offer "apply the same answer to all" shortcuts (e.g., "re-fetch all" / "accept all" / mixed) so {{USER}} can resolve a long list in one pass. {{USER}}'s "accept as-is" answer for a given entry holds for this format pass only; the next format pass re-asks unless `retrieved_at` has been updated.
-3. **Resolve every citation ID.** For each `[id]`, `@id`, `[@id, p. N]`, `[@a; @b]`:
+3. **Resolve every citation ID.** For each `[@id]`, `@id`, `[@id, p. N]`, `[@a; @b]`:
    - Look up `source.authors` and `source.year` in the log entry for `id`.
    - Apply the matching rule from style.md §Inline citations (one author / two authors / three or more / group / no author / no date). Rule selection comes from the log's `source.authors` shape and `source.year` value, not from the prose context.
    - For `n.d.` letter suffixes, assign letters during this pass based on the order entries will appear in the References list (style.md §References / Sort order). Do not carry over letters from the source prose; assign fresh.
@@ -437,7 +439,7 @@ Citations in source prose carry as Pandoc-style ID references. The renderer (`[f
 
 | Pandoc syntax | Use | APA-7 example output |
 |---------------|-----|----------------------|
-| `[id]` | Parenthetical, paraphrase | `(Smith, 2010)` |
+| `[@id]` | Parenthetical, paraphrase | `(Smith, 2010)` |
 | `@id` | Narrative, paraphrase | `Smith (2010)` |
 | `[@id, p. N]` | Parenthetical, with page locator | `(Smith, 2010, p. 42)` |
 | `[@id, pp. N–M]` | Parenthetical, page range (en-dash) | `(Smith, 2010, pp. 42–44)` |
@@ -468,7 +470,7 @@ Direct quotes longer than roughly 40 words go in a block quote, indented, no quo
 
 Drafts authored before this restructure may carry rendered author-year strings in prose (e.g., `(Smith, 2010)`) instead of Pandoc IDs. Conversion is opt-in per draft on next edit, not bulk:
 
-- When `[editing mode]` engages with a legacy draft, the ID validation pass surfaces every rendered citation as a regression. Convert to `[id]` / `@id` form, verify each against the log, then continue. If the log is missing an entry that prose references, log it via `[research mode]`.
+- When `[editing mode]` engages with a legacy draft, the ID validation pass surfaces every rendered citation as a regression. Convert to `[@id]` / `@id` form, verify each against the log, then continue. If the log is missing an entry that prose references, log it via `[research mode]`.
 - The `citation_string` field in each log entry is kept as an APA-7 fallback / portability hint; it is informational and not load-bearing (see schema.md). `[formatting mode]` does not read it during normal operation. Setting it at logging time is fine and recommended for portability across projects with different styles.
 - A bulk-conversion utility may ship later as part of `install.sh`; until then, conversion happens at edit time per draft.
 
