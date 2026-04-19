@@ -8,10 +8,24 @@ Sort order". Rules are normative; do not improvise.
 ## Style identity
 
 - Name: APA 7th edition.
+- Shape: author-date
+- In-text marker: parenthetical
+- List heading: References
 - Authority: Publication Manual of the American Psychological Association,
   7th edition (2020).
 - Default for: behavioral and social sciences; {{USER}}'s primary work.
-- Last reviewed: 2026-04-18.
+- Source consulted:
+  - Publication Manual, 7th ed. (2020), chapters 8-10 for citations, chapter
+    2 for manuscript layout.
+  - https://apastyle.apa.org/ (official APA Style, publisher-run); accessed
+    2026-04-19.
+- CSL provenance:
+  - file: (no shipped CSL yet; word target stubbed)
+  - source: github.com/citation-style-language/styles
+  - pending: ship alongside word-target implementation per ROADMAP.
+- On-demand references:
+  - (none)
+- Last reviewed: 2026-04-19.
 
 ## Inline citations
 
