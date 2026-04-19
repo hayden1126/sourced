@@ -233,9 +233,85 @@ if [[ ! -f "${STYLE_SOURCE}" ]]; then
   exit 1
 fi
 
+# Extracts iron rules from a voice library file. Iron rules are rules that must
+# pass through to every derived voice verbatim, regardless of corpus evidence.
+# A rule is iron if either:
+#   - it sits under a section heading "## Iron rules", "## AI-tells", or
+#     "## Generation signatures" (until the next "## " heading), OR
+#   - its line contains the literal token "[iron]".
+# Prints each iron rule on its own line. Blank lines are filtered.
+extract_iron_rules() {
+  local src="$1"
+  {
+    awk '
+      /^## (Iron rules|AI-tells|Generation signatures)([[:space:]]|$)/ { in_iron = 1; next }
+      /^## / && in_iron { in_iron = 0 }
+      in_iron { print }
+    ' "${src}"
+    grep -F '[iron]' "${src}" || true
+  } | grep -v '^[[:space:]]*$' || true
+}
+
+# Normalizes a rule string for substring matching: lowercase, collapse runs of
+# whitespace to a single space, strip leading/trailing whitespace and trailing
+# sentence-terminal punctuation.
+normalize_rule() {
+  echo "$1" \
+    | tr '[:upper:]' '[:lower:]' \
+    | tr -s '[:space:]' ' ' \
+    | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/[.!?]*$//'
+}
+
+# Validates that every iron rule from the skeleton voice library file appears
+# (normalized-substring) in the candidate voice file about to be rendered.
+# Arguments: candidate voice source path, skeleton voice path.
+# Returns 0 if all iron rules are present (or the skeleton has none), 1 if any
+# iron rule is missing. Prints missing rules to stderr on failure.
+validate_iron_rules() {
+  local voice_source="$1" skeleton_path="$2"
+  [[ -f "${skeleton_path}" ]] || return 0
+  [[ "${voice_source}" -ef "${skeleton_path}" ]] && return 0
+
+  local iron_rules
+  iron_rules=$(extract_iron_rules "${skeleton_path}")
+  [[ -z "${iron_rules}" ]] && return 0
+
+  local voice_normalized
+  voice_normalized=$(tr '[:upper:]' '[:lower:]' < "${voice_source}" | tr -s '[:space:]' ' ')
+
+  local missing=0
+  while IFS= read -r rule; do
+    [[ -z "${rule}" ]] && continue
+    local normalized
+    normalized=$(normalize_rule "${rule}")
+    [[ -z "${normalized}" ]] && continue
+    if [[ "${voice_normalized}" != *"${normalized}"* ]]; then
+      if [[ ${missing} -eq 0 ]]; then
+        echo "Error: iron rule(s) from ${skeleton_path} missing in ${voice_source}:" >&2
+      fi
+      echo "  - ${rule}" >&2
+      missing=$((missing + 1))
+    fi
+  done <<< "${iron_rules}"
+
+  if [[ ${missing} -gt 0 ]]; then
+    echo "" >&2
+    echo "Iron rules must appear verbatim in every derived voice library file." >&2
+    echo "If voice-extractor dropped or reworded these rules, regenerate the voice with overwrite: true and re-run install." >&2
+    return 1
+  fi
+  return 0
+}
+
 # Renders a voice library file to the project with the voice marker prepended.
+# Runs iron-rule validation against the shipped academic skeleton first; aborts
+# the install if any iron rule from the skeleton is missing in the candidate.
 render_voice() {
   local src="$1" dest="$2" voice_name="$3"
+  if ! validate_iron_rules "${src}" "${CLAUDE_VOICE_DIR}/academic.md"; then
+    echo "Aborting install: voice '${voice_name}' failed iron-rule validation." >&2
+    exit 1
+  fi
   {
     echo "<!-- sourced:voice=${voice_name} -->"
     echo ""
