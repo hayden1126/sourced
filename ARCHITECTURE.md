@@ -14,17 +14,22 @@ sourced/
 │   └── voice-extractor.md      # Subagent: derive a voice file from a writing-samples corpus.
 ├── citations/
 │   └── schema.md               # Citation log entry structure, staleness rules, ID format.
+├── skills/
+│   └── browser-reader-extract/ # Skill: extract text + [p. N] markers from DRM'd browser readers.
 └── templates/
     ├── CLAUDE.md               # Primary agent (academic-researcher) operating instructions.
     ├── brief.template.md       # Per-paper intake brief skeleton.
     ├── styles/
     │   ├── chicago17-ad.md     # Chicago 17 author-date rendering rules.
+    │   ├── chicago17-ad/       # Chicago 17 assets (CSL file; reference.docx lives here when shipped).
     │   └── apa7.md             # APA 7 rendering rules.
     └── voices/
         └── academic.md         # Voice skeleton; derived voices mirror this structure.
 ```
 
 `install.sh --global-only` renders into `~/.claude/`. `install.sh` from inside a project renders `<project>/CLAUDE.md`, `<project>/voice.md`, `<project>/style.md`.
+
+Shipped skills under `skills/<name>/` mirror into `~/.claude/skills/<name>/` on every install; Claude Code auto-discovers them across all projects. Style asset directories under `templates/styles/<name>/` mirror into `~/.claude/style/<name>/` so `[formatting mode]` can pick up CSL files, reference.docx, and other per-style binaries without a separate fetch.
 
 ## The primary agent
 

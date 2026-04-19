@@ -17,6 +17,7 @@ CLAUDE_CITATIONS_DIR="${HOME}/.claude/citations"
 CLAUDE_TEMPLATES_DIR="${HOME}/.claude/templates"
 CLAUDE_VOICE_DIR="${HOME}/.claude/voice"
 CLAUDE_STYLE_DIR="${HOME}/.claude/style"
+CLAUDE_SKILLS_DIR="${HOME}/.claude/skills"
 
 # ---- flag parsing ----------------------------------------------------------
 GLOBAL_ONLY=0
@@ -160,7 +161,7 @@ render() {
 }
 
 # ---- step 1: global files (always) -----------------------------------------
-mkdir -p "${CLAUDE_AGENTS_DIR}" "${CLAUDE_CITATIONS_DIR}" "${CLAUDE_TEMPLATES_DIR}" "${CLAUDE_VOICE_DIR}" "${CLAUDE_STYLE_DIR}"
+mkdir -p "${CLAUDE_AGENTS_DIR}" "${CLAUDE_CITATIONS_DIR}" "${CLAUDE_TEMPLATES_DIR}" "${CLAUDE_VOICE_DIR}" "${CLAUDE_STYLE_DIR}" "${CLAUDE_SKILLS_DIR}"
 echo "Rendering global files..."
 render "${REPO_DIR}/agents/source-finder.md"     "${CLAUDE_AGENTS_DIR}/source-finder.md"
 render "${REPO_DIR}/agents/voice-extractor.md"   "${CLAUDE_AGENTS_DIR}/voice-extractor.md"
@@ -203,6 +204,31 @@ for style_assets in "${REPO_DIR}"/templates/styles/*/; do
   mkdir -p "${CLAUDE_STYLE_DIR}/${style_name}"
   cp -R "${style_assets}." "${CLAUDE_STYLE_DIR}/${style_name}/"
   echo "  ${CLAUDE_STYLE_DIR}/${style_name}/ (assets)"
+done
+
+# Skill library: mirror skills/<name>/ into ~/.claude/skills/<name>/. Skills
+# are available to every Claude Code session under this home directory, so
+# academic-researcher can dispatch them without per-project install. Assets
+# are copied verbatim; they are not templates. The copy preserves any local
+# node_modules/ tree but does not run `npm install` (that is a user action
+# on first use, per the shipped SKILL.md).
+for skill_dir in "${REPO_DIR}"/skills/*/; do
+  [[ -d "${skill_dir}" ]] || continue
+  skill_name=$(basename "${skill_dir}")
+  dest="${CLAUDE_SKILLS_DIR}/${skill_name}"
+  if [[ -d "${dest}/node_modules" ]]; then
+    # Preserve installed deps across updates; sync everything else.
+    for item in "${skill_dir}".[!.]* "${skill_dir}"*; do
+      [[ -e "${item}" ]] || continue
+      base=$(basename "${item}")
+      [[ "${base}" == "node_modules" ]] && continue
+      cp -R "${item}" "${dest}/"
+    done
+  else
+    mkdir -p "${dest}"
+    cp -R "${skill_dir}." "${dest}/"
+  fi
+  echo "  ${dest}/ (skill)"
 done
 
 # Clean up legacy academic-researcher.md from prior installs. Academic-researcher
