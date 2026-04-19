@@ -22,8 +22,14 @@ After `--global-only`, the global files are available to Claude Code from any wo
 - `~/.claude/templates/brief.template.md`
 - `~/.claude/voice/<name>.md` (voice library; shipped voices land here, custom voices can be added alongside)
 - `~/.claude/style/<name>.md` (style library; same pattern)
+- `~/.claude/style/<name>/<asset>` (per-style asset directory; e.g., `chicago17-ad/chicago-author-date-17th-edition.csl`, `chicago17-ad/classical-abbreviations.md`, `chicago17-ad/reference-styled.docx` when shipped)
+- `~/.claude/skills/<name>/` (skill library; Claude Code auto-discovers skills from this path across every session under the home directory)
 
 These paths are fixed; the install targets always go to `~/.claude/`, regardless of where the repo itself lives.
+
+## Prerequisite check
+
+`install.sh` runs `check_prerequisites` near the top of every invocation (before any file writes). It verifies `pdftotext` and `pandoc` are on PATH and aborts with the apt/brew install commands if either is missing. This is check-only; the installer does not run sudo or touch system packages. See the README Prerequisites section for what each tool does and how to install it.
 
 ## Per-project setup
 
@@ -100,12 +106,16 @@ Global files (installed once, shared across projects) and per-project files (ren
 | `~/.claude/templates/brief.template.md` | global brief template |
 | `~/.claude/voice/<name>.md` | voice library (shipped + custom voices available for project selection) |
 | `~/.claude/style/<name>.md` | style library (shipped + custom styles) |
+| `~/.claude/style/<name>/<asset>` | per-style asset dir (CSL file, reference.docx, on-demand reference tables like `classical-abbreviations.md`) |
+| `~/.claude/skills/<name>/` | skill library; Claude Code auto-discovers skills globally (currently ships `browser-reader-extract`) |
 | `<project>/CLAUDE.md` | per-project; contains the inlined academic-researcher rules |
 | `<project>/voice.md` | per-project; the active voice for this project |
 | `<project>/style.md` | per-project; the active citation style for this project |
 | `<project>/<draft>.brief.md` | per-project, next to the draft |
 | `<project>/<draft>.citations.json` | per-project, next to the draft |
-| `<project>/<draft>.<target>.md` | formatted output written by `[formatting mode]` (e.g., `<draft>.gdocs.md`) |
+| `<project>/<draft>.<target>.md` | formatted output written by `[formatting mode]` (e.g., `<draft>.gdocs.md`, `<draft>.docx.md`) |
+| `<project>/<draft>.docx` | submission binary when `[formatting mode for word]` runs pandoc on the intermediate |
+| `<project>/<draft>.bib.json` | CSL-JSON bibliography emitted for `word` target against collapsed source-level IDs |
 | `<project>/.claude/citations/working.citations.json` | per-project, pre-draft |
 | `<project>/.claude/citations/working.<finder-id>.json` | per-project, source-finder shards |
 
@@ -122,20 +132,29 @@ sourced/
 ├── docs/
 │   ├── INSTALL.md               # this file
 │   ├── MODES.md
+│   ├── SKILLS.md                # shipped skills (e.g. browser-reader-extract)
 │   ├── VOICES.md
 │   └── STYLES.md
-├── install.sh                   # global + per-project install
+├── install.sh                   # global + per-project install; check_prerequisites + voice/style/skill mirroring
 ├── agents/
 │   ├── source-finder.md
 │   └── voice-extractor.md
 ├── citations/
 │   └── schema.md
+├── skills/
+│   └── browser-reader-extract/  # extract text + [p. N] markers from DRM'd browser readers
+│       ├── SKILL.md
+│       ├── package.json
+│       └── overdrive.mjs
 └── templates/
     ├── CLAUDE.md
     ├── brief.template.md
     ├── styles/
+    │   ├── apa7.md
     │   ├── chicago17-ad.md
-    │   └── apa7.md
+    │   └── chicago17-ad/        # per-style assets
+    │       ├── chicago-author-date-17th-edition.csl
+    │       └── classical-abbreviations.md
     └── voices/
         └── academic.md
 ```

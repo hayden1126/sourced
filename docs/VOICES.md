@@ -86,6 +86,12 @@ Any one layer failing doesn't ship a broken voice. All three would have to miss.
 
 Generation signatures, the AI-writing tells that apply regardless of voice, live in CLAUDE.md §10, not in individual voice files. Voice files cover per-author calibration (sentence structure, stance, pacing, punctuation habits); §10 covers category-level prohibitions the system enforces uniformly.
 
+## Direct quotations are carved out of §10 and voice
+
+Text inside a direct quotation is evidence, not generated prose. Verbatim quotation wins over both §10 Never-list prohibitions and voice-level punctuation rules: preserve the source's em dashes, ornamental triads, commas, colons, and semicolons as printed. The carve-out applies to the quoted span only; the writer's framing sentence around the quote still obeys §10 (`"Hegel — writing in 1807 — argues..."` is flagged as an em-dash violation in the framing, independent of the quote that follows).
+
+If a substitution is genuinely unavoidable (downstream renderer cannot emit the character, for example), mark it with a bracketed editorial note rather than replacing silently: `adequate to them [,] i.e., the state` makes the change visible. Silent replacement fails §4's no-ellipsis-trickery discipline. See CLAUDE.md §10 *Direct quotations* and §4 *Quote verbatim* for the full rule.
+
 ## Exempting a §10 pattern for one voice
 
 If a writer legitimately uses a pattern on CLAUDE.md §10's Never list (em-dashes for appositives, ornamental triads for rhetorical emphasis, etc.), the voice library file can exempt that specific rule. Silence in the voice file is not permission; the exemption has to be declared explicitly, and `install.sh` validates it at render time.

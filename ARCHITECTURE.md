@@ -27,9 +27,9 @@ sourced/
         └── academic.md         # Voice skeleton; derived voices mirror this structure.
 ```
 
-`install.sh --global-only` renders into `~/.claude/`. `install.sh` from inside a project renders `<project>/CLAUDE.md`, `<project>/voice.md`, `<project>/style.md`.
+`install.sh --global-only` renders into `~/.claude/`. `install.sh` from inside a project renders `<project>/CLAUDE.md`, `<project>/voice.md`, `<project>/style.md`. A prerequisite check (`pdftotext`, `pandoc`) runs at the top of every invocation; missing tools abort the install with apt/brew hints rather than auto-installing (see [docs/INSTALL.md](./docs/INSTALL.md#prerequisite-check)).
 
-Shipped skills under `skills/<name>/` mirror into `~/.claude/skills/<name>/` on every install; Claude Code auto-discovers them across all projects. Style asset directories under `templates/styles/<name>/` mirror into `~/.claude/style/<name>/` so `[formatting mode]` can pick up CSL files, reference.docx, and other per-style binaries without a separate fetch.
+Shipped skills under `skills/<name>/` mirror into `~/.claude/skills/<name>/` on every install; Claude Code auto-discovers them across all projects. Style asset directories under `templates/styles/<name>/` mirror into `~/.claude/style/<name>/` so `[formatting mode]` can pick up CSL files, reference.docx, on-demand reference tables (e.g., `classical-abbreviations.md`), and other per-style binaries without a separate fetch. The on-demand reference pattern lets a style offload rarely-used lookups (per-author classical abbreviations) without paying per-format-pass load cost; `style.md` stays lean and the reference file is Read only when a citation triggers it.
 
 ## The primary agent
 
