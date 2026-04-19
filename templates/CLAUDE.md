@@ -80,13 +80,13 @@ Self-correction trigger: if you catch yourself about to cite without having read
 
 Same trigger for bylines, but with two firing points because Pandoc IDs (§8 Moment 2) decouple authoring from rendering. Fires (a) at writing time when wrapping a citation as `@id` for narrative use ("`@leman-nda-001` shows..."), if the log entry's `source.authors` was inherited from a prior session and not re-verified this session: pause and say "wait... I'm about to render an author I haven't verified from the source, let me check the page." Then check it. Fires (b) at formatting time when `[formatting mode]` is about to emit a name (parenthetical or narrative) from a log entry whose `retrieved_at` is missing or stale (per `~/.claude/citations/schema.md` §Staleness): pause, surface the entry, ask {{USER}} whether to re-fetch before rendering. An author field carried in from a prior session's citation log counts as unverified until you re-confirm it from the source.
 
-Search hygiene: describe the concept, not the database. A search like "site:jstor.org Cheyenne cosmology" assumes the database and narrows prematurely. A search like "Cheyenne (Tsetsehestahese) cosmology academic sources" describes what you need and lets the actual scholarship surface. If you catch yourself pinning a search to a specific journal or repository, rewrite it around the concept.
+Search hygiene: describe the concept, not the database. `site:jstor.org Cheyenne cosmology` narrows prematurely; `Cheyenne (Tsetsehestahese) cosmology academic sources` lets scholarship surface. If a search pins to a specific journal or repository, rewrite around the concept.
 
 Collect APA-ready metadata as you read: author(s), year, title, journal or publisher, volume, issue, pages, DOI or stable URL. Capturing this during research is cheaper than reconstructing it during drafting.
 
 ## 4. Synthesis integrity (non-negotiable)
 
-Section 3 tells you which sources are usable. This section tells you how to use them without misrepresenting what they say. This is where LLM-flavored academic writing usually fails: fluent prose, correct-looking citations, claims that have drifted from what the sources actually support.
+Section 3 tells you which sources are usable. This section tells you how to use them without misrepresenting what they say.
 
 **Read before citing.** If you cite a source, you have read the relevant passage. Abstracts, summaries, and citations inside review articles don't count. If you haven't read the source, you cannot cite it.
 
@@ -98,7 +98,7 @@ Section 3 tells you which sources are usable. This section tells you how to use 
 
 **Synthesis across sources needs independent support.** "A says X, B says Y, therefore both support Z" is a logical leap unless X and Y each independently support Z. Check that each source actually makes the joint claim on its own terms. Two weak supports stacked are not one strong support.
 
-**Quote verbatim.** No ellipsis-trickery that reverses or softens meaning. No cherry-picking a phrase whose surrounding context would invalidate the point. If a quote needs context to be honest, include the context or don't use the quote. Verbatim extends to punctuation: preserve the source's em dashes, commas, colons, and semicolons as printed. Voice-level punctuation rules and §10 generation signatures are suspended inside the quoted span (see §10 *Direct quotations*). If a substitution is unavoidable, mark it with a bracketed editorial note rather than replacing silently.
+**Quote verbatim.** No ellipsis-trickery that reverses or softens meaning. No cherry-picking a phrase whose surrounding context would invalidate the point. If a quote needs context to be honest, include the context or drop the quote. Punctuation too: preserve the source's em dashes, commas, colons, and semicolons as printed. §10 and voice-level punctuation rules are suspended inside the quoted span (see §10 *Direct quotations*).
 
 **Audit after drafting.** For each citation, run these checks against its citation-log entry. Any "no" or "unclear" means rework the sentence, replace the citation, or drop the claim.
 
@@ -374,7 +374,7 @@ Convert source prose with Pandoc-style citation IDs into a fully-rendered docume
    - `[UNSOURCED]` tokens in source prose — claims with no source.
    - Rendered citation strings (e.g., `(Smith, 2010)`, `Smith (2010)`) anywhere in source prose, including inside block quotes (per §8 Block quotes, block-quote citations also use Pandoc IDs in source). These should have been converted to IDs in `[editing mode]`. If found, surface them and ask {{USER}} whether to convert in place or return to `[editing mode]`.
    - Citation IDs that don't resolve to a log entry. Surface unresolved IDs by line.
-   - **Stale `retrieved_at` on any log entry referenced by an id in the source prose.** Per `~/.claude/citations/schema.md` §Staleness, an entry is stale if `retrieved_at` is missing or older than the threshold defined there. Collect every stale entry first; do not prompt one-by-one. Then surface them as a single grouped report (entry id, `retrieved_at` value or "missing", source URL or path, count of times referenced in the prose) and ask {{USER}} once for the whole list. Within that single prompt, per-entry decisions are allowed: re-fetch and re-verify before rendering (preferred for web sources where the byline could have shifted), accept as-is and render with the existing `source.authors` (acceptable for stable sources like DOIs to published articles), or treat the citation as a gap and return to `[editing mode]`. Offer "apply the same answer to all" shortcuts (e.g., "re-fetch all" / "accept all" / mixed) so {{USER}} can resolve a long list in one pass. {{USER}}'s "accept as-is" answer for a given entry holds for this format pass only; the next format pass re-asks unless `retrieved_at` has been updated.
+   - **Stale `retrieved_at` on any id referenced in source prose** (per schema.md §Staleness). Collect every stale entry first; do not prompt one-by-one. Surface as one grouped report (id, `retrieved_at` or "missing", source URL, reference count) and ask once. Per-entry choices within the single prompt: re-fetch and re-verify (preferred for web sources where the byline could shift), accept as-is (acceptable for stable DOIs), or treat as gap and return to `[editing mode]`. Offer "re-fetch all" / "accept all" / mixed shortcuts. "Accept as-is" holds for this format pass only; the next re-asks unless `retrieved_at` is updated.
 3. **Resolve every citation ID.** For each `[@id]`, `@id`, `[@id, p. N]`, `[@a; @b]`:
    - Look up `source.authors` and `source.year` in the log entry for `id`.
    - Apply the matching rule from style.md §Inline citations (one author / two authors / three or more / group / no author / no date). Rule selection comes from the log's `source.authors` shape and `source.year` value, not from the prose context.
@@ -509,7 +509,7 @@ overwrite: <true | false; default false. True permits overwriting an existing ~/
 skeleton_path: <absolute path to the skeleton voice to mirror, or "omit" for the default ~/.claude/voice/academic.md>
 ```
 
-Do not invoke `voice-extractor` from inside another mode's auto-trigger path. Unlike `[research mode]`, which fires automatically when a claim lacks a source, voice-extractor only fires on an explicit request from {{USER}}. The voice library is stable state; generating a new one without being asked is scope creep, not helpfulness.
+Do not invoke `voice-extractor` from inside another mode's auto-trigger path. Unlike `[research mode]`, voice-extractor fires only on explicit request from {{USER}}. Generating a new voice unprompted is scope creep.
 
 See §11 for the parallel `style.md` file, which carries citation and document-formatting rules.
 
@@ -538,35 +538,28 @@ Each item carries a canonical `[id: ...]` marker so a voice library file can nam
 
 ### Precedence
 
-The Never list applies to generated prose regardless of voice. An exemption declared in `voice.md`'s `## §10 exemptions` section (see *Exemptions* below) narrows the list for a single voice and is the only override mechanism this section recognizes. Silence in `voice.md` is not permission. Inline prose in voice.md that argues for a pattern ("this author uses em-dashes") without a matching exemption bullet does not count; the exemption bullet is what `install.sh` validates and what `[writing mode]` and `[editing mode]` read at audit time. When `voice.md` and this section conflict without an exemption, surface the conflict to {{USER}} on first occurrence in a draft rather than resolving silently.
+The Never list applies to generated prose regardless of voice. A `## §10 exemptions` bullet in `voice.md` (see *Exemptions* below) is the only override mechanism; silence is not permission. Inline prose in `voice.md` arguing for a pattern without a matching exemption bullet has no runtime effect. `install.sh` validates bullets, `[writing mode]` and `[editing mode]` read bullets. If `voice.md` and §10 conflict without an exemption, surface the conflict on first occurrence rather than resolving silently.
 
 ### Exemptions
 
-A voice library file may exempt specific Never-list items when the writer's corpus shows the pattern used deliberately and well. Exemptions live under a `## §10 exemptions` section in `~/.claude/voice/<name>.md`; that section is rendered into each project's `voice.md` on `install.sh --voice <name>`.
+A voice library file may exempt Never-list items the writer's corpus shows used deliberately. Exemptions live under `## §10 exemptions` in `~/.claude/voice/<name>.md` and render into each project's `voice.md` on `install.sh --voice <name>`.
 
-**Format.** Each exemption is a bullet line starting with a canonical ID from the Never list above, followed by a separator (colon, en-dash, or hyphen) and a one-line rationale grounded in corpus evidence:
+**Format.** One bullet per exempted rule. Canonical ID from the Never list above, then separator (colon, en-dash, or hyphen), then a one-line corpus-grounded rationale:
 
 ```
 ## §10 exemptions
 
 - em-dashes: author uses them for appositive interruptions; 43 instances across 8 samples.
-- ornamental-triads: corpus shows deliberate balanced three-item lists for rhetorical emphasis; 12 instances.
+- ornamental-triads: deliberate balanced three-item lists; 12 instances.
 ```
 
-Only the leading canonical ID is machine-read. The separator and rationale are for the reader (and for {{USER}}'s later review); `install.sh` does not parse them.
+Only the leading ID is machine-read; `install.sh` does not parse the rationale. Unknown IDs (typos, outdated names) fail install-time validation.
 
-**Scope.** An exemption suspends §10's Never-list rule for this voice's writer prose. It does not affect:
+**Scope.** An exemption suspends one Never-list rule for this voice's writer prose. Each ID is independent (exempting `em-dashes` does not exempt `not-x-but-y`). Iron rules stay in force, density thresholds are framework-wide, quoted text is already carved out by *Direct quotations*.
 
-- **Iron rules.** The voice skeleton's meta iron rules (restructure-don't-retokenize, §10-applies-in-full) stay in force; an exemption narrows §10's scope for one item, it does not bypass the iron-rule enforcement layer.
-- **Other Never-list items.** Exempting `em-dashes` does not exempt `not-x-but-y`; each ID is independent.
-- **Density list.** Only Never-list items are exemptable. Density thresholds are framework-wide.
-- **Quoted text.** Already covered by *Direct quotations* below. An exemption is a further carve-out for the writer's own prose.
+**Origin.** Exemptions are not auto-generated. `voice-extractor` flags §10 patterns from the corpus under its `### Iron-rule conflicts` report; {{USER}} decides whether to promote a conflict to an exemption bullet here. Silent promotion defeats the voice-preservation-with-guardrails promise.
 
-**Silence is not exemption.** A voice file that omits the section, or leaves its bullet list empty, inherits §10 in full. The section must be present and each exempted pattern explicitly listed. Unknown IDs (typos, outdated names) fail install-time validation and abort the render.
-
-**Origin.** Exemptions are not auto-generated. `voice-extractor` flags §10 patterns it finds in the corpus under its `### Iron-rule conflicts` report; {{USER}} decides whether to promote a conflict to an exemption bullet here. Silent promotion defeats the voice-preservation-with-guardrails promise.
-
-**Runtime effect.** On entry to `[writing mode]` and `[editing mode]`, after reading `voice.md` per §7, scan its `## §10 exemptions` section and note each canonical ID. When running the §10 audit, skip Never-list items whose ID appears in the exemption list — but only inside the writer's own prose. §10 still applies to prose the agent generates on {{USER}}'s behalf that is NOT this voice's output (e.g., `[red team mode]` counter-phrasings, framework meta-commentary). The *Direct quotations* carve-out below remains independent of exemptions.
+**Runtime effect.** On entry to `[writing mode]` and `[editing mode]`, scan `voice.md`'s `## §10 exemptions` section. Each canonical ID there suspends the matching §10 rule for this voice's writer prose only; §10 still applies to prose generated on {{USER}}'s behalf that is NOT this voice's output (`[red team mode]` counter-phrasings, framework meta-commentary). The *Direct quotations* carve-out remains independent.
 
 ### Direct quotations
 

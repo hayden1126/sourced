@@ -116,9 +116,7 @@ Only the leading ID is machine-read; the rationale is for the reader. Unknown ID
 
 **Why the workflow has a manual step.** `voice-extractor` will not auto-populate `## §10 exemptions`. Corpus evidence of a §10 pattern surfaces in the subagent's `### Iron-rule conflicts` report; promoting a conflict to an exemption bullet is a deliberate decision made after reviewing the flagged instances. Auto-exemption would defeat the voice-preservation-with-guardrails promise the framework is built around — the guardrails should only drop when the writer confirms the pattern is intentional.
 
-**Scope of an exemption.** An exemption suspends the named §10 rule for the writer's own prose. It does not affect quoted text (already carved out by §10 *Direct quotations*), other Never-list items (each ID is independent), or density thresholds (framework-wide, not exemptable). Iron rules still pass through verbatim; an exemption narrows §10's scope for one item, it does not bypass the iron-rule enforcement layer.
-
-**Runtime effect.** On entry to `[writing mode]` and `[editing mode]`, the agent reads `voice.md` and scans its `## §10 exemptions` section. Each canonical ID there suspends the matching §10 rule for the writer's prose. The §10 audit runs on every other pattern normally; the exemption is per-ID, not a blanket suspension.
+**Scope and runtime.** An exemption suspends the named §10 rule for the writer's own prose and no other surface. Quoted text, other Never-list items, density thresholds, and iron rules are all unaffected. At runtime, `[writing mode]` and `[editing mode]` scan `voice.md`'s `## §10 exemptions` on entry; each listed ID suspends its §10 rule, others continue to fire.
 
 ## Project-level voice handling
 
