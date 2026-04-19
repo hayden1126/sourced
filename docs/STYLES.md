@@ -39,7 +39,7 @@ Currently shipped:
 
 - **`google-docs`** — single markdown block with smart quotes, en-dashes, and italics preserved. Google Docs converts on paste. Features not expressible at paste time (hanging indents, double-spacing) emit a one-line instruction at the top of the output file.
 - **`plain-markdown`** — faithful pass-through. Resolves citation IDs and generates References; applies no destination-specific transforms. Suitable for archival copies and further conversion downstream (Pandoc, etc.).
-- **`word`** — reserved; not implemented. `[formatting mode]` refuses with an instruction to use `google-docs` target + Word paste, or to extend the style file with a proper `word` target.
+- **`word`** — implemented for `chicago17-ad`. Runs a pandoc + citeproc pipeline against the shipped CSL file and (optionally) a reference.docx that defines paragraph styles. Emits `<draft>.docx.md` (rendered-markdown intermediate) plus `<draft>.docx` (submission binary). If the reference.docx is not shipped for a style, pandoc default styles are used and the fallback is surfaced in the step-8 report. Not yet shipped for `apa7`.
 - **`latex`** — reserved; not implemented.
 
 ## How `[formatting mode]` uses `style.md`
@@ -51,12 +51,15 @@ The formatting procedure (abbreviated; see CLAUDE.md §7 for the full version):
 1. Read `style.md` + the citation log.
 2. Pre-flight scan. Halt if the source prose carries `[VERIFY: ...]` tokens, `[UNSOURCED]` tokens, rendered author-year strings (legacy regressions), unresolved citation IDs, or stale `retrieved_at` timestamps on referenced entries.
 3. Resolve every Pandoc ID against `source.authors` + `source.year` in the log, applying the matching rule from `style.md` §Inline citations.
-4. Generate References list from the log per `style.md` §References. Deduped across multiple log entries pointing at the same source; sorted per style.
-5. Apply document-layout rules (title block, headings, spacing, indentation) per the target's expression rules under §Paste target expression rules. Rules with no expression in the destination (e.g., hanging indents in google-docs) emit a one-line paste-time instruction at the top of the output.
-6. Write output to `<draft>.<target>.md` (sibling file). Source prose is never modified.
-7. Report the run: citations resolved, References entries, stale entries handled, paste-time instructions.
+4. **Collapse per-instance citation IDs (target-conditional).** For targets whose downstream renderer dedupes by id (currently `word` via pandoc+citeproc), rewrite `<author>-<year>-NNN` to `<author>-<year>` in the derived markdown so the same source does not emit duplicate References entries. Skip for `google-docs` and `plain-markdown` (our own renderer dedupes directly from the log).
+5. Generate References list from the log per `style.md` §References. Deduped across multiple log entries pointing at the same source; sorted per style. For `word`, additionally emit a CSL-JSON bibliography at `<draft>.bib.json` keyed to the collapsed ids.
+6. Apply document-layout rules (title block, headings, spacing, indentation) per the target's expression rules. Rules with no expression in the destination (e.g., hanging indents in google-docs) emit a one-line paste-time instruction at the top of the output.
+7. Write output to `<draft>.<target>.md` (sibling file). For `word`, additionally invoke pandoc against the intermediate and emit `<draft>.docx`. Source prose is never modified.
+8. Report the run: citations resolved, References entries, stale entries handled, paste-time instructions, any reference.docx fallback notice.
 
 Re-running with a different style or target is idempotent: each run writes its own sibling file.
+
+**On-demand style references.** Some styles ship lookup tables too large to carry inline in `style.md`. `[formatting mode]` reads them only when a citation triggers the lookup. Currently shipped for `chicago17-ad`: a per-author classical-works abbreviation table at `~/.claude/style/chicago17-ad/classical-abbreviations.md`, consulted when a citation resolves to an ancient author (Plato, Aristotle, Cicero, Seneca, Augustine, Aquinas, etc.). The pattern scales to any style that wants to offload a rarely-used reference without paying per-format-pass load cost.
 
 ## Authoring a custom style
 
