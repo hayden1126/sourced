@@ -381,13 +381,84 @@ validate_iron_rules() {
   return 0
 }
 
+# Lists every canonical id declared in §10's Never list in the shipped CLAUDE.md
+# template. Source of truth for which ids install.sh will accept in a voice
+# file's ## §10 exemptions section. Changes to §10's Never list (add or remove
+# an id) flow through here automatically; no extra registration step required.
+list_section_10_ids() {
+  awk '
+    /^### Never \(rewrite on sight\)([[:space:]]|$)/ { in_never = 1; next }
+    /^### / && in_never { in_never = 0 }
+    in_never
+  ' "${REPO_DIR}/templates/CLAUDE.md" \
+    | grep -oE '\[id: [a-z0-9-]+\]' \
+    | sed -E 's/^\[id: ([a-z0-9-]+)\]$/\1/'
+}
+
+# Extracts exemption ids declared in a voice candidate file. Reads bullets
+# under a ## §10 exemptions section; returns the leading canonical id from
+# each non-blank bullet. A bullet is recognized as an exemption line only when
+# its first token after the leading "- " matches [a-z0-9-]+; free-prose
+# bullets (explanatory notes) are ignored so the skeleton's own instruction
+# text inside the section does not trip validation.
+extract_voice_exemptions() {
+  local src="$1"
+  awk '
+    /^## §10 exemptions([[:space:]]|$)/ { in_section = 1; next }
+    /^## / && in_section { in_section = 0 }
+    in_section
+  ' "${src}" \
+    | grep -oE '^- [a-z0-9-]+' \
+    | sed -E 's/^- ([a-z0-9-]+)$/\1/'
+}
+
+# Validates that every id in a voice file's ## §10 exemptions section resolves
+# to a canonical id from §10's Never list. Prints unknown ids to stderr.
+# Returns 0 if all ids valid (or the section is empty); 1 if any unknown id
+# found.
+validate_exemptions() {
+  local voice_source="$1"
+  local known_ids voice_ids
+  known_ids=$(list_section_10_ids)
+  voice_ids=$(extract_voice_exemptions "${voice_source}")
+  [[ -z "${voice_ids}" ]] && return 0
+
+  local unknown=0
+  while IFS= read -r id; do
+    [[ -z "${id}" ]] && continue
+    if ! printf '%s\n' "${known_ids}" | grep -qxF "${id}"; then
+      if [[ ${unknown} -eq 0 ]]; then
+        echo "Error: unknown §10 exemption id(s) in ${voice_source}:" >&2
+      fi
+      echo "  - ${id}" >&2
+      unknown=$((unknown + 1))
+    fi
+  done <<< "${voice_ids}"
+
+  if [[ ${unknown} -gt 0 ]]; then
+    echo "" >&2
+    echo "Known ids from CLAUDE.md §10 Never list:" >&2
+    printf '  %s\n' ${known_ids} >&2
+    echo "" >&2
+    echo "Fix the id(s) in the voice file's '## §10 exemptions' section and re-run." >&2
+    return 1
+  fi
+  return 0
+}
+
 # Renders a voice library file to the project with the voice marker prepended.
-# Runs iron-rule validation against the shipped academic skeleton first; aborts
-# the install if any iron rule from the skeleton is missing in the candidate.
+# Runs iron-rule validation (iron-rule text from the skeleton must appear in
+# the candidate verbatim) and §10-exemption validation (every exemption id in
+# the candidate must resolve to a canonical id in §10's Never list). Aborts
+# the install on any failure.
 render_voice() {
   local src="$1" dest="$2" voice_name="$3"
   if ! validate_iron_rules "${src}" "${CLAUDE_VOICE_DIR}/academic.md"; then
     echo "Aborting install: voice '${voice_name}' failed iron-rule validation." >&2
+    exit 1
+  fi
+  if ! validate_exemptions "${src}"; then
+    echo "Aborting install: voice '${voice_name}' failed §10-exemption validation." >&2
     exit 1
   fi
   {

@@ -85,7 +85,7 @@ The log is the single source of truth for author names and years; rendering is d
 
 **Iron rules** (content under `## Iron rules` / `## AI-tells` / `## Generation signatures` section headings in a voice skeleton, plus any line containing the `[iron]` token) pass through verbatim at every layer. `voice-extractor` refuses to downgrade iron rules to TBD; `install.sh` refuses to install a voice file where any iron rule is missing.
 
-Generation signatures — AI-writing tells that apply regardless of voice — live in CLAUDE.md §10, not in individual voice files. Voice files may add author-specific punctuation rules; they cannot silently override §10 (silence ≠ permission).
+Generation signatures (AI-writing tells that apply regardless of voice) live in CLAUDE.md §10, not in individual voice files. Each bullet on §10's Never list carries a stable `[id: <name>]` marker. A voice library file may exempt a specific rule by listing the matching ID under its `## §10 exemptions` section; `install.sh` validates the section against the ID set extracted live from `templates/CLAUDE.md` and aborts on any unknown ID. Silence is not permission: a voice file that omits the section or leaves the bullet list empty inherits §10 in full.
 
 ## Style system
 

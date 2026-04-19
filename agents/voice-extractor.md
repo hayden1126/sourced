@@ -46,6 +46,7 @@ Run these checks in order; halt on the first failure and report rather than proc
 5. **Fill each section.** For every section in the skeleton:
    - Read the section's purpose from the skeleton prose.
    - **If the section is iron** (per step 3's list), copy the skeleton's rule prose into the output verbatim, normalized only to match the voice file's whitespace. You may add one exemplar beneath it calibrated to the author's register, but the rule body itself is not rewritten, softened, or downgraded to TBD. If the corpus shows the author violating this rule (e.g., authentic em-dash usage after discounting Pandoc `---` conversion artifacts), preserve the iron rule and surface the conflict in the report's `### Iron-rule conflicts` section so the caller can escalate. Do not silently accommodate the corpus.
+   - **If the section heading is `## §10 exemptions`**, copy the skeleton's section prose verbatim and leave the bullet list empty. Do not scan the corpus for §10 patterns and do not emit exemption bullets. Exemption bullets are a deliberate {{USER}} decision made after reviewing your `### Iron-rule conflicts` report; auto-exemption defeats the voice-preservation-with-guardrails promise the framework advertises. The empty bullet list inherits §10 in full, which is the correct default.
    - **If the section is not iron**, scan the corpus for passages exhibiting (or violating) that section's pattern.
    - Write a rule statement calibrated to what the samples show, matching the density of the corresponding skeleton section. Some skeleton sections are multi-paragraph (Core Rule, Sentence Connectedness); others are one-liners (No Preamble, Formatting). Match the skeleton's own density — 1–5 sentences per section, not a fixed count.
    - Mirror the skeleton's structural shape within each section: rule prose first, then exemplar bullets, then any optional negative exemplar. Do not invent subheadings the skeleton lacks; do not drop subheadings the skeleton carries.
@@ -96,7 +97,7 @@ Return this structure in under 500 words (longer than source-finder's 300-word c
 - ...
 
 ### Iron-rule conflicts
-- <rule text, first 60 chars…>: corpus shows <N> counter-instances in <file1.md, file2.md>. Rule preserved per skeleton; flag for {{USER}} override at install time if desired.
+- <rule text, first 60 chars…>: corpus shows <N> counter-instances in <file1.md, file2.md>. Rule preserved per skeleton; if the counter-instances correspond to a §10 Never-list item (em-dashes, not-x-but-y, ornamental-triads, throat-clearing-openers, demonstrative-openers, ornamental-compounds), {{USER}} may promote to a `## §10 exemptions` bullet in the output file by hand before running `install.sh --voice`. Do not pre-fill the bullet.
 - ...
 (Or "none — no iron rules contradicted by corpus")
 

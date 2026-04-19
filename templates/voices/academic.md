@@ -133,6 +133,14 @@ Direct quotations are exempt from both this section and §10: preserve the sourc
 
 **Ellipses** for trailing thoughts: "And if you just... change it slightly, the whole thing breaks."
 
+## §10 exemptions
+
+Per-voice overrides to CLAUDE.md §10's Never list. An exemption suspends a named rule for this voice's writer prose only; it does not affect quoted text (already covered by §10 *Direct quotations*), other Never-list items, density thresholds, or iron rules. Leave the bullet list empty to inherit §10 in full.
+
+**Format.** One bullet per exempted rule. Start with a canonical ID from CLAUDE.md §10 (`em-dashes`, `not-x-but-y`, `ornamental-triads`, `throat-clearing-openers`, `demonstrative-openers`, `ornamental-compounds`). Follow with a colon, en-dash, or hyphen and a one-line rationale grounded in corpus evidence. Unknown IDs fail `install.sh` validation and abort the render.
+
+**Voice-extractor contract.** `voice-extractor` does not populate this section from corpus patterns. Corpus §10-pattern evidence surfaces in the subagent's `### Iron-rule conflicts` report; promoting a conflict to an exemption bullet here is a deliberate {{USER}} decision after reviewing the report.
+
 ## No Preamble
 
 Never start with "Great question!" or "That's interesting." Just start with substance.

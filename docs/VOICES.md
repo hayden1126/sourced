@@ -84,9 +84,41 @@ Iron rules are enforced in three places:
 
 Any one layer failing doesn't ship a broken voice. All three would have to miss.
 
-If a writer legitimately uses a pattern banned by CLAUDE.md §10 (em-dashes for appositives, say), a voice-specific exemption requires an explicit statement in `voice.md`; silence is not permission.
+Generation signatures, the AI-writing tells that apply regardless of voice, live in CLAUDE.md §10, not in individual voice files. Voice files cover per-author calibration (sentence structure, stance, pacing, punctuation habits); §10 covers category-level prohibitions the system enforces uniformly.
 
-Generation signatures — the AI-writing tells that apply regardless of voice — live in CLAUDE.md §10, not in individual voice files. Voice files cover per-author calibration (sentence structure, stance, pacing, punctuation habits); §10 covers category-level prohibitions the system enforces uniformly.
+## Exempting a §10 pattern for one voice
+
+If a writer legitimately uses a pattern on CLAUDE.md §10's Never list (em-dashes for appositives, ornamental triads for rhetorical emphasis, etc.), the voice library file can exempt that specific rule. Silence in the voice file is not permission; the exemption has to be declared explicitly, and `install.sh` validates it at render time.
+
+**Canonical IDs.** Each bullet on §10's Never list carries a stable ID:
+
+| ID | What it covers |
+|----|----------------|
+| `em-dashes` | Em dashes for appositives, interruptions, or ranges. |
+| `not-x-but-y` | "Not X but Y" and its comparative-pivot variants. |
+| `ornamental-triads` | Triadic or tetradic ornamental lists. |
+| `throat-clearing-openers` | Sentence-initial "Crucially," "Ultimately," etc. |
+| `demonstrative-openers` | Demonstrative-noun paragraph openers with a weak antecedent. |
+| `ornamental-compounds` | Hyphenated conceptual compounds that appear once and disappear. |
+
+The IDs are extracted from `templates/CLAUDE.md` §10 at install time, so adding or renaming an ID in that file flows through to validation with no extra registration step.
+
+**How to declare an exemption.** Open the library voice file at `~/.claude/voice/<name>.md`. Find the `## §10 exemptions` section. Add one bullet per exempted rule; each bullet starts with a canonical ID, followed by a separator (colon, en-dash, or hyphen) and a one-line rationale grounded in corpus evidence:
+
+```
+## §10 exemptions
+
+- em-dashes: author uses them for appositives; 43 instances across 8 samples.
+- ornamental-triads: deliberate balanced lists for rhetorical cadence; 12 instances.
+```
+
+Only the leading ID is machine-read; the rationale is for the reader. Unknown IDs (typos, outdated names) fail install-time validation and abort the render. `install.sh` prints the known-ID list when it rejects an exemption so the fix is immediate.
+
+**Why the workflow has a manual step.** `voice-extractor` will not auto-populate `## §10 exemptions`. Corpus evidence of a §10 pattern surfaces in the subagent's `### Iron-rule conflicts` report; promoting a conflict to an exemption bullet is a deliberate decision made after reviewing the flagged instances. Auto-exemption would defeat the voice-preservation-with-guardrails promise the framework is built around — the guardrails should only drop when the writer confirms the pattern is intentional.
+
+**Scope of an exemption.** An exemption suspends the named §10 rule for the writer's own prose. It does not affect quoted text (already carved out by §10 *Direct quotations*), other Never-list items (each ID is independent), or density thresholds (framework-wide, not exemptable). Iron rules still pass through verbatim; an exemption narrows §10's scope for one item, it does not bypass the iron-rule enforcement layer.
+
+**Runtime effect.** On entry to `[writing mode]` and `[editing mode]`, the agent reads `voice.md` and scans its `## §10 exemptions` section. Each canonical ID there suspends the matching §10 rule for the writer's prose. The §10 audit runs on every other pattern normally; the exemption is per-ID, not a blanket suspension.
 
 ## Project-level voice handling
 
