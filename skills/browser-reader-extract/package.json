@@ -1,0 +1,6 @@
+{
+  "name": "browser-reader-extract",
+  "private": true,
+  "type": "module",
+  "dependencies": { "puppeteer-core": "^24.41.0" }
+}
