@@ -519,12 +519,14 @@ The patterns below are not claims about good prose. They are patterns this agent
 
 ### Never (rewrite on sight)
 
-- **Em dashes** (—) for appositives, interruptions, or ranges. Do not substitute commas or parentheses while keeping the same mid-clause interruption rhythm; restructure the sentence so the gloss becomes a standalone sentence, is relocated to a natural position, or is cut.
-- **"Not X but Y"** and its variants ("X, not Y"; "less X than Y"; "not merely X but Y"; "it is not that X, but that Y"). When contrast is load-bearing, make Y the assertion and position X in a separate clause or drop it. Reordering to "Y, not X" preserves the comparative-pivot shape and fails the audit.
-- **Triadic or tetradic ornamental lists** ("X, Y, and Z"; "X, Y, Z, and W") where items are parallel for rhythm rather than argument. A genuine enumeration is fine; an ornamental cadence is not.
-- **Sentence-initial** "Crucially," "Ultimately," "Fundamentally," "Importantly," "In essence," "It is worth noting that," "It bears mentioning that," "What is striking is." These are throat-clearing openers that perform emphasis without adding content.
-- **Demonstrative-noun paragraph openers** ("This tension," "These dynamics," "This shift") where the demonstrative is doing work the prior paragraph didn't earn. The antecedent must be specific and recent.
-- **Hyphenated conceptual compounds that disappear after one use** ("state-as-universal-life," "recognition-work"). Coining is fine when the term recurs and carries argumentative weight; ad-hoc compounds for one paragraph are AI ornamentation.
+Each item carries a canonical `[id: ...]` marker so a voice library file can name it in a `## §10 exemptions` bullet when corpus evidence warrants an override. IDs are the single source of truth `install.sh`'s exemption validator accepts.
+
+- **Em dashes** (—) for appositives, interruptions, or ranges. Do not substitute commas or parentheses while keeping the same mid-clause interruption rhythm; restructure the sentence so the gloss becomes a standalone sentence, is relocated to a natural position, or is cut. `[id: em-dashes]`
+- **"Not X but Y"** and its variants ("X, not Y"; "less X than Y"; "not merely X but Y"; "it is not that X, but that Y"). When contrast is load-bearing, make Y the assertion and position X in a separate clause or drop it. Reordering to "Y, not X" preserves the comparative-pivot shape and fails the audit. `[id: not-x-but-y]`
+- **Triadic or tetradic ornamental lists** ("X, Y, and Z"; "X, Y, Z, and W") where items are parallel for rhythm rather than argument. A genuine enumeration is fine; an ornamental cadence is not. `[id: ornamental-triads]`
+- **Sentence-initial** "Crucially," "Ultimately," "Fundamentally," "Importantly," "In essence," "It is worth noting that," "It bears mentioning that," "What is striking is." These are throat-clearing openers that perform emphasis without adding content. `[id: throat-clearing-openers]`
+- **Demonstrative-noun paragraph openers** ("This tension," "These dynamics," "This shift") where the demonstrative is doing work the prior paragraph didn't earn. The antecedent must be specific and recent. `[id: demonstrative-openers]`
+- **Hyphenated conceptual compounds that disappear after one use** ("state-as-universal-life," "recognition-work"). Coining is fine when the term recurs and carries argumentative weight; ad-hoc compounds for one paragraph are AI ornamentation. `[id: ornamental-compounds]`
 
 ### Watch for density (acceptable once, AI-ish when stacked)
 
@@ -536,7 +538,35 @@ The patterns below are not claims about good prose. They are patterns this agent
 
 ### Precedence
 
-If `voice.md` explicitly permits one of the patterns above ("this author uses em-dashes for appositives"), voice.md wins for that item only. Silence in `voice.md` is not permission; this section wins by default. When `voice.md` and this section conflict, surface the conflict to {{USER}} on first occurrence in a draft rather than resolving silently.
+The Never list applies to generated prose regardless of voice. An exemption declared in `voice.md`'s `## §10 exemptions` section (see *Exemptions* below) narrows the list for a single voice and is the only override mechanism this section recognizes. Silence in `voice.md` is not permission. Inline prose in voice.md that argues for a pattern ("this author uses em-dashes") without a matching exemption bullet does not count; the exemption bullet is what `install.sh` validates and what `[writing mode]` and `[editing mode]` read at audit time. When `voice.md` and this section conflict without an exemption, surface the conflict to {{USER}} on first occurrence in a draft rather than resolving silently.
+
+### Exemptions
+
+A voice library file may exempt specific Never-list items when the writer's corpus shows the pattern used deliberately and well. Exemptions live under a `## §10 exemptions` section in `~/.claude/voice/<name>.md`; that section is rendered into each project's `voice.md` on `install.sh --voice <name>`.
+
+**Format.** Each exemption is a bullet line starting with a canonical ID from the Never list above, followed by a separator (colon, en-dash, or hyphen) and a one-line rationale grounded in corpus evidence:
+
+```
+## §10 exemptions
+
+- em-dashes: author uses them for appositive interruptions; 43 instances across 8 samples.
+- ornamental-triads: corpus shows deliberate balanced three-item lists for rhetorical emphasis; 12 instances.
+```
+
+Only the leading canonical ID is machine-read. The separator and rationale are for the reader (and for {{USER}}'s later review); `install.sh` does not parse them.
+
+**Scope.** An exemption suspends §10's Never-list rule for this voice's writer prose. It does not affect:
+
+- **Iron rules.** The voice skeleton's meta iron rules (restructure-don't-retokenize, §10-applies-in-full) stay in force; an exemption narrows §10's scope for one item, it does not bypass the iron-rule enforcement layer.
+- **Other Never-list items.** Exempting `em-dashes` does not exempt `not-x-but-y`; each ID is independent.
+- **Density list.** Only Never-list items are exemptable. Density thresholds are framework-wide.
+- **Quoted text.** Already covered by *Direct quotations* below. An exemption is a further carve-out for the writer's own prose.
+
+**Silence is not exemption.** A voice file that omits the section, or leaves its bullet list empty, inherits §10 in full. The section must be present and each exempted pattern explicitly listed. Unknown IDs (typos, outdated names) fail install-time validation and abort the render.
+
+**Origin.** Exemptions are not auto-generated. `voice-extractor` flags §10 patterns it finds in the corpus under its `### Iron-rule conflicts` report; {{USER}} decides whether to promote a conflict to an exemption bullet here. Silent promotion defeats the voice-preservation-with-guardrails promise.
+
+**Runtime effect.** On entry to `[writing mode]` and `[editing mode]`, after reading `voice.md` per §7, scan its `## §10 exemptions` section and note each canonical ID. When running the §10 audit, skip Never-list items whose ID appears in the exemption list — but only inside the writer's own prose. §10 still applies to prose the agent generates on {{USER}}'s behalf that is NOT this voice's output (e.g., `[red team mode]` counter-phrasings, framework meta-commentary). The *Direct quotations* carve-out below remains independent of exemptions.
 
 ### Direct quotations
 
