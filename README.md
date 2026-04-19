@@ -70,6 +70,7 @@ Open Claude Code from inside the project directory and start a session. The agen
 ## Documentation
 
 - [`ARCHITECTURE.md`](./ARCHITECTURE.md) — surface-area map: files, modes, subagents, invariants, extension points.
+- [`ROADMAP.md`](./ROADMAP.md) — forward-looking feature ideas organized by theme and priority, plus declared scope boundaries.
 - [`docs/INSTALL.md`](./docs/INSTALL.md) — full install, updating, flags reference, renaming yourself.
 - [`docs/MODES.md`](./docs/MODES.md) — modes reference + end-to-end workflow walkthrough + gate discipline.
 - [`docs/VOICES.md`](./docs/VOICES.md) — voice system, `voice-extractor` usage, iron rules, defense-in-depth, §10 exemption syntax, direct-quote carve-out.
