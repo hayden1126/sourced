@@ -210,3 +210,5 @@ Warning surfaced by the formatter: `emitter fallback: entry opaque-2022-001 has 
 ## Use in `[formatting mode]`
 
 §7 step 4 invokes this emitter against the log filtered to ids actually referenced in source prose (dead log entries — ones present in the log but not cited — are not emitted). The output is written to `<draft>.bib.json` and passed to pandoc as `--bibliography=<draft>.bib.json`.
+
+**Note on §7 step numbering.** References above to "CLAUDE.md §7 step 4" reflect the post-PR2 §7 procedure (see `docs/specs/2026-04-19-csl-direct-consumption-design.md` §4 step 4). In the interim window before PR2 lands, today's §7 emits CSL-JSON within step 5; the spec's contract is unchanged.
