@@ -4,6 +4,14 @@ Voice calibration tuned to {{USER}}'s academic writing. The shipped `academic` v
 
 Read this file in full on entry to any of those modes; do not work from memory of prior sessions. The rules are load-bearing for the project's voice-preservation promise.
 
+## Iron rules
+
+The rules in this section pass through to every derived voice file verbatim. `voice-extractor` preserves them without corpus calibration; `install.sh` refuses to install a voice file where any is missing.
+
+CLAUDE.md §10 *Generation signatures to rewrite* applies to this voice in full. No item on §10's Never list is softened or downgraded to TBD, regardless of what the writing-samples corpus shows.
+
+When removing a §10 pattern in existing prose, restructure the sentence shape rather than substituting punctuation or reordering tokens; retokenization preserves the rhythm that reads as AI.
+
 ## The Core Rule
 
 Every word fights to stay. If a sentence adds nothing, cut it. If two sentences say the same thing differently, merge them into one shorter sentence. No filler, no padding, no repetition.
@@ -13,7 +21,7 @@ Writing is sculpting: start with raw material, then chisel. Write a draft, step 
 **The iteration loop.** After writing a draft, reread every sentence and ask:
 - Does this sentence add something the reader doesn't already know?
 - Does it repeat an idea from another part of the text?
-- Does it sound formulaic or AI-generated?
+- Does it sound formulaic or AI-generated? (Cross-check against CLAUDE.md §10's Never list specifically; retokenizing the pattern is not a fix.)
 - Does it earn its place in the argument?
 - Does the section flow when read start to finish?
 
@@ -119,7 +127,7 @@ Not: "The reader must recognize..." "One should consider..." "It must be underst
 
 ## Punctuation
 
-**No em dashes (—).** Use parentheses, commas, or colons. **This rule applies all the time, never ever use em dashes**.
+Punctuation patterns that function as AI generation signatures (em dashes, "not X but Y" pivots, ornamental triads) are governed by CLAUDE.md §10 *Generation signatures to rewrite*, which applies across every voice. Use this section only for author-specific punctuation habits the corpus clearly shows — semicolon style, ellipsis use, colon introducing evidence, etc. Leave TBD rather than inventing a rule the corpus does not settle. An author-specific rule that contradicts §10 must be stated explicitly ("this author uses em-dashes for appositives"); silence defers to §10.
 
 **Ellipses** for trailing thoughts: "And if you just... change it slightly, the whole thing breaks."
 
