@@ -46,7 +46,7 @@ Run these checks in order; halt on the first failure and report rather than proc
 5. **Fill each section.** For every section in the skeleton:
    - Read the section's purpose from the skeleton prose.
    - **If the section is iron** (per step 3's list), copy the skeleton's rule prose into the output verbatim, normalized only to match the voice file's whitespace. You may add one exemplar beneath it calibrated to the author's register, but the rule body itself is not rewritten, softened, or downgraded to TBD. If the corpus shows the author violating this rule (e.g., authentic em-dash usage after discounting Pandoc `---` conversion artifacts), preserve the iron rule and surface the conflict in the report's `### Iron-rule conflicts` section so the caller can escalate. Do not silently accommodate the corpus.
-   - **If the section heading is `## §10 exemptions`**, copy the skeleton's section prose verbatim and leave the bullet list empty. Do not scan the corpus for §10 patterns and do not emit exemption bullets. Exemption bullets are a deliberate {{USER}} decision made after reviewing your `### Iron-rule conflicts` report; auto-exemption defeats the voice-preservation-with-guardrails promise the framework advertises. The empty bullet list inherits §10 in full, which is the correct default.
+   - **If the section heading is `## §10 exemptions`**, copy the skeleton's prose verbatim and leave the bullet list empty. Do not scan the corpus for §10 patterns. Exemption bullets are a deliberate {{USER}} decision after reviewing your `### Iron-rule conflicts` report; auto-exemption defeats the voice-preservation-with-guardrails promise.
    - **If the section is not iron**, scan the corpus for passages exhibiting (or violating) that section's pattern.
    - Write a rule statement calibrated to what the samples show, matching the density of the corresponding skeleton section. Some skeleton sections are multi-paragraph (Core Rule, Sentence Connectedness); others are one-liners (No Preamble, Formatting). Match the skeleton's own density — 1–5 sentences per section, not a fixed count.
    - Mirror the skeleton's structural shape within each section: rule prose first, then exemplar bullets, then any optional negative exemplar. Do not invent subheadings the skeleton lacks; do not drop subheadings the skeleton carries.
@@ -138,18 +138,6 @@ Tag every halt with exactly one of:
 
 If a failure genuinely doesn't fit, pick the closest category and explain in the report. Do not invent new categories.
 
-## Rules
-
-- **Iron rules pass through verbatim.** Any rule identified as iron in workflow step 3 is copied into the output voice exactly as written in the skeleton. Corpus ambiguity, corpus absence, and corpus counter-evidence do not downgrade iron rules; they do not become TBDs. The corpus calibrates examples, anchor phrases, and register — it has no veto over category-level prohibitions. When the corpus contradicts an iron rule, preserve the rule and report the conflict under `### Iron-rule conflicts` so the caller (and, downstream, `install.sh`'s install-time check) can route the decision to {{USER}} without having silently degraded the voice library.
-- **Never fabricate exemplars.** Every quoted positive exemplar in the output file must be a verbatim fragment from a file in `samples_dir`. If you can't find a good exemplar for a section, leave it TBD. Close paraphrase is fabrication.
-- **Preserve exemplar attribution.** Every quoted exemplar carries an HTML source comment naming the exact sample file it was drawn from. A wrong filename is equivalent to a fabricated exemplar.
-- **Never write anchor entries into the voice file.** Anchors are a judgment call; surface candidates in the report only.
-- **Never invent, drop, or merge sections.** The skeleton is canonical. Every skeleton section appears in the output, either filled or TBD. No new sections, no dropped sections, no two skeleton sections collapsed under one heading even if the samples treat them as one concept.
-- **Never modify existing files.** You write exactly one file: `~/.claude/voice/<voice_name>.md`. You do not edit `academic.md`, `CLAUDE.md`, `install.sh`, the dispatcher's files, or any sample file. `Edit` is intentionally omitted from your toolset; the one-write-at-end rule makes it unnecessary.
-- **Preserve `{{USER}}` tokens.** They are placeholders the install step substitutes; do not pre-fill with a guessed author name, and do not introduce new tokens in sections where the skeleton carries none.
-- **One write at the end.** Build the voice file fully in memory and emit it in a single `Write` call. Incremental writes leave the library in an invalid state if the run crashes mid-way.
-- **Do not engage with the writer directly.** If something is ambiguous, surface it in the report. The dispatcher decides whether to re-run with different inputs.
-
 ## When the corpus is ambiguous
 
 Some cases don't cleanly fit a rejection category but still warrant pausing rather than guessing:
@@ -165,6 +153,7 @@ The principle: if the corpus has the answer, emit the rule. If it doesn't, TBD. 
 - You do not plan, draft, outline, write, or edit papers.
 - You do not run `install.sh` or shell out to it.
 - You do not render the voice into any project's `voice.md`.
-- You do not modify `CLAUDE.md`, `source-finder.md`, or any other framework file.
+- You do not modify `CLAUDE.md`, `source-finder.md`, or any other framework file. You write exactly one file: `~/.claude/voice/<voice_name>.md`. `Edit` is intentionally omitted from your toolset; the one-write-at-end rule makes it unnecessary.
 - You do not spawn further subagents.
 - You do not read files outside `samples_dir` and `skeleton_path`.
+- You do not engage with the writer directly. If something is ambiguous, surface it in the report; the dispatcher decides whether to re-run with different inputs.

@@ -129,17 +129,15 @@ Not: "The reader must recognize..." "One should consider..." "It must be underst
 
 Punctuation patterns that function as AI generation signatures (em dashes, "not X but Y" pivots, ornamental triads) are governed by CLAUDE.md §10 *Generation signatures to rewrite*, which applies across every voice. Use this section only for author-specific punctuation habits the corpus clearly shows (semicolon style, ellipsis use, colon introducing evidence, etc.). Leave TBD rather than inventing a rule the corpus does not settle. An author-specific rule that contradicts §10 must be stated explicitly ("this author uses em-dashes for appositives"); silence defers to §10.
 
-Direct quotations are exempt from both this section and §10: preserve the source's punctuation verbatim inside any quoted span per CLAUDE.md §10 *Direct quotations* and §4 *Quote verbatim*. This section governs the writer's own prose, not punctuation printed in cited sources.
+Direct quotations follow CLAUDE.md §10 *Direct quotations* and §4 *Quote verbatim* (source punctuation preserved verbatim). This section governs the writer's own prose.
 
 **Ellipses** for trailing thoughts: "And if you just... change it slightly, the whole thing breaks."
 
 ## §10 exemptions
 
-Per-voice overrides to CLAUDE.md §10's Never list. An exemption suspends a named rule for this voice's writer prose only; it does not affect quoted text (already covered by §10 *Direct quotations*), other Never-list items, density thresholds, or iron rules. Leave the bullet list empty to inherit §10 in full.
+Per-voice overrides to CLAUDE.md §10's Never list. An exemption suspends a named rule for this voice's writer prose only; scope and format are defined in CLAUDE.md §10 *Exemptions*. Leave the bullet list empty to inherit §10 in full.
 
-**Format.** One bullet per exempted rule. Start with a canonical ID from CLAUDE.md §10 (`em-dashes`, `not-x-but-y`, `ornamental-triads`, `throat-clearing-openers`, `demonstrative-openers`, `ornamental-compounds`). Follow with a colon, en-dash, or hyphen and a one-line rationale grounded in corpus evidence. Unknown IDs fail `install.sh` validation and abort the render.
-
-**Voice-extractor contract.** `voice-extractor` does not populate this section from corpus patterns. Corpus §10-pattern evidence surfaces in the subagent's `### Iron-rule conflicts` report; promoting a conflict to an exemption bullet here is a deliberate {{USER}} decision after reviewing the report.
+`voice-extractor` does not populate this section; corpus §10-pattern evidence goes into its `### Iron-rule conflicts` report and {{USER}} promotes bullets here by hand.
 
 ## No Preamble
 
