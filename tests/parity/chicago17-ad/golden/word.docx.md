@@ -12,7 +12,7 @@ available (Smith 2010; Jones and Cruz 2015; Able, Baker, and Chen 2019).
 
 Institutional reporting on classroom multilingualism adds context from
 outside the academic literature (Modern Language Association 2021).
-Undated industry commentary touches on similar themes (Perennial n.d.).
+Undated industry commentary touches on similar themes (Perennial, n.d.).
 
 # References {#references .unnumbered}
 
@@ -34,7 +34,7 @@ Authors?" MLA Style Center.
 :::
 
 ::: {#ref-perennial-nd .csl-entry}
-Perennial, Paul. n.d. "Undated Commentary." Perennial Blog, n.d.
+Perennial, Paul. n.d. "Undated Commentary." Perennial Blog.
 <https://example.com/undated>.
 :::
 
