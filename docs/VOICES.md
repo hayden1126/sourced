@@ -1,0 +1,95 @@
+# Voices
+
+[← Back to README](../README.md)
+
+Voice rules live in a per-project `voice.md` rendered from a named voice in the voice library. Voice is per-project, so concurrent Claude Code sessions on different projects can carry different voices without conflict.
+
+The shipped `academic` voice is the author's own: personal register plus specific analogy anchors (Clever Hans, chicken sexing, split-brain) calibrated to one writer. Treat it as an example, not a neutral academic default. For a different author or a different register, copy it to a new name and edit, or generate one from a corpus (see below).
+
+## Pick a voice at install
+
+```bash
+/path/to/sourced/install.sh --voice academic   # default
+/path/to/sourced/install.sh --voice mycustom   # requires ~/.claude/voice/mycustom.md
+```
+
+`--voice` is validated before any project file is written. An invalid name errors out cleanly with the list of available voices; no half-installed project.
+
+Library voice files are templates: any `{{USER}}` token is substituted with your configured name when `install.sh --voice` renders the voice into a project. That's why the shipped `academic.md` shows `{{USER}}` on line 3 — the token is replaced per-project, so each project's `voice.md` carries the right name without the library file having to store it.
+
+## Authoring a custom voice by hand
+
+Copy the shipped skeleton and edit:
+
+```bash
+cp ~/.claude/voice/academic.md ~/.claude/voice/mycustom.md
+# edit ~/.claude/voice/mycustom.md
+/path/to/sourced/install.sh --voice mycustom   # inside the target project directory
+```
+
+The skeleton's section structure is canonical: every section appears in every derived voice. Don't delete sections — leave `TBD` rather than inventing a rule your taste doesn't settle. Iron rules (under `## Iron rules` in the skeleton, or anywhere else carrying the `[iron]` token) must pass through verbatim.
+
+## Generating a voice from a writing-samples corpus
+
+Hand-authoring a voice file is slow. If you have a corpus of the writer's prose (past papers, essays, reports, blog posts — whatever is representative), the `voice-extractor` subagent produces a calibrated first draft of the library file.
+
+**Requirements.** At least 5 files and 5,000 words combined, in `.md` or `.txt`. Other file types (PDF, `.docx`, `.rtf`) are silently skipped and listed in the report. More samples produce more stable patterns; the 5-file / 5,000-word floor is a hard minimum, not a target. 15,000–30,000 words across 10+ files is where the output gets genuinely useful.
+
+**Usage.** Open Claude Code in any project that already has a rendered `CLAUDE.md`. The agent reads `CLAUDE.md` §9 at startup and knows how to dispatch the subagent. Ask in natural language:
+
+> *"Generate a new library voice called `mycustom` from the samples at `~/writing/papers/`. The register is academic."*
+
+The agent will announce a switch to `[collaborative mode]` if needed, dispatch `voice-extractor` in a single Agent call, and present the report when the subagent returns. Name hygiene: pick a name matching `[a-z0-9_-]+` (lowercase letters, digits, underscore, hyphen — uppercase is rejected). The name `academic` is reserved because the shipped voice lives there; the subagent refuses with `shipped-name-collision` if you try it, regardless of the `overwrite` flag.
+
+**What the subagent does:**
+
+- Mirrors the section structure of a skeleton voice (default: the shipped `academic.md`).
+- Fills each section from patterns found in the samples, with verbatim exemplars attributed to their source file in HTML comments.
+- Leaves sections `TBD —` where the samples don't settle the question. Never fabricates rules or exemplars.
+- Preserves iron rules verbatim (see below).
+- Surfaces recurring named references as "anchor candidates" in the report. The Anchors block in the output file is always TBD by design; anchors are a judgment call only you can make.
+- Classifies the corpus register if you don't pass one. Refuses with `register-mismatch` if the label you passed contradicts what the samples show, or `mixed-register` if no single register accounts for at least 70% of the corpus.
+
+**After the subagent returns:**
+
+1. Read the report — especially `### Sections filled` (low-confidence sections deserve a look), `### Sections left TBD`, `### Iron-rule conflicts`, `### Anchor candidates`, and `### Exemplar audit` (spot-check a few quotes against their source files).
+2. Open `~/.claude/voice/<voice_name>.md` in an editor. Search for `TBD —` markers. Each one needs either a hand-written rule (drawing on the report's guidance) or deletion. At minimum, fill in the Anchors block from the `### Anchor candidates` list, or delete it if none fit.
+3. Once no TBDs remain, render the voice into a project:
+
+```bash
+cd ~/writing/my-paper
+/path/to/sourced/install.sh --voice mycustom
+```
+
+**Re-running:**
+
+- **Corpus was too thin.** Add samples, re-run with `overwrite: true`. Without `overwrite`, the subagent refuses to clobber an existing library file.
+- **Register was inferred and came out wrong.** Re-run with the correct `register:` label (`academic | technical | casual | journalistic`).
+- **Want a different skeleton.** Pass `skeleton_path: <absolute path>` pointing at another voice in `~/.claude/voice/`.
+
+**Scope.** Voice-extractor is a one-shot setup utility. It runs only when you ask, never auto-triggers during writing or research, and never runs in parallel with itself. It does not modify your project's `CLAUDE.md`, `voice.md`, or anything under the project directory — it writes exactly one file, `~/.claude/voice/<voice_name>.md`. Rendering into a project is always a deliberate `install.sh --voice <voice_name>` step you run yourself.
+
+## Iron rules and defense-in-depth
+
+Some voice rules are **iron**: they pass through every derived voice verbatim regardless of what the writing-samples corpus shows. A rule is iron if either:
+
+- It sits under a skeleton section whose heading is `## Iron rules`, `## AI-tells`, or `## Generation signatures`; or
+- Its line carries the literal token `[iron]` anywhere.
+
+Iron rules are enforced in three places:
+
+1. **Inside `voice-extractor`.** Step 3 identifies iron rules from the skeleton; step 5 preserves them verbatim; step 8 self-checks the draft before writing.
+2. **Caller-side in `academic-researcher`.** After `voice-extractor` returns, the agent substring-checks each iron rule against the produced file before surfacing the report. A missing iron rule blocks the report from being treated as success.
+3. **Install-time in `install.sh`.** `validate_iron_rules` normalizes both skeleton and candidate (lowercase, collapse whitespace, strip trailing punctuation), substring-matches each iron rule, and aborts install with non-zero exit on any miss.
+
+Any one layer failing doesn't ship a broken voice. All three would have to miss.
+
+If a writer legitimately uses a pattern banned by CLAUDE.md §10 (em-dashes for appositives, say), a voice-specific exemption requires an explicit statement in `voice.md`; silence is not permission.
+
+Generation signatures — the AI-writing tells that apply regardless of voice — live in CLAUDE.md §10, not in individual voice files. Voice files cover per-author calibration (sentence structure, stance, pacing, punctuation habits); §10 covers category-level prohibitions the system enforces uniformly.
+
+## Project-level voice handling
+
+Each project's `voice.md` records which library voice it was installed from (as an HTML comment on the first line). A later bare `install.sh --update` reuses that choice and refreshes `voice.md` from the current library version, so upstream voice-rule changes propagate. Switching to a different voice on an existing project requires `--force` (replace) or `--update --voice <new>` (explicit switch).
+
+Shipped voices at `~/.claude/voice/<shipped-name>.md` are refreshed on every install from the repo. User-authored voices (names that don't collide with shipped ones) are left untouched. To customize a shipped voice without losing edits, copy to a new name first.
