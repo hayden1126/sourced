@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Note: -t markdown-citations forces citeproc to render citations into the
+# markdown writer's output. Plain -t markdown round-trips the [@id] syntax
+# unchanged and drops the bibliography body, which would make this harness
+# trivially-passing. See run.sh comment in the design doc for the flag choice.
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 CSL_FILE="${REPO_DIR}/templates/styles/chicago17-nb/chicago-notes-bibliography-17th-edition.csl"
@@ -10,10 +15,6 @@ mkdir -p "${SCRIPT_DIR}/actual"
 failures=0
 
 # plain-markdown
-# Note: -t markdown-citations forces citeproc to render citations into the
-# markdown writer's output. Plain -t markdown round-trips the [@id] syntax
-# unchanged and drops the bibliography body, which would make this harness
-# trivially-passing. See run.sh comment in the design doc for the flag choice.
 pandoc --citeproc \
   --bibliography="${SCRIPT_DIR}/fixture.bib.json" \
   --csl="${CSL_FILE}" \
