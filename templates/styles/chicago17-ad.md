@@ -112,15 +112,48 @@ for locating the passage.
 - **Standard pagination systems**:
   - Stephanus for Plato (e.g., `514a` — page 514, section a).
   - Bekker for Aristotle (e.g., `1094a1-3` — page 1094, column a, lines 1-3).
+  - Ennead.tractate.chapter for Plotinus (e.g., `Enn. 1.6.9` — Ennead 1,
+    tractate 6, chapter 9).
+  - Volume.fragment for Stoic fragments via von Arnim's *Stoicorum
+    Veterum Fragmenta* (e.g., `SVF 2.473` — vol. 2, fragment 473). The
+    Long-Sedley collection (`LS`) is a common alternative for
+    English-reading philosophy work.
+  - Book.section for Diogenes Laertius (e.g., `DL 7.87` — book 7,
+    section 87).
+  - Book.section for Sextus Empiricus (e.g., `PH 1.25` for Outlines of
+    Pyrrhonism, `M 7.150` for Against the Mathematicians).
+  - Treatise + book.section for Cicero and most Roman philosophers
+    (e.g., `Off. 1.15`, `Fin. 3.20`, `ND 2.45`).
+  - For Seneca: letter.section for the Letters (`Ep. 9.6`);
+    book.chapter.section for the dialogues and treatises (`Ira 1.5.2`).
+  - Book.section for Marcus Aurelius (e.g., `Med. 4.17`).
   - Patristic and medieval authors: book.chapter or book.chapter.section,
     depending on the work's standard division (Augustine's Confessions and
     City of God use book.chapter.section; some shorter works use just
     book.chapter).
   - Aquinas: part, question, article (e.g., `ST I-II, q. 94, a. 2`).
-- **Standard title abbreviations**: use the conventional Latin or English
-  abbreviations per CMOS 17 §10.45 (e.g., `Rep.` for Republic, `NE` for
-  Nicomachean Ethics, `Conf.` for Confessions, `ST` for Summa Theologiae,
-  `Met.` for Metaphysics, `Pol.` for Politics).
+- **Standard title abbreviations** per CMOS 17 §10.45 (use Latin or
+  English forms; consistent within a paper). Common philosophy works:
+  - Plato: `Rep.` (Republic), `Phd.` (Phaedo), `Symp.` (Symposium),
+    `Phdr.` (Phaedrus), `Tht.` (Theaetetus).
+  - Aristotle: `NE` (Nicomachean Ethics), `Met.` (Metaphysics), `Pol.`
+    (Politics), `DA` (De anima), `Phys.` (Physics).
+  - Plotinus: `Enn.` (Enneads).
+  - Diogenes Laertius: `DL` or `Lives`.
+  - Sextus Empiricus: `PH` (Outlines of Pyrrhonism), `M` (Against the
+    Mathematicians).
+  - Stoic fragment collections: `SVF` (von Arnim), `LS` (Long-Sedley).
+  - Cicero: `Off.` (De officiis), `Fin.` (De finibus), `ND` (De natura
+    deorum), `Tusc.` (Tusculan Disputations), `Rep.` (De re publica).
+  - Seneca: `Ep.` (Epistulae morales), `Ira` (De ira), `Brev. vit.`
+    (De brevitate vitae), `Ben.` (De beneficiis).
+  - Marcus Aurelius: `Med.` (Meditations).
+  - Augustine: `Conf.` (Confessions), `Civ.` (City of God).
+  - Aquinas: `ST` (Summa Theologiae), `SCG` (Summa contra Gentiles).
+- **Abbreviations are author-scoped**: the same abbreviation can refer
+  to different works by different authors (`Rep.` is Plato's Republic
+  AND Cicero's De re publica). Always include the author name in the
+  citation to disambiguate: `(Plato, Rep. 514a)` vs. `(Cicero, Rep. 1.39)`.
 - **Pandoc syntax**: `[@plato-republic-001, 514a]` resolves to
   `(Plato, Rep. 514a)`. The locator slot carries the standard pagination;
   the year is suppressed for classical works. The formatter detects a
