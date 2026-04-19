@@ -34,9 +34,9 @@ The log has no `type` field today. Infer deterministically, in order:
    - `container-title`: omit.
 3. If `source.publication` contains `"edited by"` OR begins with `"In "` → `chapter`.
    - `container-title`: the book title (parsed from the text following `"In "` up to `"edited by"`, or the whole string if no `"edited by"`).
-   - `editor`: parsed from text following `"edited by"`. Split that text by comma. The **last** comma-segment is treated as the publisher (see below); all preceding segments are editors. Each editor segment is a person name in given-then-family order (Western prose form, unlike `source.authors` which is surname-first); split on whitespace and treat the last whitespace-token as `family`, the rest as `given`. Example: `"Alan Roth, Cambridge University Press"` → editors = `[{family: "Roth", given: "Alan"}]`, publisher = `"Cambridge University Press"`. If only one comma-segment is present, treat it as the sole editor and omit `publisher`.
+   - `editor`: parsed from text following `"edited by"`. Split that text by comma. The **last** comma-segment is treated as the publisher (see below); all preceding segments are editor segments. Each editor segment may itself contain multiple editors joined with `" and "` or `", and "` (Oxford-comma form): split each segment on `", and "` first, then on `" and "`, to produce individual editor names. Each individual editor name is a person name in given-then-family order (Western prose form, unlike `source.authors` which is surname-first); split on whitespace and treat the last whitespace-token as `family`, the rest as `given`. Example: `"Alan Roth, Cambridge University Press"` → editors = `[{family: "Roth", given: "Alan"}]`, publisher = `"Cambridge University Press"`. Multi-editor example: `"Alan Roth and Bob Smith, Cambridge University Press"` → editors = `[{family: "Roth", given: "Alan"}, {family: "Smith", given: "Bob"}]`, publisher = `"Cambridge University Press"`. If only one comma-segment is present, treat it as the sole editor segment (still subject to `" and "` splitting) and omit `publisher`.
    - `publisher`: the last comma-segment after `"edited by"` (per above), if present.
-4. Else if `source.doi_or_url` is a URL not beginning with `doi.org` → `webpage`.
+4. Else if `source.doi_or_url` is non-empty and does NOT start with `https://doi.org/` or `http://dx.doi.org/` → `webpage`.
    - `container-title`: the full `source.publication` string (often the site name).
    - `URL` is already set from the field mapping.
 5. **Fallback:** default to `article-journal`, and apply the article-journal field-mapping rules above (`container-title`: full `source.publication`; omit `publisher`/`publisher-place`). Surface a tolerable warning naming the log entry id and the reason (e.g., "no volume/issue/pages present; no clear book/chapter markers; DOI present; defaulting type to `article-journal`"). The user can correct the log entry and re-run.
@@ -46,7 +46,7 @@ CSL `type` is load-bearing: `article-journal` vs. `book` vs. `chapter` vs. `webp
 ## Known gaps (accepted residual)
 
 - `publisher-place` for `book` entries is heuristic. The log's `source.publication` is free prose; cities aren't structurally marked. Emit `publisher-place` only when a `, <CityName>` suffix is clearly present (capitalized word after a comma, not numeric, not containing digits). Else omit; citeproc renders the book without a place.
-- `chapter` editor parsing assumes the "edited by Firstname Lastname, Publisher" shape. Non-standard orderings produce best-effort output; the user can correct the log entry.
+- `chapter` editor parsing assumes the "edited by Firstname Lastname[ and Firstname Lastname...], Publisher" shape (multiple editors joined with `" and "` or `", and "` are supported). Other orderings (e.g., surname-first prose, role-suffixed names) produce best-effort output; the user can correct the log entry.
 - Untyped sources (conference papers, technical reports, theses, datasets) all map to the fallback. Future log schema additions (e.g., optional `source.type` field) would let the user bypass inference.
 
 ## Worked examples
