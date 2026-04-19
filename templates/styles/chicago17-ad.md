@@ -108,11 +108,14 @@ for locating the passage.
   argues that...`
 - **Subsequent references**: parenthetical with standard pagination, no
   year: `(Plato, Rep. 514a)`, `(Aristotle, NE 1094a1-3)`,
-  `(Augustine, Conf. 8.12)`, `(Aquinas, ST I-II, q. 94, a. 2)`.
+  `(Augustine, Conf. 8.12.29)`, `(Aquinas, ST I-II, q. 94, a. 2)`.
 - **Standard pagination systems**:
   - Stephanus for Plato (e.g., `514a` — page 514, section a).
   - Bekker for Aristotle (e.g., `1094a1-3` — page 1094, column a, lines 1-3).
-  - Patristic and medieval authors: book.chapter or book.chapter.section.
+  - Patristic and medieval authors: book.chapter or book.chapter.section,
+    depending on the work's standard division (Augustine's Confessions and
+    City of God use book.chapter.section; some shorter works use just
+    book.chapter).
   - Aquinas: part, question, article (e.g., `ST I-II, q. 94, a. 2`).
 - **Standard title abbreviations**: use the conventional Latin or English
   abbreviations per CMOS 17 §10.45 (e.g., `Rep.` for Republic, `NE` for
