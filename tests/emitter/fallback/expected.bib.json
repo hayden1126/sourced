@@ -1,0 +1,11 @@
+[
+  {
+    "id": "opaque-2022",
+    "type": "article-journal",
+    "author": [{"literal": "Opaque Collective"}],
+    "issued": {"date-parts": [[2022]]},
+    "title": "Untitled Working Paper",
+    "container-title": "SomeVenue",
+    "DOI": "10.5555/xxxx"
+  }
+]

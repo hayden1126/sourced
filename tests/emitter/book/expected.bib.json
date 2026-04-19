@@ -1,0 +1,10 @@
+[
+  {
+    "id": "jones-1998",
+    "type": "book",
+    "author": [{"family": "Jones", "given": "Robert"}],
+    "issued": {"date-parts": [[1998]]},
+    "title": "Linguistic Landscapes",
+    "publisher": "Oxford University Press"
+  }
+]

@@ -1,0 +1,24 @@
+[
+  {
+    "id": "smith-2010-001",
+    "source": {
+      "authors": ["Smith, Jane A."],
+      "year": 2010,
+      "title": "Pragmatic Markers in Contact Situations",
+      "publication": "Journal of Pragmatics",
+      "volume_issue_pages": "42(3), 12-34",
+      "doi_or_url": "https://doi.org/10.1016/j.pragma.2010.01.005"
+    }
+  },
+  {
+    "id": "smith-2010-002",
+    "source": {
+      "authors": ["Smith, Jane A."],
+      "year": 2010,
+      "title": "Pragmatic Markers in Contact Situations",
+      "publication": "Journal of Pragmatics",
+      "volume_issue_pages": "42(3), 12-34",
+      "doi_or_url": "https://doi.org/10.1016/j.pragma.2010.01.005"
+    }
+  }
+]
