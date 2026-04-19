@@ -127,7 +127,9 @@ Not: "The reader must recognize..." "One should consider..." "It must be underst
 
 ## Punctuation
 
-Punctuation patterns that function as AI generation signatures (em dashes, "not X but Y" pivots, ornamental triads) are governed by CLAUDE.md §10 *Generation signatures to rewrite*, which applies across every voice. Use this section only for author-specific punctuation habits the corpus clearly shows — semicolon style, ellipsis use, colon introducing evidence, etc. Leave TBD rather than inventing a rule the corpus does not settle. An author-specific rule that contradicts §10 must be stated explicitly ("this author uses em-dashes for appositives"); silence defers to §10.
+Punctuation patterns that function as AI generation signatures (em dashes, "not X but Y" pivots, ornamental triads) are governed by CLAUDE.md §10 *Generation signatures to rewrite*, which applies across every voice. Use this section only for author-specific punctuation habits the corpus clearly shows (semicolon style, ellipsis use, colon introducing evidence, etc.). Leave TBD rather than inventing a rule the corpus does not settle. An author-specific rule that contradicts §10 must be stated explicitly ("this author uses em-dashes for appositives"); silence defers to §10.
+
+Direct quotations are exempt from both this section and §10: preserve the source's punctuation verbatim inside any quoted span per CLAUDE.md §10 *Direct quotations* and §4 *Quote verbatim*. This section governs the writer's own prose, not punctuation printed in cited sources.
 
 **Ellipses** for trailing thoughts: "And if you just... change it slightly, the whole thing breaks."
 
