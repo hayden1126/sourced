@@ -23,6 +23,24 @@ The primary agent (academic-researcher) lives in each project's `CLAUDE.md`. Two
 - `bash` available for running `install.sh`.
 - `~/.claude/` writable (the installer creates it on first run).
 - A directory for your paper. Any directory works: a fresh folder, a git repo you already have, or an existing project.
+- **poppler-utils** (`pdftotext`, `pdfinfo`, `pdftoppm`). Claude Code's Read tool renders PDFs through `pdftoppm`; `[research mode]` extracts text from PDF sources via `pdftotext`.
+- **pandoc** 3.0+. Required by `[formatting mode]`'s `word` paste target (pandoc + citeproc + CSL pipeline).
+
+`install.sh` checks that `pdftotext` and `pandoc` are both on PATH and aborts with a clear install command if either is missing. It does not install them for you; use your package manager.
+
+Install both on Debian, Ubuntu, or WSL:
+
+```bash
+sudo apt-get install -y poppler-utils pandoc
+```
+
+On macOS:
+
+```bash
+brew install poppler pandoc
+```
+
+**Optional:** the `browser-reader-extract` skill (for extracting text from DRM'd browser readers like OverDrive, Kindle Cloud Reader, Scribd) needs Node 18+ and `puppeteer-core`. Install Node via your package manager; on first use of the skill, run `npm install` inside `~/.claude/skills/browser-reader-extract/` to fetch `puppeteer-core`. Writers who never use the skill pay zero setup cost.
 
 ## Quickstart
 
