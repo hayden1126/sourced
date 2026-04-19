@@ -113,20 +113,40 @@ for locating the passage.
   - Stephanus for Plato (e.g., `514a` — page 514, section a).
   - Bekker for Aristotle (e.g., `1094a1-3` — page 1094, column a, lines 1-3).
   - Ennead.tractate.chapter for Plotinus (e.g., `Enn. 1.6.9` — Ennead 1,
-    tractate 6, chapter 9).
+    tractate 6, chapter 9). Add Henry-Schwyzer line numbers when precision
+    matters: `Enn. 1.6.9.34-37`. Bare chapter is the baseline form; line
+    numbers are added for close textual analysis.
   - Volume.fragment for Stoic fragments via von Arnim's *Stoicorum
     Veterum Fragmenta* (e.g., `SVF 2.473` — vol. 2, fragment 473). The
-    Long-Sedley collection (`LS`) is a common alternative for
-    English-reading philosophy work.
+    Long-Sedley collection (`LS`, Long and Sedley 1987, *The Hellenistic
+    Philosophers*) is the dominant alternative in anglophone philosophy
+    and is cited by passage code (number + letter): `LS 39A`, `LS 61H`.
+    LS passage codes are not volume.fragment; the number identifies the
+    thematic section and the letter the passage within it.
   - Book.section for Diogenes Laertius (e.g., `DL 7.87` — book 7,
     section 87).
   - Book.section for Sextus Empiricus (e.g., `PH 1.25` for Outlines of
-    Pyrrhonism, `M 7.150` for Against the Mathematicians).
-  - Treatise + book.section for Cicero and most Roman philosophers
-    (e.g., `Off. 1.15`, `Fin. 3.20`, `ND 2.45`).
+    Pyrrhonism, `M 7.150` for Against the Mathematicians). Note that
+    *M* 1-6 is sometimes titled *Against the Professors* and *M* 7-11
+    *Adversus Dogmaticos*; the unified `M` numbering is standard.
+  - Treatise + book.section for Cicero's multi-book philosophical works
+    (e.g., `Off. 1.15`, `Fin. 3.20`, `ND 2.45`). Single-book works and
+    speeches use treatise + section only (e.g., `Mil. 23`); works
+    organized into multiple orations or books restore the book number
+    (e.g., `Cat. 1.5`). When in doubt, follow the divisions of the
+    standard edition (OCT or Teubner).
   - For Seneca: letter.section for the Letters (`Ep. 9.6`);
     book.chapter.section for the dialogues and treatises (`Ira 1.5.2`).
   - Book.section for Marcus Aurelius (e.g., `Med. 4.17`).
+  - For Epicurus: cite the *Letters* by addressee (`Ep. Hdt.` to
+    Herodotus, `Ep. Men.` to Menoeceus, `Ep. Pyth.` to Pythocles), the
+    *Principal Doctrines* as `KD` (Kyriai Doxai) by numbered doctrine
+    (`KD 1`, `KD 11`), and the *Vatican Sayings* as `SV` by saying
+    number. Many Epicurean fragments survive only via Diogenes Laertius
+    book 10 and are cited as `DL 10.NN` instead.
+  - For Lucretius: `DRN` (De rerum natura), book.line (`DRN 2.216-93`).
+  - For Epictetus: `Diss.` (Discourses), book.chapter.section
+    (`Diss. 1.1.7`); `Ench.` (Enchiridion), section number (`Ench. 5`).
   - Patristic and medieval authors: book.chapter or book.chapter.section,
     depending on the work's standard division (Augustine's Confessions and
     City of God use book.chapter.section; some shorter works use just
@@ -144,16 +164,27 @@ for locating the passage.
     Mathematicians).
   - Stoic fragment collections: `SVF` (von Arnim), `LS` (Long-Sedley).
   - Cicero: `Off.` (De officiis), `Fin.` (De finibus), `ND` (De natura
-    deorum), `Tusc.` (Tusculan Disputations), `Rep.` (De re publica).
+    deorum), `Tusc.` (Tusculan Disputations), `Rep.` (De re publica),
+    `Leg.` (De legibus), `Acad.` (Academica). For Cicero's letters,
+    use the addressee-keyed forms: `Att.` (Ad Atticum), `Fam.` (Ad
+    familiares), `QFr.` (Ad Quintum fratrem) — not the bare `Ep.`,
+    which is ambiguous across authors.
   - Seneca: `Ep.` (Epistulae morales), `Ira` (De ira), `Brev. vit.`
     (De brevitate vitae), `Ben.` (De beneficiis).
   - Marcus Aurelius: `Med.` (Meditations).
+  - Epicurus: `Ep. Hdt.` (Letter to Herodotus), `Ep. Men.` (Letter to
+    Menoeceus), `Ep. Pyth.` (Letter to Pythocles), `KD` (Kyriai Doxai
+    / Principal Doctrines), `SV` (Vatican Sayings).
+  - Lucretius: `DRN` (De rerum natura).
+  - Epictetus: `Diss.` (Discourses), `Ench.` (Enchiridion).
   - Augustine: `Conf.` (Confessions), `Civ.` (City of God).
   - Aquinas: `ST` (Summa Theologiae), `SCG` (Summa contra Gentiles).
 - **Abbreviations are author-scoped**: the same abbreviation can refer
   to different works by different authors (`Rep.` is Plato's Republic
-  AND Cicero's De re publica). Always include the author name in the
-  citation to disambiguate: `(Plato, Rep. 514a)` vs. `(Cicero, Rep. 1.39)`.
+  AND Cicero's De re publica; `Ep.` is used for the letters of Seneca,
+  Pliny, Horace, and others). Always include the author name in the
+  citation to disambiguate: `(Plato, Rep. 514a)` vs. `(Cicero, Rep. 1.39)`,
+  `(Seneca, Ep. 9.6)` vs. `(Pliny, Ep. 6.16)`.
 - **Pandoc syntax**: `[@plato-republic-001, 514a]` resolves to
   `(Plato, Rep. 514a)`. The locator slot carries the standard pagination;
   the year is suppressed for classical works. The formatter detects a
