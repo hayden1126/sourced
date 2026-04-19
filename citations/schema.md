@@ -118,4 +118,9 @@ Until the shard is either successfully merged (deleted) or explicitly abandoned 
 
 ## Additions
 
-Additional fields are allowed when they help (scholarly counterarguments, topic tags, follow-up questions). Never remove fields from this schema.
+Two kinds of optional fields can appear beyond the required structure above.
+
+- **Schema-defined optional fields.** Fields this schema defines but doesn't require on every entry (currently `author_evidence`, see "Author-field provenance"). When you use one, follow its definition exactly; do not redefine its semantics or shape per entry.
+- **Ad-hoc additions.** Fields not defined by this schema, added when they help (scholarly counterarguments, topic tags, follow-up questions). Use a stable name and consistent shape across entries in the same log.
+
+Never remove fields from this schema.
