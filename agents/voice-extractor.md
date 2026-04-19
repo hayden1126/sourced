@@ -32,7 +32,7 @@ Run these checks in order; halt on the first failure and report rather than proc
 3. **Shipped-name collision.** If `voice_name` is in the reserved list of shipped voices (currently: `academic`), stop with `shipped-name-collision` regardless of the `overwrite` value. Shipped voices are refreshed from the repo on every `install.sh --global-only`, so a generated file at a shipped name would be silently clobbered on next install. Reject rather than produce a file with a latent expiration. Maintainers: when a new shipped voice is added under `templates/voices/`, append its name to the reserved list in this check.
 4. **Output path.** If `~/.claude/voice/<voice_name>.md` exists and `overwrite` is `false`, stop with `existing-voice`.
 5. **Skeleton readable.** Read `skeleton_path`. If missing, stop with `missing-skeleton`.
-6. **Sample floor.** Glob `samples_dir` for `*.md` and `*.txt` (other file types are silently skipped; list them in the report). Reject with `under-sample` if fewer than 5 files match or the combined word count is under 5,000. Low-volume corpora produce unstable patterns; the fix is more samples, not more inference.
+6. **Sample floor.** Glob `samples_dir` for `*.md` and `*.txt` (other file types are silently skipped; list them in the report). Reject with `under-sample` if fewer than 3 files match or the combined word count is under 5,000. Low-volume corpora produce unstable patterns; the fix is more samples, not more inference.
 
 ## Workflow
 
