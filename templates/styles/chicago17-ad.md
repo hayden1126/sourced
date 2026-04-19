@@ -41,20 +41,17 @@ similar.
 - Narrative: `Smith and Jones (2010)`.
 
 ### Three authors
-- Parenthetical, first citation: `(Smith, Jones, and Brown 2010)`. List all
-  three.
-- Parenthetical, subsequent citations: `(Smith et al. 2010)`. Shorten after
-  first mention.
-- Narrative, first citation: `Smith, Jones, and Brown (2010)`.
-- Narrative, subsequent: `Smith et al. (2010)`.
-- "First mention" is per-document, not per-paragraph. The formatting pass
-  tracks first vs. subsequent across the whole draft.
+- Parenthetical: `(Smith, Jones, and Brown 2010)`. List all three on every
+  citation; CMOS 17 §15.29 does not shorten three-author works to "et al."
+  in the in-text citation (this differs from APA, which shortens at three).
+- Narrative: `Smith, Jones, and Brown (2010)`.
 
 ### Four or more authors
 - Parenthetical: `(Smith et al. 2010)`. Always shortened to first author plus
-  "et al.", from the first citation onward.
+  "et al.", from the first citation onward (CMOS 17 §15.29).
 - Narrative: `Smith et al. (2010)`.
-- The full author list still appears in the References entry; only the
+- The full author list (up to ten; for eleven or more list the first seven
+  plus "et al.") appears in the References entry per CMOS 17 §15.9; only the
   in-text citation is shortened.
 
 ### Group / corporate author
@@ -103,8 +100,8 @@ similar.
 ## References list
 
 ### Heading
-- Title "References", centered, top of new page in print formats. Bold per
-  CMOS 17 §1.55-1.56 if treated as a level-1 heading.
+- Title "References", centered, bold, top of new page in print formats
+  (treated as a level-1 heading per CMOS 17 §1.55-1.56).
 - Markdown / web destinations: `## References` heading, no centering.
 
 ### Sort order
@@ -120,7 +117,7 @@ similar.
   pass owns letter assignment in one pass.
 
 ### Entry format (journal article)
-`Smith, Jane A., John B. Jones, and Robert C. Brown. 2010. "Title of Article in Headline Case." Journal Name in Title Case and Italics 42 (3): 12-34. https://doi.org/...`
+`Smith, Jane A., John B. Jones, and Robert C. Brown. 2010. "Title of Article in Headline Case." Journal Name in Title Case and Italics 42 (3): 12-34. https://doi.org/10.xxxx/yyyy.`
 - Year follows author (no parentheses around it).
 - Article title in double quotes, headline-style capitalization.
 - Journal in italics, title case.
@@ -136,14 +133,16 @@ similar.
 `Smith, Jane A. 2010. "Title of Chapter in Headline Case." In Title of Book in Italics, edited by First Last and First Last, 12-34. Publisher City: Publisher.`
 
 ### Entry format (web page, dated)
-`Smith, Jane A. 2010. "Title of Page in Headline Case." Site Name. Month Day, Year. https://...`
+`Smith, Jane A. 2010. "Title of Page in Headline Case." Site Name. Month Day, Year. https://example.com/path.`
 - Site name unitalicized, in title case.
 - Date is the publication or last-revision date if available.
 
 ### Entry format (web page, no date)
-`Smith, Jane A. n.d. "Title of Page in Headline Case." Site Name. Accessed Month Day, Year. https://...`
-- "Accessed [date]" only when no other date is available; CMOS 17 §14.207.
-- For stable pages from authoritative sources, omit the access date.
+`Smith, Jane A. n.d. "Title of Page in Headline Case." Site Name. Accessed Month Day, Year. https://example.com/path.`
+- "Accessed [date]" included when no publication or revision date is
+  available on the page (CMOS 17 §14.207).
+- For stable, dated pages from authoritative sources, the access date may
+  be omitted.
 
 ### Indentation and spacing
 - Hanging indent: 0.5 in (first line flush, subsequent lines indented).
@@ -153,7 +152,8 @@ similar.
 ### URLs and DOIs
 - DOI preferred over URL when both exist.
 - Format DOIs as `https://doi.org/10.xxxx/...`. No "doi:" prefix.
-- No period after a URL or DOI at the end of an entry.
+- Terminal period after a URL or DOI at the end of an entry (CMOS 17 §14.8;
+  this differs from APA, which omits the terminal period).
 
 ## Document layout
 
