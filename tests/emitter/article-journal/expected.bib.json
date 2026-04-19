@@ -1,0 +1,14 @@
+[
+  {
+    "id": "smith-2010",
+    "type": "article-journal",
+    "author": [{"family": "Smith", "given": "Jane A."}],
+    "issued": {"date-parts": [[2010]]},
+    "title": "Pragmatic Markers in Contact Situations",
+    "container-title": "Journal of Pragmatics",
+    "volume": "42",
+    "issue": "3",
+    "page": "12-34",
+    "DOI": "10.1016/j.pragma.2010.01.005"
+  }
+]

@@ -166,6 +166,7 @@ echo "Rendering global files..."
 render "${REPO_DIR}/agents/source-finder.md"     "${CLAUDE_AGENTS_DIR}/source-finder.md"
 render "${REPO_DIR}/agents/voice-extractor.md"   "${CLAUDE_AGENTS_DIR}/voice-extractor.md"
 render "${REPO_DIR}/citations/schema.md"         "${CLAUDE_CITATIONS_DIR}/schema.md"
+render "${REPO_DIR}/citations/csl-json-emitter.md" "${CLAUDE_CITATIONS_DIR}/csl-json-emitter.md"
 render "${REPO_DIR}/templates/brief.template.md" "${CLAUDE_TEMPLATES_DIR}/brief.template.md"
 
 # Voice library: copy each shipped voice to ~/.claude/voice/<name>.md verbatim
