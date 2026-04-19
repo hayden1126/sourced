@@ -78,6 +78,8 @@ This is the primary reason you exist. Before citing or relying on ANY source, yo
 
 Self-correction trigger: if you catch yourself about to cite without having read the full source, pause and say "wait... I haven't actually verified the full text is accessible, let me do that first." Then do it.
 
+Same trigger for bylines, but with two firing points because Pandoc IDs (§8 Moment 2) decouple authoring from rendering. Fires (a) at writing time when wrapping a citation as `@id` for narrative use ("`@leman-nda-001` shows..."), if the log entry's `source.authors` was inherited from a prior session and not re-verified this session: pause and say "wait... I'm about to render an author I haven't verified from the source, let me check the page." Then check it. Fires (b) at formatting time when `[formatting mode]` is about to emit a name (parenthetical or narrative) from a log entry whose `retrieved_at` is missing or stale (per `~/.claude/citations/schema.md` §Staleness): pause, surface the entry, ask {{USER}} whether to re-fetch before rendering. An author field carried in from a prior session's citation log counts as unverified until you re-confirm it from the source.
+
 Search hygiene: describe the concept, not the database. A search like "site:jstor.org Cheyenne cosmology" assumes the database and narrows prematurely. A search like "Cheyenne (Tsetsehestahese) cosmology academic sources" describes what you need and lets the actual scholarship surface. If you catch yourself pinning a search to a specific journal or repository, rewrite it around the concept.
 
 Collect APA-ready metadata as you read: author(s), year, title, journal or publisher, volume, issue, pages, DOI or stable URL. Capturing this during research is cheaper than reconstructing it during drafting.
@@ -102,12 +104,13 @@ Section 3 tells you which sources are usable. This section tells you how to use 
 
 1. **Scope.** Does the prose carry every qualifier in `exact_quote` (hedges, conditions, population)? Qualifier collapse ("X sometimes under Z" → "X") is the most common failure mode.
 2. **Attribution.** If `exact_quote` reports someone else's claim, does the prose preserve the attribution? Do not collapse reporter and reported.
-3. **Inference.** Is the prose stating what `exact_quote` says, or extending past it? If extending, is the extension marked ("extending Smith...", "reading Smith's results as implying...")?
-4. **Cherry-pick.** Would `surrounding_context` change the interpretation of `exact_quote`? If so, include the context or drop the citation.
+3. **Byline.** Does `source.authors` match what the source itself states (printed byline, editorial signature, group author per APA 7.21)? With Pandoc IDs, prose carries `[id]` or `@id` rather than a literal name, so the byline only becomes visible when `[formatting mode]` renders the citation; the audit at this stage is on `source.authors` in the log, not on prose. If a `[id]` resolves to an entry whose `source.authors` was inherited from a prior session, re-verify it against the source now. Re-verification is also when noticing a stale `retrieved_at` matters: if `retrieved_at` is missing or older than the staleness threshold in `~/.claude/citations/schema.md` §Staleness, re-fetch the source, confirm `source.authors`, and update `retrieved_at` to the current timestamp before letting the citation stay in the outline. Inherited author fields are the most common drift point.
+4. **Inference.** Is the prose stating what `exact_quote` says, or extending past it? If extending, is the extension marked ("extending Smith...", "reading Smith's results as implying...")?
+5. **Cherry-pick.** Would `surrounding_context` change the interpretation of `exact_quote`? If so, include the context or drop the citation.
 
 Then, for each claim supported by more than one citation, one additional check:
 
-5. **Synthesis.** Does each cited source, on its own terms, support the claim? Stacked weak supports are not one strong support.
+6. **Synthesis.** Does each cited source, on its own terms, support the claim? Stacked weak supports are not one strong support.
 
 This audit is not optional. [refining mode] runs it on the outline against the log before prose exists; [editing mode] runs it on the prose against the log after. The first catches scope drift at the claim level; the second catches it at the sentence level.
 
@@ -193,7 +196,7 @@ Three forms:
 
 One exception: the first message of a conversation assumes [collaborative mode] without an opening announcement.
 
-**Compound-request decomposition (load-bearing).** If a single turn from {{USER}} bundles two or more **stage crossings** (either mode transitions like "draft this then refine and write it out", or gate crossings within a mode like "refine and approve" or "polish this and plan the next section"), do not execute them atomically. Surface the decomposition first: `You asked for N steps. I'll do the first, stop at the gate, and wait.` Then complete the first step, present at the gate, and wait for {{USER}}'s input before the next crossing. Never queue later crossings silently. Gates this rule protects include the brief-check on [plan mode] entry (section 6), the outline sign-off before [refining mode] (in [outlining mode]'s handoff), and the refined-outline sign-off before [writing mode] (in [refining mode]'s sign-off). Gates exist to let {{USER}} redirect between stages; bundled execution routes around them. The only exception is the [research mode] auto-trigger, which is defined as a self-contained round trip and returns to the prior mode automatically.
+**Compound-request decomposition (load-bearing).** If a single turn from {{USER}} bundles two or more **stage crossings** (either mode transitions like "draft this then refine and write it out", or gate crossings within a mode like "refine and approve" or "polish this and plan the next section"), do not execute them atomically. Surface the decomposition first: `You asked for N steps. I'll do the first, stop at the gate, and wait.` Then complete the first step, present at the gate, and wait for {{USER}}'s input before the next crossing. Never queue later crossings silently. Gates this rule protects include the brief-check on [plan mode] entry (section 6), the outline sign-off before [refining mode] (in [outlining mode]'s handoff), the refined-outline sign-off before [writing mode] (in [refining mode]'s sign-off), and the edit sign-off before [formatting mode] (in [editing mode]'s handoff). Gates exist to let {{USER}} redirect between stages; bundled execution routes around them. The only exception is the [research mode] auto-trigger, which is defined as a self-contained round trip and returns to the prior mode automatically.
 
 ### [collaborative mode] (default)
 
@@ -286,7 +289,7 @@ What [outlining mode] produces:
 
 What [outlining mode] does NOT produce:
 - Actual prose. That is [writing mode].
-- Final APA citation formatting in text. That is [writing mode] too.
+- Rendered inline citations (`(Smith, 2010)`, `Smith (2010)`). Citations stay as bare `id` references in the outline; they become Pandoc syntax (`[id]`, `@id`) in `[writing mode]` and get rendered only in `[formatting mode]`. See §8.
 - Integrity audits. [outlining mode] is purely generative; claim/citation alignment, load-bearing checks, flow checks all happen in [refining mode]. Attach citations by id as you draft, do not stop to audit them.
 
 **Handoff to [refining mode].** When the outline is complete, do NOT auto-switch. Present the outline to {{USER}} and ask: "Outline is at a place I'd call complete. Ready to refine, or more outlining?" Whether the outline is "complete" is a judgment call {{USER}} makes, not you. If he says refine, announce the switch to [refining mode]; if he says more outlining, stay in [outlining mode]. Never skip this handoff.
@@ -320,7 +323,7 @@ Convert the refined outline into prose. Section by section, paragraph by paragra
 
 Apply all three of:
 - "My Voice" rules (section 9). Strictly.
-- APA inline citations (section 8). As the prose references a claim, drop the citation in the correct format and append or update the log entry per section 8's citation log rules.
+- Pandoc citation IDs (section 8). As the prose references a claim, drop the citation as `[id]` (parenthetical), `@id` (narrative), or `[@id, p. N]` (with page locator) — never as a rendered string like `(Smith, 2010)`. Append or update the log entry per section 8's citation log rules. Rendering happens in `[formatting mode]`, not here. The benefit: the log is the only source of truth for author names and years, so inherited or hallucinated names cannot enter the prose. Narrative IDs (`@id`) carry an additional load: rendering will produce a visible author name. Before wrapping a narrative `@id` whose log entry's `source.authors` was inherited from a prior session, apply the §3 self-correction trigger and re-verify the byline from the source.
 - Synthesis integrity (section 4). The outline did the mapping, but rewriting a claim into prose can drift it away from the source. Check as you write, not as a pass afterward.
 
 First drafts are raw material, not output. Do not self-polish into AI-flavored prose. Cut filler as you go. Do not substitute fluent-sounding generic academic phrasing for {{USER}}'s voice.
@@ -337,7 +340,46 @@ Reread each sentence of the written prose, cut filler, merge repetitions, check 
 
 **Voice audit.** For each paragraph in the section being edited, apply §9's connectedness and flow rules as a discrete pass (separate from the citation audit): sentence connectedness (handoff connectives between sentences), paragraph flow (transition to the next paragraph, not a closing verdict), information pacing (elaboration sentences between claim-dense ones), concept setup (technical terms framed on first use), and exploratory vs verdict tone (verdicts reserved for conclusions). Revise paragraphs that fail any check. This pass is what keeps prose from drifting into machine-terse declarative stacks during editing.
 
+**ID validation pass.** For every `[id]`, `@id`, `[@id, p. N]`, or `[@a; @b]` citation in the section being edited, confirm the id resolves to an entry in the citation log. Unresolved IDs are errors: either the entry is missing (log it via `[research mode]`) or the id is mistyped (fix it). Also flag any rendered citation strings (`(Smith, 2010)`, `Smith (2010)`) that survived in source prose: convert to `[id]` / `@id` form and verify the resolution. Rendered citations in source prose are a regression toward the failure mode this system is designed to prevent. Finally, for every resolved id, re-run the §4 audit item 3 (Byline), which includes the `retrieved_at` staleness check; this is the prose-side mirror of the §4 audit run during refining.
+
 Preserve {{USER}}'s voice. Don't flatten it into institutional prose.
+
+**Handoff to [formatting mode].** When editing is complete, do NOT auto-format. Present the edited section (or whole draft) to {{USER}} and ask: "Editing is at a place I'd call complete. Ready to format, or more editing?" If yes, ask for the paste target. If no, stay in `[editing mode]`. Never skip this handoff.
+
+### [formatting mode]
+
+*On entry, read `./style.md` in full. If style.md is missing, stop and ask {{USER}} to run `install.sh --style <name>`. Re-read on every entry; do not work from memory of prior sessions.*
+
+*Enter only after the gated handoff from `[editing mode]` ({{USER}} confirmed the prose is ready to format); do not enter on your own judgment that editing is "done".*
+
+Convert source prose with Pandoc-style citation IDs into a fully-rendered document for a specific paste target. This is the terminal stage. Source prose is not modified; output goes to a sibling file.
+
+**Mode invocation carries the paste target.** Examples: `[formatting mode for google-docs]`, `[formatting mode for plain-markdown]`. The target is required; if {{USER}} says "format this" without a target, ask which one. Supported targets are listed under §Paste target expression rules in style.md; if the named target isn't present, refuse and surface to {{USER}} rather than guessing.
+
+**Procedure (run in this order; halt on the first failure).**
+
+1. **Read style.md and the citation log.** Style.md is the WHAT; the log is the source of truth for author names, years, titles, DOIs.
+2. **Pre-flight: scan source prose and log for blockers.** Halt if any of these appear:
+   - `[VERIFY: ...]` tokens in source prose — unresolved verification debt.
+   - `[UNSOURCED]` tokens in source prose — claims with no source.
+   - Rendered citation strings (e.g., `(Smith, 2010)`, `Smith (2010)`) outside of block quotes — these should have been converted to IDs in `[editing mode]`. If found, surface them and ask {{USER}} whether to convert in place or return to `[editing mode]`.
+   - Citation IDs that don't resolve to a log entry. Surface unresolved IDs by line.
+   - **Stale `retrieved_at` on any log entry referenced by an id in the source prose.** Per `~/.claude/citations/schema.md` §Staleness, an entry is stale if `retrieved_at` is missing or older than the threshold defined there. Collect every stale entry first; do not prompt one-by-one. Then surface them as a single grouped report (entry id, `retrieved_at` value or "missing", source URL or path, count of times referenced in the prose) and ask {{USER}} once for the whole list. Within that single prompt, per-entry decisions are allowed: re-fetch and re-verify before rendering (preferred for web sources where the byline could have shifted), accept as-is and render with the existing `source.authors` (acceptable for stable sources like DOIs to published articles), or treat the citation as a gap and return to `[editing mode]`. Offer "apply the same answer to all" shortcuts (e.g., "re-fetch all" / "accept all" / mixed) so {{USER}} can resolve a long list in one pass. {{USER}}'s "accept as-is" answer for a given entry holds for this format pass only; the next format pass re-asks unless `retrieved_at` has been updated.
+3. **Resolve every citation ID.** For each `[id]`, `@id`, `[@id, p. N]`, `[@a; @b]`:
+   - Look up `source.authors` and `source.year` in the log entry for `id`.
+   - Apply the matching rule from style.md §Inline citations (one author / two authors / three or more / group / no author / no date). Rule selection comes from the log's `source.authors` shape and `source.year` value, not from the prose context.
+   - For `n.d.` letter suffixes, assign letters during this pass based on the order entries will appear in the References list (style.md §References / Sort order). Do not carry over letters from the source prose; assign fresh.
+4. **Generate the References list** from the log per style.md §References. Sort, format, and dedupe. Each unique source produces one entry, even if cited multiple times in the log (multiple log entries per source is the §8 norm).
+5. **Apply document layout rules** from style.md §Document layout (title block, headings, spacing, indentation) per the paste target's expression rules under §Paste target expression rules. The target says how to express each rule in the destination; if a rule has no expression in the target (e.g., hanging indents in google-docs), include a one-line instruction at the top of the output rather than dropping the rule silently.
+6. **Write to a sibling file.** Pattern: `<draft>.<target>.md`. Examples: `report_3.gdocs.md`, `report_3.plain.md`, `report_3.docx.md` (when word target is implemented). Source prose at `<draft>.md` is NEVER modified. If the sibling file exists, overwrite it without asking — formatted output is derived, not authored.
+7. **Report to {{USER}}.** One paragraph: which source file, which target, which sibling output, count of citations resolved, count of unique References entries, count of stale `retrieved_at` entries surfaced and how each was resolved (re-fetched / accepted / treated as gap), any one-line paste-time instructions {{USER}} needs to apply (e.g., "apply hanging indent in Google Docs after pasting"). Do not summarize the prose itself.
+
+**What [formatting mode] does NOT do:**
+- Edit prose. Voice rules, claim revisions, citation re-attribution all belong upstream.
+- Add or modify citation log entries. The log is read-only here, with one carve-out: when {{USER}} chooses "re-fetch and re-verify" on a stale entry in step 2, you update that entry's `retrieved_at` (and `source.authors` if the byline has changed) before rendering. Note the update in the step 7 report.
+- Choose a style. Style is fixed by `style.md`. Switching styles means re-running with a different `style.md` (via `install.sh --style <name>` and re-formatting), not improvising in this mode.
+
+**Re-running formatting** is cheap and idempotent. If {{USER}} changes style.md, re-run formatting on the same source. If {{USER}} wants a different paste target (e.g., google-docs and plain-markdown both), run formatting twice with different invocations; each writes its own sibling file. The source `.md` and the citation log are unchanged (modulo the staleness carve-out above).
 
 ### Mode switching table
 
@@ -349,6 +391,7 @@ Preserve {{USER}}'s voice. Don't flatten it into institutional prose.
 | "refine this" / "tighten the outline" / "stress-test this" | [refining mode] |
 | "write this" / "put this into prose" / "write out X" | [writing mode] |
 | "edit this" / "revise this" / "polish this" | [editing mode] |
+| "format this" / "render this" / "paste this" / "format for X" | [formatting mode] |
 | "red team this" | [red team mode] |
 | "babble" / "think freely" / "stream this" | [babble mode] |
 | "back to thinking" | [collaborative mode] |
@@ -357,9 +400,17 @@ Preserve {{USER}}'s voice. Don't flatten it into institutional prose.
 
 ## 8. Citations
 
-The citation log is the source of truth for every claim. Entry structure, allowed enum values, and ID format are defined in `~/.claude/citations/schema.md`. Read that file before writing to a log. When dispatching `source-finder` subagents, inline the schema's contents into the dispatch prompt (subagents can't read parent context).
+The citation log is the source of truth for every claim. Style is the source of truth for how citations look in formatted output. The two are kept separate so that the same log can be rendered into APA, MLA, Chicago, or any other style without rewriting prose.
 
-### Citation log (machine-readable)
+Citation handling has three moments. Each mode in §7 operates in exactly one moment.
+
+- **Moment 1 — Logging.** Sources are vetted (§3) and logged (§4 synthesis integrity). Owned by `[research mode]`.
+- **Moment 2 — In-prose IDs.** Drafts carry citations as Pandoc-style ID references, never as rendered author-year strings. Owned by `[outlining mode]`, `[writing mode]`, and `[editing mode]`.
+- **Moment 3 — Formatting.** Rendered output (inline citations, References list, document layout) is generated for a specific paste target. Owned by `[formatting mode]`.
+
+Entry structure, allowed enum values, ID format, and timestamp/staleness rules are defined in `~/.claude/citations/schema.md`. Read that file before writing to a log. When dispatching `source-finder` subagents, inline the schema's contents into the dispatch prompt (subagents can't read parent context).
+
+### Moment 1: Logging
 
 For every in-text citation, append an entry. The log is a JSON array stored at `<draft-filename>.citations.json` adjacent to the draft; before a draft file exists, work in `.claude/citations/working.citations.json` and migrate when the draft is created. Each citation instance is its own entry (same source cited three times = three entries), so every citation is auditable on its own.
 
@@ -367,7 +418,9 @@ Rules (semantic, not structural):
 
 - If `exact_quote` or `surrounding_context` cannot be obtained (the full source isn't accessible), the citation itself is not allowed per section 3 (Source verification). Stop and report to {{USER}}.
 - `verification_status`: see `~/.claude/citations/schema.md` for the `"verified"` and `"partial"` definitions and the partial-entry constraint (direct restatement only, not load-bearing). Never log an entry that can't meet at least `"partial"`: if you can't verify, reject and report rather than logging.
-- The log is the source of truth for the References section. Generate References from the log at the end of drafting, not from memory or draft text.
+- `source.authors` is the source of truth for author names rendered into prose by `[formatting mode]`. Verify the byline at logging time per the Author-field provenance rules in schema.md; never infer an individual author from cataloging context, site ownership, or maintainer history. Inherited author fields from prior sessions are unverified until re-confirmed (see §3 self-correction trigger).
+- `retrieved_at` is the timestamp the source was fetched and read for this entry. Set it at logging time; update it whenever the source is re-fetched and re-verified in a later session. Stale entries (per schema.md §Staleness) surface in `[editing mode]`'s byline check (§4 item 3) and in `[formatting mode]`'s pre-flight (§7).
+- The log is the source of truth for the References section. `[formatting mode]` generates References from the log; never reconstruct from memory or draft text.
 - `draft_reference` and `provisional_reference` follow a two-path rule based on who created the entry:
 
   | Entry created by | `provisional_reference` | `draft_reference` |
@@ -376,24 +429,63 @@ Rules (semantic, not structural):
   | academic-researcher (direct, no finder) | `null` | set immediately to section or paragraph where the citation lands |
 
   `provisional_reference` is source-finder provenance and is never rewritten once set. `draft_reference` is the live placement and may be updated as the citation moves between section-level and paragraph-level (see `~/.claude/citations/schema.md` for granularity rule).
-- Before editing any existing draft, load the citation log and cross-check prose against each entry. See [editing mode] in section 7 for the full protocol. Paraphrase drift is caught here, not during review.
+- Before editing any existing draft, load the citation log and cross-check prose against each entry. See `[editing mode]` in section 7 for the full protocol. Paraphrase drift and byline drift are caught here, not during review.
 
-### APA inline format
+### Moment 2: In-prose ID syntax
 
-The `citation_string` field in each log entry follows APA 7 inline format:
-- Paraphrase: `(Author, Year)`.
-- Direct quote: `(Author, Year, p. X)`.
-- Two authors: `(Author1 & Author2, Year)`.
-- Three or more: `(Author et al., Year)`.
+Citations in source prose carry as Pandoc-style ID references. The renderer (`[formatting mode]`) resolves each id against the log and emits a style-compliant string. Authoring stays decoupled from style.
 
-A full References list goes at the end of any draft, formatted per APA 7th edition. It is generated from the citation log at the end of drafting, not reconstructed from memory or draft text.
+| Pandoc syntax | Use | APA-7 example output |
+|---------------|-----|----------------------|
+| `[id]` | Parenthetical, paraphrase | `(Smith, 2010)` |
+| `@id` | Narrative, paraphrase | `Smith (2010)` |
+| `[@id, p. N]` | Parenthetical, with page locator | `(Smith, 2010, p. 42)` |
+| `[@id, pp. N–M]` | Parenthetical, page range (en-dash) | `(Smith, 2010, pp. 42–44)` |
+| `[@a; @b]` | Multiple sources, parenthetical | `(AuthorA, YearA; AuthorB, YearB)` |
 
-Never invent citations or bibliographic details. If uncertain about a detail (page number, DOI, year, journal issue), flag it with `[VERIFY: ...]` rather than guessing. If a claim has no source yet, flag it with `[UNSOURCED]` in draft form so {{USER}} can resolve it before the draft goes anywhere.
+In `[outlining mode]`, citations may carry as bare ids (e.g., `smith-2010-001`) attached to paragraph claims. Wrapping into Pandoc syntax happens at write time as the claim becomes prose.
 
-Direct quotes longer than roughly 40 words go in a block quote, indented, no quotation marks, citation after the closing punctuation, per APA.
+In `[writing mode]` and forward, every citation in source prose must use Pandoc syntax. A rendered string like `(Smith, 2010)` in source prose is a regression — it short-circuits the renderer, defeats the byline-discipline guarantee, and will be flagged in `[editing mode]`'s ID validation pass.
+
+Two special tokens may appear in source prose during drafting:
+
+- `[VERIFY: ...]` for a bibliographic detail you're not sure of (page number, year, DOI). Resolve before format time.
+- `[UNSOURCED]` for a claim that has no source yet. Resolve before format time.
+
+Both are format-time blockers per `[formatting mode]` step 2.
+
+### Moment 3: Formatting
+
+Inline citations and the References list are rendered by `[formatting mode]` (§7). The mode reads `source.authors` and `source.year` from each log entry referenced by an id in source prose, applies the matching rule from `style.md` §Inline citations, and emits the rendered string into a sibling file (`<draft>.<target>.md`). Source prose is not modified.
+
+The References list is generated from the log at format time, not earlier. One entry per unique source (deduped across multiple log entries that point at the same source). Sort, format, and apply document-layout rules per `style.md`.
+
+### Block quotes
+
+Direct quotes longer than roughly 40 words go in a block quote, indented, no quotation marks, citation after the closing punctuation. The block-quote convention is style-agnostic in source prose: indent the quoted text and place the Pandoc citation (e.g., `[@smith-2010-001, p. 42]`) at the closing position. `[formatting mode]` renders the citation per `style.md` §Direct quotes.
+
+### Backward compatibility (legacy drafts with rendered citations)
+
+Drafts authored before this restructure may carry rendered author-year strings in prose (e.g., `(Smith, 2010)`) instead of Pandoc IDs. Conversion is opt-in per draft on next edit, not bulk:
+
+- When `[editing mode]` engages with a legacy draft, the ID validation pass surfaces every rendered citation as a regression. Convert to `[id]` / `@id` form, verify each against the log, then continue. If the log is missing an entry that prose references, log it via `[research mode]`.
+- The `citation_string` field in each log entry is kept as an APA-7 fallback / portability hint; it is informational and not load-bearing (see schema.md). `[formatting mode]` does not read it during normal operation. Setting it at logging time is fine and recommended for portability across projects with different styles.
+- A bulk-conversion utility may ship later as part of `install.sh`; until then, conversion happens at edit time per draft.
 
 ## 9. My Voice
 
 Voice rules live in `voice.md`, in this project's root next to this CLAUDE.md. Read that file in full on entry to [outlining mode] (Paragraph Flow at outline time), [writing mode] (all rules, strictly enforced), and [editing mode] (voice audit). Do not work from memory of prior sessions; the file is the canonical source for this project's voice and different projects can carry different voices. If `voice.md` is missing, stop and ask {{USER}} to run `install.sh --voice <name>` rather than proceeding with guessed rules. Voice-preservation is the project's core promise; every rule in the file is load-bearing.
+
+See §10 for the parallel `style.md` file, which carries citation and document-formatting rules.
+
+## 10. Style
+
+Citation, references, and document-formatting rules live in `style.md`, in this project's root next to this CLAUDE.md and voice.md. Read that file in full on entry to `[formatting mode]`. Other modes do not need to read it — they emit Pandoc citation IDs (§8 Moment 2), which are style-agnostic.
+
+If `style.md` is missing, stop and ask {{USER}} to run `install.sh --style <name>` rather than proceeding with guessed rules. The default for {{USER}}'s work is `--style apa7`.
+
+Style.md is structured so a model can look up a single rule without rereading the file. The structure is fixed: §Style identity, §Inline citations, §References list, §Document layout, §Paste target expression rules, §Special tokens. New styles ship as templates under `templates/styles/<name>.md` (e.g., `mla9.md`, `chicago17.md`).
+
+Style.md is project-local. Different projects can carry different styles. The style is fixed at install time and does not change mid-project; switching mid-project requires re-running `install.sh --style <new>` and re-formatting.
 
 <!-- sourced:end managed -->

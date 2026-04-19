@@ -16,6 +16,7 @@ CLAUDE_AGENTS_DIR="${HOME}/.claude/agents"
 CLAUDE_CITATIONS_DIR="${HOME}/.claude/citations"
 CLAUDE_TEMPLATES_DIR="${HOME}/.claude/templates"
 CLAUDE_VOICE_DIR="${HOME}/.claude/voice"
+CLAUDE_STYLE_DIR="${HOME}/.claude/style"
 
 # ---- flag parsing ----------------------------------------------------------
 GLOBAL_ONLY=0
@@ -24,6 +25,8 @@ UPDATE=0
 BRIEF_NAME=""
 VOICE="academic"
 VOICE_EXPLICIT=0
+STYLE="apa7"
+STYLE_EXPLICIT=0
 TARGET_DIR="${PWD}"
 
 usage() {
@@ -33,18 +36,27 @@ Usage: install.sh [options]
 Options:
   --global-only        Install/refresh only global files (source-finder, schema,
                        brief template, voice library). Skip per-project files.
-  --project <path>     Drop CLAUDE.md and voice.md into <path> instead of $PWD.
-  --force              Overwrite existing CLAUDE.md, voice.md, and brief (if
-                       --brief is used) without asking.
+  --project <path>     Drop CLAUDE.md, voice.md, and style.md into <path>
+                       instead of $PWD.
+  --force              Overwrite existing CLAUDE.md, voice.md, style.md, and
+                       brief (if --brief is used) without asking.
   --update             Refresh the managed block of an existing CLAUDE.md in place
                        (preserving content outside the sentinels) and refresh
-                       voice.md from the project's installed voice.
+                       voice.md and style.md from the project's installed voice
+                       and style.
   --voice <name>       Pick the voice for this project (default: academic). The
                        choice is recorded inside voice.md; --update reuses it.
                        Shipped voices live in templates/voices/; custom voices
                        can be placed at ~/.claude/voice/<name>.md. Switching to
                        a different --voice on an existing project requires
                        --force or --update.
+  --style <name>       Pick the citation/document style for this project
+                       (default: apa7). The choice is recorded inside
+                       style.md; --update reuses it. Shipped styles live in
+                       templates/styles/; custom styles can be placed at
+                       ~/.claude/style/<name>.md. Switching to a different
+                       --style on an existing project requires --force or
+                       --update.
   --brief <name>       Also drop <name>.brief.md into the project directory,
                        rendered from templates/brief.template.md.
   -h, --help           Show this message.
@@ -65,6 +77,12 @@ while [[ $# -gt 0 ]]; do
       VOICE="${2:-}"
       [[ -z "${VOICE}" ]] && { echo "--voice needs a name" >&2; exit 1; }
       VOICE_EXPLICIT=1
+      shift 2
+      ;;
+    --style)
+      STYLE="${2:-}"
+      [[ -z "${STYLE}" ]] && { echo "--style needs a name" >&2; exit 1; }
+      STYLE_EXPLICIT=1
       shift 2
       ;;
     --project)
@@ -113,7 +131,7 @@ render() {
 }
 
 # ---- step 1: global files (always) -----------------------------------------
-mkdir -p "${CLAUDE_AGENTS_DIR}" "${CLAUDE_CITATIONS_DIR}" "${CLAUDE_TEMPLATES_DIR}" "${CLAUDE_VOICE_DIR}"
+mkdir -p "${CLAUDE_AGENTS_DIR}" "${CLAUDE_CITATIONS_DIR}" "${CLAUDE_TEMPLATES_DIR}" "${CLAUDE_VOICE_DIR}" "${CLAUDE_STYLE_DIR}"
 echo "Rendering global files..."
 render "${REPO_DIR}/agents/source-finder.md"     "${CLAUDE_AGENTS_DIR}/source-finder.md"
 render "${REPO_DIR}/citations/schema.md"         "${CLAUDE_CITATIONS_DIR}/schema.md"
@@ -131,6 +149,17 @@ for voice_file in "${REPO_DIR}"/templates/voices/*.md; do
   voice_name=$(basename "${voice_file}" .md)
   cp "${voice_file}" "${CLAUDE_VOICE_DIR}/${voice_name}.md"
   echo "  ${CLAUDE_VOICE_DIR}/${voice_name}.md"
+done
+
+# Style library: copy each shipped style to ~/.claude/style/<name>.md verbatim
+# (no {{USER}} substitution). Library files are templates; the per-project
+# step substitutes {{USER}} and prepends the style marker when rendering into
+# <project>/style.md. Same pattern as the voice library above.
+for style_file in "${REPO_DIR}"/templates/styles/*.md; do
+  [[ -e "${style_file}" ]] || continue
+  style_name=$(basename "${style_file}" .md)
+  cp "${style_file}" "${CLAUDE_STYLE_DIR}/${style_name}.md"
+  echo "  ${CLAUDE_STYLE_DIR}/${style_name}.md"
 done
 
 # Clean up legacy academic-researcher.md from prior installs. Academic-researcher
@@ -178,11 +207,45 @@ if [[ ! -f "${VOICE_SOURCE}" ]]; then
   exit 1
 fi
 
+# ---- style preflight: resolve and validate before touching project files --
+# Priority for which style to use:
+#   1. --style <name> passed explicitly
+#   2. marker in the project's existing style.md
+#   3. default ("apa7")
+DEST_STYLE="${TARGET_DIR}/style.md"
+MARKER_STYLE=""
+if [[ -f "${DEST_STYLE}" ]]; then
+  MARKER_STYLE=$(sed -n '1s/^<!-- sourced:style=\([a-zA-Z0-9_-]*\) -->$/\1/p' "${DEST_STYLE}")
+fi
+if [[ ${STYLE_EXPLICIT} -eq 0 && -n "${MARKER_STYLE}" ]]; then
+  STYLE="${MARKER_STYLE}"
+fi
+
+STYLE_SOURCE="${CLAUDE_STYLE_DIR}/${STYLE}.md"
+if [[ ! -f "${STYLE_SOURCE}" ]]; then
+  echo "Error: style '${STYLE}' not found at ${STYLE_SOURCE}." >&2
+  echo "Available styles in ${CLAUDE_STYLE_DIR}:" >&2
+  for f in "${CLAUDE_STYLE_DIR}"/*.md; do
+    [[ -e "$f" ]] && echo "  $(basename "$f" .md)" >&2
+  done
+  exit 1
+fi
+
 # Renders a voice library file to the project with the voice marker prepended.
 render_voice() {
   local src="$1" dest="$2" voice_name="$3"
   {
     echo "<!-- sourced:voice=${voice_name} -->"
+    echo ""
+    sed "s/{{USER}}/${ESCAPED_USER}/g" "${src}"
+  } > "${dest}"
+}
+
+# Renders a style library file to the project with the style marker prepended.
+render_style() {
+  local src="$1" dest="$2" style_name="$3"
+  {
+    echo "<!-- sourced:style=${style_name} -->"
     echo ""
     sed "s/{{USER}}/${ESCAPED_USER}/g" "${src}"
   } > "${dest}"
@@ -265,7 +328,27 @@ else
   echo "  ${DEST_VOICE} already exists; skipping (pass --update to refresh, --force to replace)."
 fi
 
-# ---- step 4: optional brief ------------------------------------------------
+# ---- step 4: per-project style ---------------------------------------------
+# STYLE, STYLE_SOURCE, DEST_STYLE, MARKER_STYLE are set in the preflight above.
+echo "Rendering per-project style.md..."
+if [[ ! -f "${DEST_STYLE}" ]]; then
+  render_style "${STYLE_SOURCE}" "${DEST_STYLE}" "${STYLE}"
+  echo "  ${DEST_STYLE} (style: ${STYLE})"
+elif [[ ${FORCE} -eq 1 ]]; then
+  render_style "${STYLE_SOURCE}" "${DEST_STYLE}" "${STYLE}"
+  echo "  ${DEST_STYLE} (overwrote with --force, style: ${STYLE})"
+elif [[ ${UPDATE} -eq 1 ]]; then
+  render_style "${STYLE_SOURCE}" "${DEST_STYLE}" "${STYLE}"
+  echo "  ${DEST_STYLE} (refreshed via --update, style: ${STYLE})"
+elif [[ ${STYLE_EXPLICIT} -eq 1 && "${STYLE}" != "${MARKER_STYLE}" ]]; then
+  echo "Error: ${DEST_STYLE} is installed with style '${MARKER_STYLE:-unknown}'; refusing to silently switch to '${STYLE}'." >&2
+  echo "Pass --force to replace, or --update to refresh with the new style." >&2
+  exit 1
+else
+  echo "  ${DEST_STYLE} already exists; skipping (pass --update to refresh, --force to replace)."
+fi
+
+# ---- step 5: optional brief ------------------------------------------------
 if [[ -n "${BRIEF_NAME}" ]]; then
   BRIEF_PATH="${TARGET_DIR}/${BRIEF_NAME}.brief.md"
   if [[ -f "${BRIEF_PATH}" && ${FORCE} -eq 0 ]]; then
