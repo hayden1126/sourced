@@ -46,7 +46,7 @@ If you assign an individual author whose name is not printed in or signed on the
 
 ## `citation_string` is informational
 
-`citation_string` is a portability hint and a grep target; it is not load-bearing. The authoritative rendering of an inline citation comes from `source.authors` + `source.year` resolved per the project's `style.md` in `[formatting mode]` (CLAUDE.md §10). Setting `citation_string` to an APA-7 string at logging time is fine and recommended for portability across projects with different styles, but downstream rendering does not depend on it. `[formatting mode]` does not read this field during normal operation.
+`citation_string` is a portability hint and a grep target; it is not load-bearing. The authoritative rendering of an inline citation comes from `source.authors` + `source.year` resolved per the project's `style.md` in `[formatting mode]` (CLAUDE.md §7). Setting `citation_string` to an APA-7 string at logging time is fine and recommended for portability across projects with different styles, but downstream rendering does not depend on it. `[formatting mode]` does not read this field during normal operation.
 
 ## Allowed enum values
 

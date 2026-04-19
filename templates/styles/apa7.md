@@ -19,7 +19,7 @@ Resolution rules for Pandoc-style IDs in source prose. Each row is exhaustive
 for that case; if a case isn't listed, ask {{USER}} rather than guessing.
 
 ### One author
-- Parenthetical (`[id]`): `(Smith, 2010)`.
+- Parenthetical (`[@id]`): `(Smith, 2010)`.
 - Narrative (`@id`): `Smith (2010)`.
 - With page locator (`[@id, p. 42]`): `(Smith, 2010, p. 42)`.
 - With page range (`[@id, pp. 42-44]`): `(Smith, 2010, pp. 42-44)`. En-dash, not hyphen.
@@ -174,4 +174,5 @@ emit them.
 
 - `[VERIFY: ...]` and `[UNSOURCED]` in source prose are ERRORS at format
   time. Formatting mode must halt and surface every occurrence rather than
-  emitting them into the formatted output. See CLAUDE.md §10.
+  emitting them into the formatted output. See CLAUDE.md §7 ([formatting
+  mode] procedure step 2) and §8 (Moment 2).
