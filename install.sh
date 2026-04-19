@@ -64,6 +64,31 @@ Options:
 EOF
 }
 
+check_prerequisites() {
+  # Tools required by the framework at runtime (not at install). pdftotext and
+  # pdftoppm come from poppler-utils; Claude Code's built-in Read calls
+  # pdftoppm for PDF rendering, and [research mode] reads PDFs via pdftotext.
+  # pandoc 3.0+ with citeproc is required for the word/docx paste target and
+  # for any future latex target.
+  local missing=()
+  command -v pdftotext >/dev/null 2>&1 || missing+=("poppler-utils (pdftotext, pdfinfo, pdftoppm)")
+  command -v pandoc    >/dev/null 2>&1 || missing+=("pandoc (3.0+)")
+
+  [[ ${#missing[@]} -eq 0 ]] && return 0
+
+  echo "Missing prerequisites:" >&2
+  for tool in "${missing[@]}"; do
+    echo "  - ${tool}" >&2
+  done
+  echo "" >&2
+  echo "Install on Debian/Ubuntu/WSL:" >&2
+  echo "  sudo apt-get install -y poppler-utils pandoc" >&2
+  echo "" >&2
+  echo "Install on macOS:" >&2
+  echo "  brew install poppler pandoc" >&2
+  exit 1
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --global-only) GLOBAL_ONLY=1; shift ;;
@@ -95,6 +120,9 @@ while [[ $# -gt 0 ]]; do
     *)             echo "unknown flag: $1" >&2; usage; exit 1 ;;
   esac
 done
+
+# ---- prerequisites check ---------------------------------------------------
+check_prerequisites
 
 # ---- repo-self-guard -------------------------------------------------------
 if [[ ${GLOBAL_ONLY} -eq 0 ]]; then
@@ -162,6 +190,19 @@ for style_file in "${REPO_DIR}"/templates/styles/*.md; do
   style_name=$(basename "${style_file}" .md)
   cp "${style_file}" "${CLAUDE_STYLE_DIR}/${style_name}.md"
   echo "  ${CLAUDE_STYLE_DIR}/${style_name}.md"
+done
+
+# Per-style asset directories (CSL files, reference docx, etc.): mirror
+# templates/styles/<name>/ into ~/.claude/style/<name>/. These are read by
+# [formatting mode] when a paste target needs external assets (e.g., the
+# word target invokes pandoc with --csl and --reference-doc). Assets are
+# copied verbatim; they are not templates.
+for style_assets in "${REPO_DIR}"/templates/styles/*/; do
+  [[ -d "${style_assets}" ]] || continue
+  style_name=$(basename "${style_assets}")
+  mkdir -p "${CLAUDE_STYLE_DIR}/${style_name}"
+  cp -R "${style_assets}." "${CLAUDE_STYLE_DIR}/${style_name}/"
+  echo "  ${CLAUDE_STYLE_DIR}/${style_name}/ (assets)"
 done
 
 # Clean up legacy academic-researcher.md from prior installs. Academic-researcher
@@ -240,6 +281,12 @@ fi
 #     "## Generation signatures" (until the next "## " heading), OR
 #   - its line contains the literal token "[iron]".
 # Prints each iron rule on its own line. Blank lines are filtered.
+#
+# Single-line assumption: each iron rule is expected to be a single line (a
+# one-line paragraph or bullet). Multi-line iron rules would fragment into
+# per-line pseudo-rules because normalize_rule operates per extracted line. If
+# a future iron rule needs multi-line form, switch this to paragraph-mode awk
+# (RS="") first.
 extract_iron_rules() {
   local src="$1"
   {
@@ -270,7 +317,12 @@ normalize_rule() {
 validate_iron_rules() {
   local voice_source="$1" skeleton_path="$2"
   [[ -f "${skeleton_path}" ]] || return 0
-  [[ "${voice_source}" -ef "${skeleton_path}" ]] && return 0
+  # Canonicalize both paths so the self-validation short-circuit survives install
+  # flow refactors (cp -l, mv, symlinks). -ef checked inode equality, which
+  # depended on plain cp creating a fresh inode.
+  if [[ "$(readlink -f "${voice_source}")" == "$(readlink -f "${skeleton_path}")" ]]; then
+    return 0
+  fi
 
   local iron_rules
   iron_rules=$(extract_iron_rules "${skeleton_path}")

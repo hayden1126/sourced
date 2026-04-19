@@ -356,8 +356,47 @@ says how to emit them.
   copies and for further conversion downstream (Pandoc, etc.).
 
 ### word
-- Reserved. Not implemented yet. Formatting mode should refuse and ask
-  {{USER}} for the desired expression.
+- Output two files from one pass: `<draft>.docx.md` (the rendered-markdown
+  intermediate, for archive and re-runs) and `<draft>.docx` (the
+  submission binary). Source `<draft>.md` is never modified.
+- Collapse per-instance citation IDs in the derived `<draft>.docx.md`
+  before invoking pandoc. See CLAUDE.md §7 `[formatting mode]` step 4
+  for the collapse procedure and its rationale; pandoc-citeproc dedupes
+  by id, so three entries for one source render as three References
+  entries unless collapsed.
+- Dependencies (resolved at install time, not format time):
+  - pandoc 3.1 or newer (citeproc is built in). Required. If missing,
+    halt and surface `install.sh`'s prerequisite error.
+  - CSL file for the style, shipped at
+    `~/.claude/style/chicago17-ad/chicago-author-date-17th-edition.csl`.
+    Required. If missing, halt and report; do not fall back to a
+    different CSL edition silently (edition drift was the failure mode
+    that motivated shipping this file).
+  - Reference docx matching §Document layout (Times New Roman 12 pt,
+    double-spaced body, 0.5 in hanging-indent Bibliography paragraph
+    style), expected at
+    `~/.claude/style/chicago17-ad/reference-styled.docx`. Optional. If
+    missing, run pandoc without `--reference-doc` and report the
+    fallback loudly in step 8 (paragraph style and hanging indents will
+    not match §Document layout; {{USER}} may need to patch styles in
+    Word).
+- Pipeline:
+  1. Write the collapsed, fully-resolved markdown to `<draft>.docx.md`.
+  2. Generate a source-level bibliography file from the citation log
+     (one entry per unique source, keyed to the collapsed ids) in CSL
+     JSON format, at `<draft>.bib.json` next to the draft.
+  3. Invoke `pandoc --citeproc
+     --bibliography=<draft>.bib.json
+     --csl=~/.claude/style/chicago17-ad/chicago-author-date-17th-edition.csl
+     [--reference-doc=~/.claude/style/chicago17-ad/reference-styled.docx]
+     -o <draft>.docx <draft>.docx.md`.
+     The `--reference-doc` flag is omitted when the ref.docx is missing.
+  4. Confirm pandoc exit status is 0 and both output files exist before
+     reporting to {{USER}}.
+- Paste-time instructions: none when the ref.docx is present. When the
+  ref.docx fell back to pandoc's default, instruct {{USER}} once to
+  apply Times New Roman 12, double-spacing, and hanging-indent
+  References in Word after opening the file.
 
 ### latex
 - Reserved. Not implemented yet.
