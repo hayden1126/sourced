@@ -11,7 +11,7 @@ A consolidated view across the three main lines of evidence is now available
 
 Institutional reporting on classroom multilingualism adds context from outside
 the academic literature (Modern Language Association 2021). Undated industry commentary touches on
-similar themes (Perennial n.d.).
+similar themes (Perennial, n.d.).
 
 # References {#references .unnumbered}
 
@@ -29,7 +29,7 @@ Modern Language Association. 2021. "How Do I Cite a Source with Multiple Authors
 :::
 
 ::: {#ref-perennial-nd .csl-entry}
-Perennial, Paul. n.d. "Undated Commentary." Perennial Blog, n.d. <https://example.com/undated>.
+Perennial, Paul. n.d. "Undated Commentary." Perennial Blog. <https://example.com/undated>.
 :::
 
 ::: {#ref-smith-2010 .csl-entry}
