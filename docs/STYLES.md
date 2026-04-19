@@ -22,13 +22,26 @@ Both render citations from Pandoc-style IDs (`[@id]`, `@id`, `[@id, p. N]`) in s
 
 ## Style file structure
 
-Each style file ships a fixed section structure so `[formatting mode]` can look up a single rule without rereading the file. Sections are addressable (e.g., "see §Inline / Two authors").
+Each style file ships a fixed section structure so `[formatting mode]` can look up a single rule without rereading the file. Sections are addressable (e.g., "see §Inline / Two authors"). The required section set varies by the style's structural **shape** (declared in §Style identity):
 
-- **§Style identity** — name, authority (manual + edition), default domain, last-reviewed date.
-- **§Inline citations** — resolution rules for every Pandoc ID case (one author, two authors, three-plus, group author, no author, no date, multi-citation, direct quotes, classical texts).
-- **§References list** — entry format per source type (journal article, book, chapter, web page, translation of primary text, reprint), sort order, indentation, URL/DOI handling.
-- **§Document layout** — title block, heading hierarchy, body text spacing, footnotes.
-- **§Paste target expression rules** — how the style's conventions are expressed in specific destination formats (see below).
+| Shape | Required sections |
+|-------|-------------------|
+| `author-date` (APA, Chicago AD, Harvard, AMA author-year, AAA, Turabian AD) | §Style identity · §Inline citations · §References list · §Document layout · §Paste target expression rules · §Special tokens |
+| `author-page` (MLA 9) | same as author-date; §Inline citations rules differ (no year; page locator in parens) |
+| `footnote` (Chicago NB, Turabian NB, MHRA, OSCOLA) | §Style identity · §Footnote citations · §Bibliography · §Document layout · §Paste target expression rules · §Special tokens |
+| `numeric-sequence` (IEEE, Vancouver, ACM numeric, ACS superscript, CSE c-s) | §Style identity · §Inline citations · §Reference list · §Numbering rules · §Document layout · §Paste target expression rules · §Special tokens |
+| `numeric-alpha` (CSE c-n, some Harvard variants) | same as numeric-sequence; §Numbering rules specifies label generation instead of ordinal assignment |
+
+**§Style identity** common to every shape carries: `Name`, `Shape`, `In-text marker`, `List heading` (runtime section name: References, Works Cited, Bibliography, Reference List), `Authority`, `Default for`, `Source consulted` (URLs + access dates for audit), `CSL provenance` (shipped CSL filename + source repo + edition pinning), `On-demand references` (paths to sidecar reference files the formatter reads conditionally), `Last reviewed`.
+
+Section contents by role:
+
+- **§Inline citations** — resolution rules per ID case for author-date / author-page / numeric shapes: one author, two authors, three-plus, group, no author, no date, multi-citation, direct quotes, style-specific edge cases (classical texts, personal communications).
+- **§Footnote citations** (footnote shapes only) — full first-cite form, short subsequent form, `ibid.` or short-form rules, footnote placement convention.
+- **§References list** / **§Reference list** / **§Bibliography** — entry format per source type (journal article, book, chapter, web page, translation, reprint), sort order, indentation, URL/DOI handling. Section name matches the style's own terminology.
+- **§Numbering rules** (numeric shapes only) — how numbers or letter-labels are assigned, reset rules, range-collapsing (`[1]-[3]` vs `[1, 2, 3]`), superscript vs bracket conventions.
+- **§Document layout** — title block, heading hierarchy, body text spacing, footnotes (for non-footnote shapes only).
+- **§Paste target expression rules** — how the style's conventions render per destination format.
 - **§Special tokens** — how `[VERIFY: ...]` and `[UNSOURCED]` tokens in source prose are treated at format time.
 
 ## Paste targets

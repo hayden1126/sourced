@@ -8,15 +8,31 @@ Sort order". Rules are normative; do not improvise.
 ## Style identity
 
 - Name: Chicago Manual of Style, 17th edition, author-date system.
+- Shape: author-date
+- In-text marker: parenthetical
+- List heading: References
 - Authority: The Chicago Manual of Style, 17th edition (University of Chicago
   Press, 2017), chapters 14-15 for citations, chapters 1-2 for manuscript
   layout.
 - Default for: humanities and social-science work where the syllabus
   specifies "Chicago author-date" (or where the professor's own publications
   use parenthetical author-year style). Not for notes-bibliography (NB)
-  contexts; for those, use a chicago17-nb.md style file instead (not yet
-  shipped).
-- Last reviewed: 2026-04-18.
+  contexts; use chicago17-nb.md for those.
+- Source consulted:
+  - CMOS 17 (print and paywalled online), chapters 14-15 for citations,
+    chapters 1-2 for manuscript layout.
+  - https://www.chicagomanualofstyle.org/tools_citationguide/citation-guide-2.html
+    (CMOS Online author-date quick guide, free); accessed 2026-04-19.
+  - https://owl.purdue.edu/owl/research_and_citation/chicago_manual_17th_edition/
+    (Purdue OWL, non-authoritative; used for disambiguation only); accessed 2026-04-19.
+- CSL provenance:
+  - file: chicago17-ad/chicago-author-date-17th-edition.csl
+  - source: github.com/citation-style-language/styles
+  - filename-pinned to 17th-edition variant so CMOS 18 upstream does not
+    silently override.
+- On-demand references:
+  - classical texts → chicago17-ad/classical-abbreviations.md
+- Last reviewed: 2026-04-19.
 
 ## Inline citations
 
