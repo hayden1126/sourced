@@ -39,5 +39,22 @@
     "volume": "48",
     "issue": "1",
     "page": "55-80"
+  },
+  {
+    "id": "mla-2021",
+    "type": "webpage",
+    "author": [{"literal": "Modern Language Association"}],
+    "issued": {"date-parts": [[2021]]},
+    "title": "How do I cite a source with multiple authors?",
+    "container-title": "MLA Style Center",
+    "URL": "https://style.mla.org/citing-multiple-authors/"
+  },
+  {
+    "id": "perennial-nd",
+    "type": "webpage",
+    "author": [{"family": "Perennial", "given": "Paul"}],
+    "title": "Undated Commentary",
+    "container-title": "Perennial Blog",
+    "URL": "https://example.com/undated"
   }
 ]
