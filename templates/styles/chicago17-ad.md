@@ -97,6 +97,49 @@ similar.
 - Single-spaced inside the block quote in print formats; the surrounding
   body remains double-spaced.
 
+### Classical Greek and Latin works
+Author-date handles ancient texts unevenly: classical works are cited by
+standard pagination systems (Stephanus, Bekker, etc.), not modern page
+numbers, so the year of any particular translation is usually irrelevant
+for locating the passage.
+
+- **First mention**: prefer narrative integration that introduces the
+  translation: `In the Republic, Plato (trans. Grube and Reeve 1992)
+  argues that...`
+- **Subsequent references**: parenthetical with standard pagination, no
+  year: `(Plato, Rep. 514a)`, `(Aristotle, NE 1094a1-3)`,
+  `(Augustine, Conf. 8.12)`, `(Aquinas, ST I-II, q. 94, a. 2)`.
+- **Standard pagination systems**:
+  - Stephanus for Plato (e.g., `514a` — page 514, section a).
+  - Bekker for Aristotle (e.g., `1094a1-3` — page 1094, column a, lines 1-3).
+  - Patristic and medieval authors: book.chapter or book.chapter.section.
+  - Aquinas: part, question, article (e.g., `ST I-II, q. 94, a. 2`).
+- **Standard title abbreviations**: use the conventional Latin or English
+  abbreviations per CMOS 17 §10.45 (e.g., `Rep.` for Republic, `NE` for
+  Nicomachean Ethics, `Conf.` for Confessions, `ST` for Summa Theologiae,
+  `Met.` for Metaphysics, `Pol.` for Politics).
+- **Pandoc syntax**: `[@plato-republic-001, 514a]` resolves to
+  `(Plato, Rep. 514a)`. The locator slot carries the standard pagination;
+  the year is suppressed for classical works. The formatter detects a
+  classical work from the log entry's content (ancient author, standard
+  pagination format in the locator) — no schema change required.
+
+### Personal communication / interview
+- In-text only: `(J. Smith, pers. comm., March 15, 2023)`. Use the
+  communicator's full name on first mention, surname on subsequent.
+- NOT included in References — personal communications are not recoverable
+  by readers (CMOS 17 §15.53).
+- Exception: recorded and archived interviews that are publicly accessible
+  get a normal entry under the interviewee's name.
+
+### Reprint of older work
+- In-text: `(Hume [1739] 1978)` — original publication year in brackets,
+  reprint year following. Both years stay in subsequent citations.
+- Pandoc syntax: `[@hume-treatise-001]` resolves to `(Hume [1739] 1978)`
+  when the log entry carries an `original_year` field alongside the
+  reprint `year`. Without an `original_year`, renders as the standard
+  `(Hume 1978)`.
+
 ## References list
 
 ### Heading
@@ -143,6 +186,38 @@ similar.
   available on the page (CMOS 17 §14.207).
 - For stable, dated pages from authoritative sources, the access date may
   be omitted.
+
+### Entry format (translation of classical or primary text)
+`PrimaryAuthor. EditionYear. Title in Italics. Translated by Translator Name. City: Publisher.`
+- Author is the original writer's conventional name (Plato, Aristotle,
+  Augustine, Aquinas).
+- Year is the translation/edition year — the year that locates the volume
+  on a library shelf, not the original composition date.
+- "Translated by" or "Edited and translated by" as appropriate; for
+  revisions, append "Revised by [Reviser Name]."
+- Example: `Plato. 1992. Republic. Translated by G. M. A. Grube. Revised
+  by C. D. C. Reeve. Indianapolis: Hackett.`
+- For a work cited only by standard pagination (Stephanus, Bekker), the
+  References entry still uses the modern edition year — that's how the
+  reader finds the volume; the standard pagination is how they find the
+  passage within it.
+
+### Entry format (multi-volume work)
+- Whole multi-volume work: `Author. Year-Year. Title in Italics. N vols. City: Publisher.`
+- Single volume of a multi-volume set: `Author. Year. Title in Italics. Vol. N of Series Title in Italics. City: Publisher.`
+- A chapter or entry within a single volume of a multi-volume set:
+  `Author. Year. "Chapter Title in Quotes." In Title of Volume in Italics, vol. N of Series Title, edited by Editor Name, NN-NN. City: Publisher.`
+
+### Entry format (reprint of older work)
+`Author. (OriginalYear) ReprintYear. Title in Italics. Editor / translator info if any. City: Reprint Publisher.`
+- Original publication year in parentheses, reprint year follows without
+  parentheses.
+- Used when the original year is meaningful for understanding the work's
+  place in intellectual history (especially common for classical
+  philosophy reprints from the early modern period onward).
+- Example: `Hume, David. (1739) 1978. A Treatise of Human Nature. Edited
+  by L. A. Selby-Bigge. 2nd ed. Revised by P. H. Nidditch. Oxford:
+  Clarendon Press.`
 
 ### Indentation and spacing
 - Hanging indent: 0.5 in (first line flush, subsequent lines indented).
