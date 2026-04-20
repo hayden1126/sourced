@@ -485,13 +485,13 @@ Both are format-time blockers per `[formatting mode]` step 2.
 
 ### Moment 3: Formatting
 
-Inline citations and the References list are rendered by `[formatting mode]` (§7). The mode reads `source.authors` and `source.year` from each log entry referenced by an id in source prose, applies the matching rule from `style.md` §Inline citations, and emits the rendered string into a sibling file (`<draft>.<target>.md`). Source prose is not modified.
+Inline citations and the References list are rendered by `[formatting mode]` (§7). The mode emits a CSL-JSON bibliography from the log (per `~/.claude/citations/csl-json-emitter.md`) and invokes `pandoc --citeproc` with the style's vendored CSL. Pandoc+CSL renders every inline citation and the References list; the mode does not read style.md §Inline citations (that section has been removed from the slim schema). Output goes to a sibling file (`<draft>.<target>.md`) per target. Source prose is not modified.
 
 The References list is generated from the log at format time, not earlier. One entry per unique source (deduped across multiple log entries that point at the same source). Sort, format, and apply document-layout rules per `style.md`. Per-instance ids in the derived markdown are collapsed to source-level ids uniformly (pandoc+CSL dedupes by id across all paste targets); see §7 `[formatting mode]` step 3.
 
 ### Block quotes
 
-Direct quotes longer than roughly 40 words go in a block quote, indented, no quotation marks, citation after the closing punctuation. The block-quote convention is style-agnostic in source prose: indent the quoted text and place the Pandoc citation (e.g., `[@smith-2010-001, p. 42]`) at the closing position. `[formatting mode]` renders the citation per `style.md` §Direct quotes.
+Direct quotes longer than roughly 40 words go in a block quote, indented, no quotation marks, citation after the closing punctuation. The block-quote convention is style-agnostic in source prose: indent the quoted text and place the Pandoc citation (e.g., `[@smith-2010-001, p. 42]`) at the closing position. `[formatting mode]` delegates citation rendering for block-quoted passages to pandoc+CSL (the CSL encodes the style's direct-quote conventions); the mode does not read style.md for direct-quote rules. See §Document layout.Block quotes in style.md for the prose-level threshold that `[editing mode]` enforces upstream (verified in `[formatting mode]` pre-flight per §7 step 2).
 
 ### Backward compatibility (legacy drafts with rendered citations)
 
@@ -601,7 +601,7 @@ Citation, references, and document-formatting rules live in `style.md`, in this 
 
 If `style.md` is missing, stop and ask {{USER}} to run `install.sh --style <name>` rather than proceeding with guessed rules. The default for {{USER}}'s work is `--style apa7`.
 
-Style.md is structured so a model can look up a single rule without rereading the file. The structure is fixed: §Style identity, §Inline citations, §References list, §Document layout, §Paste target expression rules, §Special tokens. New styles ship as templates under `templates/styles/<name>.md` (e.g., `mla9.md`, `chicago17.md`).
+Style.md is structured so a model can look up a single rule without rereading the file. The structure is fixed: §Style identity, §Document layout, §Paste target expression rules, §Special tokens (the slim schema; rendering-rule sections — §Inline citations, §References list, §Footnote citations, §Numbering rules — have been removed because pandoc+CSL now owns all rendering). New styles ship as templates under `templates/styles/<name>.md` (e.g., `mla9.md`, `chicago17.md`).
 
 Style.md is project-local. Different projects can carry different styles. The style is fixed at install time and does not change mid-project; switching mid-project requires re-running `install.sh --style <new>` and re-formatting.
 
