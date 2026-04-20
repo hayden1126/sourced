@@ -29,7 +29,7 @@
 
 - **Target entries:** <number, typically 8–20>
 - **Floor:** <minimum acceptable; mode warns if merged log comes in below this>
-- **Per-facet cap:** <max entries drawn from any one facet, to prevent over-concentration; "none" acceptable>
+- **Per-facet cap:** <max entries drawn from any one facet, to prevent over-concentration; optional — may be left as "decide during planning" and set after facet approval in `[plan mode]` phase 2, since facets aren't decomposed until then. "none" also acceptable.>
 
 ## Source constraints
 
@@ -43,7 +43,7 @@
 
 - **Length per entry:** <150–250 words typical; specify if rubric demands otherwise>
 - **Required beats:** <check any that apply: summary | relevance-to-topic | location-of-key-quotes | evaluation. Default: all four.>
-- **Voice:** <"default agent voice" or "match voice.md">
+- **Voice:** <annotation prose applies voice.md's iron rules + §10 Never list + exploratory-vs-verdict tone only; paragraph flow, pacing, and sentence connectedness do not apply to per-entry blocks. Note any per-project deviations here; otherwise leave as "standard annotation voice".>
 
 ## Deadline
 

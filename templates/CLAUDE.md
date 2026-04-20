@@ -364,12 +364,12 @@ Turn the merged citation log into a formatted annotated bibliography. Two respon
 
 **Phase 1: per-entry annotation.** For each entry in the log (`verification_status` is `verified` or `partial`), generate an annotation and write it to the entry's `annotation` field (see `~/.claude/citations/schema.md §Annotation`). Annotations are grounded only in the log entry's fields plus the brief's *Topic* and *Scope statement* sections — no source re-read, no new dispatch. §3 verification is inherited from logging time; annotation does not re-open it.
 
-Annotation shape: 150–250 words, four beats in order, matching schema.md §Annotation:
+Annotation shape: 150–250 words, four beats in order, matching schema.md §Annotation. Percentages below are approximate allocations of the word budget and sum to 100%; drift of ±5% per beat is fine when a specific source demands more summary or thinner evaluation.
 
-1. **Paraphrased summary (40–60% of budget).** What the source argues, shows, or demonstrates. Draw from `context_description` + `surrounding_context`. Preserve every qualifier in `exact_quote` (hedges, conditions, populations, periods). Preserve second-order attribution ("Smith, reviewing Jones, argues …"). Do not extend past what the fields support; flag gaps rather than filling.
-2. **Relevance to the bibliography's topic (20–30%).** Name which in-scope bullet the source speaks to, or which boundary case it illuminates. Specific, not generic. State thin relevance as thin; padding is a failure mode.
-3. **Location of key quotable material (10–20%).** `location` verbatim ("p. 42", "§3.2", "chapter 4, pp. 118–124"). Quote at most one short phrase from `exact_quote` if a specific formulation is the reason to cite this source; otherwise paraphrase. Do not quote `surrounding_context` — that field is verification-only.
-4. **Brief evaluation (10–20%).** One strength and one limit, relative to this bibliography's topic. Draw only from fields the entry carries. Do not invent evaluative claims the fields don't support; pick a different dimension or omit with a flag to {{USER}}.
+1. **Paraphrased summary (~50% of budget).** What the source argues, shows, or demonstrates. Draw from `context_description` + `surrounding_context`. Preserve every qualifier in `exact_quote` (hedges, conditions, populations, periods). Preserve second-order attribution ("Smith, reviewing Jones, argues …"). Do not extend past what the fields support; flag gaps rather than filling.
+2. **Relevance to the bibliography's topic (~25%).** Name which in-scope bullet the source speaks to, or which boundary case it illuminates. Specific, not generic. State thin relevance as thin; padding is a failure mode.
+3. **Location of key quotable material (~15%).** `location` verbatim ("p. 42", "§3.2", "chapter 4, pp. 118–124"). Quote at most one short phrase from `exact_quote` if a specific formulation is the reason to cite this source; otherwise paraphrase. Do not quote `surrounding_context` — that field is verification-only.
+4. **Brief evaluation (~10%).** One strength and one limit, relative to this bibliography's topic. Draw only from fields the entry carries. Do not invent evaluative claims the fields don't support; pick a different dimension or omit with a flag to {{USER}}.
 
 Constraints:
 
