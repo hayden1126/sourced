@@ -19,7 +19,7 @@ sourced/
 │   └── browser-reader-extract/ # Skill: extract text + [p. N] markers from DRM'd browser readers.
 ├── tests/
 │   ├── emitter/                # CSL-JSON emitter fixtures + unit tests.
-│   └── parity/                 # Golden outputs: 5 styles × 3 paste targets = 15 goldens.
+│   └── parity/                 # Golden outputs: 5 styles × 4 paste targets = 20 goldens.
 └── templates/
     ├── CLAUDE.md               # Primary agent (academic-researcher) operating instructions.
     ├── brief.template.md       # Per-paper intake brief skeleton.
@@ -61,7 +61,7 @@ Shipped skills under `skills/<name>/` mirror into `~/.claude/skills/<name>/` on 
 | `[refining mode]` | Stress-test the outline. Citation / structure / synthesis-integrity (§4) audit before prose exists. | `[writing mode]` (sign-off gate) |
 | `[writing mode]` | Convert refined outline into prose. Apply `voice.md`, §10 generation signatures, paraphrase default, Pandoc citation IDs. | `[editing mode]` |
 | `[editing mode]` | Seven-pass audit: ID validation → §4 citation → partial-entry recheck → grammar → AI-tell (§10) → quote-density → voice (§9). Handoff gate blocks on unresolved voice-audit hits. | `[formatting mode]` (handoff gate) |
-| `[formatting mode]` | Render source prose into style-specific output for a named paste target (`word`, `google-docs`, `plain-markdown` — all rendered via pandoc+CSL). Terminal stage; source prose never modified. | Done. |
+| `[formatting mode]` | Render source prose into style-specific output for a named paste target (`word`, `google-docs`, `plain-markdown`, `latex` — all rendered via pandoc+CSL). Terminal stage; source prose never modified. | Done. |
 | `[research mode]` | Source vetting and logging. Auto-triggers from other modes when a claim needs a source. Dispatches `source-finder` subagents in parallel for 3+ sub-topics. | Returns to prior mode on completion. |
 | `[red team mode]` | Systematically challenge every claim. Counterpoints, blind spots. | Any mode. |
 | `[babble mode]` | Stream-of-consciousness. No structure. Raw material for collaboration. | Any mode. |
@@ -95,7 +95,7 @@ The log is the single source of truth for author names and years; rendering is d
 
 ## Citation rendering pipeline
 
-Step 3 above (rendering) delegates to `pandoc --citeproc` reading the style's vendored CSL file under `templates/styles/<name>/`. `[formatting mode]` emits the citation log as CSL-JSON per the mapping in [`citations/csl-json-emitter.md`](./citations/csl-json-emitter.md), hands pandoc the source prose plus CSL-JSON plus CSL, and receives rendered inline citations and a References list. The same pipeline serves all three paste targets (`word`, `google-docs`, `plain-markdown`); paste-target differences are post-pandoc transforms. See [`docs/STYLES.md`](./docs/STYLES.md) for the end-to-end description.
+Step 3 above (rendering) delegates to `pandoc --citeproc` reading the style's vendored CSL file under `templates/styles/<name>/`. `[formatting mode]` emits the citation log as CSL-JSON per the mapping in [`citations/csl-json-emitter.md`](./citations/csl-json-emitter.md), hands pandoc the source prose plus CSL-JSON plus CSL, and receives rendered inline citations and a References list. The same pipeline serves all four paste targets (`word`, `google-docs`, `plain-markdown`, `latex`); paste-target differences are output format (`.docx` / markdown / `.tex`) plus per-target post-pandoc transforms and per-target asset binding (reference.docx for word, template.tex for latex). See [`docs/STYLES.md`](./docs/STYLES.md) for the end-to-end description.
 
 ## Voice system: three layers
 

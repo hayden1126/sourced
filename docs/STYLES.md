@@ -35,19 +35,19 @@ Required sections (every style):
 |---------|------|
 | §Style identity | Name, Shape (audit-only), In-text marker (audit-only), List heading (runtime-read), Authority, Default for, Source consulted, CSL provenance (file / source / fetched / CSL title), On-demand references (post-pandoc hook per style), Last reviewed. |
 | §Document layout | Fonts and spacing, Margins, Heading hierarchy, Title block, Page numbering, (optional) Footnotes, Block quotes (threshold if any — enforced in `[editing mode]`, verified in `[formatting mode]` pre-flight). |
-| §Paste target expression rules | Per-target subsections (google-docs, plain-markdown, word): pandoc flags, paste-time instructions, post-pandoc transforms, reference.docx path (word only). |
+| §Paste target expression rules | Per-target subsections (google-docs, plain-markdown, word, latex): pandoc flags, paste-time instructions, post-pandoc transforms, reference.docx path (word only), template.tex path (latex only). |
 | §Special tokens | `[VERIFY: ...]` and `[UNSOURCED]` policy. Most styles carry the standard block. |
 
 ## Paste targets
 
-`[formatting mode]` renders into one of the target formats defined under the style's `§Paste target expression rules` section. The target is required at mode invocation: `[formatting mode for google-docs]`, `[formatting mode for plain-markdown]`, `[formatting mode for word]`. An unspecified target is a refusal, not a default.
+`[formatting mode]` renders into one of the target formats defined under the style's `§Paste target expression rules` section. The target is required at mode invocation: `[formatting mode for google-docs]`, `[formatting mode for plain-markdown]`, `[formatting mode for word]`, `[formatting mode for latex]`. An unspecified target is a refusal, not a default.
 
-All three targets are rendered by `pandoc --citeproc` reading the style's vendored CSL file. Flags per target (including output markdown dialect, wrap behavior, and reference.docx) live in the style's `§Paste target expression rules` subsections.
+All four targets are rendered by `pandoc --citeproc` reading the style's vendored CSL file. Flags per target (including output markdown dialect, wrap behavior, reference.docx, and template.tex) live in the style's `§Paste target expression rules` subsections.
 
 - **`google-docs`** — markdown output tuned for Google Docs paste (smart quotes, en-dashes preserved). Features not expressible at paste time (hanging indents, custom headers) surface as a one-line instruction at the top of the output.
 - **`plain-markdown`** — faithful markdown pass-through.
 - **`word`** — pandoc emits `.docx` directly, optionally styled by a reference.docx bundled per style.
-- **`latex`** — reserved; not implemented.
+- **`latex`** — pandoc emits a standalone `.tex` via a per-style pandoc template at `templates/styles/<name>/template.tex`. User compiles with `pdflatex` / `xelatex` / `lualatex`; `sourced` does not own compilation.
 
 ## How `[formatting mode]` uses `style.md`
 
@@ -59,7 +59,7 @@ The formatting procedure (abbreviated; see CLAUDE.md §7 for the full version):
 2. Pre-flight. Halt on `[VERIFY: ...]`, `[UNSOURCED]`, rendered citation strings, unresolved IDs, stale `retrieved_at`, or inline direct quotes exceeding the style's block-quote threshold.
 3. Pre-pandoc pass: collapse per-instance citation IDs into a derived `<draft>.pandoc.md`. Source prose unchanged.
 4. Emit CSL-JSON bibliography from the log to `<draft>.bib.json` per `citations/csl-json-emitter.md`.
-5. Invoke pandoc with flags from `§Paste target expression rules.<target>`; output per target (`.docx`, `.gdocs.md`, `.plain.md`).
+5. Invoke pandoc with flags from `§Paste target expression rules.<target>`; output per target (`.docx`, `.gdocs.md`, `.plain.md`, `.tex`).
 6. Handle pandoc stderr: halt on blocking warnings (unresolved citation, missing type, CSL-parse error); surface tolerable warnings in the report.
 7. Post-pandoc pass: apply On-demand references transforms (e.g., classical-abbreviations rewrite); prepend paste-time instructions.
 8. Report.
