@@ -2,22 +2,30 @@
 
 [← Back to README](../README.md)
 
-Ten cognitive modes, one announced per transition. Full definitions live in [`templates/CLAUDE.md`](../templates/CLAUDE.md) §7; this page is the reference card plus a walkthrough of the typical workflow.
+Eleven cognitive modes, one announced per transition. Full definitions live in [`templates/CLAUDE.md`](../templates/CLAUDE.md) §7; this page is the reference card plus a walkthrough of the typical workflow.
+
+## Project types
+
+Two project types select different mode graphs:
+
+- **Essay** (default). All ten essay modes are reachable. Created with `install.sh --brief <name>` or `install.sh --brief <name> --type essay`.
+- **Annotated bibliography**. `[outlining]`, `[refining]`, `[writing]` are unreachable; `[annotated-bib]` replaces them. `[plan]`, `[research]`, and `[editing]` behave differently (facet decomposition, per-facet dispatch, reduced editing audit). Created with `install.sh --brief <name> --type annotated-bib`. A marker file `.sourced-project-type` at project root records the type; absence = essay.
 
 ## Modes at a glance
 
-| Mode | Purpose |
-|------|---------|
-| `[collaborative]` | Default. Think aloud with forward momentum. |
-| `[red team]` | Systematically attack your own argument. |
-| `[babble]` | Stream-of-consciousness, no structure. |
-| `[research]` | Find and vet sources. Auto-triggers when any other mode hits an unsourced claim. Dispatches `source-finder` subagents in parallel for 3+ sub-topics. |
-| `[plan]` | Map sources to arguments before writing. Requires an intake brief (or explicit skip). |
-| `[outlining]` | Paragraph-level structure, citations attached by id, no prose. Purely generative. |
-| `[refining]` | Stress-test the outline against the citation log. Runs the §4 audit (scope, attribution, inference, cherry-pick, synthesis) and integrity checks before prose exists. |
-| `[writing]` | Outline to prose. Applies voice rules (§9), generation signatures (§10), paraphrase default, Pandoc citation IDs. |
-| `[editing]` | Seven-pass audit on prose: ID validation → §4 citation → partial-entry recheck → grammar → AI-tell (§10) → quote-density → voice (§9). |
-| `[formatting]` | Render prose into style-specific output for a named paste target. Terminal stage; source prose never modified. |
+| Mode | Purpose | Available in |
+|------|---------|--------------|
+| `[collaborative]` | Default. Think aloud with forward momentum. | all |
+| `[red team]` | Systematically attack your own argument. | all |
+| `[babble]` | Stream-of-consciousness, no structure. | all |
+| `[research]` | Find and vet sources. Auto-triggers when any other mode hits an unsourced claim. Dispatches `source-finder` subagents in parallel for 3+ sub-topics. Dispatch template carries scope statement verbatim in annotated-bib projects. | all |
+| `[plan]` | Map sources to arguments before writing (essay). Run topic specificity gate and facet decomposition (annotated-bib). Requires a brief (or explicit skip). | all |
+| `[outlining]` | Paragraph-level structure, citations attached by id, no prose. Purely generative. | essay |
+| `[refining]` | Stress-test the outline against the citation log. Runs the §4 audit (scope, attribution, inference, cherry-pick, synthesis) and integrity checks before prose exists. | essay |
+| `[writing]` | Outline to prose. Applies voice rules (§9), generation signatures (§10), paraphrase default, Pandoc citation IDs. | essay |
+| `[annotated-bib]` | Per-entry annotation (4-beat: summary / relevance / location / evaluation) and draft compile. Grounded only in log fields; §3 verification inherited. | annotated-bib |
+| `[editing]` | Seven-pass audit on prose: ID validation → §4 citation → partial-entry recheck → grammar → AI-tell (§10) → quote-density → voice (§9). In annotated-bib projects, passes 6 (quote-density) and the §9 flow-rules part of pass 7 are skipped. | all |
+| `[formatting]` | Render prose into style-specific output for a named paste target. Terminal stage; source prose never modified. | all |
 
 ## Typical workflow
 
