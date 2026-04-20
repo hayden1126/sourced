@@ -1,7 +1,7 @@
 # CSL direct consumption: shift rendering ownership to pandoc + CSL
 
 - **Date:** 2026-04-19
-- **Status:** Approved (v3, after two review cycles)
+- **Status:** Shipped 2026-04-19 via PRs #1-5 (see `~/.claude/projects/-home-hayden-sourced/memory/project_csl_architecture_shift.md` for the full PR list).
 - **Scope:** Pipeline rewrite + slim schema + retroactive migration of 5 shipped styles
 - **Out of scope:** Tier-2 style rollout (captured under Follow-up)
 

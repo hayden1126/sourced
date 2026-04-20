@@ -20,7 +20,7 @@ Items that require a schema change, new mode, or new gate are called out in the 
 
 ## Citation styles
 
-Current shipped: `apa7`, `chicago17-ad`. Each new style is a `templates/styles/<name>.md` file plus (optionally) a `templates/styles/<name>/` asset dir for CSL or reference docs.
+Current shipped: `apa7`, `chicago17-ad`, `chicago17-nb`, `ieee`, `mla9` — all on the slim schema with vendored CSL files under `templates/styles/<name>/`. Each new style is a slim `templates/styles/<name>.md` file plus a `templates/styles/<name>/<csl>.csl` (optionally) a `reference-styled.docx` for the `word` target.
 
 ### MLA 9
 **Priority:** next · **Effort:** M · **Status:** shipped (commit 3c870c6).

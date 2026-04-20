@@ -488,7 +488,7 @@ Both are format-time blockers per `[formatting mode]` step 2.
 
 Inline citations and the References list are rendered by `[formatting mode]` (§7). The mode emits a CSL-JSON bibliography from the log (per `~/.claude/citations/csl-json-emitter.md`) and invokes `pandoc --citeproc` with the style's vendored CSL. Pandoc+CSL renders every inline citation and the References list; the mode does not read style.md §Inline citations (that section has been removed from the slim schema). Output goes to a sibling file (`<draft>.<target>.md`) per target. Source prose is not modified.
 
-The References list is generated from the log at format time, not earlier. One entry per unique source (deduped across multiple log entries that point at the same source). Sort, format, and apply document-layout rules per `style.md`. Per-instance ids in the derived markdown are collapsed to source-level ids uniformly (pandoc+CSL dedupes by id across all paste targets); see §7 `[formatting mode]` step 3.
+The References list is generated from the log at format time, not earlier. One entry per unique source (deduped across multiple log entries that point at the same source). Sort, format, and apply document-layout rules per `style.md`. Per-instance ids in source prose (`<author>-<year>-NNN`) are collapsed to source-level ids (`<author>-<year>`) by §7 step 3's pre-pandoc pass before pandoc+CSL renders them. Pandoc+CSL then dedupes by the collapsed id across all paste targets; see §7 `[formatting mode]` step 3.
 
 ### Block quotes
 
