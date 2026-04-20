@@ -16,6 +16,10 @@ Citation and document-layout rules live in a per-project `style.md` rendered fro
 
 Each renders citations from Pandoc-style IDs (`[@id]`, `@id`, `[@id, p. N]`) in source prose into style-compliant inline citations (or footnotes, for `chicago17-nb`) and References entries (or Bibliography / Works Cited per the style's terminology) at `[formatting mode]` time. Additional styles in the ROADMAP (Vancouver, AMA, Harvard, ACM, ACS, Turabian 9, CSE, MHRA) follow the same structural patterns.
 
+## Schema transition in progress
+
+The 5 shipped style files are being migrated from a rendering-rules-in-markdown schema to a slim schema where `pandoc --citeproc` + vendored CSL files own all rendering. During the migration, some style.md files carry dead-weight old rendering-rule sections (§Inline citations, §References list, §Footnote citations, §Numbering rules) that `[formatting mode]` no longer reads. The dead-weight will be removed in the final migration PR. See `docs/specs/2026-04-19-csl-direct-consumption-design.md` for the full shift description.
+
 ## Pick a style at install
 
 ```bash
