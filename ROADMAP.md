@@ -65,9 +65,13 @@ Legal writing. Massive spec (case law, statutes, regulations), different citatio
 Beyond "argumentative essay with sources." Each new type probably extends the mode system or adds a new target output.
 
 ### Annotated bibliography
-**Priority:** next · **Effort:** S · **Status:** open.
+**Priority:** next · **Effort:** M · **Status:** phase 1+2 shipped 2026-04-20; phase 3 (per-style paste-target variants) open.
 
-Output IS the citation log, formatted as per-entry blocks with paraphrase + analysis rather than an argumentative essay. Cheap to ship: new `[formatting mode]` target or a new mode that emits `<draft>.annotated.md` from the log directly. Schema needs a per-entry `annotation` field (new optional field, backward-compatible).
+New `annotated-bib` project type with topic-driven research deliverable. User supplies a narrow topic; `[plan mode]` runs a topic specificity gate and facet decomposition; `[research mode]` dispatches source-finders per facet; `[annotated-bib mode]` (new) writes per-entry annotations (150–250 word four-beat: summary / relevance / location / evaluation) grounded only in log fields; `[editing mode]` runs a subset of its passes (skip quote-density, reduce voice audit to iron rules + exploratory/verdict). Design spec: [`docs/specs/2026-04-20-annotated-bibliography-design.md`](docs/specs/2026-04-20-annotated-bibliography-design.md).
+
+**Shipped 2026-04-20 (phases 1+2).** Schema extension (`citations/schema.md §Annotation`); new brief template (`templates/brief.template.annotated-bib.md`); `install.sh --type annotated-bib` flag + `.sourced-project-type` marker; `templates/CLAUDE.md §7` project-type preamble + new mode + mode adaptations.
+
+**Phase 3 open.** Per-style paste-target variants (`apa7-annotated-bib`, `chicago17-ad-annotated-bib`, etc.) that render per-entry bibliography entries followed by annotation blocks via `pandoc --citeproc` + CSL. Open design question: inject annotations via CSL `note` field mapping plus custom CSL-JSON emitter path, or post-pandoc merge of rendered bibliography + log's `annotation` field by id match. Upstream citation-style-language/styles has `apa-annotated-bibliography.csl` for APA; other styles may need vendored variants. LaTeX `template.tex` adjustments per style for annotation-block layout. Test fixtures per style. Originally sized S; resized M after design work surfaced the project-type fork cost.
 
 ### Thesis / dissertation
 **Priority:** later · **Effort:** L · **Status:** open.
