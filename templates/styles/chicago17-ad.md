@@ -74,17 +74,21 @@ Threshold: 100 words (roughly five typed lines). Rendered as block quotes per Ch
 
 ### google-docs
 
-- pandoc flags: `--citeproc --wrap=none -t markdown-citations`
+- pandoc flags: `--citeproc --wrap=none -t markdown-citations-header_attributes`
 - Paste-time instructions:
   - "Apply hanging indent to References after pasting (Format > Align > Indentation options > Special > Hanging)."
   - "Apply double-spacing in Google Docs if the destination expects it (Format > Line & paragraph spacing > Double)."
-- Post-pandoc transforms: classical-abbreviations rewrite (see §Style identity.On-demand references).
+- Post-pandoc transforms:
+  1. Strip pandoc fenced-div markers (`sed -e '/^::: /d' -e '/^:::$/d'`); Google Docs' "Paste as markdown" renders the `:::` wrappers as literal text. The `-header_attributes` pandoc extension handles the heading-attribute counterpart (`# References {#references .unnumbered}`).
+  2. Classical-abbreviations rewrite (see §Style identity.On-demand references).
 
 ### plain-markdown
 
-- pandoc flags: `--citeproc --wrap=preserve -t markdown-citations`
+- pandoc flags: `--citeproc --wrap=preserve -t markdown-citations-header_attributes`
 - Paste-time instructions: (none)
-- Post-pandoc transforms: classical-abbreviations rewrite.
+- Post-pandoc transforms:
+  1. Strip pandoc fenced-div markers (`sed -e '/^::: /d' -e '/^:::$/d'`); most destinations (Obsidian, Notion, GitHub render, Reddit) paste the `:::` wrappers as literal text.
+  2. Classical-abbreviations rewrite.
 
 ### word
 
