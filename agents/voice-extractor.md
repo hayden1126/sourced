@@ -155,7 +155,7 @@ Tag every halt with exactly one of:
 
 - **`missing-samples-dir`** — `samples_dir` does not exist or cannot be read.
 - **`invalid-voice-name`** — `voice_name` contains characters outside `[a-z0-9_-]`.
-- **`shipped-name-collision`** — `voice_name` matches a shipped voice (currently `academic`); next `install.sh --global-only` would clobber it. Suggest a different name.
+- **`shipped-name-collision`** — `voice_name` matches a shipped voice (currently `academic`, `casual`, `technical`, `journalistic`, `narrative`, `hybrid`); next `install.sh --global-only` would clobber it. Suggest a different name.
 - **`existing-voice`** — output path exists and `overwrite` is `false`.
 - **`missing-skeleton`** — `skeleton_path` does not exist or cannot be read.
 - **`under-sample`** — corpus below the 5-file or 5,000-word floor.
