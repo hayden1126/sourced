@@ -78,11 +78,14 @@ Every word fights to stay. If a sentence adds nothing, cut it. If two sentences 
 
 Writing is sculpting: start with raw material, then chisel. Write a draft, step back, cut, rewrite. Repeat. The first version is never the final version.
 
+**Concision is a means, not an end.** The baseline register for this voice is medium-to-long connected prose (see §Sentence Connectedness); chiseling below that baseline is a failure mode, not a success. If cutting a word makes the sentence awkward to read aloud, put the word back. If compressing two sentences into one merges two different thoughts, do not merge them. "Every word fights to stay" means filler doesn't survive; it does not mean every removal is a win. A grammatically tight sentence that trips the reader on first read has been over-chiseled. The fix is to restore connective tissue, not to defend the compression.
+
 **The iteration loop.** After writing a draft, reread every sentence and ask:
 - Does this sentence add something the reader doesn't already know?
 - Does it repeat an idea from another part of the text?
 - Does it sound formulaic or AI-generated? (Cross-check against CLAUDE.md §10's Never list specifically; retokenizing the pattern is not a fix.)
 - Does it earn its place in the argument?
+- **Does it read fluidly aloud, or does the reader trip on it?** A clipped fragment ("none of the three resolves"), a stranded preposition that lands awkwardly ("where is the 'there' the stem points at?"), or a register-high verb where a plain one would carry the meaning ("legible" where "visible" works) all signal over-compression. Restore the word or restructure around a different shape.
 - Does the section flow when read start to finish?
 
 If any answer is no, rewrite or cut. Then reread again. Do not stop after one pass. Keep iterating until a full reread surfaces no issues. Only then present the draft for feedback.
@@ -128,6 +131,15 @@ Walk through reasoning. When there's a counterpoint worth addressing, address it
 ### Paragraph Length
 
 3 to 5 sentences per paragraph maximum. Each paragraph has one job. Show the example first, then explain the principle.
+
+### Weak Nominalizations
+
+Prefer verbs over nouns made from verbs. Prefer concrete subjects over abstract ones. A chain of abstract nouns ("the scope of X… the widening into Y… the strategies Z uses to place W in relation to…") reads as institutional padding even when every word passes the Core Rule's cut test. This is the opposite failure mode of over-compression: when the cut-bias stops firing, the prose expands into abstract-noun cascades that disconnect the agent from the action.
+
+- Nominalized: "widening the scope to the morphological strategies the Cheyenne lexicon uses to place bearers in relation to what the culture considers sacred"
+- Verbed: "widening the scope to the Cheyenne morphology that marks which bearers the culture treats as sacred"
+
+Watch especially for sentences whose subject is an abstract noun made from a verb ("the argument," "the question," "the distinction," "the tension," "the refusal") when every clause extends the cascade. Rewrite around a concrete agent and an active verb when the subject doesn't need to stay abstract. Small-word redundancy is a related tell; a repeated "as" ("read as X rather than as Y" should be "read as X rather than Y") survives the Core Rule because individual words pass but the pattern is compression-artifact slack.
 
 ## Dimension
 
