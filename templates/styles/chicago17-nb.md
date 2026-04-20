@@ -36,8 +36,8 @@ Sections are addressable: "see §Footnote citations / Short form", "see
     chicago-notes-bibliography.csl (now tracking CMOS 18) does not silently
     override.
 - On-demand references:
-  - classical texts → chicago17-ad/classical-abbreviations.md (shared with
-    CMOS 17 AD; per-author abbreviations are identical across NB and AD)
+  - `chicago17-ad/classical-abbreviations.md` — shared with chicago17-ad.
+  - Hook: after pandoc renders output, walk each footnote body and each bibliography entry; for every entry whose CSL-JSON `author[].family` matches an author in the sidecar's allowlist, rewrite the rendered title per the sidecar's abbreviation column. Applies to all paste targets.
 - Last reviewed: 2026-04-19.
 
 ## Footnote citations
@@ -242,12 +242,17 @@ abbreviation table before emitting the note. Pagination-system rules
 
 ## Document layout
 
-### Title block
+### Fonts and spacing
 
-- Student papers: separate title page, title centered roughly one-third down,
-  byline / course / instructor / date stacked centered below.
-- Markdown destinations: `# Title` at top, blank line, metadata block
-  (author / date / course) as plain lines.
+- Font: Times New Roman 12 or similar serif default (CMOS 17 §2.8).
+- Line spacing: double in print/Word destinations; single in markdown unless
+  destination overrides.
+- Paragraph indent: 0.5 in first-line indent. Markdown: no indent (flat
+  rendering); paragraph break is a blank line.
+
+### Margins
+
+- 1 in all sides.
 
 ### Heading hierarchy
 
@@ -257,14 +262,16 @@ abbreviation table before emitting the note. Pagination-system rules
 - Level 2: centered, regular weight, headline case. Markdown: `### Heading`.
 - Level 3: flush left, bold, headline case. Markdown: `#### Heading`.
 
-### Body text
+### Title block
 
-- Font: Times New Roman 12 or similar serif default (CMOS 17 §2.8).
-- Line spacing: double in print/Word destinations; single in markdown unless
-  destination overrides.
-- Paragraph indent: 0.5 in first-line indent. Markdown: no indent (flat
-  rendering); paragraph break is a blank line.
-- Margins: 1 in all sides.
+- Student papers: separate title page, title centered roughly one-third down,
+  byline / course / instructor / date stacked centered below.
+- Markdown destinations: `# Title` at top, blank line, metadata block
+  (author / date / course) as plain lines.
+
+### Page numbering
+
+- Not specified in the current style file; add when first needed.
 
 ### Footnotes
 
@@ -283,6 +290,10 @@ CLAUDE.md §7) and placed per paste target:
 Substantive content notes (commentary, asides, tangents) use the same
 numbering stream as source citations in Chicago NB; there is no separate
 endnote/footnote split.
+
+### Block quotes
+
+Threshold: 100 words (roughly five typed lines). Rendered as block quotes per Chicago 17 §13.10.
 
 ## Paste target expression rules
 

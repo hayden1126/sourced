@@ -31,7 +31,8 @@ Sort order". Rules are normative; do not improvise.
   - filename-pinned to 17th-edition variant so CMOS 18 upstream does not
     silently override.
 - On-demand references:
-  - classical texts → chicago17-ad/classical-abbreviations.md
+  - `chicago17-ad/classical-abbreviations.md` — classical-author abbreviation table.
+  - Hook: after pandoc renders output, walk each bibliography entry and each footnote (for NB; n/a here); for every entry whose CSL-JSON `author[].family` matches an author in the sidecar's allowlist, rewrite the rendered title per the sidecar's abbreviation column. Applies to all paste targets.
 - Last reviewed: 2026-04-19.
 
 ## Inline citations
@@ -296,11 +297,16 @@ for locating the passage.
 
 ## Document layout
 
-### Title block
-- Student papers: separate title page, title centered roughly one-third down
-  the page, byline / course / instructor / date stacked centered below.
-- Markdown destinations: `# Title` at top, then a blank line, then a
-  metadata block (author / date / course) as plain lines.
+### Fonts and spacing
+- Font: Times New Roman 12 or similar serif default. CMOS 17 §2.8 prefers
+  serif for body text.
+- Line spacing: double in print/Word destinations; single in markdown unless
+  destination overrides.
+- Paragraph indent: 0.5 in first-line indent. Markdown: no indent (rendered
+  flat); paragraph break is a blank line.
+
+### Margins
+- 1 in all sides.
 
 ### Heading hierarchy
 - CMOS 17 §1.55-1.56 defines five heading levels. The system is more
@@ -310,14 +316,14 @@ for locating the passage.
 - Level 3: flush left, bold, headline case. Markdown: `#### Heading`.
 - Levels 4 and 5 exist; rarely needed in {{USER}}'s work. Add when first used.
 
-### Body text
-- Font: Times New Roman 12 or similar serif default. CMOS 17 §2.8 prefers
-  serif for body text.
-- Line spacing: double in print/Word destinations; single in markdown unless
-  destination overrides.
-- Paragraph indent: 0.5 in first-line indent. Markdown: no indent (rendered
-  flat); paragraph break is a blank line.
-- Margins: 1 in all sides.
+### Title block
+- Student papers: separate title page, title centered roughly one-third down
+  the page, byline / course / instructor / date stacked centered below.
+- Markdown destinations: `# Title` at top, then a blank line, then a
+  metadata block (author / date / course) as plain lines.
+
+### Page numbering
+- Not specified in the current style file; add when first needed.
 
 ### Footnotes
 - The author-date system uses parenthetical citation, not footnotes, for
@@ -328,6 +334,9 @@ for locating the passage.
 - Substantive footnotes that themselves cite a source use the same
   author-date parenthetical inside the note: `For a contrasting view, see
   (Jones 2012, 88-90).`
+
+### Block quotes
+Threshold: 100 words (roughly five typed lines). Rendered as block quotes per Chicago 17 §13.10.
 
 ## Paste target expression rules
 
