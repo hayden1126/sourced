@@ -26,8 +26,9 @@ The primary agent (academic-researcher) lives in each project's `CLAUDE.md`. Two
 - `~/.claude/` writable (the installer creates it on first run).
 - A directory for your paper. Any directory works: a fresh folder, a git repo you already have, or an existing project.
 - **poppler-utils** (`pdftotext`, `pdfinfo`, `pdftoppm`). Claude Code's Read tool renders PDFs through `pdftoppm`; `[research mode]` extracts text from PDF sources via `pdftotext`.
-- **pandoc** 3.1+. Required by every `[formatting mode]` paste target (`word`, `google-docs`, `plain-markdown`); all three render through the pandoc + citeproc + CSL pipeline.
+- **pandoc** 3.1+. Required by every `[formatting mode]` paste target (`word`, `google-docs`, `plain-markdown`, `latex`); all four render through the pandoc + citeproc + CSL pipeline.
 - **python3**. Used at per-project install time to cross-check a vendored CSL file's `<title>` against the style's declaration (`validate_csl_title` in `install.sh`). Ships by default with current Debian, Ubuntu, WSL, and macOS; install via your package manager if missing.
+- **TeX Live** (optional). Only needed if you'll compile the `[formatting mode for latex]` output to PDF. `sourced` emits a `.tex` file; compilation is your job. Not checked by `install.sh`. See [`docs/INSTALL.md`](./docs/INSTALL.md#optional-tex-live-for-the-latex-paste-target) for package guidance per platform.
 
 `install.sh` checks that `pdftotext`, `pandoc`, and `python3` are all on PATH and aborts with a clear install command if any is missing. It does not install them for you; use your package manager.
 
