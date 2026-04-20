@@ -69,17 +69,17 @@ Threshold: 4 lines of prose, 3 lines of verse (MLA 9 §6.36). Verse quotations u
 
 ### google-docs
 
-- pandoc flags: `--citeproc --wrap=none -t markdown-citations`
+- pandoc flags: `--citeproc --wrap=none -t markdown-citations-header_attributes`
 - Paste-time instructions:
   - "Apply hanging indent to Works Cited after pasting (Format > Align > Indentation options > Special > Hanging)."
   - "MLA page-number header ('Smith 3') requires a custom Google Docs header; add via Insert > Headers > Header, then type surname + page number."
-- Post-pandoc transforms: (none)
+- Post-pandoc transforms: strip pandoc fenced-div markers from the Works Cited block (`sed -e '/^::: /d' -e '/^:::$/d'`); Google Docs' "Paste as markdown" renders the `:::` wrappers as literal text. The `-header_attributes` pandoc extension handles the heading-attribute counterpart (`# Works Cited {#works-cited .unnumbered}`).
 
 ### plain-markdown
 
-- pandoc flags: `--citeproc --wrap=preserve -t markdown-citations`
+- pandoc flags: `--citeproc --wrap=preserve -t markdown-citations-header_attributes`
 - Paste-time instructions: (none)
-- Post-pandoc transforms: (none)
+- Post-pandoc transforms: strip pandoc fenced-div markers from the Works Cited block (`sed -e '/^::: /d' -e '/^:::$/d'`); most destinations (Obsidian, Notion, GitHub render, Reddit) paste the `:::` wrappers as literal text.
 
 ### word
 

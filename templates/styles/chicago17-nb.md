@@ -82,17 +82,21 @@ Threshold: 100 words (roughly five typed lines). Rendered as block quotes per Ch
 
 ### google-docs
 
-- pandoc flags: `--citeproc --wrap=none -t markdown-citations`
+- pandoc flags: `--citeproc --wrap=none -t markdown-citations-header_attributes`
 - Paste-time instructions:
   - "Apply hanging indent to Bibliography after pasting (Format > Align > Indentation options > Special > Hanging)."
   - "Footnotes paste as inline markers in Google Docs; convert to Google Docs footnotes using Insert > Footnote if needed. Google Docs does not round-trip pandoc `[^N]: body` blocks into native footnotes automatically."
-- Post-pandoc transforms: classical-abbreviations rewrite (see §Style identity.On-demand references).
+- Post-pandoc transforms:
+  1. Strip pandoc fenced-div markers (`sed -e '/^::: /d' -e '/^:::$/d'`); Google Docs' "Paste as markdown" renders the `:::` wrappers as literal text. The `-header_attributes` pandoc extension handles the heading-attribute counterpart (`# Bibliography {#bibliography .unnumbered}`).
+  2. Classical-abbreviations rewrite (see §Style identity.On-demand references).
 
 ### plain-markdown
 
-- pandoc flags: `--citeproc --wrap=preserve -t markdown-citations`
+- pandoc flags: `--citeproc --wrap=preserve -t markdown-citations-header_attributes`
 - Paste-time instructions: (none)
-- Post-pandoc transforms: classical-abbreviations rewrite.
+- Post-pandoc transforms:
+  1. Strip pandoc fenced-div markers (`sed -e '/^::: /d' -e '/^:::$/d'`); most destinations (Obsidian, Notion, GitHub render, Reddit) paste the `:::` wrappers as literal text.
+  2. Classical-abbreviations rewrite.
 
 ### word
 
