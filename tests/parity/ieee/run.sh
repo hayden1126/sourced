@@ -25,4 +25,8 @@ if ! "${RENDER}" "${SCRIPT_DIR}" word docx.md -t markdown-citations; then
   failures=$((failures + 1))
 fi
 
+if ! "${RENDER}" "${SCRIPT_DIR}" latex tex -t latex; then
+  failures=$((failures + 1))
+fi
+
 exit ${failures}

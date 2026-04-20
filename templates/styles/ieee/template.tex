@@ -1,0 +1,51 @@
+\documentclass[conference]{IEEEtran}
+
+% Engine-agnostic encoding: pdflatex uses inputenc/fontenc; xe/lualatex use fontspec.
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else
+  \usepackage{fontspec}
+\fi
+
+% IEEEtran ships with its own geometry and typography; do not override margins,
+% fonts, or line spacing unless the target venue demands it. IEEEtran expects
+% math and graphics; these are inherited from its base.
+\usepackage{csquotes}
+\usepackage{calc}
+\usepackage{hyperref}
+\hypersetup{hidelinks}
+
+% Citeproc: pandoc emits a CSLReferences environment for the References list.
+% IEEEtran's two-column layout requires redefining the environment to avoid
+% hanging-indent conflicts with its narrow column width. We use a flat list.
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{0pt}
+\newlength{\csllabelwidth}
+\setlength{\csllabelwidth}{2em}
+\newenvironment{CSLReferences}[2]% #1 hanging-indent flag (ignored), #2 entry spacing
+  {\setlength{\parindent}{0pt}%
+   \setlength{\parskip}{#2\baselineskip}}%
+  {}
+\newcommand{\CSLBlock}[1]{#1\hfill\break}
+\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{#1}}
+\newcommand{\CSLRightInline}[1]{\parbox[t]{\dimexpr\linewidth-\csllabelwidth}{#1}\break}
+\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
+
+$for(header-includes)$
+$header-includes$
+$endfor$
+
+\title{$title$}
+\author{$for(author)$$author$$sep$ \and $endfor$}
+
+\begin{document}
+
+$if(title)$
+\maketitle
+$endif$
+
+$body$
+
+\end{document}
