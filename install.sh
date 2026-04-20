@@ -66,14 +66,32 @@ EOF
 }
 
 check_prerequisites() {
-  # Tools required by the framework at runtime (not at install). pdftotext and
-  # pdftoppm come from poppler-utils; Claude Code's built-in Read calls
-  # pdftoppm for PDF rendering, and [research mode] reads PDFs via pdftotext.
-  # pandoc 3.0+ with citeproc is required for the word/docx paste target and
-  # for any future latex target.
+  # Tools required by the framework at runtime. pdftotext/pdftoppm come from
+  # poppler-utils; Claude Code's built-in Read uses pdftoppm for PDF rendering,
+  # and [research mode] uses pdftotext.
+  # pandoc 3.1+ with citeproc is required by every [formatting mode] paste
+  # target (word, google-docs, plain-markdown). python3 is used at style-install
+  # to cross-check the CSL <title> against style.md provenance.
   local missing=()
   command -v pdftotext >/dev/null 2>&1 || missing+=("poppler-utils (pdftotext, pdfinfo, pdftoppm)")
-  command -v pandoc    >/dev/null 2>&1 || missing+=("pandoc (3.0+)")
+  command -v python3   >/dev/null 2>&1 || missing+=("python3")
+
+  if ! command -v pandoc >/dev/null 2>&1; then
+    missing+=("pandoc 3.1 or newer")
+  else
+    # pandoc --version first line looks like "pandoc 3.1.9" or "pandoc.exe 3.1.9".
+    local pandoc_version
+    pandoc_version=$(pandoc --version | head -n1 | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' | head -n1)
+    local major minor
+    major=${pandoc_version%%.*}
+    minor=${pandoc_version#*.}
+    minor=${minor%%.*}
+    if [[ -z "${major}" || -z "${minor}" ]]; then
+      missing+=("pandoc 3.1 or newer (detected unparseable version: $(pandoc --version | head -n1))")
+    elif (( major < 3 || (major == 3 && minor < 1) )); then
+      missing+=("pandoc 3.1 or newer (detected ${pandoc_version}; Ubuntu 22.04 and older apt ships 2.9 and is below minimum)")
+    fi
+  fi
 
   [[ ${#missing[@]} -eq 0 ]] && return 0
 
@@ -82,11 +100,19 @@ check_prerequisites() {
     echo "  - ${tool}" >&2
   done
   echo "" >&2
-  echo "Install on Debian/Ubuntu/WSL:" >&2
-  echo "  sudo apt-get install -y poppler-utils pandoc" >&2
+  echo "Install on Debian/Ubuntu 24.04+/WSL Ubuntu 24.04+:" >&2
+  echo "  sudo apt-get install -y poppler-utils pandoc python3" >&2
+  echo "" >&2
+  echo "Install on Debian/Ubuntu 22.04 or older (apt pandoc is 2.9, too old):" >&2
+  echo "  sudo apt-get install -y poppler-utils python3" >&2
+  echo "  # then install pandoc 3.1+ from https://github.com/jgm/pandoc/releases" >&2
   echo "" >&2
   echo "Install on macOS:" >&2
-  echo "  brew install poppler pandoc" >&2
+  echo "  brew install poppler pandoc python3" >&2
+  echo "" >&2
+  echo "Install on Windows (PowerShell as admin):" >&2
+  echo "  winget install --id JohnMacFarlane.Pandoc" >&2
+  echo "  winget install --id Python.Python.3" >&2
   exit 1
 }
 
@@ -277,6 +303,89 @@ if [[ ! -f "${VOICE_SOURCE}" ]]; then
   exit 1
 fi
 
+# Cross-check the vendored CSL file's <title> against the style.md's declared
+# CSL provenance title. Catches "shipped the wrong CSL file" before the user
+# sees a mis-rendered document in [formatting mode]. Runs python3 to parse the
+# CSL XML properly; grep would false-positive on <title> elements nested
+# elsewhere in the CSL structure.
+#
+# Arguments: style_source (path to style.md), style_name.
+# Returns 0 on match (or if style.md declares no CSL provenance, which is
+# allowed for legacy styles during the migration). Returns 1 on mismatch.
+validate_csl_title() {
+  local style_source="$1" style_name="$2"
+  local declared_title csl_rel_path csl_abs_path actual_title
+
+  declared_title=$(awk '
+    /^  - CSL title:/ {
+      # Extract content between the first pair of double quotes on this line.
+      # Handles trailing prose after the closing quote (e.g., "...title..." (note)).
+      # If no quotes are present, fall back to the post-colon content trimmed.
+      line = $0
+      sub(/^  - CSL title:[[:space:]]*/, "", line)
+      if (match(line, /"[^"]*"/)) {
+        print substr(line, RSTART + 1, RLENGTH - 2)
+      } else {
+        # No quotes — use the whole trimmed remainder.
+        sub(/^[[:space:]]+/, "", line)
+        sub(/[[:space:]]+$/, "", line)
+        print line
+      }
+      exit
+    }
+  ' "${style_source}")
+  csl_rel_path=$(awk '/^  - file:/{sub(/^  - file:[[:space:]]*/, ""); print; exit}' "${style_source}")
+
+  # If neither is declared, skip (legacy style.md pre-schema; migration window).
+  if [[ -z "${declared_title}" && -z "${csl_rel_path}" ]]; then
+    return 0
+  fi
+
+  if [[ -z "${csl_rel_path}" ]]; then
+    echo "Warning: ${style_source} declares a CSL title but no CSL provenance file path; skipping cross-check." >&2
+    return 0
+  fi
+
+  csl_abs_path="${REPO_DIR}/templates/styles/${csl_rel_path}"
+  if [[ ! -f "${csl_abs_path}" ]]; then
+    echo "Error: ${style_source} declares CSL provenance file '${csl_rel_path}' but ${csl_abs_path} does not exist." >&2
+    return 1
+  fi
+
+  actual_title=$(python3 - "${csl_abs_path}" <<'PYEOF'
+import sys, xml.etree.ElementTree as ET
+path = sys.argv[1]
+tree = ET.parse(path)
+root = tree.getroot()
+# CSL namespace: http://purl.org/net/xbiblio/csl
+ns = {'csl': 'http://purl.org/net/xbiblio/csl'}
+info = root.find('csl:info', ns)
+if info is None:
+    print("")
+    sys.exit(0)
+title = info.find('csl:title', ns)
+print(title.text.strip() if title is not None and title.text else "")
+PYEOF
+)
+
+  if [[ -z "${declared_title}" ]]; then
+    echo "Warning: ${style_source} declares CSL file '${csl_rel_path}' but no CSL title; skipping cross-check." >&2
+    return 0
+  fi
+
+  if [[ "${actual_title}" != "${declared_title}" ]]; then
+    echo "Error: CSL title mismatch for style '${style_name}'." >&2
+    echo "  declared in ${style_source}: '${declared_title}'" >&2
+    echo "  actual in  ${csl_abs_path}: '${actual_title}'" >&2
+    echo "" >&2
+    echo "Either the shipped CSL file is wrong, or the style.md provenance declaration drifted." >&2
+    echo "Re-vendor the correct CSL file from github.com/citation-style-language/styles or update style.md." >&2
+    return 1
+  fi
+
+  return 0
+}
+
 # ---- style preflight: resolve and validate before touching project files --
 # Priority for which style to use:
 #   1. --style <name> passed explicitly
@@ -298,6 +407,10 @@ if [[ ! -f "${STYLE_SOURCE}" ]]; then
   for f in "${CLAUDE_STYLE_DIR}"/*.md; do
     [[ -e "$f" ]] && echo "  $(basename "$f" .md)" >&2
   done
+  exit 1
+fi
+
+if ! validate_csl_title "${STYLE_SOURCE}" "${STYLE}"; then
   exit 1
 fi
 
