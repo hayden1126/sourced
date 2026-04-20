@@ -96,7 +96,7 @@ Threshold: 100 words (roughly five typed lines). Rendered as block quotes per Ch
 
 ### word
 
-- pandoc flags: `--citeproc --reference-doc=~/.claude/style/chicago17-nb/reference-styled.docx`
+- pandoc flags: `--citeproc`
 - reference.docx: `chicago17-nb/reference-styled.docx` — Times New Roman 12pt, double-spaced body, 0.5in hanging Bibliography paragraph style, footnote paragraph style. Optional; on absence, pandoc default layout; surface as a tolerable warning in the step 8 report.
 - Post-pandoc transforms: classical-abbreviations rewrite.
 

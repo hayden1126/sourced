@@ -87,7 +87,7 @@ Threshold: none. IEEE has no prescribed block-quote threshold; writers use edito
 
 ### word
 
-- pandoc flags: `--citeproc --reference-doc=~/.claude/style/ieee/reference-styled.docx`
+- pandoc flags: `--citeproc`
 - reference.docx: `ieee/reference-styled.docx` — Times New Roman 10pt / two-column body, single-spaced References with hanging indent, per IEEE manuscript template. Optional; on absence, pandoc default layout; surface tolerable warning.
 - Post-pandoc transforms: (none)
 
