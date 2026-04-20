@@ -120,12 +120,12 @@ Until the shard is either successfully merged (deleted) or explicitly abandoned 
 
 Optional string field `annotation`. Populated by `[annotated-bib mode]` (templates/CLAUDE.md §7) in projects whose `.sourced-project-type` marker is `annotated-bib`; absent on essay-project entries.
 
-Shape: 150–250 words of style-agnostic prose, four beats in order:
+Shape: 150–250 words of style-agnostic prose, four beats in order. Percentages are approximate allocations summing to 100%; ±5% drift per beat is fine when a specific source demands more summary or thinner evaluation.
 
-1. Paraphrased summary of what the source argues or shows (40–60% of word budget), drawn from `context_description` + `surrounding_context`. Preserves every qualifier in `exact_quote` (hedges, conditions, populations). Preserves second-order attribution ("Smith, reviewing Jones, argues …").
-2. Relevance to the bibliography's topic (20–30%), naming which in-scope bullet the source speaks to.
-3. Location of key quotable material (10–20%), reading `location` verbatim; at most one short phrase from `exact_quote` quoted inline.
-4. Brief evaluation (10–20%), one strength + one limit drawn only from fields the entry carries.
+1. Paraphrased summary of what the source argues or shows (~50% of word budget), drawn from `context_description` + `surrounding_context`. Preserves every qualifier in `exact_quote` (hedges, conditions, populations). Preserves second-order attribution ("Smith, reviewing Jones, argues …").
+2. Relevance to the bibliography's topic (~25%), naming which in-scope bullet the source speaks to.
+3. Location of key quotable material (~15%), reading `location` verbatim; at most one short phrase from `exact_quote` quoted inline.
+4. Brief evaluation (~10%), one strength + one limit drawn only from fields the entry carries.
 
 Generated from log fields only; no source re-read at annotation time (§3 verification is inherited from logging, not re-opened). Style-agnostic: do not render `(Smith, 2010)` inside the annotation; cross-references to other entries use `[@id]` form.
 
