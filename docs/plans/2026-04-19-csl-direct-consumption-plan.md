@@ -1,5 +1,7 @@
 # CSL Direct Consumption Implementation Plan
 
+> **Status: Shipped 2026-04-19 via PRs #1-5.** This document is historical — all tasks completed. See `docs/specs/2026-04-19-csl-direct-consumption-design.md` for the design, and the memory file for the full PR list.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Shift citation and bibliography rendering from hand-maintained per-style rules (duplicated in 5 style.md files) to `pandoc --citeproc` driven by vendored CSL files, for all paste targets.
