@@ -1,0 +1,56 @@
+\documentclass[12pt]{article}
+
+% Engine-agnostic encoding: pdflatex uses inputenc/fontenc; xe/lualatex use fontspec.
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else
+  \usepackage{fontspec}
+\fi
+
+% Chicago 17 (notes-bibliography) layout: 1in margins, single-spaced body.
+% Footnotes are rendered by pandoc citeproc as inline \footnote{...} commands;
+% no special \footnote machinery override is needed.
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\singlespacing
+\usepackage{mathptmx}
+
+\usepackage{csquotes}
+\usepackage{calc}
+\usepackage{hyperref}
+\hypersetup{hidelinks}
+
+% Citeproc: pandoc emits a CSLReferences environment for the Bibliography list.
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{0.5in}
+\newlength{\csllabelwidth}
+\setlength{\csllabelwidth}{3em}
+\newenvironment{CSLReferences}[2]% #1 hanging-indent flag, #2 entry spacing
+  {\setlength{\parindent}{0pt}%
+   \ifodd #1 \let\oldpar\par\def\par{\hangindent=\cslhangindent\oldpar}\fi
+   \setlength{\parskip}{#2\baselineskip}}%
+  {}
+\newcommand{\CSLBlock}[1]{#1\hfill\break}
+\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{#1}}
+\newcommand{\CSLRightInline}[1]{\parbox[t]{\dimexpr\linewidth-\csllabelwidth}{#1}\break}
+\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
+
+$for(header-includes)$
+$header-includes$
+$endfor$
+
+\title{$title$}
+\author{$for(author)$$author$$sep$ \and $endfor$}
+\date{$date$}
+
+\begin{document}
+
+$if(title)$
+\maketitle
+$endif$
+
+$body$
+
+\end{document}

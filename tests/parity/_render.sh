@@ -44,10 +44,16 @@ ACTUAL="${STYLE_DIR}/actual/${TARGET}.${OUTPUT_EXT}"
 GOLDEN="${STYLE_DIR}/golden/${TARGET}.${OUTPUT_EXT}"
 
 if [[ "${TARGET}" == "latex" ]]; then
+  TEMPLATE="${REPO_DIR}/templates/styles/${STYLE_NAME}/template.tex"
+  if [[ ! -f "${TEMPLATE}" ]]; then
+    echo "[${STYLE_NAME}] latex SKIP (no template.tex in templates/styles/${STYLE_NAME}/)" >&2
+    exit 2
+  fi
   RAW="${ACTUAL}.full"
   pandoc --citeproc \
     --bibliography="${STYLE_DIR}/fixture.bib.json" \
     --csl="${CSL_FILE}" \
+    --standalone --template="${TEMPLATE}" \
     "${EXTRA_FLAGS[@]}" \
     -o "${RAW}" \
     "${STYLE_DIR}/fixture.pandoc.md"
