@@ -362,44 +362,51 @@ Preserve {{USER}}'s voice. Don't flatten it into institutional prose.
 
 *Enter only after the gated handoff from `[editing mode]` ({{USER}} confirmed the prose is ready to format); do not enter on your own judgment that editing is "done".*
 
-Convert source prose with Pandoc-style citation IDs into a fully-rendered document for a specific paste target. This is the terminal stage. Source prose is not modified; output goes to a sibling file.
+Convert source prose with Pandoc-style citation IDs into a fully-rendered document for a specific paste target. This is the terminal stage. Source prose is not modified; output goes to a sibling file. Rendering is delegated to `pandoc --citeproc` reading the style's vendored CSL file; the procedure below is uniform across all paste targets and all style Shapes.
 
-**Mode invocation carries the paste target.** Examples: `[formatting mode for google-docs]`, `[formatting mode for plain-markdown]`. The target is required; if {{USER}} says "format this" without a target, ask which one. Supported targets are listed under §Paste target expression rules in style.md; if the named target isn't present, refuse and surface to {{USER}} rather than guessing.
+**Mode invocation carries the paste target.** Examples: `[formatting mode for google-docs]`, `[formatting mode for plain-markdown]`, `[formatting mode for word]`. The target is required; if {{USER}} says "format this" without a target, ask which one. Supported targets are listed under `§Paste target expression rules` in style.md; if the named target isn't present, refuse and surface to {{USER}} rather than guessing.
 
 **Procedure (run in this order; halt on the first failure).**
 
-1. **Read style.md and the citation log.** Style.md is the WHAT; the log is the source of truth for author names, years, titles, DOIs.
-2. **Pre-flight: scan source prose and log for blockers.** Halt if any of these appear:
+1. **Read style.md and the citation log.** Verify style.md's `§Style identity.CSL provenance.file` resolves to an existing CSL file on disk (path: `~/.claude/style/<style>/<csl-filename>` per install.sh's layout). Halt if missing.
+2. **Pre-flight.** Halt on any of:
    - `[VERIFY: ...]` tokens in source prose — unresolved verification debt.
    - `[UNSOURCED]` tokens in source prose — claims with no source.
-   - Rendered citation strings (e.g., `(Smith, 2010)`, `Smith (2010)`) anywhere in source prose, including inside block quotes (per §8 Block quotes, block-quote citations also use Pandoc IDs in source). These should have been converted to IDs in `[editing mode]`. If found, surface them and ask {{USER}} whether to convert in place or return to `[editing mode]`.
+   - Rendered citation strings (e.g., `(Smith, 2010)`, `Smith (2010)`, `[1]`) anywhere in source prose, including inside block quotes. These should have been converted to Pandoc IDs in `[editing mode]`. Surface and ask {{USER}} whether to convert in place or return to `[editing mode]`.
    - Citation IDs that don't resolve to a log entry. Surface unresolved IDs by line.
-   - **Stale `retrieved_at` on any id referenced in source prose** (per schema.md §Staleness). Collect every stale entry first; do not prompt one-by-one. Surface as one grouped report (id, `retrieved_at` or "missing", source URL, reference count) and ask once. Per-entry choices within the single prompt: re-fetch and re-verify (preferred for web sources where the byline could shift), accept as-is (acceptable for stable DOIs), or treat as gap and return to `[editing mode]`. Offer "re-fetch all" / "accept all" / mixed shortcuts. "Accept as-is" holds for this format pass only; the next re-asks unless `retrieved_at` is updated.
-3. **Resolve every citation ID.** Read style.md §Style identity for the `Shape:` field, then branch:
+   - **Stale `retrieved_at`** on any id referenced in source prose (per schema.md §Staleness). Collect every stale entry first; do not prompt one-by-one. Grouped report (id, `retrieved_at` or "missing", source URL, reference count). Per-entry choices: re-fetch and re-verify (preferred for web sources), accept as-is (acceptable for stable DOIs), treat as gap and return to `[editing mode]`. Offer "re-fetch all" / "accept all" / mixed shortcuts. "Accept as-is" holds for this format pass only.
+   - **Inline direct quotes in source prose exceeding the block-quote threshold declared in `§Document layout.Block quotes`** of style.md. This is an LLM-judgment check over quotation-marked spans in prose; it reads the threshold value (e.g., "40 words", "4 lines") and flags plausible exceedances. Surface and refuse; user returns to `[editing mode]` to convert the inline quote to a block quote. `[formatting mode]` does not rewrite prose.
+3. **Pre-pandoc pass.** Copy source prose to `<draft>.pandoc.md`; collapse per-instance citation IDs (regex `<author>-<year>-\d{3}` → `<author>-<year>`) in the copy. Source `<draft>.md` is NEVER modified.
+4. **Emit CSL-JSON bibliography** from the citation log to `<draft>.bib.json`, following `~/.claude/citations/csl-json-emitter.md` (the emitter specification). One entry per unique source, keyed to the collapsed id. Filter the log to ids actually referenced in source prose; dead log entries are not emitted. Tolerable emitter warnings (per the specification's §Source-type inference fallback rule) are collected for the step 8 report but do not halt.
+5. **Invoke pandoc.** Read flags from style.md `§Paste target expression rules.<target>.pandoc flags`. Per-target output routing:
+   - `word` → `<draft>.docx`
+   - `google-docs` → `<draft>.gdocs.md`
+   - `plain-markdown` → `<draft>.plain.md`
 
-   - **author-date** (APA, Chicago AD, Harvard, AMA author-year, AAA, Turabian AD): for each `[@id]`, `@id`, `[@id, p. N]`, `[@a; @b]`, look up `source.authors` and `source.year` in the log, apply the matching rule from style.md §Inline citations (one author / two authors / three or more / group / no author / no date). Assign `n.d.-a/b` letters per style.md §References sort order; do not carry over letters from source prose.
-   - **author-page** (MLA 9): same as author-date, but the rendered string carries a page locator in place of the year (`(Smith 42)` rather than `(Smith, 2010)`). If an id has no locator and the style requires one, halt and surface.
-   - **footnote** (Chicago NB, Turabian NB, MHRA, OSCOLA): for each `[@id]` or `[@id, p. N]`, assign a footnote number N in first-appearance order; emit a footnote marker in the derived markdown (`[^N]` for Pandoc, superscript for Word); build full note text per style.md §Footnote citations (full form on first cite, short form on subsequent; `ibid.` or short-form per the style's rules) and append to a footnote-body array keyed by N. Defer footnote-body emission to step 6.
-   - **numeric-sequence** (IEEE, Vancouver, ACM numeric, ACS superscript, CSE citation-sequence): walk the source prose in reading order; for each `[@id]`, assign number N on first appearance and reuse on subsequent references. Emit the rendered marker per style.md §Inline citations (e.g., `[N]` for IEEE, `(N)` or superscript per §Numbering rules for Vancouver or AMA). Build a number-to-id map; step 5 generates the References list in numeric order rather than alphabetical.
-   - **numeric-alpha** (CSE citation-name, some Harvard variants with alphabetic labels): hybrid. Assign letter-suffixed labels per §Numbering rules; otherwise behaves as author-date for resolution.
+   The invocation shape is: `pandoc <flags> --bibliography=<draft>.bib.json --csl=<csl-path> -o <output> <draft>.pandoc.md`. The `--reference-doc=<path>` flag applies only when style.md `§Paste target expression rules.word` declares a reference.docx path.
+6. **Handle pandoc exit and stderr.**
+   - Non-zero exit: halt; surface stderr in full.
+   - Exit 0 with stderr non-empty: classify warnings per the table in `§Citeproc warning classification` below. Blocking warnings halt before writing output; tolerable warnings pass through to the step 8 report.
+7. **Post-pandoc pass.**
+   - Apply `§Style identity.On-demand references` transforms if declared. For chicago17-ad and chicago17-nb, this is the classical-abbreviations rewrite: walk the rendered output; for each bibliography entry and (for NB) each footnote body, read back to the CSL-JSON entry that produced it; if the entry's `author[].family` matches an author in the sidecar's allowlist, rewrite the rendered title per the sidecar's abbreviation column. Other styles: skip.
+   - Prepend paste-time instruction strings from `§Paste target expression rules.<target>.Paste-time instructions` to the output file (single line(s) at the top, each prefixed with a conventional marker like `<!-- paste-time: -->`).
+8. **Report to {{USER}}.** One paragraph: source file, target, output sibling file, citations resolved, unique References entries, stale `retrieved_at` handled (re-fetched / accepted / gap), tolerable pandoc or emitter warnings surfaced, any paste-time instructions {{USER}} must apply (e.g., "apply hanging indent in Google Docs after pasting"). Do not summarize the prose itself.
 
-   Rule selection within each branch comes from the log's `source.authors` shape and `source.year` value, not from the prose context.
-4. **Collapse per-instance citation IDs (target-conditional).** For targets whose downstream renderer dedupes by id (currently `word`, via pandoc-citeproc + CSL), rewrite each `[@<author>-<year>-NNN]`, `@<author>-<year>-NNN`, `[@<author>-<year>-NNN, p. N]` to its source-level form: regex `<author>-<year>-\d{3}` → `<author>-<year>`. Apply only to the derived `<draft>.<target>.md`; the source `<draft>.md` is never modified (§8 invariant). Skip this step for targets that render our own output format (`google-docs`, `plain-markdown`): their inline citations and References list are generated from the log directly, so per-instance ids carry no collision cost. The collapsed ids in the derived markdown resolve against a source-level bibliography file generated from the log in step 5, one entry per unique source. The collapse is purely textual; it does not touch the log, does not rewrite `id` fields on entries, and does not merge log entries.
-5. **Generate the References list** from the log per style.md (§References list, §Reference list, or §Bibliography — the section name varies by shape; the `List heading:` field in §Style identity names the runtime heading). Sort order is shape-conditional:
+**Citeproc warning classification.**
 
-   - **author-date / author-page / numeric-alpha**: alphabetical by first author's surname, per the style's sort-order rules.
-   - **numeric-sequence**: by assigned number (first-appearance order from step 3).
-   - **footnote**: alphabetical in the `§Bibliography` section; the footnote array from step 3 is a separate artifact rendered at layout time.
-
-   Each unique source produces one entry, even if cited multiple times in the log (multiple log entries per source is the §8 norm). For targets that went through step 4's collapse, the References list doubles as the source-level bibliography the collapsed ids resolve against; emit it as CSL JSON at `<draft>.bib.json` in addition to rendering it per style.md.
-6. **Apply document layout rules** from style.md §Document layout (title block, headings, spacing, indentation) per the paste target's expression rules under §Paste target expression rules. The target says how to express each rule in the destination; if a rule has no expression in the target (e.g., hanging indents in google-docs), include a one-line instruction at the top of the output rather than dropping the rule silently. For **footnote-shape** styles, render the footnote-body array built in step 3: Pandoc markdown uses `[^N]: body` blocks at end of document for `google-docs` and `plain-markdown`; the `word` target relies on pandoc's native footnote handling via the CSL.
-7. **Write to a sibling file.** Pattern: `<draft>.<target>.md`. Examples: `report_3.gdocs.md`, `report_3.plain.md`, `report_3.docx.md`. Source prose at `<draft>.md` is NEVER modified. If the sibling file exists, overwrite it without asking — formatted output is derived, not authored.
-8. **Report to {{USER}}.** One paragraph: which source file, which target, which sibling output, count of citations resolved, count of unique References entries, count of stale `retrieved_at` entries surfaced and how each was resolved (re-fetched / accepted / treated as gap), any one-line paste-time instructions {{USER}} needs to apply (e.g., "apply hanging indent in Google Docs after pasting"). Do not summarize the prose itself.
+| Warning pattern | Classification | Action |
+|-----------------|----------------|--------|
+| "reference not found" / "citation [@id] not resolved" | Blocking | Halt before writing output. |
+| "missing field: type" on an entry in the emitted CSL-JSON | Blocking | Halt — CSL `type` drives rendering; fix the emitter inference path, don't let the default fire silently. |
+| "missing field: DOI" / "missing field: URL" on applicable types | Tolerable | Surface in report. |
+| "missing field: publisher-place" / other optional fields | Tolerable | Surface in report. |
+| "unrecognized element" or similar CSL-parse warning | Blocking | Halt — CSL file is suspect. |
 
 **What [formatting mode] does NOT do:**
-- Edit prose. Voice rules, claim revisions, citation re-attribution all belong upstream.
+- Edit prose. Voice rules, claim revisions, citation re-attribution, block-quote conversion all belong upstream (in `[editing mode]` or earlier).
 - Add or modify citation log entries. The log is read-only here, with one carve-out: when {{USER}} chooses "re-fetch and re-verify" on a stale entry in step 2, you update that entry's `retrieved_at` (and `source.authors` if the byline has changed) before rendering. Note the update in the step 8 report.
 - Choose a style. Style is fixed by `style.md`. Switching styles means re-running with a different `style.md` (via `install.sh --style <name>` and re-formatting), not improvising in this mode.
+- Branch on Shape. Shape is audit metadata in the slim schema; pandoc+CSL owns Shape-specific rendering. The procedure above is uniform for author-date, author-page, footnote, numeric-sequence, and numeric-alpha styles.
 
 **Re-running formatting** is cheap and idempotent. If {{USER}} changes style.md, re-run formatting on the same source. If {{USER}} wants a different paste target (e.g., google-docs and plain-markdown both), run formatting twice with different invocations; each writes its own sibling file. The source `.md` and the citation log are unchanged (modulo the staleness carve-out above).
 
@@ -480,7 +487,7 @@ Both are format-time blockers per `[formatting mode]` step 2.
 
 Inline citations and the References list are rendered by `[formatting mode]` (§7). The mode reads `source.authors` and `source.year` from each log entry referenced by an id in source prose, applies the matching rule from `style.md` §Inline citations, and emits the rendered string into a sibling file (`<draft>.<target>.md`). Source prose is not modified.
 
-The References list is generated from the log at format time, not earlier. One entry per unique source (deduped across multiple log entries that point at the same source). Sort, format, and apply document-layout rules per `style.md`. Targets whose downstream renderer dedupes by id (e.g., `word` via pandoc-citeproc) additionally collapse per-instance ids in the derived markdown; see §7 `[formatting mode]` step 4.
+The References list is generated from the log at format time, not earlier. One entry per unique source (deduped across multiple log entries that point at the same source). Sort, format, and apply document-layout rules per `style.md`. Per-instance ids in the derived markdown are collapsed to source-level ids uniformly (pandoc+CSL dedupes by id across all paste targets); see §7 `[formatting mode]` step 3.
 
 ### Block quotes
 
