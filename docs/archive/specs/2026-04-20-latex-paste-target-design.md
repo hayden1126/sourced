@@ -1,7 +1,7 @@
 # LaTeX paste target: ship `latex` as a 5th paste target per style
 
 - **Date:** 2026-04-20
-- **Status:** Approved (revised post-review)
+- **Status:** Shipped 2026-04-20 via PR #11.
 - **Scope:** Add `latex` to the shipped paste-target set across all 5 styles (apa7, chicago17-ad, chicago17-nb, ieee, mla9), using the existing pandoc + citeproc + CSL pipeline. Ship a per-style pandoc template. Extend parity coverage.
 - **Out of scope:** PDF compilation (user owns `pdflatex` / `xelatex` / `lualatex`). Figure/table handling beyond pandoc defaults. biblatex / natbib pathways. arXiv-ready submission (separate ROADMAP item).
 
