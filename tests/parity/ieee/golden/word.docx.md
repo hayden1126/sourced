@@ -1,42 +1,52 @@
 # Fixture: ieee parity
 
-Recent work on pragmatic markers in contact situations established the
-baseline for cross-linguistic studies \[1\]. Code-switching dynamics in
-classroom discourse received a complementary treatment \[2\], and a
-broader empirical synthesis covered urban multilingual contexts \[3\].
-The first study went on to address quantitative predictions \[1, p.
-22\], building on the original framework.
+The signal-processing baseline for this line of work came from \[1\],
+whose framework underpins later treatments. A complementary hardware
+study followed shortly after \[2\]. Subsequent theoretical work refined
+the convergence bounds \[3\]. The original framework was then revisited
+with a sharper quantitative claim \[1, p. 118\], confirming the
+numbering stays stable on a repeat cite.
 
-Methodological consolidation across the three lines of evidence is now
-available \[1\], \[2\], \[3\].
-
-Institutional reporting on similar trends adds context \[4\].
+A broader survey consolidated the three lines of evidence \[1\], \[2\],
+\[3\], and a four-author collaboration extended the empirical base with
+field measurements \[4\]. Standards reporting added institutional
+context \[5\].
 
 # References {#references .unnumbered}
 
 ::: {#refs .references .csl-bib-body}
-::: {#ref-smith-2010 .csl-entry}
-[\[1\] ]{.csl-left-margin}[J. A. Smith, "Pragmatic Markers in Contact
-Situations," *Journal of Pragmatics*, vol. 42, no. 3, pp. 12--34, 2010,
-doi:
-[10.1016/j.pragma.2010.01.005](https://doi.org/10.1016/j.pragma.2010.01.005).]{.csl-right-inline}
+::: {#ref-tang-2012 .csl-entry}
+[\[1\] ]{.csl-left-margin}[W. Tang, "A Unified Framework for Adaptive
+Signal Estimation," *IEEE Transactions on Signal Processing*, vol. 60,
+no. 4, pp. 110--125, 2012, doi:
+[10.1109/TSP.2012.0004110](https://doi.org/10.1109/TSP.2012.0004110).]{.csl-right-inline}
 :::
 
-::: {#ref-jones-cruz-2015 .csl-entry}
-[\[2\] ]{.csl-left-margin}[R. Jones and E. Cruz, "Code-switching in
-Classroom Discourse," *Applied Linguistics*, vol. 36, no. 2, pp.
-84--102, 2015.]{.csl-right-inline}
+::: {#ref-patel-2014 .csl-entry}
+[\[2\] ]{.csl-left-margin}[R. Patel and M. Nguyen, "FPGA Realization of
+a Low-Latency Adaptive Filter," in *Proc. IEEE Int. Symp. Circuits and
+Systems*, 2014, pp. 2204--2207. doi:
+[10.1109/ISCAS.2014.6865534](https://doi.org/10.1109/ISCAS.2014.6865534).]{.csl-right-inline}
 :::
 
-::: {#ref-able-baker-chen-2019 .csl-entry}
-[\[3\] ]{.csl-left-margin}[A. Able, B. Baker, and C. Chen, "Multilingual
-Practices in Urban Contexts," *Language in Society*, vol. 48, no. 1, pp.
-55--80, 2019.]{.csl-right-inline}
+::: {#ref-oduya-2016 .csl-entry}
+[\[3\] ]{.csl-left-margin}[K. Oduya and L. Reinhardt, "Tight Convergence
+Bounds for Stochastic Gradient Estimators," *IEEE Transactions on
+Information Theory*, vol. 62, no. 9, pp. 5012--5030, 2016, doi:
+[10.1109/TIT.2016.2589901](https://doi.org/10.1109/TIT.2016.2589901).]{.csl-right-inline}
 :::
 
-::: {#ref-mla-2021 .csl-entry}
-[\[4\] ]{.csl-left-margin}[Modern Language Association, "How do I cite a
-source with multiple authors?" MLA Style Center. \[Online\]. Available:
-<https://style.mla.org/citing-multiple-authors/>]{.csl-right-inline}
+::: {#ref-able-baker-chen-davies-2019 .csl-entry}
+[\[4\] ]{.csl-left-margin}[A. Able, B. Baker, C. Chen, and D. Davies,
+"Field Measurements of Multilingual Sensor Arrays," *IEEE Sensors
+Journal*, vol. 19, no. 6, pp. 2201--2214, 2019, doi:
+[10.1109/JSEN.2019.2891234](https://doi.org/10.1109/JSEN.2019.2891234).]{.csl-right-inline}
+:::
+
+::: {#ref-ieee-std-2020 .csl-entry}
+[\[5\] ]{.csl-left-margin}[IEEE Standards Association, "IEEE Standard
+for Floating-Point Arithmetic," IEEE, New York, NY, IEEE Std 754-2019,
+2020. Available:
+<https://standards.ieee.org/ieee/754/6210/>]{.csl-right-inline}
 :::
 :::
