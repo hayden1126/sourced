@@ -6,6 +6,8 @@ For a register-specific calibration (academic papers, casual blog posts, technic
 
 Read this file in full on entry to any of those modes; do not work from memory of prior sessions. The rules are load-bearing for the project's voice-preservation promise.
 
+**Note for downstream readers.** This skeleton is filled in by `voice-extractor` from a blended-register corpus. Any `TBD — derived from corpus` marker that remains in the rendered file signals the corpus did not settle that rule; treat such markers as "fall back to general register judgment" rather than a hard rule, and apply the surrounding prose guidance as context.
+
 ## Iron rules
 
 The rules in this section pass through to every derived voice file verbatim. `voice-extractor` preserves them without corpus calibration; `install.sh` refuses to install a voice file where any is missing.

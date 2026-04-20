@@ -567,7 +567,7 @@ validate_exemptions() {
 # the install on any failure.
 render_voice() {
   local src="$1" dest="$2" voice_name="$3"
-  if ! validate_iron_rules "${src}" "${CLAUDE_VOICE_DIR}/academic.md"; then
+  if ! validate_iron_rules "${src}" "${CLAUDE_VOICE_DIR}/${voice_name}.md"; then
     echo "Aborting install: voice '${voice_name}' failed iron-rule validation." >&2
     exit 1
   fi

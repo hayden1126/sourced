@@ -1,7 +1,7 @@
 # Voice-extractor skeleton decoupling
 
 - **Date:** 2026-04-19
-- **Status:** Approved (after brainstorming + prior-art research)
+- **Status:** Shipped 2026-04-19 via PR #7.
 - **Scope:** Decouple voice-extractor's skeleton from the academic register; ship 6 register-specific skeletons + reorganize each into 4-axis structure
 - **Out of scope:** Classifier feature-set expansion (LIWC / function words / char n-grams), weighted-blend continuous-register composition, post-generation style-fidelity evaluation, new subagent capabilities
 

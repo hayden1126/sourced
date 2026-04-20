@@ -1,5 +1,7 @@
 # Voice-Extractor Decoupling Implementation Plan
 
+> **Status: Shipped 2026-04-19 via PR #7.** This document is historical — all tasks completed. See `docs/archive/specs/2026-04-19-voice-extractor-decoupling-design.md` for the design.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Decouple `voice-extractor`'s skeleton from the academic register; ship 6 register-specific skeletons reorganized into 4 orthogonal axes (Iron / Tone / Structure / Dimension); auto-route skeleton selection by classifier confidence.
@@ -8,7 +10,7 @@
 
 **Tech Stack:** Markdown (voice skeletons, subagent definition, docs), bash (install.sh reserved-name list).
 
-**Spec:** `docs/specs/2026-04-19-voice-extractor-decoupling-design.md` (commit `2e72b4e`). When this plan references "spec §N", it means that file's section N.
+**Spec:** `docs/archive/specs/2026-04-19-voice-extractor-decoupling-design.md` (commit `2e72b4e`). When this plan references "spec §N", it means that file's section N.
 
 ---
 
