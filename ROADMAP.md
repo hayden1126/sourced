@@ -40,7 +40,7 @@ Electrical / computer engineering. Numeric-sequence proof-of-concept for the `sh
 ### Tier-2 rollout (pinning table)
 **Priority:** later · **Effort:** S each · **Status:** open.
 
-Eight styles queued behind the core three (MLA 9, Chicago 17 NB, IEEE). Per [`docs/specs/2026-04-19-csl-direct-consumption-design.md`](docs/specs/2026-04-19-csl-direct-consumption-design.md) §11, each targets ~15 minutes of per-style work once the slim schema ships — a slim `style.md`, a vendored CSL, and parity fixtures. This table pre-resolves the CSL filename + authority-URL lookups so rollout PRs stay mechanical; edition-pinning caveats flag where upstream drift (e.g., CMOS 17 → 18) requires a suffixed-filename pin rather than the plain variant.
+Eight styles queued behind the core three (MLA 9, Chicago 17 NB, IEEE). Per [`docs/archive/specs/2026-04-19-csl-direct-consumption-design.md`](docs/archive/specs/2026-04-19-csl-direct-consumption-design.md) §11, each targets ~15 minutes of per-style work now that the slim schema has shipped — a slim `style.md`, a vendored CSL, and parity fixtures. This table pre-resolves the CSL filename + authority-URL lookups so rollout PRs stay mechanical; edition-pinning caveats flag where upstream drift (e.g., CMOS 17 → 18) requires a suffixed-filename pin rather than the plain variant.
 
 | Style | CSL filename | Authority URL | Edition pinning caveats |
 |---|---|---|---|
@@ -137,12 +137,12 @@ Archives, interviews, fieldwork, oral histories. Different verification rules th
 
 ## Paste targets
 
-Current shipped: `google-docs`, `plain-markdown`, `word` (Chicago 17 only).
+Current shipped: `google-docs`, `plain-markdown`, `word` (all 5 styles — APA 7, Chicago 17 author-date, Chicago 17 notes-bibliography, IEEE, MLA 9 — render uniformly via `pandoc --citeproc` + vendored CSL after the 2026-04-19 CSL direct-consumption migration).
 
 ### LaTeX
 **Priority:** next · **Effort:** M · **Status:** open.
 
-STEM / math / physics. The pandoc pipeline built for `word` translates directly (pandoc can emit `.tex`). Ship a `latex` target per style with appropriate CSL and a `preamble.tex` scaffold. Probably pair with MLA 9 / IEEE shipping so STEM students get the full pipeline.
+STEM / math / physics. The pandoc + citeproc + CSL pipeline used by every shipped paste target translates directly (pandoc can emit `.tex`). Ship a `latex` target per style with appropriate CSL and a `preamble.tex` scaffold. IEEE and MLA 9 are already shipped as styles, so STEM students get the full pipeline the moment the target lands.
 
 ### arXiv-ready submission
 **Priority:** later · **Effort:** M · **Status:** open.
@@ -153,11 +153,6 @@ Full arXiv submission format (LaTeX + figures + bibliography). Builds on the LaT
 **Priority:** maybe · **Effort:** M · **Status:** open.
 
 Knowledge-base integration. Citation IDs resolve to wiki-links in the destination tool rather than rendered author-year strings. Targets writers who use a PKM system alongside their academic writing.
-
-### Word (for `apa7`)
-**Priority:** next · **Effort:** S · **Status:** open.
-
-Already implemented for Chicago 17; extending to APA is trivial (APA 7 CSL file + reference docx matching APA layout). Ship alongside the classical-abbreviations pattern as the default for APA students.
 
 ---
 

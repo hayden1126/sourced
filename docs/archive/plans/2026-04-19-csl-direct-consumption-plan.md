@@ -1,6 +1,6 @@
 # CSL Direct Consumption Implementation Plan
 
-> **Status: Shipped 2026-04-19 via PRs #1-5.** This document is historical — all tasks completed. See `docs/specs/2026-04-19-csl-direct-consumption-design.md` for the design, and the memory file for the full PR list.
+> **Status: Shipped 2026-04-19 via PRs #1-5.** This document is historical — all tasks completed. See `docs/archive/specs/2026-04-19-csl-direct-consumption-design.md` for the design, and the memory file for the full PR list.
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -10,7 +10,7 @@
 
 **Tech Stack:** bash (install.sh), pandoc 3.1+ with citeproc, CSL 1.0.2 (XML), CSL-JSON (bibliography), Python 3 (XML parsing in install.sh), markdown (all doc/spec files).
 
-**Spec:** `docs/specs/2026-04-19-csl-direct-consumption-design.md` (commit `4a8774e`). When this plan says "per spec §N", that refers to sections in that file.
+**Spec:** `docs/archive/specs/2026-04-19-csl-direct-consumption-design.md` (commit `4a8774e`). When this plan says "per spec §N", that refers to sections in that file.
 
 ---
 

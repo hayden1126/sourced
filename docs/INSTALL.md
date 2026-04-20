@@ -29,7 +29,7 @@ These paths are fixed; the install targets always go to `~/.claude/`, regardless
 
 ## Prerequisite check
 
-`install.sh` runs `check_prerequisites` near the top of every invocation (before any file writes). It verifies `pdftotext` and `pandoc` are on PATH and aborts with the apt/brew install commands if either is missing. This is check-only; the installer does not run sudo or touch system packages. See the README Prerequisites section for what each tool does and how to install it.
+`install.sh` runs `check_prerequisites` near the top of every invocation (before any file writes). It verifies `pdftotext`, `pandoc`, and `python3` are on PATH and aborts with the apt/brew install commands if any is missing. This is check-only; the installer does not run sudo or touch system packages. See the README Prerequisites section for what each tool does and how to install it.
 
 ## Per-project setup
 
@@ -151,10 +151,28 @@ sourced/
     ├── brief.template.md
     ├── styles/
     │   ├── apa7.md
+    │   ├── apa7/                # per-style assets
+    │   │   └── apa.csl
     │   ├── chicago17-ad.md
-    │   └── chicago17-ad/        # per-style assets
-    │       ├── chicago-author-date-17th-edition.csl
-    │       └── classical-abbreviations.md
+    │   ├── chicago17-ad/
+    │   │   ├── chicago-author-date-17th-edition.csl
+    │   │   └── classical-abbreviations.md
+    │   ├── chicago17-nb.md
+    │   ├── chicago17-nb/
+    │   │   ├── chicago-notes-bibliography-17th-edition.csl
+    │   │   └── classical-abbreviations.md
+    │   ├── ieee.md
+    │   ├── ieee/
+    │   │   └── ieee.csl
+    │   ├── mla9.md
+    │   └── mla9/
+    │       ├── classical-abbreviations.md
+    │       └── modern-language-association.csl
     └── voices/
-        └── academic.md
+        ├── academic.md
+        ├── casual.md
+        ├── hybrid.md
+        ├── journalistic.md
+        ├── narrative.md
+        └── technical.md
 ```
