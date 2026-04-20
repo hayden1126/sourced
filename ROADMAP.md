@@ -137,12 +137,12 @@ Archives, interviews, fieldwork, oral histories. Different verification rules th
 
 ## Paste targets
 
-Current shipped: `google-docs`, `plain-markdown`, `word` (all 5 styles — APA 7, Chicago 17 author-date, Chicago 17 notes-bibliography, IEEE, MLA 9 — render uniformly via `pandoc --citeproc` + vendored CSL after the 2026-04-19 CSL direct-consumption migration).
+Current shipped: `google-docs`, `plain-markdown`, `word`, `latex` (all 5 styles — APA 7, Chicago 17 author-date, Chicago 17 notes-bibliography, IEEE, MLA 9 — render uniformly via `pandoc --citeproc` + vendored CSL after the 2026-04-19 CSL direct-consumption migration; `latex` added 2026-04-20).
 
 ### LaTeX
-**Priority:** next · **Effort:** M · **Status:** open.
+**Priority:** next · **Effort:** M · **Status:** shipped 2026-04-20.
 
-STEM / math / physics. The pandoc + citeproc + CSL pipeline used by every shipped paste target translates directly (pandoc can emit `.tex`). Ship a `latex` target per style with appropriate CSL and a `preamble.tex` scaffold. IEEE and MLA 9 are already shipped as styles, so STEM students get the full pipeline the moment the target lands.
+STEM / math / physics. Uses the existing pandoc + citeproc + CSL pipeline (no biblatex, no natbib) plus a per-style pandoc `template.tex` that sets document class, geometry, and the `CSLReferences` environment. `IEEEtran` for the IEEE style; `article` for APA, Chicago (both variants), and MLA. Engine-agnostic via `iftex` guard — compiles under `pdflatex`, `xelatex`, and `lualatex`. Shipped artifact is a standalone `.tex` file; user owns compilation. Figure/table handling stays at pandoc defaults; arXiv-ready packaging is a follow-up item.
 
 ### arXiv-ready submission
 **Priority:** later · **Effort:** M · **Status:** open.

@@ -91,6 +91,15 @@ Threshold: none. IEEE has no prescribed block-quote threshold; writers use edito
 - reference.docx: `ieee/reference-styled.docx` — Times New Roman 10pt / two-column body, single-spaced References with hanging indent, per IEEE manuscript template. Optional; on absence, pandoc default layout; surface tolerable warning.
 - Post-pandoc transforms: (none)
 
+### latex
+
+- pandoc flags: `--citeproc --standalone -t latex`
+- template.tex: `ieee/template.tex` — `IEEEtran` class (conference option), single-column body, IEEE-matching typography. `CSLReferences` environment redefined to use a flat list (no hanging indent) so bracketed-number citations compile under IEEEtran's narrow columns. Required; `[formatting mode]` resolves the relative path to `~/.claude/style/ieee/template.tex` and adds `--template=<absolute-path>` to the pandoc invocation.
+- Paste-time instructions:
+  - "Compile with `pdflatex <draft>.tex` (or `xelatex` / `lualatex`)."
+  - "IEEEtran ships with TeX Live in the `collection-publishers` bundle (Debian: `texlive-publishers`). A minimal TeX Live install may need this package before compilation succeeds."
+- Post-pandoc transforms: (none)
+
 ## Special tokens
 
 - `[VERIFY: ...]` and `[UNSOURCED]` in source prose are ERRORS at format time. Formatting mode halts and surfaces every occurrence. See CLAUDE.md §7 [formatting mode] step 2.

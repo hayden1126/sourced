@@ -92,6 +92,14 @@ Threshold: 100 words (roughly five typed lines). Rendered as block quotes per Ch
 - reference.docx: `chicago17-ad/reference-styled.docx` — Times New Roman 12pt, double-spaced body, 0.5in hanging References. Optional; file not shipped yet; on absence, pandoc uses default layout and surfaces a tolerable warning.
 - Post-pandoc transforms: classical-abbreviations rewrite.
 
+### latex
+
+- pandoc flags: `--citeproc --standalone -t latex`
+- template.tex: `chicago17-ad/template.tex` — article class, 12pt Times-family, 1in margins, single-spaced body, hanging-indent References. `iftex` guard supports `pdflatex`, `xelatex`, and `lualatex`. Required; `[formatting mode]` resolves the relative path to `~/.claude/style/chicago17-ad/template.tex` and adds `--template=<absolute-path>` to the pandoc invocation.
+- Paste-time instructions:
+  - "Compile with `pdflatex <draft>.tex` (or `xelatex` / `lualatex`)."
+- Post-pandoc transforms: classical-abbreviations rewrite.
+
 ## Special tokens
 
 - `[VERIFY: ...]` and `[UNSOURCED]` in source prose are ERRORS at format time. Formatting mode halts and surfaces every occurrence. See CLAUDE.md §7 [formatting mode] step 2.

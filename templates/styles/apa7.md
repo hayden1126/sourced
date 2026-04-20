@@ -88,6 +88,14 @@ Threshold: 40 words. Direct quotes of 40 words or more are rendered as block quo
 - reference.docx: `apa7/reference-styled.docx` — Times New Roman 12pt, double-spaced body, 0.5in hanging References, APA title page layout. Optional; file not shipped yet; on absence, pandoc uses default layout and surfaces a tolerable warning.
 - Post-pandoc transforms: (none)
 
+### latex
+
+- pandoc flags: `--citeproc --standalone -t latex`
+- template.tex: `apa7/template.tex` — article class, 12pt Times-family, 1in margins, double-spaced body, hanging-indent References. `iftex` guard makes the template compile under `pdflatex`, `xelatex`, and `lualatex`. Required; `[formatting mode]` resolves the relative path to `~/.claude/style/apa7/template.tex` and adds `--template=<absolute-path>` to the pandoc invocation.
+- Paste-time instructions:
+  - "Compile with `pdflatex <draft>.tex` (or `xelatex` / `lualatex`)."
+- Post-pandoc transforms: (none)
+
 ## Special tokens
 
 - `[VERIFY: ...]` and `[UNSOURCED]` in source prose are ERRORS at format time. Formatting mode halts and surfaces every occurrence. See CLAUDE.md §7 [formatting mode] step 2.

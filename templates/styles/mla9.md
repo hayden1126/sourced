@@ -87,6 +87,14 @@ Threshold: 4 lines of prose, 3 lines of verse (MLA 9 §6.36). Verse quotations u
 - reference.docx: `mla9/reference-styled.docx` — Times New Roman 12pt, double-spaced body, 0.5in hanging Works Cited, "Lastname N" page-number header. Optional; on absence, pandoc default layout; surface tolerable warning.
 - Post-pandoc transforms: (none)
 
+### latex
+
+- pandoc flags: `--citeproc --standalone -t latex`
+- template.tex: `mla9/template.tex` — article class, 12pt Times-family, 1in margins, double-spaced body, hanging-indent Works Cited. `iftex` guard supports `pdflatex`, `xelatex`, and `lualatex`. Required; `[formatting mode]` resolves the relative path to `~/.claude/style/mla9/template.tex` and adds `--template=<absolute-path>` to the pandoc invocation.
+- Paste-time instructions:
+  - "Compile with `pdflatex <draft>.tex` (or `xelatex` / `lualatex`)."
+- Post-pandoc transforms: (none)
+
 ## Special tokens
 
 - `[VERIFY: ...]` and `[UNSOURCED]` in source prose are ERRORS at format time. Formatting mode halts and surfaces every occurrence. See CLAUDE.md §7 [formatting mode] step 2.

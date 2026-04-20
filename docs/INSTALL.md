@@ -31,6 +31,54 @@ These paths are fixed; the install targets always go to `~/.claude/`, regardless
 
 `install.sh` runs `check_prerequisites` near the top of every invocation (before any file writes). It verifies `pdftotext`, `pandoc`, and `python3` are on PATH and aborts with the apt/brew install commands if any is missing. This is check-only; the installer does not run sudo or touch system packages. See the README Prerequisites section for what each tool does and how to install it.
 
+## Optional: TeX Live for the `latex` paste target
+
+The `latex` paste target emits a standalone `.tex` file. Compiling that `.tex` to a PDF is outside `sourced`'s scope — `install.sh` does not check for a TeX distribution, does not depend on one, and does not invoke `pdflatex` from any mode. If you plan to use the `latex` target, install TeX Live (or an equivalent) yourself.
+
+### Minimum vs. full
+
+- **`article`-class styles (APA, Chicago author-date, Chicago notes-bibliography, MLA):** `texlive-latex-base` + `texlive-latex-recommended` + `texlive-fonts-recommended` is sufficient. Provides `pdflatex`, the `article` class, `geometry`, `setspace`, `hyperref`, `iftex`, `csquotes`, `calc`, and `mathptmx` (the Times-family font the shipped templates use).
+- **IEEE style:** additionally requires `texlive-publishers` (contains `IEEEtran`). A minimal install without this package will fail to compile the IEEE latex output.
+- **`xelatex` / `lualatex` engines** (optional — `pdflatex` is the default and works with the shipped templates): `texlive-xetex` / `texlive-luatex` packages. The shipped templates compile under all three engines via an `iftex` guard.
+- **Full (~5 GB):** `texlive-full` installs everything and eliminates per-style package questions.
+
+### Install commands
+
+**Debian / Ubuntu / WSL:**
+
+```bash
+# Minimum for article-class styles
+sudo apt-get install -y texlive-latex-base texlive-latex-recommended texlive-fonts-recommended
+
+# Add IEEEtran for the IEEE style
+sudo apt-get install -y texlive-publishers
+
+# One-shot: everything
+sudo apt-get install -y texlive-full
+```
+
+**macOS:**
+
+```bash
+brew install --cask basictex   # ~100 MB, then `sudo tlmgr install <package>` for anything missing
+# or
+brew install --cask mactex     # ~4 GB, full distribution
+```
+
+After installing BasicTeX, you may need `sudo tlmgr update --self && sudo tlmgr install IEEEtran` (or whichever package LaTeX reports missing) before compiling.
+
+**Windows:** install [MiKTeX](https://miktex.org) or [TeX Live](https://www.tug.org/texlive/). MiKTeX fetches missing packages on-demand during the first compile.
+
+### Compiling
+
+Once installed, compile with:
+
+```bash
+pdflatex <draft>.tex
+```
+
+Or `xelatex` / `lualatex` — the shipped templates compile under all three.
+
 ## Per-project setup
 
 Each writing project gets its own `CLAUDE.md` (the academic-researcher definition, rendered with your name), `voice.md`, and `style.md`. Run `install.sh` from inside the project:
