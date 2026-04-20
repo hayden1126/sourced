@@ -29,8 +29,7 @@ Sections are addressable: "see §Inline citations / Multi-citation", "see
   - fetched: 2026-04-19
   - CSL title: "IEEE Reference Guide version 11.29.2023" (matches the
     authority above).
-- On-demand references:
-  - (none)
+- On-demand references: (none)
 - Last reviewed: 2026-04-19.
 
 ## Inline citations
@@ -196,13 +195,17 @@ order depends on it.
 
 ## Document layout
 
-### Title block
+### Fonts and spacing
 
-- Conference papers and journal submissions: title centered at top, author
-  names + affiliations + email below. IEEE conference templates (LaTeX or
-  Word) handle this layout; the paste target should preserve it.
-- Markdown destinations: `# Title` at top, blank line, metadata block
-  (author / affiliation / date) as plain lines.
+- Font: Times New Roman 10 pt two-column for IEEE conference and most
+  journal formats (per IEEE Word and LaTeX templates). Single-spaced.
+- Markdown destinations: font is the destination's choice; the formatter
+  does not try to reproduce two-column layout in plain markdown.
+
+### Margins
+
+- IEEE templates specify tight margins; match the template.
+- Markdown destinations: margin is the destination's choice.
 
 ### Heading hierarchy
 
@@ -215,13 +218,18 @@ heading levels.
 - Level 2: `### A. Subsection Title`.
 - Level 3: `#### 1) Sub-subsection`.
 
-### Body text
+### Title block
 
-- Font: Times New Roman 10 pt two-column for IEEE conference and most
-  journal formats (per IEEE Word and LaTeX templates). Single-spaced.
-- Margins: IEEE templates specify tight margins; match the template.
-- Markdown destinations: font and margin are the destination's choice; the
-  formatter does not try to reproduce two-column layout in plain markdown.
+- Conference papers and journal submissions: title centered at top, author
+  names + affiliations + email below. IEEE conference templates (LaTeX or
+  Word) handle this layout; the paste target should preserve it.
+- Markdown destinations: `# Title` at top, blank line, metadata block
+  (author / affiliation / date) as plain lines.
+
+### Page numbering
+
+- Not specified in the current style file; IEEE Word/LaTeX templates
+  handle page numbering at the template level.
 
 ### Footnotes
 
@@ -229,6 +237,10 @@ Footnotes are for substantive content notes, not citation. Numbered
 superscript in body, full note at page bottom (Word) or as a numbered list
 at section/document end (markdown). The IEEE Reference Guide discourages
 footnotes; use sparingly.
+
+### Block quotes
+
+Threshold: none. IEEE has no prescribed block-quote threshold; writers use editorial judgment.
 
 ## Paste target expression rules
 

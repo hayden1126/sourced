@@ -1538,25 +1538,13 @@ Threshold: 40 words. Direct quotes of 40 words or more are rendered as block quo
 - `[VERIFY: ...]` and `[UNSOURCED]` in source prose are ERRORS at format time.
 ```
 
-**Vendor the CSL file before writing the slim style.md.** apa7 does not ship a CSL today (`templates/styles/apa7/` does not exist). The slim schema's `CSL provenance.file` field MUST resolve to a real file; install.sh's `validate_csl_title` halts otherwise.
+**Note: apa.csl was vendored during PR1** (commit `6f8fed3`). `templates/styles/apa7/apa.csl` already exists; the CSL provenance block in `apa7.md` already points at it. No vendoring step needed in PR3 — just slim the style.md file.
+
+Verify the vendored file is still present before proceeding:
 
 ```bash
-mkdir -p templates/styles/apa7/
-curl -fsSL -o templates/styles/apa7/apa.csl \
-  https://raw.githubusercontent.com/citation-style-language/styles/master/apa.csl
-
-# Verify the file is non-empty CSL XML:
-head -3 templates/styles/apa7/apa.csl
-# Expected first line: <?xml version="1.0" encoding="utf-8"?>
-
-# Read its <title> for the slim file's CSL title field:
-python3 -c "
-import xml.etree.ElementTree as ET
-ns = {'csl': 'http://purl.org/net/xbiblio/csl'}
-root = ET.parse('templates/styles/apa7/apa.csl').getroot()
-print(root.find('csl:info/csl:title', ns).text)
-"
-# Use the printed title verbatim in the slim file's CSL title: field.
+ls -la templates/styles/apa7/apa.csl
+# Should exist; ~2000 lines
 ```
 
 - [ ] **Step 2: Overwrite apa7.md.**
@@ -1571,15 +1559,6 @@ cd tests/parity/apa7/
 Expected: three OK lines.
 
 - [ ] **Step 4: Commit.**
-
-If a new CSL file was added:
-
-```bash
-git add templates/styles/apa7/ templates/styles/apa7.md
-git commit -m "Slim apa7.md to pandoc+CSL schema; vendor apa.csl"
-```
-
-Else:
 
 ```bash
 git add templates/styles/apa7.md

@@ -23,9 +23,8 @@ Sort order". Rules are normative; do not improvise.
   - file: apa7/apa.csl
   - source: github.com/citation-style-language/styles (master branch, raw apa.csl)
   - fetched: 2026-04-19
-  - CSL title: "APA Style 7th edition" (verified against the vendored apa.csl `<title>` element; cross-checked at install time once PR2 lands).
-- On-demand references:
-  - (none)
+  - CSL title: "APA Style 7th edition" (verified against the vendored apa.csl `<title>` element; cross-checked at install time once the CSL-title validator ships (PR2 Task 4.3)).
+- On-demand references: (none)
 - Last reviewed: 2026-04-19.
 
 ## Inline citations
@@ -127,12 +126,16 @@ for that case; if a case isn't listed, ask {{USER}} rather than guessing.
 
 ## Document layout
 
-### Title block
-- Title centered, bold, upper half of first page.
-- Below the title: author name (no title or degree), affiliation,
-  course/instructor (student paper variant), date.
-- Markdown destinations: `# Title` at top, then a blank line, then a
-  metadata block (author / date / course) as plain lines.
+### Fonts and spacing
+- Font: Times New Roman 12, Calibri 11, or similar serif/sans default.
+  In markdown destinations, font is the destination's choice.
+- Line spacing: double in print/Word destinations; single in markdown unless
+  destination overrides.
+- Paragraph indent: 0.5 in first-line indent. Markdown: no indent (rendered
+  flat); paragraph break is a blank line.
+
+### Margins
+- 1 in all sides. Markdown: not applicable.
 
 ### Heading hierarchy
 - Level 1: centered, bold, title case. Markdown: `## Heading`.
@@ -140,20 +143,24 @@ for that case; if a case isn't listed, ask {{USER}} rather than guessing.
 - Level 3: flush left, bold italic, title case. Markdown: `#### Heading`.
 - Levels 4 and 5 exist; rarely needed in {{USER}}'s work. Add when first used.
 
-### Body text
-- Font: Times New Roman 12, Calibri 11, or similar serif/sans default.
-  In markdown destinations, font is the destination's choice.
-- Line spacing: double in print/Word destinations; single in markdown unless
-  destination overrides.
-- Paragraph indent: 0.5 in first-line indent. Markdown: no indent (rendered
-  flat); paragraph break is a blank line.
-- Margins: 1 in all sides. Markdown: not applicable.
+### Title block
+- Title centered, bold, upper half of first page.
+- Below the title: author name (no title or degree), affiliation,
+  course/instructor (student paper variant), date.
+- Markdown destinations: `# Title` at top, then a blank line, then a
+  metadata block (author / date / course) as plain lines.
+
+### Page numbering
+- Not specified in the current style file; add when first needed.
 
 ### Footnotes
 - APA 7 prefers parenthetical author-date over footnotes; use footnotes only
   for substantive content notes, not citation.
 - Numbered superscript in body, full note at page bottom (Word) or as a
   numbered list at section/document end (markdown).
+
+### Block quotes
+Threshold: 40 words. Direct quotes of 40 words or more are rendered as block quotes in source prose (indented, no surrounding quotation marks, citation after the closing punctuation). `[editing mode]` enforces; `[formatting mode]` verifies in pre-flight (CLAUDE.md §7 step 2) and halts if an over-threshold inline direct quote is still present.
 
 ## Paste target expression rules
 
