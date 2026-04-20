@@ -585,12 +585,14 @@ STYLE_NAME="<style>"
 mkdir -p "${SCRIPT_DIR}/actual"
 failures=0
 
+# -t markdown-citations (not -t markdown): pandoc's markdown writer round-trips citation syntax and drops the bibliography unless this writer extension is disabled.
+
 # plain-markdown
 pandoc --citeproc \
   --bibliography="${SCRIPT_DIR}/fixture.bib.json" \
   --csl="${CSL_FILE}" \
   --wrap=preserve \
-  -t markdown \
+  -t markdown-citations \
   -o "${SCRIPT_DIR}/actual/plain-markdown.md" \
   "${SCRIPT_DIR}/fixture.pandoc.md"
 
@@ -606,7 +608,7 @@ pandoc --citeproc \
   --bibliography="${SCRIPT_DIR}/fixture.bib.json" \
   --csl="${CSL_FILE}" \
   --wrap=none \
-  -t markdown \
+  -t markdown-citations \
   -o "${SCRIPT_DIR}/actual/google-docs.md" \
   "${SCRIPT_DIR}/fixture.pandoc.md"
 
@@ -621,7 +623,7 @@ fi
 pandoc --citeproc \
   --bibliography="${SCRIPT_DIR}/fixture.bib.json" \
   --csl="${CSL_FILE}" \
-  -t markdown \
+  -t markdown-citations \
   -o "${SCRIPT_DIR}/actual/word.docx.md" \
   "${SCRIPT_DIR}/fixture.pandoc.md"
 

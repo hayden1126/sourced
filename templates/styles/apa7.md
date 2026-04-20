@@ -20,9 +20,10 @@ Sort order". Rules are normative; do not improvise.
   - https://apastyle.apa.org/ (official APA Style, publisher-run); accessed
     2026-04-19.
 - CSL provenance:
-  - file: (no shipped CSL yet; word target stubbed)
-  - source: github.com/citation-style-language/styles
-  - pending: ship alongside word-target implementation per ROADMAP.
+  - file: apa7/apa.csl
+  - source: github.com/citation-style-language/styles (master branch, raw apa.csl)
+  - fetched: 2026-04-19
+  - CSL title: "APA Style 7th edition" (verified against the vendored apa.csl `<title>` element; cross-checked at install time once PR2 lands).
 - On-demand references:
   - (none)
 - Last reviewed: 2026-04-19.

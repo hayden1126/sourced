@@ -1,0 +1,60 @@
+[
+  {
+    "id": "smith-2010",
+    "type": "article-journal",
+    "author": [{"family": "Smith", "given": "Jane A."}],
+    "issued": {"date-parts": [[2010]]},
+    "title": "Pragmatic Markers in Contact Situations",
+    "container-title": "Journal of Pragmatics",
+    "volume": "42",
+    "issue": "3",
+    "page": "12-34",
+    "DOI": "10.1016/j.pragma.2010.01.005"
+  },
+  {
+    "id": "jones-cruz-2015",
+    "type": "article-journal",
+    "author": [
+      {"family": "Jones", "given": "Robert"},
+      {"family": "Cruz", "given": "Elena"}
+    ],
+    "issued": {"date-parts": [[2015]]},
+    "title": "Code-Switching in Classroom Discourse",
+    "container-title": "Applied Linguistics",
+    "volume": "36",
+    "issue": "2",
+    "page": "84-102"
+  },
+  {
+    "id": "able-baker-chen-2019",
+    "type": "article-journal",
+    "author": [
+      {"family": "Able", "given": "Amir"},
+      {"family": "Baker", "given": "Bea"},
+      {"family": "Chen", "given": "Chao"}
+    ],
+    "issued": {"date-parts": [[2019]]},
+    "title": "Multilingual Practices in Urban Contexts",
+    "container-title": "Language in Society",
+    "volume": "48",
+    "issue": "1",
+    "page": "55-80"
+  },
+  {
+    "id": "mla-2021",
+    "type": "webpage",
+    "author": [{"literal": "Modern Language Association"}],
+    "issued": {"date-parts": [[2021]]},
+    "title": "How do I cite a source with multiple authors?",
+    "container-title": "MLA Style Center",
+    "URL": "https://style.mla.org/citing-multiple-authors/"
+  },
+  {
+    "id": "perennial-nd",
+    "type": "webpage",
+    "author": [{"family": "Perennial", "given": "Paul"}],
+    "title": "Undated Commentary",
+    "container-title": "Perennial Blog",
+    "URL": "https://example.com/undated"
+  }
+]
