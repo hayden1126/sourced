@@ -12,7 +12,7 @@ The primary agent (academic-researcher) lives in each project's `CLAUDE.md`. Two
 - **Synthesis integrity.** Paraphrases must match source scope. Attribution chains are preserved. Inference steps are marked, not hidden. Audit runs at refining stage (outline) and editing stage (prose).
 - **Voice preservation, with generator-level guardrails.** Per-author voice files specify sentence structure, stance, pacing, concept setup, and punctuation habits. A global inventory of AI-writing signatures (em dashes, "not X but Y" pivots, ornamental triads, throat-clearing adverbs, demonstrative-noun openers) applies regardless of voice and is enforced at both writing and editing time.
 - **Paraphrase as default.** Direct quotes are reserved for wording that's itself the evidence. Quote-density flags fire on over-quoted paragraphs in both writing and editing modes.
-- **Citation rendering is decoupled from authoring.** Prose carries Pandoc-style IDs (`[@id]`, `@id`, `[@id, p. N]`); a separate formatting mode resolves them per style (APA 7 or Chicago 17 author-date) into a sibling output file for a chosen paste target.
+- **Citation rendering is decoupled from authoring.** Prose carries Pandoc-style IDs (`[@id]`, `@id`, `[@id, p. N]`); a separate formatting mode resolves them per style (five shipped: APA 7, Chicago 17 author-date, Chicago 17 notes-bibliography, IEEE, MLA 9) into a sibling output file for a chosen paste target. All paste targets render through `pandoc --citeproc` reading the style's vendored CSL file.
 - **Parallel research with integrity.** When three or more independent sub-topics need sources, source-finders dispatch in parallel. Each writes to its own shard; the parent merges with validation and collision resolution.
 - **Mode discipline.** Ten cognitive modes, one announced per transition. Gates between stages require explicit approval; silence is not an override.
 - **Defense-in-depth for iron rules.** Category-level voice prohibitions ("no em dashes") are checked in three places: inside `voice-extractor` at generation time, inside `academic-researcher` at caller-return time, and inside `install.sh` at render time. Any one layer missing doesn't ship a broken voice.
@@ -26,17 +26,18 @@ The primary agent (academic-researcher) lives in each project's `CLAUDE.md`. Two
 - `~/.claude/` writable (the installer creates it on first run).
 - A directory for your paper. Any directory works: a fresh folder, a git repo you already have, or an existing project.
 - **poppler-utils** (`pdftotext`, `pdfinfo`, `pdftoppm`). Claude Code's Read tool renders PDFs through `pdftoppm`; `[research mode]` extracts text from PDF sources via `pdftotext`.
-- **pandoc** 3.0+. Required by `[formatting mode]`'s `word` paste target (pandoc + citeproc + CSL pipeline).
+- **pandoc** 3.1+. Required by every `[formatting mode]` paste target (`word`, `google-docs`, `plain-markdown`); all three render through the pandoc + citeproc + CSL pipeline.
+- **python3**. Used at per-project install time to cross-check a vendored CSL file's `<title>` against the style's declaration (`validate_csl_title` in `install.sh`). Ships by default with current Debian, Ubuntu, WSL, and macOS; install via your package manager if missing.
 
-`install.sh` checks that `pdftotext` and `pandoc` are both on PATH and aborts with a clear install command if either is missing. It does not install them for you; use your package manager.
+`install.sh` checks that `pdftotext`, `pandoc`, and `python3` are all on PATH and aborts with a clear install command if any is missing. It does not install them for you; use your package manager.
 
-Install both on Debian, Ubuntu, or WSL:
+Install on Debian, Ubuntu, or WSL (python3 is typically already present):
 
 ```bash
-sudo apt-get install -y poppler-utils pandoc
+sudo apt-get install -y poppler-utils pandoc python3
 ```
 
-On macOS:
+On macOS (python3 ships with recent macOS; `brew install python3` if missing):
 
 ```bash
 brew install poppler pandoc
