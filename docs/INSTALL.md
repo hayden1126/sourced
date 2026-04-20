@@ -19,7 +19,9 @@ After `--global-only`, the global files are available to Claude Code from any wo
 - `~/.claude/agents/source-finder.md`
 - `~/.claude/agents/voice-extractor.md`
 - `~/.claude/citations/schema.md`
+- `~/.claude/citations/csl-json-emitter.md`
 - `~/.claude/templates/brief.template.md`
+- `~/.claude/templates/brief.template.annotated-bib.md`
 - `~/.claude/voice/<name>.md` (voice library; shipped voices land here, custom voices can be added alongside)
 - `~/.claude/style/<name>.md` (style library; same pattern)
 - `~/.claude/style/<name>/<asset>` (per-style asset directory; e.g., `chicago17-ad/chicago-author-date-17th-edition.csl`, `chicago17-ad/classical-abbreviations.md`, `chicago17-ad/reference-styled.docx` when shipped)
@@ -140,7 +142,8 @@ If a CLAUDE.md exists but you want a fresh render regardless:
 | `--update` | Refresh the managed block of CLAUDE.md (preserving content outside sentinels) and refresh `voice.md` and `style.md` from the project's installed voice and style. |
 | `--voice <name>` | Pick the voice rendered into this project's `voice.md` (default: `academic`). Shipped voices live in `templates/voices/`; custom voices can be placed at `~/.claude/voice/<name>.md`. |
 | `--style <name>` | Pick the citation/document style rendered into this project's `style.md` (default: `apa7`). Shipped styles live in `templates/styles/`; custom styles can be placed at `~/.claude/style/<name>.md`. |
-| `--brief <name>` | Also drop `<name>.brief.md` into the project from `templates/brief.template.md`. |
+| `--brief <name>` | Also drop `<name>.brief.md` into the project, rendered from the brief template that matches `--type` (`brief.template.md` for `essay`, `brief.template.annotated-bib.md` for `annotated-bib`). |
+| `--type <kind>` | Pick the project kind: `essay` (default) or `annotated-bib`. Default writes no marker and leaves the project on the standard essay mode graph. `annotated-bib` writes a `.sourced-project-type` marker at the project root, selects `templates/brief.template.annotated-bib.md` when paired with `--brief`, and switches the project onto the annotated-bibliography mode graph (see `docs/MODES.md`). Switching the type on an existing project requires `--force` or `--update`. |
 
 ## File layout
 
@@ -197,25 +200,31 @@ sourced/
 └── templates/
     ├── CLAUDE.md
     ├── brief.template.md
+    ├── brief.template.annotated-bib.md
     ├── styles/
     │   ├── apa7.md
     │   ├── apa7/                # per-style assets
-    │   │   └── apa.csl
+    │   │   ├── apa.csl
+    │   │   └── template.tex
     │   ├── chicago17-ad.md
     │   ├── chicago17-ad/
     │   │   ├── chicago-author-date-17th-edition.csl
-    │   │   └── classical-abbreviations.md
+    │   │   ├── classical-abbreviations.md
+    │   │   └── template.tex
     │   ├── chicago17-nb.md
     │   ├── chicago17-nb/
     │   │   ├── chicago-notes-bibliography-17th-edition.csl
-    │   │   └── classical-abbreviations.md
+    │   │   ├── classical-abbreviations.md
+    │   │   └── template.tex
     │   ├── ieee.md
     │   ├── ieee/
-    │   │   └── ieee.csl
+    │   │   ├── ieee.csl
+    │   │   └── template.tex
     │   ├── mla9.md
     │   └── mla9/
     │       ├── classical-abbreviations.md
-    │       └── modern-language-association.csl
+    │       ├── modern-language-association.csl
+    │       └── template.tex
     └── voices/
         ├── academic.md
         ├── casual.md

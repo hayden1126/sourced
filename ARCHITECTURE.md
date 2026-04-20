@@ -22,18 +22,19 @@ sourced/
 │   └── parity/                 # Golden outputs: 5 styles × 4 paste targets = 20 goldens.
 └── templates/
     ├── CLAUDE.md               # Primary agent (academic-researcher) operating instructions.
-    ├── brief.template.md       # Per-paper intake brief skeleton.
+    ├── brief.template.md       # Per-paper intake brief skeleton (essay projects).
+    ├── brief.template.annotated-bib.md # Intake brief skeleton for annotated-bib projects.
     ├── styles/
     │   ├── apa7.md             # APA 7 (author-date) — slim style.
-    │   ├── apa7/               # Vendored apa.csl + per-style assets.
+    │   ├── apa7/               # Vendored apa.csl + per-style assets (includes template.tex for the latex paste target).
     │   ├── chicago17-ad.md     # Chicago 17 author-date — slim style.
-    │   ├── chicago17-ad/       # Vendored CSL + per-style assets.
+    │   ├── chicago17-ad/       # Vendored CSL + per-style assets (includes template.tex for the latex paste target).
     │   ├── chicago17-nb.md     # Chicago 17 notes-bibliography — slim style.
-    │   ├── chicago17-nb/       # Vendored CSL + per-style assets.
+    │   ├── chicago17-nb/       # Vendored CSL + per-style assets (includes template.tex for the latex paste target).
     │   ├── ieee.md             # IEEE (numeric) — slim style.
-    │   ├── ieee/                # Vendored CSL + per-style assets.
+    │   ├── ieee/                # Vendored CSL + per-style assets (includes template.tex for the latex paste target).
     │   ├── mla9.md             # MLA 9 (author-page) — slim style.
-    │   └── mla9/               # Vendored CSL + per-style assets.
+    │   └── mla9/               # Vendored CSL + per-style assets (includes template.tex for the latex paste target).
     └── voices/
         ├── academic.md         # Academic-register skeleton (research, essays, dissertations).
         ├── casual.md           # Casual-register skeleton (blog posts, personal essays).
@@ -60,7 +61,8 @@ Shipped skills under `skills/<name>/` mirror into `~/.claude/skills/<name>/` on 
 | `[outlining mode]` | Paragraph-level structure with claims + citation IDs. Purely generative, no audits. | `[refining mode]` (handoff gate) |
 | `[refining mode]` | Stress-test the outline. Citation / structure / synthesis-integrity (§4) audit before prose exists. | `[writing mode]` (sign-off gate) |
 | `[writing mode]` | Convert refined outline into prose. Apply `voice.md`, §10 generation signatures, paraphrase default, Pandoc citation IDs. | `[editing mode]` |
-| `[editing mode]` | Seven-pass audit: ID validation → §4 citation → partial-entry recheck → grammar → AI-tell (§10) → quote-density → voice (§9). Handoff gate blocks on unresolved voice-audit hits. | `[formatting mode]` (handoff gate) |
+| `[annotated-bib mode]` | Per-entry annotation (4-beat: summary / relevance / location / evaluation) and draft compile. Grounded only in log fields; §3 verification inherited. Annotated-bib projects only; replaces `[outlining]` / `[refining]` / `[writing]`. | `[editing mode]` |
+| `[editing mode]` | Seven-pass audit: ID validation → §4 citation → partial-entry recheck → grammar → AI-tell (§10) → quote-density → voice (§9). Handoff gate blocks on unresolved voice-audit hits. In annotated-bib projects, pass 6 (quote-density) and the §9 flow-rules part of pass 7 are skipped. | `[formatting mode]` (handoff gate) |
 | `[formatting mode]` | Render source prose into style-specific output for a named paste target (`word`, `google-docs`, `plain-markdown`, `latex` — all rendered via pandoc+CSL). Terminal stage; source prose never modified. | Done. |
 | `[research mode]` | Source vetting and logging. Auto-triggers from other modes when a claim needs a source. Dispatches `source-finder` subagents in parallel for 3+ sub-topics. | Returns to prior mode on completion. |
 | `[red team mode]` | Systematically challenge every claim. Counterpoints, blind spots. | Any mode. |
@@ -82,6 +84,7 @@ Shipped skills under `skills/<name>/` mirror into `~/.claude/skills/<name>/` on 
 - `<project>/<draft>.md` — source prose with Pandoc citation IDs.
 - `<project>/<draft>.citations.json` — citation log for the draft (schema: `citations/schema.md`).
 - `<project>/<draft>.<target>.md` — formatted output written by `[formatting mode]` (e.g., `<draft>.gdocs.md`).
+- `<project>/.sourced-project-type` — project-type marker written by `install.sh` when `--type` is non-default (currently only `annotated-bib`); contains the type name on a single line. Absence means essay (legacy-safe default).
 
 ## Citation handling: three moments
 
