@@ -1,47 +1,43 @@
 # Fixture: chicago17-nb parity
 
-The argument developed by Jane A. Smith[^1] ran counter to earlier claims about pragmatic markers in contact situations. Smith's later treatment[^2] extended the point with closer reading of the data. The parallel case in classroom discourse received fresh attention from Robert Jones and Elena Cruz[^3], who showed similar dynamics at scale.[^4] Broader empirical work covered urban multilingual contexts as well.[^5]
+Fernández opens the discussion with a sweeping claim about liturgical continuity across the early medieval West.[^1] That framing set the terms for a generation of later work, including the close palaeographic study produced in Leipzig a decade later.[^2]
 
-A synthesis across all three lines of evidence is now available.[^6]
+Fernández returns to the same argument in a later chapter, now with a harder quantitative edge:[^3]
 
-Institutional reporting on the same period reinforces the point.[^7] An undated commentary in the trade press touched on adjacent issues.[^8]
+> The codices in question share not only a scribal hand but a deliberate editorial program, and any account that treats them as independent witnesses misreads the material evidence on its face.[^4]
+
+Collaborative work on the same corpus broadened the claim to four regional scriptoria,[^5] and Herrmann and Schulz returned to the question in a short follow-up note.[^6] A more recent archival guide fills in the institutional background.[^7]
 
 # Bibliography {#bibliography .unnumbered}
 
 ::: {#refs .references .csl-bib-body .hanging-indent}
-::: {#ref-able-baker-chen-2019 .csl-entry}
-Able, Amir, Bea Baker, and Chao Chen. "Multilingual Practices in Urban Contexts." *Language in Society* 48, no. 1 (2019): 55--80.
+::: {#ref-bnf-guide-2022 .csl-entry}
+Bibliothèque nationale de France. *Guide to the Medieval Manuscript Collections*. Paris: Bibliothèque nationale de France, 2022. <https://www.bnf.fr/fr/guide-manuscrits-medievaux>.
 :::
 
-::: {#ref-jones-cruz-2015 .csl-entry}
-Jones, Robert, and Elena Cruz. "Code-Switching in Classroom Discourse." *Applied Linguistics* 36, no. 2 (2015): 84--102.
+::: {#ref-fernandez-2011 .csl-entry}
+Fernández, María Luisa. *Liturgical Continuity in the Early Medieval West*. Cambridge: Cambridge University Press, 2011.
 :::
 
-::: {#ref-mla-2021 .csl-entry}
-Modern Language Association. "How Do I Cite a Source with Multiple Authors?" MLA Style Center, 2021. <https://style.mla.org/citing-multiple-authors/>.
+::: {#ref-herrmann-schulz-2021 .csl-entry}
+Herrmann, Klaus, and Annika Schulz. "A Palaeographic Reassessment of the Leipzig Codices." *Speculum* 96, no. 2 (2021): 38--71.
 :::
 
-::: {#ref-perennial-nd .csl-entry}
-Perennial, Paul. "Undated Commentary." Perennial Blog. <https://example.com/undated>.
-:::
-
-::: {#ref-smith-2010 .csl-entry}
-Smith, Jane A. "Pragmatic Markers in Contact Situations." *Journal of Pragmatics* 42, no. 3 (2010): 12--34. <https://doi.org/10.1016/j.pragma.2010.01.005>.
+::: {#ref-okafor-lindqvist-tanaka-rossi-2018 .csl-entry}
+Okafor, Chidinma, Erik Lindqvist, Hiroshi Tanaka, and Giulia Rossi. "Four Scriptoria, One Editorial Program: A Comparative Study." *Scriptorium* 72, no. 1 (2018): 5--48.
 :::
 :::
 
-[^1]: "Pragmatic Markers in Contact Situations," *Journal of Pragmatics* 42, no. 3 (2010): 12--34, <https://doi.org/10.1016/j.pragma.2010.01.005>.
+[^1]: María Luisa Fernández, *Liturgical Continuity in the Early Medieval West* (Cambridge: Cambridge University Press, 2011).
 
-[^2]: Smith.
+[^2]: Klaus Herrmann and Annika Schulz, "A Palaeographic Reassessment of the Leipzig Codices," *Speculum* 96, no. 2 (2021): 38--71.
 
-[^3]: "Code-Switching in Classroom Discourse," *Applied Linguistics* 36, no. 2 (2015): 84--102.
+[^3]: Fernández, *Liturgical Continuity in the Early Medieval West*, 214.
 
-[^4]: Jones and Cruz, 88.
+[^4]: Fernández, 219.
 
-[^5]: Amir Able, Bea Baker, and Chao Chen, "Multilingual Practices in Urban Contexts," *Language in Society* 48, no. 1 (2019): 55--80.
+[^5]: Chidinma Okafor et al., "Four Scriptoria, One Editorial Program: A Comparative Study," *Scriptorium* 72, no. 1 (2018): 5--48.
 
-[^6]: Smith, "Pragmatic Markers in Contact Situations"; Jones and Cruz, "Code-Switching in Classroom Discourse"; Able, Baker, and Chen, "Multilingual Practices in Urban Contexts."
+[^6]: Herrmann and Schulz, "A Palaeographic Reassessment of the Leipzig Codices," 44.
 
-[^7]: Modern Language Association, "How Do I Cite a Source with Multiple Authors?" MLA Style Center, 2021, <https://style.mla.org/citing-multiple-authors/>.
-
-[^8]: Paul Perennial, "Undated Commentary," Perennial Blog, <https://example.com/undated>.
+[^7]: Bibliothèque nationale de France, *Guide to the Medieval Manuscript Collections* (Paris: Bibliothèque nationale de France, 2022), <https://www.bnf.fr/fr/guide-manuscrits-medievaux>.
