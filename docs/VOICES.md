@@ -95,7 +95,7 @@ The agent will announce a switch to `[collaborative mode]` if needed, dispatch `
 - Leaves sections `TBD —` where the samples don't settle the question. Never fabricates rules or exemplars.
 - Preserves iron rules verbatim (see below).
 - Surfaces recurring named references as "anchor candidates" in the report. The Anchors block in the output file is always TBD by design; anchors are a judgment call only you can make.
-- Classifies the corpus register if you don't pass one. Refuses with `register-mismatch` if the label you passed contradicts what the samples show, or `mixed-register` if no single register accounts for at least 70% of the corpus.
+- Classifies the corpus register if you don't pass one. Routes to the matching skeleton when a single register reaches ≥ 85% of the corpus; routes to `hybrid.md` (register-neutral) when no single register dominates. Refuses with `register-mismatch` only when the label you passed flatly contradicts what the samples show.
 
 **After the subagent returns:**
 
