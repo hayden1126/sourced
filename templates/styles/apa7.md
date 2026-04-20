@@ -70,17 +70,17 @@ Threshold: 40 words. Direct quotes of 40 words or more are rendered as block quo
 
 ### google-docs
 
-- pandoc flags: `--citeproc --wrap=none -t markdown-citations`
+- pandoc flags: `--citeproc --wrap=none -t markdown-citations-header_attributes`
 - Paste-time instructions:
   - "Apply hanging indent to References after pasting (Format > Align > Indentation options > Special > Hanging)."
   - "Apply double-spacing in Google Docs if the destination expects it (Format > Line & paragraph spacing > Double)."
-- Post-pandoc transforms: (none)
+- Post-pandoc transforms: strip pandoc fenced-div markers from the References block (`sed -e '/^::: /d' -e '/^:::$/d'`); Google Docs' "Paste as markdown" renders the `:::` wrappers as literal text. The `-header_attributes` pandoc extension handles the heading-attribute counterpart (`# References {#references .unnumbered}`).
 
 ### plain-markdown
 
-- pandoc flags: `--citeproc --wrap=preserve -t markdown-citations`
+- pandoc flags: `--citeproc --wrap=preserve -t markdown-citations-header_attributes`
 - Paste-time instructions: (none)
-- Post-pandoc transforms: (none)
+- Post-pandoc transforms: strip pandoc fenced-div markers from the References block (`sed -e '/^::: /d' -e '/^:::$/d'`); most destinations (Obsidian, Notion, GitHub render, Reddit) paste the `:::` wrappers as literal text.
 
 ### word
 

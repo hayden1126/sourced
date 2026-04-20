@@ -74,16 +74,16 @@ Threshold: none. IEEE has no prescribed block-quote threshold; writers use edito
 
 ### google-docs
 
-- pandoc flags: `--citeproc --wrap=none -t markdown-citations`
+- pandoc flags: `--citeproc --wrap=none -t markdown-citations-header_attributes`
 - Paste-time instructions:
   - "Apply hanging indent to References after pasting (Format > Align > Indentation options > Special > Hanging)."
-- Post-pandoc transforms: (none)
+- Post-pandoc transforms: strip pandoc fenced-div markers from the References block (`sed -e '/^::: /d' -e '/^:::$/d'`); Google Docs' "Paste as markdown" renders the `:::` wrappers as literal text. The `-header_attributes` pandoc extension handles the heading-attribute counterpart (`# References {#references .unnumbered}`).
 
 ### plain-markdown
 
-- pandoc flags: `--citeproc --wrap=preserve -t markdown-citations`
+- pandoc flags: `--citeproc --wrap=preserve -t markdown-citations-header_attributes`
 - Paste-time instructions: (none)
-- Post-pandoc transforms: (none)
+- Post-pandoc transforms: strip pandoc fenced-div markers from the References block (`sed -e '/^::: /d' -e '/^:::$/d'`); most destinations (Obsidian, Notion, GitHub render, Reddit) paste the `:::` wrappers as literal text.
 
 ### word
 

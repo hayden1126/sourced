@@ -66,6 +66,24 @@ else
     "${EXTRA_FLAGS[@]}" \
     -o "${ACTUAL}" \
     "${STYLE_DIR}/fixture.pandoc.md"
+
+  # Post-pandoc strip for markdown paste targets. Pandoc's markdown-citations
+  # writer wraps each citeproc-rendered References entry in ::: fenced-div
+  # syntax, which most destinations (Google Docs' "Paste as markdown",
+  # Obsidian, Notion, GitHub render, Reddit) paste as literal text. Stripping
+  # the ::: lines keeps italics and links in the bibliography entries while
+  # producing clean markdown. The -header_attributes pandoc extension (passed
+  # via run.sh) handles the heading-attribute counterpart
+  # (`# References {#references .unnumbered}`). The pattern matches only
+  # pandoc's emitted forms (`::: {...}` open, `:::` close) to avoid clobbering
+  # user-authored `:::` strings that might slip into source prose.
+  # word and latex targets don't need this — pandoc's docx/latex writers
+  # consume divs internally.
+  case "${TARGET}" in
+    google-docs|plain-markdown)
+      sed -i -e '/^::: /d' -e '/^:::$/d' "${ACTUAL}"
+      ;;
+  esac
 fi
 
 if ! diff -u "${GOLDEN}" "${ACTUAL}"; then
