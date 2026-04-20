@@ -248,6 +248,40 @@ Three plausible integration angles worth scoping before committing to a design:
 
 Related: `issues.md #5` (editing-critic subagents, parked); `### Peer review mode` above (team candidate); `### Revision mode` (team candidate).
 
+### Installable `sourced` executable on `$PATH`
+**Priority:** later · **Effort:** S · **Status:** open.
+
+Ship a user-facing executable so installation and updates don't require users to know the absolute path to `install.sh`. Likely shape: rename `install.sh` to `sourced` with subcommands (`sourced install`, `sourced update`, `sourced uninstall`), plus a bootstrap one-liner (`curl … | sh`) that drops the binary into `/usr/local/bin` or `~/.local/bin`. Lowers adoption friction for non-developer writers who don't keep a mental map of cloned-repo paths. No schema / mode / gate impact — distribution ergonomics only, but it gates how reachable the core value prop is for less-technical users.
+
+### Per-project directory restructure
+**Priority:** later · **Effort:** M · **Status:** open.
+
+Group project files into semantic subdirectories to reduce top-level clutter as a project accumulates drafts, sources, and samples. Proposed layout:
+
+```
+project-dir/
+├── CLAUDE.md              # stays at root — Claude Code reads from project root
+├── config/
+│   ├── voice.md
+│   ├── style.md
+│   └── <name>.brief.md
+├── sources/
+│   ├── <draft>.citations.json
+│   └── *.pdf, *.txt, *.md    # user-uploaded primary/secondary sources
+├── samples/               # writing samples for voice-extractor input
+│   └── *.md, *.pdf, *.txt
+├── .claude/citations/     # unchanged: shard files during parallel dispatch
+└── <draft>.md + <draft>.*.md  # drafts and formatted outputs stay at root
+```
+
+Constraints. `CLAUDE.md` must stay at project root (Claude Code convention). `.claude/citations/` stays hidden for dispatch-shard infrastructure; the writer-facing main log moves into `sources/`. Drafts and formatted outputs stay at root because `[writing mode]` and `[formatting mode]` emit sibling files and users expect to find them next to each other.
+
+Touch points. `templates/CLAUDE.md §7` references `./voice.md`, `./style.md`, and `<draft>.citations.json` as flat paths across every mode that reads them; all need updating. `agents/source-finder.md`, `citations/schema.md`, and the `voice-extractor` agent pick up sample-dir conventions. `install.sh` creates the subdirs and writes to new target paths. Per-style `style.md` files reference the citation log location in their pandoc recipes.
+
+Migration. For one release: agents and install.sh read flat paths as fallback if subdir paths are absent, so existing projects keep working. Next release: deprecate the fallback, print a `sourced migrate` hint that moves files into place.
+
+No schema change; no new mode; no new gate. Purely organizational. Scope-wise, this is ergonomics (not one of the core values) — but it materially affects how usable sourced is once a real writer has run 3+ essays in one dir.
+
 ---
 
 ## Scope boundaries (declined, with rationale)
