@@ -66,14 +66,32 @@ EOF
 }
 
 check_prerequisites() {
-  # Tools required by the framework at runtime (not at install). pdftotext and
-  # pdftoppm come from poppler-utils; Claude Code's built-in Read calls
-  # pdftoppm for PDF rendering, and [research mode] reads PDFs via pdftotext.
-  # pandoc 3.0+ with citeproc is required for the word/docx paste target and
-  # for any future latex target.
+  # Tools required by the framework at runtime. pdftotext/pdftoppm come from
+  # poppler-utils; Claude Code's built-in Read uses pdftoppm for PDF rendering,
+  # and [research mode] uses pdftotext.
+  # pandoc 3.1+ with citeproc is required by every [formatting mode] paste
+  # target (word, google-docs, plain-markdown). python3 is used at style-install
+  # to cross-check the CSL <title> against style.md provenance.
   local missing=()
   command -v pdftotext >/dev/null 2>&1 || missing+=("poppler-utils (pdftotext, pdfinfo, pdftoppm)")
-  command -v pandoc    >/dev/null 2>&1 || missing+=("pandoc (3.0+)")
+  command -v python3   >/dev/null 2>&1 || missing+=("python3")
+
+  if ! command -v pandoc >/dev/null 2>&1; then
+    missing+=("pandoc 3.1 or newer")
+  else
+    # pandoc --version first line looks like "pandoc 3.1.9" or "pandoc.exe 3.1.9".
+    local pandoc_version
+    pandoc_version=$(pandoc --version | head -n1 | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' | head -n1)
+    local major minor
+    major=${pandoc_version%%.*}
+    minor=${pandoc_version#*.}
+    minor=${minor%%.*}
+    if [[ -z "${major}" || -z "${minor}" ]]; then
+      missing+=("pandoc 3.1 or newer (detected unparseable version: $(pandoc --version | head -n1))")
+    elif (( major < 3 || (major == 3 && minor < 1) )); then
+      missing+=("pandoc 3.1 or newer (detected ${pandoc_version}; Ubuntu 22.04 and older apt ships 2.9 and is below minimum)")
+    fi
+  fi
 
   [[ ${#missing[@]} -eq 0 ]] && return 0
 
@@ -82,11 +100,19 @@ check_prerequisites() {
     echo "  - ${tool}" >&2
   done
   echo "" >&2
-  echo "Install on Debian/Ubuntu/WSL:" >&2
-  echo "  sudo apt-get install -y poppler-utils pandoc" >&2
+  echo "Install on Debian/Ubuntu 24.04+/WSL Ubuntu 24.04+:" >&2
+  echo "  sudo apt-get install -y poppler-utils pandoc python3" >&2
+  echo "" >&2
+  echo "Install on Debian/Ubuntu 22.04 or older (apt pandoc is 2.9, too old):" >&2
+  echo "  sudo apt-get install -y poppler-utils python3" >&2
+  echo "  # then install pandoc 3.1+ from https://github.com/jgm/pandoc/releases" >&2
   echo "" >&2
   echo "Install on macOS:" >&2
-  echo "  brew install poppler pandoc" >&2
+  echo "  brew install poppler pandoc python3" >&2
+  echo "" >&2
+  echo "Install on Windows (PowerShell as admin):" >&2
+  echo "  winget install --id JohnMacFarlane.Pandoc" >&2
+  echo "  winget install --id Python.Python.3" >&2
   exit 1
 }
 
