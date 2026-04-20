@@ -997,7 +997,7 @@ git commit -m "Require pandoc 3.1+ and python3 in install.sh prerequisites"
 
 - [ ] **Step 1: Add the `validate_csl_title` function.**
 
-Insert this function immediately after `render_style` (around line 479, just before the `# ---- step 2: per-project CLAUDE.md` section):
+Insert this function definition BEFORE the `# ---- style preflight:` block (around line 280, immediately before `DEST_STYLE="${TARGET_DIR}/style.md"`). Rationale: bash functions must be defined before they are called, and the call site (Step 2) is inside the style preflight block. Placing the definition after the call site (e.g., before `# ---- step 2: per-project CLAUDE.md`) would fail at runtime with "command not found".
 
 ```bash
 # Cross-check the vendored CSL file's <title> against the style.md's declared
@@ -1013,7 +1013,24 @@ validate_csl_title() {
   local style_source="$1" style_name="$2"
   local declared_title csl_rel_path csl_abs_path actual_title
 
-  declared_title=$(awk '/^  - CSL title:/{sub(/^  - CSL title:[[:space:]]*/, ""); gsub(/^"|"$/, ""); print; exit}' "${style_source}")
+  declared_title=$(awk '
+    /^  - CSL title:/ {
+      # Extract content between the first pair of double quotes on this line.
+      # Handles trailing prose after the closing quote (e.g., "...title..." (note)).
+      # If no quotes are present, fall back to the post-colon content trimmed.
+      line = $0
+      sub(/^  - CSL title:[[:space:]]*/, "", line)
+      if (match(line, /"[^"]*"/)) {
+        print substr(line, RSTART + 1, RLENGTH - 2)
+      } else {
+        # No quotes — use the whole trimmed remainder.
+        sub(/^[[:space:]]+/, "", line)
+        sub(/[[:space:]]+$/, "", line)
+        print line
+      }
+      exit
+    }
+  ' "${style_source}")
   csl_rel_path=$(awk '/^  - file:/{sub(/^  - file:[[:space:]]*/, ""); print; exit}' "${style_source}")
 
   # If neither is declared, skip (legacy style.md pre-schema; migration window).
