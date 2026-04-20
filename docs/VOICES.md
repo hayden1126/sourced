@@ -6,6 +6,53 @@ Voice rules live in a per-project `voice.md` rendered from a named voice in the 
 
 The shipped `academic` voice is the author's own: personal register plus specific analogy anchors (Clever Hans, chicken sexing, split-brain) calibrated to one writer. Treat it as an example, not a neutral academic default. For a different author or a different register, copy it to a new name and edit, or generate one from a corpus (see below).
 
+## Shipped skeletons
+
+Sourced ships 6 register-specific voice skeletons under `~/.claude/voice/`. Each is a template for voice-extractor to mirror when generating a per-author voice file from a writing-samples corpus.
+
+| Skeleton | Register | Typical documents |
+|----------|----------|-------------------|
+| `academic.md` | academic | research papers, essays, dissertations |
+| `casual.md` | casual | blog posts, personal essays, conversational pieces |
+| `technical.md` | technical | documentation, API references, procedural guides |
+| `journalistic.md` | journalistic | news stories, features, reported commentary |
+| `narrative.md` | narrative | personal essays, reflection pieces, college application essays, memoir |
+| `hybrid.md` | register-neutral | blended corpora that don't cleanly fit one register |
+
+Each skeleton has identical section structure (same 4 top-level headers; same subsection names). What varies is the non-iron prose within each section — each is calibrated to its register's defaults.
+
+## Section structure: 4 orthogonal axes
+
+Each skeleton organizes its rules under 4 top-level headers:
+
+- **`## Iron rules`** — global prohibitions (CLAUDE.md §10 Never list + any line tagged `[iron]`). Never calibrated from corpus. `## §10 exemptions` nests as a subsection here for per-voice carve-outs.
+- **`## Tone`** — what the voice sounds like: register, stance, sentence rhythm, vocabulary, audience orientation (we/you/third-person).
+- **`## Structure`** — how the prose is organized: connectedness, pacing, concept setup, argument-building, paragraph length.
+- **`## Dimension`** — unique author habits that vary independent of register: analogies / anchors, punctuation quirks, formatting conventions.
+
+The 4 axes are orthogonal: a writer can be tonally casual + structurally academic + dimensionally narrative all at once. Voice-extractor calibrates each axis from corpus evidence per-section.
+
+## Skeleton selection: auto-route by classifier
+
+When you invoke `voice-extractor` with a writing-samples corpus, it classifies the corpus and picks a skeleton:
+
+1. If you pass `register: <label>`, that skeleton is used directly. Halts only if the corpus flatly contradicts the label (`register-mismatch`).
+2. If you omit `register`, the classifier runs:
+   - **≥ 85% single register** → that register's skeleton is used.
+   - **< 85% on any single register** (blended corpus) → `hybrid.md` is used.
+
+No `mixed-register` halt. Blended corpora auto-route to hybrid without user intervention.
+
+The classifier surfaces the full breakdown in the report's `### Register drift` section when the dominant register is < 95% clean, so you can re-run with a specific register if the auto-route looks wrong.
+
+## Hybrid.md's contract
+
+`hybrid.md` is the register-neutral fallback. Its non-iron prose deliberately does NOT describe rules in register-specific terms. Instead, each section states the underlying rule (what connects to what, what comes first, etc.) and directs voice-extractor to derive the specifics from corpus evidence.
+
+**Why it matters:** a corpus that's structurally academic but tonally casual (school essays are the canonical example) would, under a single-skeleton system defaulting to academic, get flattened to academic register throughout. Hybrid.md preserves the blend: each section extracts its rule from THIS corpus, not from a pre-chosen register's template.
+
+**When hybrid.md fires:** any corpus where no single register crosses 85%. Classifier surfaces the breakdown so you can see which registers contributed.
+
 ## Pick a voice at install
 
 ```bash
