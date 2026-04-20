@@ -8,25 +8,15 @@ Fernández returns to the same argument in a later chapter, now with a harder qu
 
 Collaborative work on the same corpus broadened the claim to four regional scriptoria,[^5] and Herrmann and Schulz returned to the question in a short follow-up note.[^6] A more recent archival guide fills in the institutional background.[^7]
 
-# Bibliography {#bibliography .unnumbered}
+# Bibliography
 
-::: {#refs .references .csl-bib-body .hanging-indent}
-::: {#ref-bnf-guide-2022 .csl-entry}
 Bibliothèque nationale de France. *Guide to the Medieval Manuscript Collections*. Paris: Bibliothèque nationale de France, 2022. <https://www.bnf.fr/fr/guide-manuscrits-medievaux>.
-:::
 
-::: {#ref-fernandez-2011 .csl-entry}
 Fernández, María Luisa. *Liturgical Continuity in the Early Medieval West*. Cambridge: Cambridge University Press, 2011.
-:::
 
-::: {#ref-herrmann-schulz-2021 .csl-entry}
 Herrmann, Klaus, and Annika Schulz. "A Palaeographic Reassessment of the Leipzig Codices." *Speculum* 96, no. 2 (2021): 38--71.
-:::
 
-::: {#ref-okafor-lindqvist-tanaka-rossi-2018 .csl-entry}
 Okafor, Chidinma, Erik Lindqvist, Hiroshi Tanaka, and Giulia Rossi. "Four Scriptoria, One Editorial Program: A Comparative Study." *Scriptorium* 72, no. 1 (2018): 5--48.
-:::
-:::
 
 [^1]: María Luisa Fernández, *Liturgical Continuity in the Early Medieval West* (Cambridge: Cambridge University Press, 2011).
 

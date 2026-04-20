@@ -13,11 +13,11 @@ RENDER="${SCRIPT_DIR}/../_render.sh"
 
 failures=0
 
-if ! "${RENDER}" "${SCRIPT_DIR}" plain-markdown md --wrap=preserve -t markdown-citations; then
+if ! "${RENDER}" "${SCRIPT_DIR}" plain-markdown md --wrap=preserve -t markdown-citations-header_attributes; then
   failures=$((failures + 1))
 fi
 
-if ! "${RENDER}" "${SCRIPT_DIR}" google-docs md --wrap=none -t markdown-citations; then
+if ! "${RENDER}" "${SCRIPT_DIR}" google-docs md --wrap=none -t markdown-citations-header_attributes; then
   failures=$((failures + 1))
 fi
 
