@@ -132,6 +132,17 @@ Walk through reasoning. When there's a counterpoint worth addressing, address it
 
 3 to 5 sentences per paragraph maximum. Each paragraph has one job. Show the example first, then explain the principle.
 
+### Reduced Structures and Parse Load
+
+A reduced relative clause (dropped "that"), a cataphoric pronoun ("one," "this," "that," pointing forward to content the sentence hasn't yet delivered), or a long noun-phrase subject is each acceptable on its own. Two or three stacked in one sentence force the reader to backtrack to identify the subject. Limit yourself to one parse-load element per sentence; if the argument needs more, split the sentence.
+
+Prefer the explicit "that" when the sentence already has a long subject, a cataphoric reference, or multiple clauses. The word savings are not worth the parse cost. This is a principled exception to the Core Rule's cut bias: "that" is optional grammatically but load-bearing for readability once a sentence carries other parse-load elements.
+
+- Stacked: "The axis Moore's data reveals is one the names themselves display across the census record, and the morphological contrast this prospectus has traced reads onto it directly." Three reduced relatives plus a cataphoric "one"; the reader backtracks to find each subject.
+- Split: "Moore's data reveals a vertical axis, and the names themselves display the same axis across the census record. The morphological contrast between transparent names and Ma'heo'o reads onto that axis directly." One idea per sentence, with explicit noun phrases in place of the cataphora.
+
+Signal: if the reader has to re-read a clause to identify its subject, a reduced relative is probably doing the damage. Restore the "that," or split the sentence at the clause boundary.
+
 ### Weak Nominalizations
 
 Prefer verbs over nouns made from verbs. Prefer concrete subjects over abstract ones. A chain of abstract nouns ("the scope of X… the widening into Y… the strategies Z uses to place W in relation to…") reads as institutional padding even when every word passes the Core Rule's cut test. This is the opposite failure mode of over-compression: when the cut-bias stops firing, the prose expands into abstract-noun cascades that disconnect the agent from the action.
