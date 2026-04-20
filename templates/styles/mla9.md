@@ -83,7 +83,7 @@ Threshold: 4 lines of prose, 3 lines of verse (MLA 9 §6.36). Verse quotations u
 
 ### word
 
-- pandoc flags: `--citeproc --reference-doc=~/.claude/style/mla9/reference-styled.docx`
+- pandoc flags: `--citeproc`
 - reference.docx: `mla9/reference-styled.docx` — Times New Roman 12pt, double-spaced body, 0.5in hanging Works Cited, "Lastname N" page-number header. Optional; on absence, pandoc default layout; surface tolerable warning.
 - Post-pandoc transforms: (none)
 
