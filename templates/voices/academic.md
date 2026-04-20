@@ -101,17 +101,6 @@ Sentences hand off. Each connects to the previous through a causal, contrastive,
 
 Academic prose defaults to longer connected sentences; the short form is for emphasis at pivots, not the baseline.
 
-### Reduced Structures and Parse Load
-
-A reduced relative clause (dropped "that"), a cataphoric pronoun ("one," "this," "that"), or a long noun-phrase subject is each acceptable on its own. Two or three stacked in one sentence force the reader to backtrack to identify the subject. Limit yourself to one reduced structure per sentence; if the argument needs more, split the sentence.
-
-Prefer the explicit "that" when the sentence already has a long subject, a cataphoric reference, or multiple clauses. The word savings are not worth the parse cost. This is a principled exception to the Core Rule's cut bias: "that" is optional grammatically but load-bearing for readability once a sentence carries other reduced structures.
-
-- Stacked: "The axis Moore's data reveals is one the names themselves display across the census record, and the morphological contrast this prospectus has traced reads onto it directly." Three reduced relatives plus a cataphoric "one"; the reader backtracks to find each subject.
-- Split: "Moore's data reveals a vertical axis, and the names themselves display that same axis across the census record. The morphological contrast between transparent names and Ma'heo'o reads onto that axis directly." One idea per sentence, with explicit noun phrases in place of the cataphora.
-
-Signal: if the reader has to re-read a clause to identify its subject, a reduced relative is probably doing the damage. Restore the "that," or split the sentence at the clause boundary.
-
 ### Paragraph Flow
 
 Paragraphs set up, develop, and hand off. End a paragraph on a transition to the next paragraph's topic, not on a verdict that closes the door. Open the next paragraph with a connective, a reference back, or a concept the prior paragraph positioned.
@@ -142,6 +131,17 @@ Walk through reasoning. When there's a counterpoint worth addressing, address it
 ### Paragraph Length
 
 3 to 5 sentences per paragraph maximum. Each paragraph has one job. Show the example first, then explain the principle.
+
+### Reduced Structures and Parse Load
+
+A reduced relative clause (dropped "that"), a cataphoric pronoun ("one," "this," "that," pointing forward to content the sentence hasn't yet delivered), or a long noun-phrase subject is each acceptable on its own. Two or three stacked in one sentence force the reader to backtrack to identify the subject. Limit yourself to one parse-load element per sentence; if the argument needs more, split the sentence.
+
+Prefer the explicit "that" when the sentence already has a long subject, a cataphoric reference, or multiple clauses. The word savings are not worth the parse cost. This is a principled exception to the Core Rule's cut bias: "that" is optional grammatically but load-bearing for readability once a sentence carries other parse-load elements.
+
+- Stacked: "The axis Moore's data reveals is one the names themselves display across the census record, and the morphological contrast this prospectus has traced reads onto it directly." Three reduced relatives plus a cataphoric "one"; the reader backtracks to find each subject.
+- Split: "Moore's data reveals a vertical axis, and the names themselves display the same axis across the census record. The morphological contrast between transparent names and Ma'heo'o reads onto that axis directly." One idea per sentence, with explicit noun phrases in place of the cataphora.
+
+Signal: if the reader has to re-read a clause to identify its subject, a reduced relative is probably doing the damage. Restore the "that," or split the sentence at the clause boundary.
 
 ### Weak Nominalizations
 
