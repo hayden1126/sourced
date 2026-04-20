@@ -18,7 +18,7 @@ Each renders citations from Pandoc-style IDs (`[@id]`, `@id`, `[@id, p. N]`) in 
 
 ## Schema transition in progress
 
-The 5 shipped style files are being migrated from a rendering-rules-in-markdown schema to a slim schema where `pandoc --citeproc` + vendored CSL files own all rendering. During the migration, some style.md files carry dead-weight old rendering-rule sections (§Inline citations, §References list, §Footnote citations, §Numbering rules) that `[formatting mode]` no longer reads. The dead-weight will be removed in the final migration PR. See `docs/specs/2026-04-19-csl-direct-consumption-design.md` for the full shift description.
+The 5 shipped style files are mid-migration from a rendering-rules-in-markdown schema to the slim schema above. After this PR, chicago17-nb, ieee, and mla9 are fully slim; apa7 and chicago17-ad still carry dead-weight old rendering-rule sections (§Inline citations, §References list, §Footnote citations, §Numbering rules) that `[formatting mode]` no longer reads. The dead-weight will be removed in the next (final) migration PR. See `docs/specs/2026-04-19-csl-direct-consumption-design.md` for the full shift description.
 
 ## Pick a style at install
 
@@ -31,37 +31,26 @@ The 5 shipped style files are being migrated from a rendering-rules-in-markdown 
 
 ## Style file structure
 
-Each style file ships a fixed section structure so `[formatting mode]` can look up a single rule without rereading the file. Sections are addressable (e.g., "see §Inline / Two authors"). The required section set varies by the style's structural **shape** (declared in §Style identity):
+Each style file has a fixed section structure so `[formatting mode]` can look up rules by section name. Sections are addressable (e.g., "see §Style identity.CSL provenance", "see §Paste target expression rules.google-docs"). The required sections are the same for every style; rendering of inline citations, references, and footnotes is delegated to `pandoc --citeproc` reading the vendored CSL file.
 
-| Shape | Required sections |
-|-------|-------------------|
-| `author-date` (APA, Chicago AD, Harvard, AMA author-year, AAA, Turabian AD) | §Style identity · §Inline citations · §References list · §Document layout · §Paste target expression rules · §Special tokens |
-| `author-page` (MLA 9) | same as author-date; §Inline citations rules differ (no year; page locator in parens) |
-| `footnote` (Chicago NB, Turabian NB, MHRA, OSCOLA) | §Style identity · §Footnote citations · §Bibliography · §Document layout · §Paste target expression rules · §Special tokens |
-| `numeric-sequence` (IEEE, Vancouver, ACM numeric, ACS superscript, CSE c-s) | §Style identity · §Inline citations · §Reference list · §Numbering rules · §Document layout · §Paste target expression rules · §Special tokens |
-| `numeric-alpha` (CSE c-n, some Harvard variants) | same as numeric-sequence; §Numbering rules specifies label generation instead of ordinal assignment |
+Required sections (every style):
 
-**§Style identity** common to every shape carries: `Name`, `Shape`, `In-text marker`, `List heading` (runtime section name: References, Works Cited, Bibliography, Reference List), `Authority`, `Default for`, `Source consulted` (URLs + access dates for audit), `CSL provenance` (shipped CSL filename + source repo + edition pinning), `On-demand references` (paths to sidecar reference files the formatter reads conditionally), `Last reviewed`.
-
-Section contents by role:
-
-- **§Inline citations** — resolution rules per ID case for author-date / author-page / numeric shapes: one author, two authors, three-plus, group, no author, no date, multi-citation, direct quotes, style-specific edge cases (classical texts, personal communications).
-- **§Footnote citations** (footnote shapes only) — full first-cite form, short subsequent form, `ibid.` or short-form rules, footnote placement convention.
-- **§References list** / **§Reference list** / **§Bibliography** — entry format per source type (journal article, book, chapter, web page, translation, reprint), sort order, indentation, URL/DOI handling. Section name matches the style's own terminology.
-- **§Numbering rules** (numeric shapes only) — how numbers or letter-labels are assigned, reset rules, range-collapsing (`[1]-[3]` vs `[1, 2, 3]`), superscript vs bracket conventions.
-- **§Document layout** — title block, heading hierarchy, body text spacing, footnotes (for non-footnote shapes only).
-- **§Paste target expression rules** — how the style's conventions render per destination format.
-- **§Special tokens** — how `[VERIFY: ...]` and `[UNSOURCED]` tokens in source prose are treated at format time.
+| Section | Role |
+|---------|------|
+| §Style identity | Name, Shape (audit-only), In-text marker (audit-only), List heading (runtime-read), Authority, Default for, Source consulted, CSL provenance (file / source / fetched / CSL title), On-demand references (post-pandoc hook per style), Last reviewed. |
+| §Document layout | Fonts and spacing, Margins, Heading hierarchy, Title block, Page numbering, (optional) Footnotes, Block quotes (threshold if any — enforced in `[editing mode]`, verified in `[formatting mode]` pre-flight). |
+| §Paste target expression rules | Per-target subsections (google-docs, plain-markdown, word): pandoc flags, paste-time instructions, post-pandoc transforms, reference.docx path (word only). |
+| §Special tokens | `[VERIFY: ...]` and `[UNSOURCED]` policy. Most styles carry the standard block. |
 
 ## Paste targets
 
-`[formatting mode]` renders into one of the target formats defined under the style's **Paste target expression rules** section. The target is required at mode invocation: `[formatting mode for google-docs]`, `[formatting mode for plain-markdown]`. An unspecified target is a refusal, not a default.
+`[formatting mode]` renders into one of the target formats defined under the style's `§Paste target expression rules` section. The target is required at mode invocation: `[formatting mode for google-docs]`, `[formatting mode for plain-markdown]`, `[formatting mode for word]`. An unspecified target is a refusal, not a default.
 
-Currently shipped:
+All three targets are rendered by `pandoc --citeproc` reading the style's vendored CSL file. Flags per target (including output markdown dialect, wrap behavior, and reference.docx) live in the style's `§Paste target expression rules` subsections.
 
-- **`google-docs`** — single markdown block with smart quotes, en-dashes, and italics preserved. Google Docs converts on paste. Features not expressible at paste time (hanging indents, double-spacing) emit a one-line instruction at the top of the output file.
-- **`plain-markdown`** — faithful pass-through. Resolves citation IDs and generates References; applies no destination-specific transforms. Suitable for archival copies and further conversion downstream (Pandoc, etc.).
-- **`word`** — implemented for `chicago17-ad`. Runs a pandoc + citeproc pipeline against the shipped CSL file and (optionally) a reference.docx that defines paragraph styles. Emits `<draft>.docx.md` (rendered-markdown intermediate) plus `<draft>.docx` (submission binary). If the reference.docx is not shipped for a style, pandoc default styles are used and the fallback is surfaced in the step-8 report. Not yet shipped for `apa7`.
+- **`google-docs`** — markdown output tuned for Google Docs paste (smart quotes, en-dashes preserved). Features not expressible at paste time (hanging indents, custom headers) surface as a one-line instruction at the top of the output.
+- **`plain-markdown`** — faithful markdown pass-through.
+- **`word`** — pandoc emits `.docx` directly, optionally styled by a reference.docx bundled per style.
 - **`latex`** — reserved; not implemented.
 
 ## How `[formatting mode]` uses `style.md`
@@ -70,18 +59,16 @@ Currently shipped:
 
 The formatting procedure (abbreviated; see CLAUDE.md §7 for the full version):
 
-1. Read `style.md` + the citation log.
-2. Pre-flight scan. Halt if the source prose carries `[VERIFY: ...]` tokens, `[UNSOURCED]` tokens, rendered author-year strings (legacy regressions), unresolved citation IDs, or stale `retrieved_at` timestamps on referenced entries.
-3. Resolve every Pandoc ID against `source.authors` + `source.year` in the log, applying the matching rule from `style.md` §Inline citations.
-4. **Collapse per-instance citation IDs (target-conditional).** For targets whose downstream renderer dedupes by id (currently `word` via pandoc+citeproc), rewrite `<author>-<year>-NNN` to `<author>-<year>` in the derived markdown so the same source does not emit duplicate References entries. Skip for `google-docs` and `plain-markdown` (our own renderer dedupes directly from the log).
-5. Generate References list from the log per `style.md` §References. Deduped across multiple log entries pointing at the same source; sorted per style. For `word`, additionally emit a CSL-JSON bibliography at `<draft>.bib.json` keyed to the collapsed ids.
-6. Apply document-layout rules (title block, headings, spacing, indentation) per the target's expression rules. Rules with no expression in the destination (e.g., hanging indents in google-docs) emit a one-line paste-time instruction at the top of the output.
-7. Write output to `<draft>.<target>.md` (sibling file). For `word`, additionally invoke pandoc against the intermediate and emit `<draft>.docx`. Source prose is never modified.
-8. Report the run: citations resolved, References entries, stale entries handled, paste-time instructions, any reference.docx fallback notice.
+1. Read `style.md` + the citation log. Verify CSL file exists on disk.
+2. Pre-flight. Halt on `[VERIFY: ...]`, `[UNSOURCED]`, rendered citation strings, unresolved IDs, stale `retrieved_at`, or inline direct quotes exceeding the style's block-quote threshold.
+3. Pre-pandoc pass: collapse per-instance citation IDs into a derived `<draft>.pandoc.md`. Source prose unchanged.
+4. Emit CSL-JSON bibliography from the log to `<draft>.bib.json` per `citations/csl-json-emitter.md`.
+5. Invoke pandoc with flags from `§Paste target expression rules.<target>`; output per target (`.docx`, `.gdocs.md`, `.plain.md`).
+6. Handle pandoc stderr: halt on blocking warnings (unresolved citation, missing type, CSL-parse error); surface tolerable warnings in the report.
+7. Post-pandoc pass: apply On-demand references transforms (e.g., classical-abbreviations rewrite); prepend paste-time instructions.
+8. Report.
 
 Re-running with a different style or target is idempotent: each run writes its own sibling file.
-
-**On-demand style references.** Some styles ship lookup tables too large to carry inline in `style.md`. `[formatting mode]` reads them only when a citation triggers the lookup. Currently shipped for `chicago17-ad`: a per-author classical-works abbreviation table at `~/.claude/style/chicago17-ad/classical-abbreviations.md`, consulted when a citation resolves to an ancient author (Plato, Aristotle, Cicero, Seneca, Augustine, Aquinas, etc.). The pattern scales to any style that wants to offload a rarely-used reference without paying per-format-pass load cost.
 
 ## Authoring a custom style
 
