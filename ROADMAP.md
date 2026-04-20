@@ -65,9 +65,18 @@ Legal writing. Massive spec (case law, statutes, regulations), different citatio
 Beyond "argumentative essay with sources." Each new type probably extends the mode system or adds a new target output.
 
 ### Annotated bibliography
-**Priority:** next · **Effort:** S · **Status:** open.
+**Priority:** next · **Effort:** M · **Status:** phase 1+2 shipped 2026-04-20; phase 3 (per-style paste-target variants) open.
 
-Output IS the citation log, formatted as per-entry blocks with paraphrase + analysis rather than an argumentative essay. Cheap to ship: new `[formatting mode]` target or a new mode that emits `<draft>.annotated.md` from the log directly. Schema needs a per-entry `annotation` field (new optional field, backward-compatible).
+New `annotated-bib` project type with topic-driven research deliverable. User supplies a narrow topic; `[plan mode]` runs a topic specificity gate and facet decomposition; `[research mode]` dispatches source-finders per facet; `[annotated-bib mode]` (new) writes per-entry annotations (150–250 word four-beat: summary / relevance / location / evaluation) grounded only in log fields; `[editing mode]` runs a subset of its passes (skip quote-density, reduce voice audit to iron rules + exploratory/verdict). Design spec: [`docs/specs/2026-04-20-annotated-bibliography-design.md`](docs/specs/2026-04-20-annotated-bibliography-design.md).
+
+**Shipped 2026-04-20 (phases 1+2).** Schema extension (`citations/schema.md §Annotation`); new brief template (`templates/brief.template.annotated-bib.md`); `install.sh --type annotated-bib` flag + `.sourced-project-type` marker; `templates/CLAUDE.md §7` project-type preamble + new mode + mode adaptations.
+
+**Phase 3 open.** Per-style paste-target variants (`apa7-annotated-bib`, `chicago17-ad-annotated-bib`, etc.) that render per-entry bibliography entries followed by annotation blocks via `pandoc --citeproc` + CSL. Open design question: inject annotations via CSL `note` field mapping plus custom CSL-JSON emitter path, or post-pandoc merge of rendered bibliography + log's `annotation` field by id match. Upstream citation-style-language/styles has `apa-annotated-bibliography.csl` for APA; other styles may need vendored variants. LaTeX `template.tex` adjustments per style for annotation-block layout. Test fixtures per style. Originally sized S; resized M after design work surfaced the project-type fork cost.
+
+### Grant proposal
+**Priority:** later · **Effort:** M · **Status:** open.
+
+Different section structure (Specific Aims, Background / Significance, Approach, Budget Justification). `[plan mode]` needs grant-aware templates; mode gates map per-section rather than global. Funder-specific formatting (NIH vs. NSF vs. private foundations) probably ships as templates-on-templates.
 
 ### Thesis / dissertation
 **Priority:** later · **Effort:** L · **Status:** open.
@@ -92,11 +101,6 @@ Targets medical / social-science students who run systematic searches. Needs:
 - Source-finder extension: respect structured inclusion criteria rather than just the topic description.
 
 Schema extension: citation log entries carry `screening_decision` and `exclusion_reason` fields when part of a systematic review.
-
-### Grant proposal
-**Priority:** later · **Effort:** M · **Status:** open.
-
-Different section structure (Specific Aims, Background / Significance, Approach, Budget Justification). `[plan mode]` needs grant-aware templates; mode gates map per-section rather than global. Funder-specific formatting (NIH vs. NSF vs. private foundations) probably ships as templates-on-templates.
 
 ### Book review / review essay
 **Priority:** maybe · **Effort:** S · **Status:** open.
@@ -190,15 +194,15 @@ JSTOR-specific version of `browser-reader-extract` for paywalled-but-authorized 
 
 Fetch arXiv LaTeX source rather than the rendered PDF. More reliable for math-heavy papers where PDF extraction loses formulas and code blocks. arXiv provides a public API; no browser automation needed.
 
-### `extract-transcript`
-**Priority:** later · **Effort:** M · **Status:** open.
-
-Clean interview transcripts (Zoom output, Otter.ai export, YouTube auto-caption) into quote-ready form with timestamps. Ties into the primary-source research mode above. Handles speaker diarization, timestamp normalization, and quote-extraction formatting.
-
 ### Additional browser readers
 **Priority:** later · **Effort:** S each · **Status:** open.
 
 Kindle Cloud Reader, Scribd, Archive.org's in-browser reader, HathiTrust. Each follows the pattern documented in `browser-reader-extract/SKILL.md`'s *Adding a new reader* section. Prioritize based on what real writers hit.
+
+### `extract-transcript`
+**Priority:** later · **Effort:** M · **Status:** open.
+
+Clean interview transcripts (Zoom output, Otter.ai export, YouTube auto-caption) into quote-ready form with timestamps. Ties into the primary-source research mode above. Handles speaker diarization, timestamp normalization, and quote-extraction formatting.
 
 ### `extract-scholar-citations`
 **Priority:** maybe · **Effort:** M · **Status:** open.
@@ -211,22 +215,46 @@ Harvest citations from a Google Scholar author page or search results with autom
 
 Cross-cutting features that touch multiple modes.
 
+### Installable `sourced` executable on `$PATH`
+**Priority:** later · **Effort:** S · **Status:** open.
+
+Ship a user-facing executable so installation and updates don't require users to know the absolute path to `install.sh`. Likely shape: rename `install.sh` to `sourced` with subcommands (`sourced install`, `sourced update`, `sourced uninstall`), plus a bootstrap one-liner (`curl … | sh`) that drops the binary into `/usr/local/bin` or `~/.local/bin`. Lowers adoption friction for non-developer writers who don't keep a mental map of cloned-repo paths. No schema / mode / gate impact — distribution ergonomics only, but it gates how reachable the core value prop is for less-technical users.
+
+### Per-project directory restructure
+**Priority:** later · **Effort:** M · **Status:** open.
+
+Group project files into semantic subdirectories to reduce top-level clutter as a project accumulates drafts, sources, and samples. Proposed layout:
+
+```
+project-dir/
+├── CLAUDE.md              # stays at root — Claude Code reads from project root
+├── config/
+│   ├── voice.md
+│   ├── style.md
+│   └── <name>.brief.md
+├── sources/
+│   ├── <draft>.citations.json
+│   └── *.pdf, *.txt, *.md    # user-uploaded primary/secondary sources
+├── samples/               # writing samples for voice-extractor input
+│   └── *.md, *.pdf, *.txt
+├── .claude/citations/     # unchanged: shard files during parallel dispatch
+└── <draft>.md + <draft>.*.md  # drafts and formatted outputs stay at root
+```
+
+Constraints. `CLAUDE.md` must stay at project root (Claude Code convention). `.claude/citations/` stays hidden for dispatch-shard infrastructure; the writer-facing main log moves into `sources/`. Drafts and formatted outputs stay at root because `[writing mode]` and `[formatting mode]` emit sibling files and users expect to find them next to each other.
+
+Touch points. `templates/CLAUDE.md §7` references `./voice.md`, `./style.md`, and `<draft>.citations.json` as flat paths across every mode that reads them; all need updating. `agents/source-finder.md`, `citations/schema.md`, and the `voice-extractor` agent pick up sample-dir conventions. `install.sh` creates the subdirs and writes to new target paths. Per-style `style.md` files reference the citation log location in their pandoc recipes.
+
+Migration. For one release: agents and install.sh read flat paths as fallback if subdir paths are absent, so existing projects keep working. Next release: deprecate the fallback, print a `sourced migrate` hint that moves files into place.
+
+No schema change; no new mode; no new gate. Purely organizational. Scope-wise, this is ergonomics (not one of the core values) — but it materially affects how usable sourced is once a real writer has run 3+ essays in one dir.
+
 ### Cross-project citation reuse
 **Priority:** later · **Effort:** L · **Status:** open.
 
 One writer, many papers, overlapping sources. A cross-project citation library (verify once, use many) reduces re-verification cost. `[research mode]` would check the shared library first before dispatching source-finders.
 
 Schema extension: add `source_hash` (content-addressed or DOI-based) that dedupes across project log files. Staleness thresholds still apply per use; re-verification may still be needed for web sources.
-
-### Voice-merging for co-authored papers
-**Priority:** maybe · **Effort:** L · **Status:** open.
-
-Papers with multiple authors sometimes need blended voices: author A writes section 1, author B writes section 2, both voices coexist. Current voice system is per-project-single-voice. Options: section-level voice assignment in the brief, or a "blended" voice type that doesn't strictly enforce either author's rules. Unclear whether real co-authors actually want this vs. simply alternating paragraph-by-paragraph.
-
-### Translation workflow
-**Priority:** maybe · **Effort:** L · **Status:** open.
-
-Quoting from non-English sources with verbatim original + translation + translator attribution. Current §4 verbatim-quotation rule doesn't distinguish between "verbatim in the source language" and "verbatim in the paraphrased translation." Schema extension: add `original_language`, `translation`, `translator` fields. `[formatting mode]` handles display conventions per style (APA vs. Chicago differ on bracket notation for translations).
 
 ### Teaching mode
 **Priority:** maybe · **Effort:** M · **Status:** open.
@@ -247,6 +275,16 @@ Three plausible integration angles worth scoping before committing to a design:
 **Investigation-first.** The `Team*` tool schemas have not been loaded or tested yet (they are gated behind `ToolSearch` as deferred tools). Scope the API surface before any design — specifically: what state is shared across team members, what handoff semantics exist, whether teams persist across turns, and whether the per-session token economics work given that `source-finder` already burns tokens fast. If the integration story is weak, stay with one-shot subagents.
 
 Related: `issues.md #5` (editing-critic subagents, parked); `### Peer review mode` above (team candidate); `### Revision mode` (team candidate).
+
+### Voice-merging for co-authored papers
+**Priority:** maybe · **Effort:** L · **Status:** open.
+
+Papers with multiple authors sometimes need blended voices: author A writes section 1, author B writes section 2, both voices coexist. Current voice system is per-project-single-voice. Options: section-level voice assignment in the brief, or a "blended" voice type that doesn't strictly enforce either author's rules. Unclear whether real co-authors actually want this vs. simply alternating paragraph-by-paragraph.
+
+### Translation workflow
+**Priority:** maybe · **Effort:** L · **Status:** open.
+
+Quoting from non-English sources with verbatim original + translation + translator attribution. Current §4 verbatim-quotation rule doesn't distinguish between "verbatim in the source language" and "verbatim in the paraphrased translation." Schema extension: add `original_language`, `translation`, `translator` fields. `[formatting mode]` handles display conventions per style (APA vs. Chicago differ on bracket notation for translations).
 
 ---
 
