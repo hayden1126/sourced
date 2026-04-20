@@ -17,9 +17,11 @@ The dispatcher gives you:
 
 - `samples_dir` — absolute path to a directory of writing samples.
 - `voice_name` — the name the output file will carry at `~/.claude/voice/<voice_name>.md`. Must match `[a-z0-9_-]+`.
-- `register` (optional) — one of `academic`, `technical`, `casual`, `journalistic`. If omitted, classify the corpus yourself and surface the classification at the top of your report.
+- `register` (optional) — one of `academic`, `technical`, `casual`, `journalistic`, `narrative`. If omitted, classify the corpus yourself and surface the classification at the top of your report. The register value selects the skeleton file at `~/.claude/voice/<register>.md`.
 - `overwrite` (optional, default `false`) — if `false` and the output path already exists, refuse and report. If `true`, overwrite.
-- `skeleton_path` (optional) — path to the voice file whose section structure to mirror. Default: `~/.claude/voice/academic.md` (installed by `install.sh --global-only`). If the file at `skeleton_path` is missing, stop and report.
+- `skeleton_path` (optional) — path to the voice file whose section structure to mirror. Default: resolved from the `register` value (or classifier output) as `~/.claude/voice/<register>.md`; `register=mixed` (classification result) resolves to `~/.claude/voice/hybrid.md`. If the file at `skeleton_path` is missing, stop and report.
+
+  Explicit `skeleton_path` override is for advanced users authoring custom skeletons; normal use omits this param and lets skeleton selection flow from register.
 
 The dispatch template in `CLAUDE.md` §9 always passes every field, using the literal string `omit` where an optional field is not applicable. Treat `omit` as "field not provided" and apply the optional-field default (classify the corpus for `register`, use the default `skeleton_path`). Do not interpret `omit` as a literal value.
 
@@ -29,7 +31,7 @@ Run these checks in order; halt on the first failure and report rather than proc
 
 1. **Samples directory exists.** If `samples_dir` is missing or unreadable, stop with `missing-samples-dir`.
 2. **Voice name valid.** If `voice_name` does not match `[a-z0-9_-]+`, stop with `invalid-voice-name`.
-3. **Shipped-name collision.** If `voice_name` is in the reserved list of shipped voices (currently: `academic`), stop with `shipped-name-collision` regardless of the `overwrite` value. Shipped voices are refreshed from the repo on every `install.sh --global-only`, so a generated file at a shipped name would be silently clobbered on next install. Reject rather than produce a file with a latent expiration. Maintainers: when a new shipped voice is added under `templates/voices/`, append its name to the reserved list in this check.
+3. **Shipped-name collision.** If `voice_name` is in the reserved list of shipped voices (currently: `academic`, `casual`, `technical`, `journalistic`, `narrative`, `hybrid`), stop with `shipped-name-collision` regardless of the `overwrite` value. Shipped voices are refreshed from the repo on every `install.sh --global-only`, so a generated file at a shipped name would be silently clobbered on next install. Reject rather than produce a file with a latent expiration. Maintainers: when a new shipped voice is added under `templates/voices/`, append its name to the reserved list in this check.
 4. **Output path.** If `~/.claude/voice/<voice_name>.md` exists and `overwrite` is `false`, stop with `existing-voice`.
 5. **Skeleton readable.** Read `skeleton_path`. If missing, stop with `missing-skeleton`.
 6. **Sample floor.** Glob `samples_dir` for `*.md` and `*.txt` (other file types are silently skipped; list them in the report). Reject with `under-sample` if fewer than 3 files match or the combined word count is under 5,000. Low-volume corpora produce unstable patterns; the fix is more samples, not more inference.
@@ -37,7 +39,25 @@ Run these checks in order; halt on the first failure and report rather than proc
 ## Workflow
 
 1. **Read every matched sample.** Hold the full corpus in memory.
-2. **Register.** If provided, trust it. If omitted, classify the corpus as one of `academic`, `technical`, `casual`, `journalistic`, or `mixed` based on sentence length distribution, contraction frequency, punctuation habits, and vocabulary register. A corpus counts as `mixed` when no single register accounts for at least 70% of the sample word count. If classification lands on `mixed`, stop with `mixed-register` and ask the dispatcher to split the directory or pass a label. If a `register` label was provided but the corpus's patterns flatly contradict it (e.g., `academic` label on prose dominated by contractions and two-word sentences), stop with `register-mismatch` rather than silently recalibrating.
+2. **Register.** If provided, trust it. If omitted, classify the corpus as one of `academic`, `technical`, `casual`, `journalistic`, `narrative`, or `mixed` based on:
+
+   - sentence length distribution
+   - contraction frequency
+   - punctuation habits
+   - vocabulary register
+   - first-person-pronoun frequency (narrative marker)
+   - past-tense-narrative constructions (narrative marker)
+   - scene / dialogue indicators (narrative marker)
+
+   Threshold: the corpus counts as a single register when that register accounts for at least 85% of the sample word count. Below 85% on any single register, the corpus counts as `mixed`.
+
+   **Skeleton selection based on classifier output:**
+   - Single register ≥ 85% → `skeleton_path = ~/.claude/voice/<register>.md`
+   - `mixed` (< 85% single-register) → `skeleton_path = ~/.claude/voice/hybrid.md`; proceed with workflow
+
+   `mixed` no longer halts. The hybrid skeleton is a first-class option for blended corpora.
+
+   If a `register` label was provided but the corpus's patterns flatly contradict it (e.g., `academic` label on prose dominated by contractions and two-word sentences), stop with `register-mismatch` rather than silently recalibrating.
 3. **Identify iron rules in the skeleton** before filling sections. Iron rules are preserved verbatim; the corpus does not get to vote on them. A rule is iron if either:
    - it sits under a skeleton section whose heading is `## Iron rules`, `## AI-tells`, or `## Generation signatures`, OR
    - its rule body contains the literal token `[iron]` anywhere in the line.
@@ -83,6 +103,11 @@ Return this structure in under 500 words (longer than source-finder's 300-word c
 <provided | inferred> — <label>
 <one-line reasoning if inferred>
 
+### Register drift
+<only emit when dominant register is < 95% clean; omit this section entirely when corpus is dominantly one register>
+Classified as <top> (<top-pct>%). Minority presence: <runner-up> <runner-up-pct>%, <third> <third-pct>% (when applicable).
+If your intent is <runner-up> voice, re-run with `register: <runner-up>` and `overwrite: true`.
+
 ### Sample stats
 - Files analyzed: <N>
 - Total words: <W>
@@ -119,6 +144,7 @@ Before rendering: open `~/.claude/voice/<voice_name>.md` and fill in every `TBD 
 If the output looks right: render into a project with `install.sh --voice <voice_name>` from inside the target project directory.
 If confidence is low on load-bearing sections, or the corpus was near the sample floor, collect more samples and re-run with `overwrite: true`.
 If the register was inferred and looks wrong, re-run with `register: <correct-label>` to force recalibration.
+If you previously generated a voice against the pre-decoupling `academic.md` skeleton (before the 6-skeleton decoupling shipped), re-run voice-extractor with `overwrite: true` to pick up the new routing and register-appropriate skeleton selection.
 ```
 
 If preflight halted, return a one-section report naming the rejection category, the specific reason, and what the dispatcher needs to change to retry.
@@ -129,11 +155,10 @@ Tag every halt with exactly one of:
 
 - **`missing-samples-dir`** — `samples_dir` does not exist or cannot be read.
 - **`invalid-voice-name`** — `voice_name` contains characters outside `[a-z0-9_-]`.
-- **`shipped-name-collision`** — `voice_name` matches a shipped voice (currently `academic`); next `install.sh --global-only` would clobber it. Suggest a different name.
+- **`shipped-name-collision`** — `voice_name` matches a shipped voice (currently `academic`, `casual`, `technical`, `journalistic`, `narrative`, `hybrid`); next `install.sh --global-only` would clobber it. Suggest a different name.
 - **`existing-voice`** — output path exists and `overwrite` is `false`.
 - **`missing-skeleton`** — `skeleton_path` does not exist or cannot be read.
 - **`under-sample`** — corpus below the 5-file or 5,000-word floor.
-- **`mixed-register`** — no `register` label provided and classification lands on `mixed`.
 - **`register-mismatch`** — `register` label was provided but the corpus's actual patterns contradict it.
 
 If a failure genuinely doesn't fit, pick the closest category and explain in the report. Do not invent new categories.

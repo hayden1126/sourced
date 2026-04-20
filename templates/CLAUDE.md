@@ -523,9 +523,9 @@ Next step after a successful run is always: {{USER}} runs `install.sh --voice <v
 ```
 samples_dir: <absolute path to a directory containing the writing samples>
 voice_name: <name for the new library voice; must match [a-z0-9_-]+>
-register: <academic | technical | casual | journalistic, or "omit" to let the subagent classify>
+register: <academic | technical | casual | journalistic | narrative, or "omit" to let the subagent classify>
 overwrite: <true | false; default false. True permits overwriting an existing ~/.claude/voice/<voice_name>.md>
-skeleton_path: <absolute path to the skeleton voice to mirror, or "omit" for the default ~/.claude/voice/academic.md>
+skeleton_path: <absolute path to the skeleton voice to mirror, or "omit" — voice-extractor will resolve the skeleton from the register (e.g., academic → ~/.claude/voice/academic.md; mixed-classifier-output → ~/.claude/voice/hybrid.md)>
 ```
 
 Do not invoke `voice-extractor` from inside another mode's auto-trigger path. Unlike `[research mode]`, voice-extractor fires only on explicit request from {{USER}}. Generating a new voice unprompted is scope creep.
