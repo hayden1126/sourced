@@ -364,7 +364,7 @@ Preserve {{USER}}'s voice. Don't flatten it into institutional prose.
 
 Convert source prose with Pandoc-style citation IDs into a fully-rendered document for a specific paste target. This is the terminal stage. Source prose is not modified; output goes to a sibling file. Rendering is delegated to `pandoc --citeproc` reading the style's vendored CSL file; the procedure below is uniform across all paste targets and all style Shapes.
 
-**Mode invocation carries the paste target.** Examples: `[formatting mode for google-docs]`, `[formatting mode for plain-markdown]`, `[formatting mode for word]`. The target is required; if {{USER}} says "format this" without a target, ask which one. Supported targets are listed under `§Paste target expression rules` in style.md; if the named target isn't present, refuse and surface to {{USER}} rather than guessing.
+**Mode invocation carries the paste target.** Examples: `[formatting mode for google-docs]`, `[formatting mode for plain-markdown]`, `[formatting mode for word]`, `[formatting mode for latex]`. The target is required; if {{USER}} says "format this" without a target, ask which one. Supported targets are listed under `§Paste target expression rules` in style.md; if the named target isn't present, refuse and surface to {{USER}} rather than guessing.
 
 **Procedure (run in this order; halt on the first failure).**
 
@@ -382,8 +382,9 @@ Convert source prose with Pandoc-style citation IDs into a fully-rendered docume
    - `word` → `<draft>.docx`
    - `google-docs` → `<draft>.gdocs.md`
    - `plain-markdown` → `<draft>.plain.md`
+   - `latex` → `<draft>.tex`
 
-   The invocation shape is: `pandoc <flags> --bibliography=<draft>.bib.json --csl=<csl-path> -o <output> <draft>.pandoc.md`. For the `word` target only, additionally check the style's `§Paste target expression rules.word.reference.docx:` bullet. If it declares a path AND the file exists at `~/.claude/style/<path>`, add `--reference-doc=<absolute-path>` to the invocation. If the bullet declares a path but the file is absent, proceed without the flag and surface "reference.docx fallback: <path> not shipped; using pandoc default layout" as a tolerable warning in the step 8 report. If the bullet declares no path, no flag is added.
+   The invocation shape is: `pandoc <flags> --bibliography=<draft>.bib.json --csl=<csl-path> -o <output> <draft>.pandoc.md`. For the `word` target only, additionally check the style's `§Paste target expression rules.word.reference.docx:` bullet. If it declares a path AND the file exists at `~/.claude/style/<path>`, add `--reference-doc=<absolute-path>` to the invocation. If the bullet declares a path but the file is absent, proceed without the flag and surface "reference.docx fallback: <path> not shipped; using pandoc default layout" as a tolerable warning in the step 8 report. If the bullet declares no path, no flag is added. For the `latex` target, additionally read the `§Paste target expression rules.latex.template.tex:` bullet. The template is required (unlike reference.docx's fallback behavior) because without it pandoc emits a `.tex` using its default template — which is not style-calibrated and may conflict with the style's intended document class (IEEEtran vs article, etc.). Resolve the declared relative path to `~/.claude/style/<path>` and add `--template=<absolute-path>` to the invocation. If the bullet declares a path but the file is absent, halt and surface "template.tex missing: <path>" — the install is broken.
 6. **Handle pandoc exit and stderr.**
    - Non-zero exit: halt; surface stderr in full.
    - Exit 0 with stderr non-empty: classify warnings per the table in `§Citeproc warning classification` below. Blocking warnings halt before writing output; tolerable warnings pass through to the step 8 report.

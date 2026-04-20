@@ -100,6 +100,14 @@ Threshold: 100 words (roughly five typed lines). Rendered as block quotes per Ch
 - reference.docx: `chicago17-nb/reference-styled.docx` — Times New Roman 12pt, double-spaced body, 0.5in hanging Bibliography paragraph style, footnote paragraph style. Optional; on absence, pandoc default layout; surface as a tolerable warning in the step 8 report.
 - Post-pandoc transforms: classical-abbreviations rewrite.
 
+### latex
+
+- pandoc flags: `--citeproc --standalone -t latex`
+- template.tex: `chicago17-nb/template.tex` — article class, 12pt Times-family, 1in margins, single-spaced body. Footnotes render natively via pandoc's `\footnote{...}` commands emitted by citeproc; no custom footnote machinery needed. Required; `[formatting mode]` resolves the relative path to `~/.claude/style/chicago17-nb/template.tex` and adds `--template=<absolute-path>` to the pandoc invocation.
+- Paste-time instructions:
+  - "Compile with `pdflatex <draft>.tex` (or `xelatex` / `lualatex`)."
+- Post-pandoc transforms: classical-abbreviations rewrite.
+
 ## Special tokens
 
 - `[VERIFY: ...]` and `[UNSOURCED]` in source prose are ERRORS at format time. Formatting mode halts and surfaces every occurrence. See CLAUDE.md §7 [formatting mode] step 2.
