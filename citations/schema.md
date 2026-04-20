@@ -116,11 +116,28 @@ Until the shard is either successfully merged (deleted) or explicitly abandoned 
 - If a shard exists for a finder-id academic-researcher is about to reuse, rename the old shard to `working.<finder-id>.failed.<ISO-8601-timestamp>.json` and surface it to {{USER}} before dispatching. This is the catch-all rename for when a reuse collision happens before {{USER}} has explicitly abandoned the old shard.
 - Abandoned failed shards stay under the `.failed.<timestamp>` name as a record. They are never auto-deleted.
 
+## Annotation (annotated-bibliography projects only)
+
+Optional string field `annotation`. Populated by `[annotated-bib mode]` (templates/CLAUDE.md §7) in projects whose `.sourced-project-type` marker is `annotated-bib`; absent on essay-project entries.
+
+Shape: 150–250 words of style-agnostic prose, four beats in order:
+
+1. Paraphrased summary of what the source argues or shows (40–60% of word budget), drawn from `context_description` + `surrounding_context`. Preserves every qualifier in `exact_quote` (hedges, conditions, populations). Preserves second-order attribution ("Smith, reviewing Jones, argues …").
+2. Relevance to the bibliography's topic (20–30%), naming which in-scope bullet the source speaks to.
+3. Location of key quotable material (10–20%), reading `location` verbatim; at most one short phrase from `exact_quote` quoted inline.
+4. Brief evaluation (10–20%), one strength + one limit drawn only from fields the entry carries.
+
+Generated from log fields only; no source re-read at annotation time (§3 verification is inherited from logging, not re-opened). Style-agnostic: do not render `(Smith, 2010)` inside the annotation; cross-references to other entries use `[@id]` form.
+
+`verification_status: "partial"` entries: relevance and evaluation beats must stay inside the `exact_quote` span or be dropped with a flag to {{USER}}.
+
+`[formatting mode]` reads this field when rendering an `annotated-bib` paste-target variant; essay paste targets ignore it. `[editing mode]` runs the §4 audit and §10 AI-tell pass on annotation prose; the `[editing mode]` quote-density pass and §9 paragraph-flow rules do not apply (both assume multi-paragraph prose).
+
 ## Additions
 
 Two kinds of optional fields can appear beyond the required structure above.
 
-- **Schema-defined optional fields.** Fields this schema defines but doesn't require on every entry (currently `author_evidence`, see "Author-field provenance"). When you use one, follow its definition exactly; do not redefine its semantics or shape per entry.
+- **Schema-defined optional fields.** Fields this schema defines but doesn't require on every entry (currently `author_evidence`, see "Author-field provenance"; and `annotation`, see "Annotation" above). When you use one, follow its definition exactly; do not redefine its semantics or shape per entry.
 - **Ad-hoc additions.** Fields not defined by this schema, added when they help (scholarly counterarguments, topic tags, follow-up questions). Use a stable name and consistent shape across entries in the same log.
 
 Never remove fields from this schema.

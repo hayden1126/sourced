@@ -28,6 +28,8 @@ VOICE="academic"
 VOICE_EXPLICIT=0
 STYLE="apa7"
 STYLE_EXPLICIT=0
+PROJECT_TYPE="essay"
+TYPE_EXPLICIT=0
 TARGET_DIR="${PWD}"
 
 usage() {
@@ -60,7 +62,12 @@ Options:
                        --style on an existing project requires --force or
                        --update.
   --brief <name>       Also drop <name>.brief.md into the project directory,
-                       rendered from templates/brief.template.md.
+                       rendered from the brief template that matches --type.
+  --type <kind>        Project type: essay (default) or annotated-bib.
+                       Recorded at project root as .sourced-project-type
+                       marker when non-default. annotated-bib projects use
+                       brief.template.annotated-bib.md and a different mode
+                       graph (see templates/CLAUDE.md §7).
   -h, --help           Show this message.
 EOF
 }
@@ -143,6 +150,16 @@ while [[ $# -gt 0 ]]; do
       [[ -z "${TARGET_DIR}" ]] && { echo "--project needs a path" >&2; exit 1; }
       shift 2
       ;;
+    --type)
+      PROJECT_TYPE="${2:-}"
+      [[ -z "${PROJECT_TYPE}" ]] && { echo "--type needs a value (essay | annotated-bib)" >&2; exit 1; }
+      case "${PROJECT_TYPE}" in
+        essay|annotated-bib) ;;
+        *) echo "--type must be 'essay' or 'annotated-bib', got '${PROJECT_TYPE}'" >&2; exit 1 ;;
+      esac
+      TYPE_EXPLICIT=1
+      shift 2
+      ;;
     -h|--help)     usage; exit 0 ;;
     *)             echo "unknown flag: $1" >&2; usage; exit 1 ;;
   esac
@@ -194,6 +211,7 @@ render "${REPO_DIR}/agents/voice-extractor.md"   "${CLAUDE_AGENTS_DIR}/voice-ext
 render "${REPO_DIR}/citations/schema.md"         "${CLAUDE_CITATIONS_DIR}/schema.md"
 render "${REPO_DIR}/citations/csl-json-emitter.md" "${CLAUDE_CITATIONS_DIR}/csl-json-emitter.md"
 render "${REPO_DIR}/templates/brief.template.md" "${CLAUDE_TEMPLATES_DIR}/brief.template.md"
+render "${REPO_DIR}/templates/brief.template.annotated-bib.md" "${CLAUDE_TEMPLATES_DIR}/brief.template.annotated-bib.md"
 
 # Voice library: copy each shipped voice to ~/.claude/voice/<name>.md verbatim
 # (no {{USER}} substitution). Library files are treated as templates; the
@@ -689,13 +707,42 @@ else
   echo "  ${DEST_STYLE} already exists; skipping (pass --update to refresh, --force to replace)."
 fi
 
-# ---- step 5: optional brief ------------------------------------------------
+# ---- step 5: project-type marker -------------------------------------------
+# Absence of the marker means essay (legacy-safe default). Only write the marker
+# for non-default types so existing essay installs stay unchanged. Reading: any
+# non-empty marker means non-essay; agents gate mode availability on the value.
+TYPE_MARKER="${TARGET_DIR}/.sourced-project-type"
+if [[ "${PROJECT_TYPE}" != "essay" ]]; then
+  EXISTING_MARKER=""
+  [[ -f "${TYPE_MARKER}" ]] && EXISTING_MARKER=$(head -n1 "${TYPE_MARKER}" 2>/dev/null || true)
+  if [[ -n "${EXISTING_MARKER}" && "${EXISTING_MARKER}" != "${PROJECT_TYPE}" && ${FORCE} -eq 0 && ${UPDATE} -eq 0 ]]; then
+    echo "Error: ${TYPE_MARKER} is installed as type '${EXISTING_MARKER}'; refusing to silently switch to '${PROJECT_TYPE}'." >&2
+    echo "Pass --force to replace, or --update to refresh with the new type." >&2
+    exit 1
+  fi
+  echo "${PROJECT_TYPE}" > "${TYPE_MARKER}"
+  echo "  ${TYPE_MARKER} (type: ${PROJECT_TYPE})"
+elif [[ ${TYPE_EXPLICIT} -eq 1 && -f "${TYPE_MARKER}" && ${FORCE} -eq 1 ]]; then
+  # Explicit --type essay --force on a previously-annotated-bib project: remove the marker.
+  rm -f "${TYPE_MARKER}"
+  echo "  removed ${TYPE_MARKER} (reverted to essay)"
+fi
+
+# ---- step 6: optional brief ------------------------------------------------
 if [[ -n "${BRIEF_NAME}" ]]; then
   BRIEF_PATH="${TARGET_DIR}/${BRIEF_NAME}.brief.md"
+  case "${PROJECT_TYPE}" in
+    annotated-bib) BRIEF_TEMPLATE="${REPO_DIR}/templates/brief.template.annotated-bib.md" ;;
+    *)             BRIEF_TEMPLATE="${REPO_DIR}/templates/brief.template.md" ;;
+  esac
+  if [[ ! -f "${BRIEF_TEMPLATE}" ]]; then
+    echo "Error: brief template not found at ${BRIEF_TEMPLATE}." >&2
+    exit 1
+  fi
   if [[ -f "${BRIEF_PATH}" && ${FORCE} -eq 0 ]]; then
     echo "  ${BRIEF_PATH} already exists; skipping (pass --force to overwrite)."
   else
-    render "${REPO_DIR}/templates/brief.template.md" "${BRIEF_PATH}"
+    render "${BRIEF_TEMPLATE}" "${BRIEF_PATH}"
   fi
 fi
 
