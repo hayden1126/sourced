@@ -111,7 +111,7 @@ cd ~/writing/my-paper
 **Re-running:**
 
 - **Corpus was too thin.** Add samples, re-run with `overwrite: true`. Without `overwrite`, the subagent refuses to clobber an existing library file.
-- **Register was inferred and came out wrong.** Re-run with the correct `register:` label (`academic | technical | casual | journalistic`).
+- **Register was inferred and came out wrong.** Re-run with the correct `register:` label (`academic | technical | casual | journalistic | narrative`).
 - **Want a different skeleton.** Pass `skeleton_path: <absolute path>` pointing at another voice in `~/.claude/voice/`.
 
 **Scope.** Voice-extractor is a one-shot setup utility. It runs only when you ask, never auto-triggers during writing or research, and never runs in parallel with itself. It does not modify your project's `CLAUDE.md`, `voice.md`, or anything under the project directory — it writes exactly one file, `~/.claude/voice/<voice_name>.md`. Rendering into a project is always a deliberate `install.sh --voice <voice_name>` step you run yourself.
