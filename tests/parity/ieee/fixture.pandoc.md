@@ -1,15 +1,27 @@
 # Fixture: ieee parity
 
-Recent work on pragmatic markers in contact situations established the
-baseline for cross-linguistic studies [@smith-2010]. Code-switching dynamics
-in classroom discourse received a complementary treatment [@jones-cruz-2015],
-and a broader empirical synthesis covered urban multilingual contexts
-[@able-baker-chen-2019]. The first study went on to address quantitative
-predictions [@smith-2010, p. 22], building on the original framework.
+<!--
+This fixture exercises IEEE-specific rendering behavior:
+  - sequential numeric assignment at first appearance ([1], [2], [3], [4])
+  - a citation whose id sorts FIRST alphabetically (Able) but appears LATER
+    in the prose, to prove bibliography ordering is by appearance, not alpha
+  - a grouped citation with multiple ids at one callsite
+  - a repeat citation of an already-assigned id to confirm the number is stable
+  - a locator (page) on a repeat to confirm the [N, p. M] form
+  - a 4-author entry to exercise et-al behavior in the bibliography
+-->
 
-Methodological consolidation across the three lines of evidence is now
-available [@smith-2010; @jones-cruz-2015; @able-baker-chen-2019].
+The signal-processing baseline for this line of work came from @tang-2012,
+whose framework underpins later treatments. A complementary hardware study
+followed shortly after [@patel-2014]. Subsequent theoretical work refined the
+convergence bounds [@oduya-2016]. The original framework was then revisited
+with a sharper quantitative claim [@tang-2012, p. 118], confirming the
+numbering stays stable on a repeat cite.
 
-Institutional reporting on similar trends adds context [@mla-2021].
+A broader survey consolidated the three lines of evidence
+[@tang-2012; @patel-2014; @oduya-2016], and a four-author collaboration
+extended the empirical base with field measurements
+[@able-baker-chen-davies-2019]. Standards reporting added institutional
+context [@ieee-std-2020].
 
 # References

@@ -134,10 +134,7 @@ Walk through the reasoning but feel free to skip steps the reader will fill in. 
 
 Anecdotes from personal experience anchor casual writing. Specific, small-scale, concrete. The reader should be able to picture the scene.
 
-**Anchors I often use:**
-- TBD — derived from corpus
-
-Analogies closer to everyday objects than to technical concepts. Cut any that require domain knowledge to land.
+**Anchors:** TBD — derived from corpus. Casual-register anchors lean on everyday objects or situations — cooking, commuting, tools-at-hand — rather than technical or academic examples. Cut any anchor that requires domain knowledge to land.
 
 ### Punctuation
 

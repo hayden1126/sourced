@@ -19,7 +19,7 @@ This file is the per-project style reference read by `[formatting mode]` (CLAUDE
   - fetched: 2026-04-19
   - CSL title: "MLA Handbook 9th edition (in-text citations)"
 - On-demand references:
-  - `chicago17-ad/classical-abbreviations.md` — cross-reference only; MLA does not prescribe classical abbreviation, so no post-pandoc hook fires.
+  - `mla9/classical-abbreviations.md` — cross-reference only; MLA does not prescribe classical abbreviation, so no post-pandoc hook fires. Content mirrors `chicago17-ad/classical-abbreviations.md`.
 - Last reviewed: 2026-04-19.
 
 ## Document layout

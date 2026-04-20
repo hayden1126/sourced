@@ -80,7 +80,7 @@ The skeleton's section structure is canonical: every section appears in every de
 
 Hand-authoring a voice file is slow. If you have a corpus of the writer's prose (past papers, essays, reports, blog posts — whatever is representative), the `voice-extractor` subagent produces a calibrated first draft of the library file.
 
-**Requirements.** At least 5 files and 5,000 words combined, in `.md` or `.txt`. Other file types (PDF, `.docx`, `.rtf`) are silently skipped and listed in the report. More samples produce more stable patterns; the 5-file / 5,000-word floor is a hard minimum, not a target. 15,000–30,000 words across 10+ files is where the output gets genuinely useful.
+**Requirements.** At least 3 files and 5,000 words combined, in `.md` or `.txt`. Other file types (PDF, `.docx`, `.rtf`) are silently skipped and listed in the report. More samples produce more stable patterns; the 3-file / 5,000-word floor is a hard minimum, not a target. 15,000–30,000 words across 10+ files is where the output gets genuinely useful.
 
 **Usage.** Open Claude Code in any project that already has a rendered `CLAUDE.md`. The agent reads `CLAUDE.md` §9 at startup and knows how to dispatch the subagent. Ask in natural language:
 
@@ -90,7 +90,7 @@ The agent will announce a switch to `[collaborative mode]` if needed, dispatch `
 
 **What the subagent does:**
 
-- Mirrors the section structure of a skeleton voice (default: the shipped `academic.md`).
+- Mirrors the section structure of a skeleton voice selected by the register classifier: a dominant-register corpus (≥ 85%) routes to its matching shipped skeleton (`academic`, `casual`, `technical`, `journalistic`, `narrative`); a blended corpus routes to `hybrid.md` (register-neutral). No single default.
 - Fills each section from patterns found in the samples, with verbatim exemplars attributed to their source file in HTML comments.
 - Leaves sections `TBD —` where the samples don't settle the question. Never fabricates rules or exemplars.
 - Preserves iron rules verbatim (see below).

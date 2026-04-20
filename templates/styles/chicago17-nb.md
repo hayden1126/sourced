@@ -19,7 +19,7 @@ This file is the per-project style reference read by `[formatting mode]` (CLAUDE
   - fetched: 2026-04-19
   - CSL title: "Chicago Manual of Style 17th edition (notes and bibliography)"
 - On-demand references:
-  - `chicago17-ad/classical-abbreviations.md` — shared with chicago17-ad.
+  - `chicago17-nb/classical-abbreviations.md` — bundled with this style; content mirrors `chicago17-ad/classical-abbreviations.md`.
   - Hook: after pandoc renders output, walk each footnote body and each bibliography entry; for every entry whose CSL-JSON `author[].family` matches an author in the sidecar's allowlist, rewrite the rendered title per the sidecar's abbreviation column. Applies to all paste targets.
 - Last reviewed: 2026-04-19.
 
