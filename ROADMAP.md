@@ -144,6 +144,21 @@ Current shipped: `google-docs`, `plain-markdown`, `word`, `latex` (all 5 styles 
 
 STEM / math / physics. Uses the existing pandoc + citeproc + CSL pipeline (no biblatex, no natbib) plus a per-style pandoc `template.tex` that sets document class, geometry, and the `CSLReferences` environment. `IEEEtran` for the IEEE style; `article` for APA, Chicago (both variants), and MLA. Engine-agnostic via `iftex` guard — compiles under `pdflatex`, `xelatex`, and `lualatex`. Shipped artifact is a standalone `.tex` file; user owns compilation. Figure/table handling stays at pandoc defaults; arXiv-ready packaging is a follow-up item.
 
+### Figure and table handling
+**Priority:** later · **Effort:** M · **Status:** open.
+
+Currently all 4 paste targets pass markdown `![caption](path)` through pandoc's defaults: `\includegraphics{path}` for `latex`, embedded binary for `word`, the image path verbatim for `plain-markdown` and `google-docs`. No style file prescribes figure-specific rules; no parity fixture exercises a figure. First-class support would cover:
+
+- **Resource path resolution.** A convention for a `figures/` directory at the project root plus a pandoc `--resource-path` hook so authors can use relative paths without hand-managing CWD. `[formatting mode]` composes the flag.
+- **Cross-reference passthrough.** `{#fig:foo}` anchors rendering as `\label{fig:foo}` in LaTeX and durable anchors in markdown targets; `@fig:foo` references resolving uniformly across targets (pandoc's `pandoc-crossref` filter or its built-in equivalent is the likely mechanism).
+- **Per-style figure conventions.** APA 7's "Figure N" numbering with italic captions; Chicago 17 (both variants) "Figure N." with sentence-case captions; IEEE "Fig. N." with specific placement rules. Codified in `style.md` `§Document layout`.
+- **Parity coverage.** Each style's fixture gains a figure exercise; goldens verify caption placement, numbering, and cross-reference text.
+- **Table handling.** Markdown table → LaTeX `tabular` / `longtable` (pandoc handles natively); Word / Google Docs through the same mechanism. Caption and label rules extend.
+
+Schema likely unchanged (figures live in the prose, not the citation log). Main work is per-style layout authoring plus fixture extension.
+
+Related: `arXiv-ready submission` (below) depends on this; figure-aware LaTeX output is the non-trivial piece of that follow-up.
+
 ### arXiv-ready submission
 **Priority:** later · **Effort:** M · **Status:** open.
 
@@ -217,6 +232,21 @@ Quoting from non-English sources with verbatim original + translation + translat
 **Priority:** maybe · **Effort:** M · **Status:** open.
 
 Agent explains why it's making each decision for a student learning the academic-writing process. Current agent executes mode-gate discipline silently; a teaching variant would surface "I'm auto-triggering research mode because claim X needs a source" explanations at every mode entry. Opt-in verbosity.
+
+### Claude Code Agent Teams integration
+**Priority:** maybe · **Effort:** M–L · **Status:** open.
+
+Claude Code's Agent Teams feature (`TeamCreate` / `TeamDelete` / `SendMessage` tool family) lets subagents coordinate as a structured team — shared context or explicit handoffs rather than one-shot dispatch-and-consolidate. Current `sourced` subagents (`source-finder`, `voice-extractor`) are one-shot utilities; the main agent dispatches, receives a report, and does the merging itself.
+
+Three plausible integration angles worth scoping before committing to a design:
+
+1. **Parallel source-finders with a coordinator.** `[research mode]` already dispatches multiple finders in parallel, but each returns an independent report and the main thread consolidates. A team-based version adds a coordinator that dedupes candidate sources across finders and surfaces disagreements (two finders flag the same source with different reliability assessments). Moves merge-logic out of the main agent.
+2. **Editing-critic team for `[editing mode]`.** `issues.md #5` has been parked on whether refining/editing should use specialist subagents. Agent Teams would naturally implement the critic pattern there: grammar critic, voice-tells critic, citation-integrity critic, paraphrase critic, each reading the same draft, with reports flowing to the main agent for the actual prose revision.
+3. **Peer-review mode as a team.** The `### Peer review mode` ROADMAP item envisions a rubric-driven reviewer. A team could split by rubric axis (argument clarity, evidence adequacy, counterargument handling, methods rigor, writing quality), each axis owned by a specialist team member with a structured report.
+
+**Investigation-first.** The `Team*` tool schemas have not been loaded or tested yet (they are gated behind `ToolSearch` as deferred tools). Scope the API surface before any design — specifically: what state is shared across team members, what handoff semantics exist, whether teams persist across turns, and whether the per-session token economics work given that `source-finder` already burns tokens fast. If the integration story is weak, stay with one-shot subagents.
+
+Related: `issues.md #5` (editing-critic subagents, parked); `### Peer review mode` above (team candidate); `### Revision mode` (team candidate).
 
 ---
 
