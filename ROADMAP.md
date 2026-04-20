@@ -37,20 +37,26 @@ Sibling to the already-shipped `chicago17-ad` (author-date). Notes-bibliography 
 
 Electrical / computer engineering. Numeric-sequence proof-of-concept for the `shape: numeric-sequence` branch added in commit 2ff3ab5. Numbers assigned by first appearance through source prose; References sorted by assigned number. CSL shipped: `ieee.csl` (version 11.29.2023, tracks IEEE 2023 editorial guidelines).
 
-### ACM
-**Priority:** later · **Effort:** M · **Status:** open.
+### Tier-2 rollout (pinning table)
+**Priority:** later · **Effort:** S each · **Status:** open.
 
-STEM/engineering. Numeric citations (`[1]`, `[2]`) resolved in order of first appearance. Same shape as IEEE; file follows the pattern established by ieee.md. ACM supports both numeric and author-year in-text forms depending on venue; ship numeric as the default variant (acm-numeric.md); author-year variant (acm-author-year.md) as a separate file if demand surfaces.
+Eight styles queued behind the core three (MLA 9, Chicago 17 NB, IEEE). Per [`docs/specs/2026-04-19-csl-direct-consumption-design.md`](docs/specs/2026-04-19-csl-direct-consumption-design.md) §11, each targets ~15 minutes of per-style work once the slim schema ships — a slim `style.md`, a vendored CSL, and parity fixtures. This table pre-resolves the CSL filename + authority-URL lookups so rollout PRs stay mechanical; edition-pinning caveats flag where upstream drift (e.g., CMOS 17 → 18) requires a suffixed-filename pin rather than the plain variant.
+
+| Style | CSL filename | Authority URL | Edition pinning caveats |
+|---|---|---|---|
+| Vancouver | `dependent/vancouver-nlm.csl` | https://www.icmje.org/recommendations/ | Ships only as a dependent style; resolves to parent `nlm-citation-sequence.csl`. Safer pin: vendor the independent parent directly. ICMJE Recommendations are a living spec (no edition number). |
+| AMA | `american-medical-association.csl` | https://academic.oup.com/amamanualofstyle | Pinned to 11th edition in `<title>`; upstream ships `american-medical-association-10th-edition.csl`, so precedent exists for suffixed variants. Plain file will likely drift on AMA 12 — hedge by forking to `american-medical-association-11th-edition.csl` on vendor. |
+| Harvard | `harvard-cite-them-right.csl` | https://www.citethemrightonline.com/ | **High drift** — upstream title already rolled to "Cite Them Right 12th edition" while summary says 11th. Safer pin: `harvard-cite-them-right-11th-edition.csl`. `harvard1.csl` removed from upstream — do not use. |
+| ACM | `association-for-computing-machinery.csl` | https://www.acm.org/publications/authors/reference-formatting | ACM Reference Format (numeric). Alternate: `acm-sig-proceedings.csl` (legacy). Living spec (Version 3 current); no version marker in filename so drift risk is implicit. Author-year submissions typically reuse Chicago. |
+| ACS | `american-chemical-society.csl` | https://pubs.acs.org/doi/book/10.1021/acsguide | Pinned to "ACS Guide 2022 revision." ACS Guide is digital-first and continuously updated, so upstream may refresh in place. No edition-suffixed variants upstream — fork locally with year suffix if strict pinning needed. |
+| Turabian 9 | `dependent/turabian-notes-bibliography.csl` | https://press.uchicago.edu/ucp/books/book/chicago/M/bo27847540.html | **High drift, two-layer.** Dependent on `chicago-notes-bibliography-subsequent-author-title-17th-edition.csl` — CMOS 17→18 drift propagates through. Turabian 10 already published, so upstream may re-point soon. **Pin both** dependent + parent. Alternate: `dependent/turabian-author-date.csl`. |
+| CSE | `cse-citation-sequence.csl` | https://www.councilscienceeditors.org/scientific-style-and-format | Pinned to SSF 9th edition (citation-sequence). 8th-edition suffixed variants exist upstream, establishing drift precedent. Variants: `cse-name-year.csl`, `cse-citation-name.csl`. |
+| MHRA | `mhra-notes.csl` | https://www.mhra.org.uk/style | Pinned to "MHRA Style Guide 4th edition (notes)." No edition-suffixed variants upstream, so future 5th ed would drift in place. Alternates: `mhra-author-date.csl`, `mhra-notes-subsequent-ibid.csl`, `mhra-shortened-notes.csl`. |
 
 ### Bluebook
 **Priority:** maybe · **Effort:** XL · **Status:** open.
 
 Legal writing. Massive spec (case law, statutes, regulations), different citation structure entirely (`v.`, signals, short-form, supra, id.). Probably a standalone subproject rather than a shipped style; worth scoping before committing.
-
-### Turabian, Vancouver, Harvard
-**Priority:** later · **Effort:** S each · **Status:** open.
-
-Field-specific variants of existing shipped styles. Turabian is close to Chicago author-date; Vancouver is medical-numeric (adjacent to IEEE); Harvard is close to APA. Each probably a small delta on an existing shipped style rather than greenfield.
 
 ---
 
