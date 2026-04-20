@@ -134,7 +134,7 @@ Varies widely. Scene paragraphs can be long (6-8 sentences of cumulative detail)
 
 The whole piece IS anecdote, essentially. Within the larger narrative, smaller anecdotes can nest (a remembered moment, a friend's story) to illuminate the main arc.
 
-**Anchors:** TBD — derived from corpus. Narrative-register anchors often include recurring images, named people, specific settings that surface across multiple samples.
+**Anchors:** TBD — derived from corpus. Narrative-register anchors often include recurring images, named people, specific settings that surface across multiple samples — concrete pattern-kinds are things like a returned-to setting (the grandmother's kitchen, the back road home), a named recurring figure (the teacher who said X, a sibling at a specific age), or a sensory image the writer returns to as shorthand (the smell of wet asphalt, a specific light at dusk). voice-extractor replaces this placeholder with the author's actual anchors from the corpus; the patterns above are illustrative of the kind, not defaults to keep.
 
 Not every nested anecdote earns its place. Drop it if it doesn't connect back to the main arc; a detour that goes nowhere is a detour. Cut back a nested anecdote you find yourself extending: it should illuminate a moment, not run the piece.
 
