@@ -73,6 +73,11 @@ New `annotated-bib` project type with topic-driven research deliverable. User su
 
 **Phase 3 open.** Per-style paste-target variants (`apa7-annotated-bib`, `chicago17-ad-annotated-bib`, etc.) that render per-entry bibliography entries followed by annotation blocks via `pandoc --citeproc` + CSL. Open design question: inject annotations via CSL `note` field mapping plus custom CSL-JSON emitter path, or post-pandoc merge of rendered bibliography + log's `annotation` field by id match. Upstream citation-style-language/styles has `apa-annotated-bibliography.csl` for APA; other styles may need vendored variants. LaTeX `template.tex` adjustments per style for annotation-block layout. Test fixtures per style. Originally sized S; resized M after design work surfaced the project-type fork cost.
 
+### Grant proposal
+**Priority:** later · **Effort:** M · **Status:** open.
+
+Different section structure (Specific Aims, Background / Significance, Approach, Budget Justification). `[plan mode]` needs grant-aware templates; mode gates map per-section rather than global. Funder-specific formatting (NIH vs. NSF vs. private foundations) probably ships as templates-on-templates.
+
 ### Thesis / dissertation
 **Priority:** later · **Effort:** L · **Status:** open.
 
@@ -96,11 +101,6 @@ Targets medical / social-science students who run systematic searches. Needs:
 - Source-finder extension: respect structured inclusion criteria rather than just the topic description.
 
 Schema extension: citation log entries carry `screening_decision` and `exclusion_reason` fields when part of a systematic review.
-
-### Grant proposal
-**Priority:** later · **Effort:** M · **Status:** open.
-
-Different section structure (Specific Aims, Background / Significance, Approach, Budget Justification). `[plan mode]` needs grant-aware templates; mode gates map per-section rather than global. Funder-specific formatting (NIH vs. NSF vs. private foundations) probably ships as templates-on-templates.
 
 ### Book review / review essay
 **Priority:** maybe · **Effort:** S · **Status:** open.
@@ -194,15 +194,15 @@ JSTOR-specific version of `browser-reader-extract` for paywalled-but-authorized 
 
 Fetch arXiv LaTeX source rather than the rendered PDF. More reliable for math-heavy papers where PDF extraction loses formulas and code blocks. arXiv provides a public API; no browser automation needed.
 
-### `extract-transcript`
-**Priority:** later · **Effort:** M · **Status:** open.
-
-Clean interview transcripts (Zoom output, Otter.ai export, YouTube auto-caption) into quote-ready form with timestamps. Ties into the primary-source research mode above. Handles speaker diarization, timestamp normalization, and quote-extraction formatting.
-
 ### Additional browser readers
 **Priority:** later · **Effort:** S each · **Status:** open.
 
 Kindle Cloud Reader, Scribd, Archive.org's in-browser reader, HathiTrust. Each follows the pattern documented in `browser-reader-extract/SKILL.md`'s *Adding a new reader* section. Prioritize based on what real writers hit.
+
+### `extract-transcript`
+**Priority:** later · **Effort:** M · **Status:** open.
+
+Clean interview transcripts (Zoom output, Otter.ai export, YouTube auto-caption) into quote-ready form with timestamps. Ties into the primary-source research mode above. Handles speaker diarization, timestamp normalization, and quote-extraction formatting.
 
 ### `extract-scholar-citations`
 **Priority:** maybe · **Effort:** M · **Status:** open.
@@ -214,43 +214,6 @@ Harvest citations from a Google Scholar author page or search results with autom
 ## Framework extensions
 
 Cross-cutting features that touch multiple modes.
-
-### Cross-project citation reuse
-**Priority:** later · **Effort:** L · **Status:** open.
-
-One writer, many papers, overlapping sources. A cross-project citation library (verify once, use many) reduces re-verification cost. `[research mode]` would check the shared library first before dispatching source-finders.
-
-Schema extension: add `source_hash` (content-addressed or DOI-based) that dedupes across project log files. Staleness thresholds still apply per use; re-verification may still be needed for web sources.
-
-### Voice-merging for co-authored papers
-**Priority:** maybe · **Effort:** L · **Status:** open.
-
-Papers with multiple authors sometimes need blended voices: author A writes section 1, author B writes section 2, both voices coexist. Current voice system is per-project-single-voice. Options: section-level voice assignment in the brief, or a "blended" voice type that doesn't strictly enforce either author's rules. Unclear whether real co-authors actually want this vs. simply alternating paragraph-by-paragraph.
-
-### Translation workflow
-**Priority:** maybe · **Effort:** L · **Status:** open.
-
-Quoting from non-English sources with verbatim original + translation + translator attribution. Current §4 verbatim-quotation rule doesn't distinguish between "verbatim in the source language" and "verbatim in the paraphrased translation." Schema extension: add `original_language`, `translation`, `translator` fields. `[formatting mode]` handles display conventions per style (APA vs. Chicago differ on bracket notation for translations).
-
-### Teaching mode
-**Priority:** maybe · **Effort:** M · **Status:** open.
-
-Agent explains why it's making each decision for a student learning the academic-writing process. Current agent executes mode-gate discipline silently; a teaching variant would surface "I'm auto-triggering research mode because claim X needs a source" explanations at every mode entry. Opt-in verbosity.
-
-### Claude Code Agent Teams integration
-**Priority:** maybe · **Effort:** M–L · **Status:** open.
-
-Claude Code's Agent Teams feature (`TeamCreate` / `TeamDelete` / `SendMessage` tool family) lets subagents coordinate as a structured team — shared context or explicit handoffs rather than one-shot dispatch-and-consolidate. Current `sourced` subagents (`source-finder`, `voice-extractor`) are one-shot utilities; the main agent dispatches, receives a report, and does the merging itself.
-
-Three plausible integration angles worth scoping before committing to a design:
-
-1. **Parallel source-finders with a coordinator.** `[research mode]` already dispatches multiple finders in parallel, but each returns an independent report and the main thread consolidates. A team-based version adds a coordinator that dedupes candidate sources across finders and surfaces disagreements (two finders flag the same source with different reliability assessments). Moves merge-logic out of the main agent.
-2. **Editing-critic team for `[editing mode]`.** `issues.md #5` has been parked on whether refining/editing should use specialist subagents. Agent Teams would naturally implement the critic pattern there: grammar critic, voice-tells critic, citation-integrity critic, paraphrase critic, each reading the same draft, with reports flowing to the main agent for the actual prose revision.
-3. **Peer-review mode as a team.** The `### Peer review mode` ROADMAP item envisions a rubric-driven reviewer. A team could split by rubric axis (argument clarity, evidence adequacy, counterargument handling, methods rigor, writing quality), each axis owned by a specialist team member with a structured report.
-
-**Investigation-first.** The `Team*` tool schemas have not been loaded or tested yet (they are gated behind `ToolSearch` as deferred tools). Scope the API surface before any design — specifically: what state is shared across team members, what handoff semantics exist, whether teams persist across turns, and whether the per-session token economics work given that `source-finder` already burns tokens fast. If the integration story is weak, stay with one-shot subagents.
-
-Related: `issues.md #5` (editing-critic subagents, parked); `### Peer review mode` above (team candidate); `### Revision mode` (team candidate).
 
 ### Installable `sourced` executable on `$PATH`
 **Priority:** later · **Effort:** S · **Status:** open.
@@ -285,6 +248,43 @@ Touch points. `templates/CLAUDE.md §7` references `./voice.md`, `./style.md`, a
 Migration. For one release: agents and install.sh read flat paths as fallback if subdir paths are absent, so existing projects keep working. Next release: deprecate the fallback, print a `sourced migrate` hint that moves files into place.
 
 No schema change; no new mode; no new gate. Purely organizational. Scope-wise, this is ergonomics (not one of the core values) — but it materially affects how usable sourced is once a real writer has run 3+ essays in one dir.
+
+### Cross-project citation reuse
+**Priority:** later · **Effort:** L · **Status:** open.
+
+One writer, many papers, overlapping sources. A cross-project citation library (verify once, use many) reduces re-verification cost. `[research mode]` would check the shared library first before dispatching source-finders.
+
+Schema extension: add `source_hash` (content-addressed or DOI-based) that dedupes across project log files. Staleness thresholds still apply per use; re-verification may still be needed for web sources.
+
+### Teaching mode
+**Priority:** maybe · **Effort:** M · **Status:** open.
+
+Agent explains why it's making each decision for a student learning the academic-writing process. Current agent executes mode-gate discipline silently; a teaching variant would surface "I'm auto-triggering research mode because claim X needs a source" explanations at every mode entry. Opt-in verbosity.
+
+### Claude Code Agent Teams integration
+**Priority:** maybe · **Effort:** M–L · **Status:** open.
+
+Claude Code's Agent Teams feature (`TeamCreate` / `TeamDelete` / `SendMessage` tool family) lets subagents coordinate as a structured team — shared context or explicit handoffs rather than one-shot dispatch-and-consolidate. Current `sourced` subagents (`source-finder`, `voice-extractor`) are one-shot utilities; the main agent dispatches, receives a report, and does the merging itself.
+
+Three plausible integration angles worth scoping before committing to a design:
+
+1. **Parallel source-finders with a coordinator.** `[research mode]` already dispatches multiple finders in parallel, but each returns an independent report and the main thread consolidates. A team-based version adds a coordinator that dedupes candidate sources across finders and surfaces disagreements (two finders flag the same source with different reliability assessments). Moves merge-logic out of the main agent.
+2. **Editing-critic team for `[editing mode]`.** `issues.md #5` has been parked on whether refining/editing should use specialist subagents. Agent Teams would naturally implement the critic pattern there: grammar critic, voice-tells critic, citation-integrity critic, paraphrase critic, each reading the same draft, with reports flowing to the main agent for the actual prose revision.
+3. **Peer-review mode as a team.** The `### Peer review mode` ROADMAP item envisions a rubric-driven reviewer. A team could split by rubric axis (argument clarity, evidence adequacy, counterargument handling, methods rigor, writing quality), each axis owned by a specialist team member with a structured report.
+
+**Investigation-first.** The `Team*` tool schemas have not been loaded or tested yet (they are gated behind `ToolSearch` as deferred tools). Scope the API surface before any design — specifically: what state is shared across team members, what handoff semantics exist, whether teams persist across turns, and whether the per-session token economics work given that `source-finder` already burns tokens fast. If the integration story is weak, stay with one-shot subagents.
+
+Related: `issues.md #5` (editing-critic subagents, parked); `### Peer review mode` above (team candidate); `### Revision mode` (team candidate).
+
+### Voice-merging for co-authored papers
+**Priority:** maybe · **Effort:** L · **Status:** open.
+
+Papers with multiple authors sometimes need blended voices: author A writes section 1, author B writes section 2, both voices coexist. Current voice system is per-project-single-voice. Options: section-level voice assignment in the brief, or a "blended" voice type that doesn't strictly enforce either author's rules. Unclear whether real co-authors actually want this vs. simply alternating paragraph-by-paragraph.
+
+### Translation workflow
+**Priority:** maybe · **Effort:** L · **Status:** open.
+
+Quoting from non-English sources with verbatim original + translation + translator attribution. Current §4 verbatim-quotation rule doesn't distinguish between "verbatim in the source language" and "verbatim in the paraphrased translation." Schema extension: add `original_language`, `translation`, `translator` fields. `[formatting mode]` handles display conventions per style (APA vs. Chicago differ on bracket notation for translations).
 
 ---
 
