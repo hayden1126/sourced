@@ -1,19 +1,5 @@
 # Fixture: chicago17-nb parity
 
-<!--
-This fixture exercises chicago17-nb-specific rendering behavior:
-  - a first citation that should render as a FULL-FORM footnote
-    (author, title, container, year, page)
-  - a later repeat of the same source that should render in SHORT FORM
-    (author, short title, page) rather than "Ibid." (17th ed. preference)
-  - a block quote followed by a citation, to exercise block-quote handling
-    (the note threshold is set in the style file)
-  - a two-author source to exercise the "Author and Author" (not ampersand)
-    joining in notes
-  - a four-author source to exercise the "Author et al." collapse in notes
-    while the bibliography entry still lists all four
--->
-
 Fernández opens the discussion with a sweeping claim about liturgical
 continuity across the early medieval West.[@fernandez-2011] That framing set
 the terms for a generation of later work, including the close palaeographic
