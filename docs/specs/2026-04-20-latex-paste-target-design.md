@@ -1,9 +1,9 @@
 # LaTeX paste target: ship `latex` as a 5th paste target per style
 
 - **Date:** 2026-04-20
-- **Status:** Approved
-- **Scope:** Add `latex` to the shipped paste-target set across all 5 styles (apa7, chicago17-ad, chicago17-nb, ieee, mla9), using the existing pandoc + citeproc + CSL pipeline. Ship a per-style `preamble.tex` scaffold. Extend parity coverage.
-- **Out of scope:** PDF compilation (user owns `pdflatex`). Figure/table handling beyond pandoc defaults. biblatex / natbib pathways. arXiv-ready submission (separate ROADMAP item).
+- **Status:** Approved (revised post-review)
+- **Scope:** Add `latex` to the shipped paste-target set across all 5 styles (apa7, chicago17-ad, chicago17-nb, ieee, mla9), using the existing pandoc + citeproc + CSL pipeline. Ship a per-style pandoc template. Extend parity coverage.
+- **Out of scope:** PDF compilation (user owns `pdflatex` / `xelatex` / `lualatex`). Figure/table handling beyond pandoc defaults. biblatex / natbib pathways. arXiv-ready submission (separate ROADMAP item).
 
 ## 1. Problem
 
@@ -15,44 +15,71 @@ The ROADMAP `### LaTeX` entry is marked `next · M · open`. STEM workflows (mat
 
 Pandoc emits a standalone `.tex` file. The user runs `pdflatex` (or `xelatex` / `lualatex`) themselves. Rationale: STEM students already have a LaTeX toolchain; owning compilation inside `sourced` would require `texlive` in prereqs and turn runtime edge cases (missing fonts, package conflicts, bib backend mismatches) into `sourced` problems. The `word` target's "shipped binary" ergonomics do not generalize — Word users typically don't have a `.docx`-to-PDF pipeline; LaTeX users do.
 
-### 2.2 Pipeline: pandoc + citeproc + CSL (same as every other shipped target)
+### 2.2 Pipeline: pandoc + citeproc + CSL
 
-No biblatex, no natbib, no new bibliography ecosystem. Pandoc's citeproc renders bibliography entries as formatted text inline in the `.tex` body, identical to how it handles `word` / `google-docs` / `plain-markdown`. Matches the CSL direct-consumption architecture shipped 2026-04-19; keeps the invariant "style behavior lives in the CSL file." A biblatex pathway would require per-style biblatex analogs (5 more vendored bibliography artifacts) and a parallel style-vs-style matrix — not worth it for v1, and materially dupes the CSL work.
+No biblatex, no natbib, no new bibliography ecosystem. Pandoc's citeproc renders bibliography entries as formatted text inline in the `.tex` body via the `CSLReferences` environment, identical to how it handles `word` / `google-docs` / `plain-markdown`. Matches the CSL direct-consumption architecture shipped 2026-04-19; keeps the invariant "style behavior lives in the CSL file." A biblatex pathway would require per-style biblatex analogs (5 more vendored bibliography artifacts) and a parallel style-vs-style matrix — not worth it for v1, and materially dupes the CSL work.
 
-### 2.3 Per-style `preamble.tex` scaffold
+### 2.3 Per-style pandoc **template** (not preamble)
 
-Each style ships `templates/styles/<name>/preamble.tex` alongside its `.csl`. Contents are style-appropriate (document class, geometry, fonts, spacing). Per-style matches the existing per-style-asset pattern (`reference-styled.docx` for `word`; CSL for bibliography). An IEEE paper landing in `\documentclass{article}` instead of `\documentclass{IEEEtran}` would be instantly wrong to any STEM reviewer.
+Each style ships `templates/styles/<name>/template.tex` alongside its `.csl`. This is a full pandoc template — a superset of a preamble that includes `$body$`, `$title$`, conditional `$if(title)$` blocks, and the `\begin{document}` / `\end{document}` wrappers. Rationale (revised from pre-review draft): `--include-in-header` injects *after* pandoc's default preamble, so `\documentclass{article}` is already set before the injected content runs — which means IEEE styles that need `\documentclass{IEEEtran}` cannot override the class from an include-in-header file. `--template=<template.tex>` replaces pandoc's default template entirely, giving per-style control over documentclass, package load order, and document structure.
 
-### 2.4 Figures and tables: pandoc defaults only
+### 2.4 Figures, math, cross-references: pandoc defaults only
 
-Markdown `![caption](path)` passes through as `\includegraphics{path}` via pandoc's default rules. No `--resource-path` tuning, no `\label` / `\ref` semantics in v1, no float-positioning heuristics. Matches how figures are handled in `word` / `google-docs` / `plain-markdown` today (untested, passthrough). Figure polish is a downstream ROADMAP item (adjacent to arXiv-ready submission).
+- **Figures.** Markdown `![caption](path)` passes through as `\includegraphics{path}` via pandoc's default rules. No `--resource-path` tuning, no float-positioning heuristics. Figure polish is a downstream ROADMAP item.
+- **Math.** Inline `$...$` and display `$$...$$` pass through pandoc's default LaTeX writer unchanged. Already works; no configuration.
+- **Cross-references.** `{#sec:foo}` anchors and `[text](#sec:foo)` links pass through as `\label{sec:foo}` / `\hyperref[sec:foo]{text}` (pandoc default). No special v1 handling.
+- **Custom LaTeX.** Raw LaTeX inside markdown (`\command{...}`) passes through pandoc's raw-block mechanism. Writers who need arbitrary LaTeX write it directly.
+
+Silence on any of the above would invite drift; all are explicitly "pandoc defaults, no project-level treatment."
 
 ### 2.5 Install-time changes: none
 
-Pandoc is already a prereq for the three shipped targets. `pdflatex` is the user's responsibility. The existing install.sh per-style mirroring already copies the whole `templates/styles/<name>/` directory into `~/.claude/style/<name>/`, so new `preamble.tex` files install automatically with no script changes.
+Pandoc is already a prereq for the three shipped targets (≥ 3.1, per the CSL-direct spec). `pdflatex` / `xelatex` / `lualatex` is the user's responsibility. The existing install.sh per-style mirroring already copies the whole `templates/styles/<name>/` directory, so new `template.tex` files install automatically with no script changes.
 
-## 3. Per-style preamble contents
+### 2.6 Pandoc version
 
-Each preamble is ~15-30 lines. Same document-class choice drives most of the decision; the rest is style-matching geometry and typography.
+Inherits the **pandoc ≥ 3.1** requirement from the CSL direct-consumption spec. The `CSLReferences` environment requires pandoc ≥ 2.11; project floor is higher. No new version gate introduced here.
 
-| Style | documentclass | Key preamble contents |
+### 2.7 LaTeX engine support
+
+Templates support `pdflatex`, `xelatex`, and `lualatex` via an `iftex` guard (§3 below). Pinning to one engine would be simpler but cuts off the modern-TeX users that a STEM skeleton should accommodate. The guard is 3–5 lines per template; cost is negligible.
+
+## 3. Per-style template contents
+
+Each `template.tex` is ~40–70 lines (longer than a preamble because it includes `$body$`, `$title$`, the `\begin{document}` wrapper, and pandoc variable handling). Per-style differences below.
+
+| Style | documentclass | Key template contents |
 |---|---|---|
-| apa7 | `article` | 12pt Times, 1in margins, double-spaced body (`setspace`), APA-matching title-block `\usepackage{titling}`, hanging-indent bibliography via pandoc's `CSLReferences` environment |
+| apa7 | `article` | 12pt Times, 1in margins, double-spaced body (`setspace`), APA-matching title block, hanging-indent for `CSLReferences` |
 | chicago17-ad | `article` | 12pt Times, 1in margins, single-spaced body, CMOS-17 typographic defaults |
 | chicago17-nb | `article` | Same as `-ad`; notes are rendered by citeproc into `.tex` as inline footnote text (no `\footnote` machinery needed) |
-| ieee | `IEEEtran` | `conference` option (default), `\IEEEsetup{...}` for captions, IEEE-matching column / spacing defaults |
+| ieee | `IEEEtran` | `conference` option (default), `\IEEEsetup{...}` for captions, IEEE-matching column / spacing defaults; `CSLReferences` explicitly redefined to play with IEEEtran's two-column layout |
 | mla9 | `article` | 12pt Times, 1in margins, double-spaced, Works Cited hanging-indent compatible |
 
-Every preamble includes `\usepackage{hyperref}` (pandoc citeproc emits hyperlinks), `\usepackage{csquotes}` (quote handling), and `\usepackage[T1]{fontenc}` (UTF-8 punctuation). `geometry` and `setspace` are loaded where the style needs them.
+Every template includes the `iftex` guard for encoding:
+
+```latex
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[utf8]{inputenc}
+  \usepackage[T1]{fontenc}
+\else
+  \usepackage{fontspec}
+\fi
+\usepackage{csquotes}
+\usepackage{hyperref}
+```
+
+Plus pandoc's standard variable plumbing (`$title$`, `$author$`, `$date$`, `$body$`, `$for(header-includes)$`).
 
 ## 4. Style.md `§Paste target expression rules` additions
 
 Each style.md gets a `### latex` subsection under `## Paste target expression rules`. The subsection carries:
 
-- **Pandoc recipe.** `pandoc --citeproc --standalone --include-in-header=<preamble.tex> --csl <csl> --bibliography <bib.json> -o <draft>.tex <draft>.pandoc.md`
-- **File outputs.** `<draft>.tex` (compilable standalone file); no `<draft>.docx.md` sibling.
-- **Paste-time instructions.** "User compiles with `pdflatex <draft>.tex`." No post-pandoc hook; no post-processing step.
-- **Known quirks** (per-style, if any — e.g., IEEEtran requires specific title-block formatting that pandoc's default `\maketitle` may not match; note in style.md).
+- **Pandoc recipe:** `pandoc --citeproc --standalone --template=<template.tex> --csl <csl> --bibliography <bib.json> -o <draft>.tex <draft>.pandoc.md`
+- **File output:** `<draft>.tex` (compilable standalone file).
+- **Paste-time instructions:** "User compiles with `pdflatex <draft>.tex` (or `xelatex` / `lualatex`)." No post-pandoc hook; no post-processing step.
+- **Known quirks:** per-style notes where pandoc's default behavior collides with the style's LaTeX conventions (e.g., IEEEtran's title-block expects `\IEEEauthorblockN{}` — noted in `ieee.md`).
 
 ## 5. Parity coverage
 
@@ -60,28 +87,46 @@ Each style.md gets a `### latex` subsection under `## Paste target expression ru
 
 Before adding the 4th target, factor the repeated pandoc block in each `tests/parity/<style>/run.sh` into a shared helper at `tests/parity/_render.sh`. Current per-style `run.sh` contains three near-identical pandoc invocations differing only by `--wrap`, `-t`, and output name. At 4 targets the copy-paste becomes maintenance burden; at 5+ (ROADMAP tier-2 rollout) it compounds. This is a no-behavior-change refactor; suite stays 15/15 green.
 
-`_render.sh` interface (draft):
+`_render.sh` interface:
 
 ```
-_render.sh <style-dir> <target-name> <pandoc-flags...>
-# Emits actual/<target-name>.<ext>; diffs against golden/; returns pass/fail
+_render.sh <style-dir> <target-name> <output-ext> [--extra-flag ...]
+# Reads fixture.pandoc.md and fixture.bib.json from <style-dir>.
+# Emits actual/<target-name>.<output-ext>; diffs against golden/<target-name>.<output-ext>.
+# Extra flags pass through to pandoc (e.g., --template=<path> for latex).
+# For the `latex` target, additionally extracts the body between \begin{document}
+# and \end{document} before writing to actual/ (see §5.2).
 ```
 
-Each `run.sh` becomes a list of three (later four) `_render.sh` calls.
+Targets and their invocation shapes:
 
-### 5.2 Fragment-mode golden for `latex`
+| Target | Output ext | Extra flags | Post-process |
+|---|---|---|---|
+| plain-markdown | `md` | `-t markdown --wrap=none` | none |
+| google-docs | `md` | `-t markdown --wrap=preserve` | none |
+| word | `docx.md` | (markdown intermediate of docx) | none |
+| latex | `tex` | `--standalone --template=<template>` | extract body |
 
-`golden/latex.tex` captures pandoc's **fragment** output (`-t latex` without `--standalone` and without `--include-in-header`). Fragment = body content + citeproc bibliography block only. No `\documentclass`, no `\begin{document}`, no preamble. Rationale: preamble is a shipped asset, edited when a style's typography needs tuning. If preamble edits cascaded into golden diffs, every preamble tweak would force 5 golden regenerations — the "always-red on cosmetic edits" failure mode `tests/parity/README.md` explicitly warns against.
+### 5.2 Body-extraction golden (revised from fragment-mode)
 
-Fragment mode verifies exactly what the harness should verify: the CSL pipeline's body output is stable per style.
+Parity tests the same invocation the user gets (standalone render with the actual template). After pandoc finishes, the harness extracts the content between `\begin{document}` and `\end{document}` (exclusive of the wrappers themselves) and writes it to `actual/latex.tex`. The golden compares against this extracted body.
 
-### 5.3 User-facing recipe vs. parity-tested recipe
+Rationale: the pre-review draft used fragment mode (`-t latex` without `--standalone` / `--template`) for the golden, which guaranteed the harness-verified recipe diverged from the user-facing recipe — a latent drift risk. Body extraction closes that gap: the parity harness runs the exact production recipe, and only the preamble (non-body content) is excluded from the diff surface. Preamble edits no longer cascade into golden diffs; body-level CSL behavior is verified precisely.
 
-The user-facing recipe in `style.md` runs pandoc in **standalone** mode (produces compilable `.tex`). The parity-tested recipe runs pandoc in **fragment** mode (produces just the body). Both use the same CSL and the same fixture. The only flags that differ are `--standalone` and `--include-in-header`. The difference is explicit in each style.md (to avoid confusion between what the test checks and what the user gets).
+Extraction is a one-line `sed` or `awk`:
+
+```bash
+awk '/\\begin\{document\}/,/\\end\{document\}/' actual/latex.tex.full \
+  | sed '1d;$d' > actual/latex.tex
+```
+
+### 5.3 Compilation smoke check
+
+`_render.sh` (or a separate smoke step in `run-all.sh`) does not run `pdflatex` — that's deliberately out of scope for the harness (doubles the test prereqs, introduces cross-platform compile variance). But commit 2 (§8) includes a **manual** `pdflatex` smoke run for at least the IEEE target during PR development. If compilation fails, the template fix is part of commit 2 before merge, not a post-ship fix. Elevating this from the pre-review draft's "post-ship verification" framing.
 
 ### 5.4 Suite size
 
-After shipping: 5 styles × 4 targets = 20 parity assertions per `run-all.sh` invocation. Each style dir has 4 goldens and 4 lines in its run.sh.
+After shipping: 5 styles × 4 targets = 20 parity assertions per `run-all.sh` invocation. Each style dir has 4 goldens and a `run.sh` that calls `_render.sh` four times.
 
 ## 6. CLAUDE.md changes
 
@@ -91,27 +136,27 @@ One small change: `§7 [formatting mode]`'s supported-paste-target list adds `la
 
 - `docs/STYLES.md`: `latex` appears in the shipped-paste-targets table for each style.
 - `ARCHITECTURE.md`: §Paste targets enumerates `latex` as a 4th target; the parity count updates from "5×3=15" to "5×4=20."
-- `docs/INSTALL.md`: no changes (no new prereqs).
-- `ROADMAP.md`: `### LaTeX` entry's status flips from `open` to `shipped (<commit>)`. Text can stay mostly intact — the "pipeline translates directly" framing is correct.
+- `docs/INSTALL.md`: no changes to prereqs; optionally note that IEEEtran lives in `texlive-publishers` (not in `texlive-base`), so IEEE users need to install a fuller TeX Live set. One sentence.
+- `ROADMAP.md`: `### LaTeX` entry's status flips from `open` to `shipped`. Text can stay mostly intact — the "pipeline translates directly" framing is correct.
 
 ## 8. Delivery plan
 
 Three commits on branch `latex-paste-target`, one PR against `main`:
 
 1. **Refactor `run.sh` → `_render.sh` helper.** No behavior change. Suite stays 15/15. Establishes the pattern needed by commit 2.
-2. **Add `latex` target.** 5 new `preamble.tex` files; `latex` subsection added to each `style.md`; `latex` appended to CLAUDE.md §7's target list; 5 new `golden/latex.tex` files; run.sh per-style calls `_render.sh` for latex. Suite goes to 20/20.
-3. **Docs.** STYLES.md, ARCHITECTURE.md, ROADMAP.md updates per §7 above.
+2. **Add `latex` target.** 5 new `template.tex` files; `latex` subsection added to each `style.md`; `latex` appended to CLAUDE.md §7's target list; 5 new `golden/latex.tex` files (body-extracted); run.sh per-style calls `_render.sh` for latex. Suite goes to 20/20. **Includes manual `pdflatex` smoke verification for IEEE** (and for any other style where the template deviates meaningfully from `article`-class defaults). If smoke fails, template fix lands in this commit.
+3. **Docs.** STYLES.md, ARCHITECTURE.md, ROADMAP.md, INSTALL.md updates per §7 above.
 
 Post-merge hygiene: move this spec to `docs/archive/specs/` with a Shipped banner (matches the convention from the CSL-direct-consumption and voice-extractor-decoupling shipments).
 
-## 9. Risks and open questions
+## 9. Risks
 
-- **IEEEtran output may need title-block tuning.** Pandoc's default `\maketitle` renders author/affiliation in `article`-class style, which IEEEtran overrides with its own `\author{\IEEEauthorblockN{...}}` conventions. If the fragment-mode parity golden is stable (and we expect it will be — the body is just citations + references), the preamble can evolve independently. Flagging as a post-ship verification item rather than a blocker.
-- **Bibliography block placement.** Pandoc citeproc emits a `CSLReferences` environment at the end of the document. IEEEtran's template expects `\bibliography{...}` or equivalent. Verify at golden-regeneration time that the fragment `.tex` doesn't trigger class-specific warnings when compiled standalone. If it does, the preamble adds a silencing package or redefines the environment.
-- **UTF-8 in fixtures.** Chicago17-nb fixture contains `Fernández`, `Bibliothèque`, `palaeographic` — unicode that must survive the latex-body render. `\usepackage[T1]{fontenc}` + `\usepackage[utf8]{inputenc}` covers this on all 5 preambles; verify once during golden regeneration that no diacritic is mangled.
+- **IEEEtran + pandoc `CSLReferences` compilation (pre-merge blocker).** IEEEtran redefines `\bibliography`-ish machinery and expects numeric `[N]` references via BibTeX/biblatex. Pandoc citeproc emits the `CSLReferences` environment with `\CSLLeftMargin` / `\CSLRightInline` commands. These need to compile cleanly under IEEEtran's two-column layout; the IEEE template may need to redefine or wrap `CSLReferences` to cooperate. Verified at commit-2 time via the manual `pdflatex` smoke run (§5.3); not a post-ship item.
+- **TeX Live collection coverage.** IEEEtran ships in `collection-publishers` (TeX Live's `texlive-publishers` Debian package), not in `texlive-base`. An IEEE user on a minimal TeX Live install gets a compile error. `docs/INSTALL.md` should call this out; not something `install.sh` can check because it's a runtime dependency, not an install-time one.
+- **UTF-8 diacritics in fixtures.** Chicago17-nb fixture contains `Fernández`, `Bibliothèque`, `palaeographic` — unicode that must survive the latex-body render. The `iftex` guard handles this (pdflatex uses `inputenc`; xe/lualatex uses native UTF-8). Verify once during golden regeneration that no diacritic is mangled.
 
 ## 10. Follow-up (not this spec)
 
 - **arXiv-ready submission** (ROADMAP `later`). Builds on this target; adds preprint metadata, figure handling, and a `make arxiv` recipe.
 - **biblatex pathway** (ROADMAP scope-boundary candidate). Possible if a STEM user needs native `\cite` commands; re-scope then.
-- **Tier-2 style rollout with latex.** Once Vancouver / AMA / Harvard / ACM / ACS / Turabian 9 / CSE / MHRA land as styles (ROADMAP tier-2 table), each inherits this target automatically: add a `preamble.tex` (or reuse `article`-class where appropriate) and a `latex` block in its `style.md`.
+- **Tier-2 style rollout with latex.** Once Vancouver / AMA / Harvard / ACM / ACS / Turabian 9 / CSE / MHRA land as styles (ROADMAP tier-2 table), each inherits this target automatically: author a `template.tex` (or reuse `article`-class where appropriate) and add a `latex` block in its `style.md`.
