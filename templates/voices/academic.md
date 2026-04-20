@@ -43,8 +43,8 @@ Not: "This works, but the thing is that it's also fragile, which means that unde
 
 Claims along the way should read as exploration; verdicts are for conclusions. Reserve decisive framings for synthesis at paragraph or section ends, not for every sentence en route.
 
-- Exploratory: "Crucially, while the physical space of the Arrow Lodge is strictly exclusionary to women, Cheyenne law specifies that a woman's 'medicine' is fundamentally still required..." — nuance is surfaced, not collapsed.
-- Verdict-stacked: "The contrast is itself a linguistic fact. It parallels a cosmological axis." — back-to-back verdicts with no exploratory sentence between.
+- Exploratory: "Crucially, while the replication produced results consistent with the original finding, the experimenters noted that the apparatus differed in ways the published protocol had not disclosed..." — nuance is surfaced, not collapsed.
+- Verdict-stacked: "The distinction is structural. It tracks the disciplinary boundary." — back-to-back verdicts with no exploratory sentence between.
 
 ### Thinking Out Loud
 
@@ -93,8 +93,8 @@ This is not optional polish. This is the process. First drafts are raw material,
 
 Sentences hand off. Each connects to the previous through a causal, contrastive, or sequencing connective ("because," "since," "while," "instead," "so that," "as," "when"). A paragraph of complete-on-their-own declaratives makes the reader do the connecting and reads as a stream of verdicts rather than an argument.
 
-- Connected: "Because this energy is not infinite, the tribe's existence depends on renewal through ceremonial order. This order is built on the belief that the universe stays in balance only when male and female energies are in equilibrium; neither is sufficient on its own."
-- Disconnected: "That uncertainty is useful. The distinction between parsable and unparsable names runs through the Cheyenne lexicon. It is already present at the level of the tribe's autonym."
+- Connected: "Because the archive was destroyed during the 1944 bombing, later historians worked from secondary summaries rather than primary documents. Those summaries compressed what the originals made explicit; each subsequent citation loses a layer of specificity."
+- Disconnected: "The tension is productive. The gap between theory and practice appears throughout the economics literature. It recurs at the level of individual policy debates."
 
 Academic prose defaults to longer connected sentences; the short form is for emphasis at pivots, not the baseline.
 
@@ -102,22 +102,22 @@ Academic prose defaults to longer connected sentences; the short form is for emp
 
 Paragraphs set up, develop, and hand off. End a paragraph on a transition to the next paragraph's topic, not on a verdict that closes the door. Open the next paragraph with a connective, a reference back, or a concept the prior paragraph positioned.
 
-- Connected: a paragraph on the Sacred Hat ends on its linguistic roots; the next opens "While the Hat embodies generative female power, it functions alongside the Sacred Arrows..." — "While" carries the handoff.
-- Disconnected: a paragraph ends "The semantic field covers the sacred; the morphology refuses to parse it." The next opens cold; the reader has to jump the gap themselves.
+- Connected: a paragraph on Brown's 1954 cross-sectional data ends on the methodological gap it exposed; the next opens "While Brown worked with cross-sectional samples, the longitudinal follow-up found substantially different patterns..." — "While" carries the handoff.
+- Disconnected: a paragraph ends "The statistical model captures the correlation; the mechanism remains unspecified." The next opens cold; the reader has to jump the gap themselves.
 
 ### Information Pacing
 
 Not every sentence carries a new claim plus citation. Interleave elaboration sentences that develop the prior claim without introducing new evidence. Readers need breathing room between heavy claims; packed prose exhausts them.
 
-- Paced: "Because the Hat originates from this realm, this explains why the Cheyenne recognize it as 'the female power' (Spotted Elk, 2012). This identity is further reflected in the Hat's name..." — the second sentence elaborates without new evidence.
+- Paced: "Because the replication used a larger and more diverse sample, the effect size contracted (Patel and Kim, 2019). This reduction reflects not a failure of the original finding but a correction to its population validity..." — the second sentence elaborates without new evidence.
 - Packed: every sentence loads a new claim plus a parenthetical citation; the reader processes evidence continuously with no synthesis sentence to rest on.
 
 ### Concept Setup
 
 Introduce technical or specialized terms with a one-clause framing on first use. Don't drop terminology and move on; a reader without the domain background is blocked.
 
-- Set up: "the management of ExAhestOtse, a finite cosmic energy from the Creator that sustains all life" — the term is defined inline before further use.
-- Dropped: "The name parses as the cataphoric preverb *tse-* plus the verbal stem..." — "cataphoric preverb" expects prior morphological knowledge the reader may not have.
+- Set up: "the role of inhibitory control, the cognitive capacity to suppress a dominant response in favor of a context-appropriate alternative" — the term is defined inline before further use.
+- Dropped: "The analysis assumes *Gauss-Markov conditions* hold across the panel..." — "Gauss-Markov conditions" expects prior econometric knowledge the reader may not have.
 
 ### Building Arguments
 
