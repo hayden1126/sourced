@@ -13,21 +13,32 @@ sourced/
 │   ├── source-finder.md        # Subagent: vet sources in parallel for §3-integrity citations.
 │   └── voice-extractor.md      # Subagent: derive a voice file from a writing-samples corpus.
 ├── citations/
-│   └── schema.md               # Citation log entry structure, staleness rules, ID format.
+│   ├── schema.md               # Citation log entry structure, staleness rules, ID format.
+│   └── csl-json-emitter.md     # Log → CSL-JSON mapping consumed by pandoc --citeproc.
 ├── skills/
 │   └── browser-reader-extract/ # Skill: extract text + [p. N] markers from DRM'd browser readers.
+├── tests/
+│   ├── emitter/                # CSL-JSON emitter fixtures + unit tests.
+│   └── parity/                 # Golden outputs: 5 styles × 3 paste targets = 15 goldens.
 └── templates/
     ├── CLAUDE.md               # Primary agent (academic-researcher) operating instructions.
     ├── brief.template.md       # Per-paper intake brief skeleton.
     ├── styles/
-    │   ├── chicago17-ad.md     # Chicago 17 author-date rendering rules.
-    │   ├── chicago17-ad/       # Chicago 17 assets (CSL file; reference.docx lives here when shipped).
-    │   └── apa7.md             # APA 7 rendering rules.
+    │   ├── apa7.md             # APA 7 (author-date) — slim style.
+    │   ├── apa7/               # Vendored apa.csl + per-style assets.
+    │   ├── chicago17-ad.md     # Chicago 17 author-date — slim style.
+    │   ├── chicago17-ad/       # Vendored CSL + per-style assets.
+    │   ├── chicago17-nb.md     # Chicago 17 notes-bibliography — slim style.
+    │   ├── chicago17-nb/       # Vendored CSL + per-style assets.
+    │   ├── ieee.md             # IEEE (numeric) — slim style.
+    │   ├── ieee/                # Vendored CSL + per-style assets.
+    │   ├── mla9.md             # MLA 9 (author-page) — slim style.
+    │   └── mla9/               # Vendored CSL + per-style assets.
     └── voices/
         └── academic.md         # Voice skeleton; derived voices mirror this structure.
 ```
 
-`install.sh --global-only` renders into `~/.claude/`. `install.sh` from inside a project renders `<project>/CLAUDE.md`, `<project>/voice.md`, `<project>/style.md`. A prerequisite check (`pdftotext`, `pandoc`) runs at the top of every invocation; missing tools abort the install with apt/brew hints rather than auto-installing (see [docs/INSTALL.md](./docs/INSTALL.md#prerequisite-check)).
+`install.sh --global-only` renders into `~/.claude/`. `install.sh` from inside a project renders `<project>/CLAUDE.md`, `<project>/voice.md`, `<project>/style.md`. A prerequisite check (`pdftotext`, `pandoc` ≥ 3.1, `python3`) runs at the top of every invocation; missing tools abort the install with apt/brew hints rather than auto-installing (see [docs/INSTALL.md](./docs/INSTALL.md#prerequisite-check)).
 
 Shipped skills under `skills/<name>/` mirror into `~/.claude/skills/<name>/` on every install; Claude Code auto-discovers them across all projects. Style asset directories under `templates/styles/<name>/` mirror into `~/.claude/style/<name>/` so `[formatting mode]` can pick up CSL files, reference.docx, on-demand reference tables (e.g., `classical-abbreviations.md`), and other per-style binaries without a separate fetch. The on-demand reference pattern lets a style offload rarely-used lookups (per-author classical abbreviations) without paying per-format-pass load cost; `style.md` stays lean and the reference file is Read only when a citation triggers it.
 
@@ -45,7 +56,7 @@ Shipped skills under `skills/<name>/` mirror into `~/.claude/skills/<name>/` on 
 | `[refining mode]` | Stress-test the outline. Citation / structure / synthesis-integrity (§4) audit before prose exists. | `[writing mode]` (sign-off gate) |
 | `[writing mode]` | Convert refined outline into prose. Apply `voice.md`, §10 generation signatures, paraphrase default, Pandoc citation IDs. | `[editing mode]` |
 | `[editing mode]` | Seven-pass audit: ID validation → §4 citation → partial-entry recheck → grammar → AI-tell (§10) → quote-density → voice (§9). Handoff gate blocks on unresolved voice-audit hits. | `[formatting mode]` (handoff gate) |
-| `[formatting mode]` | Render source prose into style-specific output for a named paste target (`google-docs`, `plain-markdown`). Terminal stage; source prose never modified. | Done. |
+| `[formatting mode]` | Render source prose into style-specific output for a named paste target (`word`, `google-docs`, `plain-markdown` — all rendered via pandoc+CSL). Terminal stage; source prose never modified. | Done. |
 | `[research mode]` | Source vetting and logging. Auto-triggers from other modes when a claim needs a source. Dispatches `source-finder` subagents in parallel for 3+ sub-topics. | Returns to prior mode on completion. |
 | `[red team mode]` | Systematically challenge every claim. Counterpoints, blind spots. | Any mode. |
 | `[babble mode]` | Stream-of-consciousness. No structure. Raw material for collaboration. | Any mode. |
@@ -77,6 +88,10 @@ Each moment is owned by exactly one mode family.
 
 The log is the single source of truth for author names and years; rendering is decoupled from authoring.
 
+## Citation rendering pipeline
+
+Step 3 above (rendering) delegates to `pandoc --citeproc` reading the style's vendored CSL file under `templates/styles/<name>/`. `[formatting mode]` emits the citation log as CSL-JSON per the mapping in [`citations/csl-json-emitter.md`](./citations/csl-json-emitter.md), hands pandoc the source prose plus CSL-JSON plus CSL, and receives rendered inline citations and a References list. The same pipeline serves all three paste targets (`word`, `google-docs`, `plain-markdown`); paste-target differences are post-pandoc transforms. See [`docs/STYLES.md`](./docs/STYLES.md) for the end-to-end description.
+
 ## Voice system: three layers
 
 1. **Skeleton** (`templates/voices/academic.md`) — section structure + `## Iron rules` section. Copied verbatim into the voice library on global install.
@@ -89,7 +104,7 @@ Generation signatures (AI-writing tells that apply regardless of voice) live in 
 
 ## Style system
 
-`templates/styles/<name>.md` ships citation + layout rules per academic style. Currently shipped: Chicago 17 author-date, APA 7. `[formatting mode]` is the only mode that reads `style.md`; all other modes emit style-agnostic Pandoc IDs.
+`templates/styles/<name>.md` ships citation + layout rules per academic style. Currently shipped: APA 7, Chicago 17 author-date, Chicago 17 notes-bibliography, IEEE, MLA 9 — all on the slim schema (framework-specific metadata + document layout only; CSL owns rendering). `[formatting mode]` is the only mode that reads `style.md`; all other modes emit style-agnostic Pandoc IDs.
 
 ## Invariants
 
@@ -104,7 +119,7 @@ Generation signatures (AI-writing tells that apply regardless of voice) live in 
 
 - **New voice from scratch.** Copy `templates/voices/academic.md` → `~/.claude/voice/<name>.md`, edit per-section rules, preserve the `## Iron rules` section verbatim, then `install.sh --voice <name>` from a project.
 - **New voice from corpus.** Ask the agent to generate a voice from a writing-samples directory; it dispatches `voice-extractor` in `[collaborative mode]` and surfaces the report. Fill in `TBD` sections by hand, then `install.sh --voice <name>`.
-- **New style.** Copy `templates/styles/chicago17-ad.md` or `apa7.md`, edit per-style rules, then `install.sh --style <name>`.
+- **New style.** Copy any of the five shipped slim styles (`apa7.md`, `chicago17-ad.md`, `chicago17-nb.md`, `ieee.md`, `mla9.md`) as a starting template, vendor the matching CSL file under `templates/styles/<name>/`, edit per-style metadata + document layout, then `install.sh --style <name>`.
 - **New mode.** Add a `### [mode name]` subsection to `templates/CLAUDE.md` §7 (entry rules, workflow, handoff). Register it in the mode-switching table. Any auto-trigger rules need explicit announce-on-entry and announce-on-return semantics.
 - **New subagent.** Add `agents/<name>.md` with frontmatter (`name`, `description`, `tools`, `model`) plus a dispatch template. Reference it from the relevant mode section in CLAUDE.md.
 
