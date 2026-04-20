@@ -37,7 +37,7 @@ The `latex` paste target emits a standalone `.tex` file. Compiling that `.tex` t
 
 ### Minimum vs. full
 
-- **`article`-class styles (APA, Chicago author-date, Chicago notes-bibliography, MLA):** `texlive-latex-base` + `texlive-latex-recommended` + `texlive-fonts-recommended` is sufficient. Provides `pdflatex`, the `article` class, `geometry`, `setspace`, `hyperref`, `iftex`, `csquotes`, `calc`, and `mathptmx` (the Times-family font the shipped templates use).
+- **`article`-class styles (APA, Chicago author-date, Chicago notes-bibliography, MLA):** `texlive-latex-base` + `texlive-latex-recommended` + `texlive-latex-extra` + `texlive-fonts-recommended`. Provides `pdflatex`, the `article` class, `geometry`, `setspace`, `hyperref`, `iftex`, `calc`, `mathptmx` (Times-family font), and `csquotes` (the last lives in `texlive-latex-extra` on current Debian / Ubuntu, not in `-recommended`).
 - **IEEE style:** additionally requires `texlive-publishers` (contains `IEEEtran`). A minimal install without this package will fail to compile the IEEE latex output.
 - **`xelatex` / `lualatex` engines** (optional — `pdflatex` is the default and works with the shipped templates): `texlive-xetex` / `texlive-luatex` packages. The shipped templates compile under all three engines via an `iftex` guard.
 - **Full (~5 GB):** `texlive-full` installs everything and eliminates per-style package questions.
@@ -47,8 +47,8 @@ The `latex` paste target emits a standalone `.tex` file. Compiling that `.tex` t
 **Debian / Ubuntu / WSL:**
 
 ```bash
-# Minimum for article-class styles
-sudo apt-get install -y texlive-latex-base texlive-latex-recommended texlive-fonts-recommended
+# Minimum for article-class styles (note: csquotes lives in texlive-latex-extra)
+sudo apt-get install -y texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended
 
 # Add IEEEtran for the IEEE style
 sudo apt-get install -y texlive-publishers
