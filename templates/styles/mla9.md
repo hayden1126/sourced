@@ -31,10 +31,7 @@ Sections are addressable: "see §Inline citations / Two authors", "see
   - CSL title: "MLA Handbook 9th edition (in-text citations)" (matches
     authority).
 - On-demand references:
-  - (none yet; classical texts in MLA context may need the per-author
-    abbreviation table at chicago17-ad/classical-abbreviations.md if the
-    writer is citing Greek or Latin primary sources alongside literary
-    scholarship)
+  - (none; classical texts in MLA context may cross-reference `chicago17-ad/classical-abbreviations.md` but no hook fires — MLA does not prescribe classical abbreviation)
 - Last reviewed: 2026-04-19.
 
 ## Inline citations
@@ -242,14 +239,14 @@ journal or book:
 
 ## Document layout
 
-### Title block
+### Fonts and spacing
 
-- MLA papers do not use a separate title page (unless the instructor
-  requires one). Four-line header at top-left of first page: author name,
-  instructor, course, date (day-month-year format: `5 Apr. 2022`). Title
-  centered on the next line.
-- Markdown destinations: the header fits naturally as a metadata block
-  below the title.
+- Font: serif (Times New Roman 12 preferred), double-spaced throughout.
+- Paragraph indent: 0.5 in first-line indent.
+
+### Margins
+
+- 1 in all sides.
 
 ### Heading hierarchy
 
@@ -259,11 +256,17 @@ or lightly-nested headings.
 - Level 1: `## Heading` (markdown) / centered bold (print).
 - Level 2: `### Heading` (markdown) / flush left bold (print).
 
-### Body text
+### Title block
 
-- Font: serif (Times New Roman 12 preferred), double-spaced throughout.
-- Paragraph indent: 0.5 in first-line indent.
-- Margins: 1 in all sides.
+- MLA papers do not use a separate title page (unless the instructor
+  requires one). Four-line header at top-left of first page: author name,
+  instructor, course, date (day-month-year format: `5 Apr. 2022`). Title
+  centered on the next line.
+- Markdown destinations: the header fits naturally as a metadata block
+  below the title.
+
+### Page numbering
+
 - Page numbers in upper-right corner with the author's surname preceding:
   `Smith 3`.
 
@@ -272,6 +275,10 @@ or lightly-nested headings.
 MLA 9 permits substantive content notes via footnote or endnote (writer's
 choice), numbered superscript in body. Footnotes are for commentary, not
 for citation; citations stay in parenthetical form.
+
+### Block quotes
+
+Threshold: 4 lines of prose, 3 lines of verse (MLA 9 §6.36). Verse quotations use a slash `/` with spaces to mark line breaks when inline; block form for 4+ lines of prose / 3+ lines of verse with no quotation marks. `[editing mode]` enforces; `[formatting mode]` verifies in pre-flight.
 
 ## Paste target expression rules
 
