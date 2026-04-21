@@ -18,7 +18,7 @@ Each in-text citation is one entry. Same source cited three times = three entrie
     "doi_or_url": "https://doi.org/..."
   },
   "location": "specific location inside the source: page, section, chapter, paragraph, timestamp",
-  "exact_quote": "verbatim text from the source that supports the claim",
+  "exact_quote": "a single contiguous verbatim span copied from the rendered source at the location this entry records (see §Verification fields); never a paraphrase, synthesis across passages, or reconstruction from memory",
   "surrounding_context": "1-2 verbatim sentences immediately before and after the exact quote",
   "context_description": "what the author is arguing in this passage and why it supports the claim",
   "claim_supported": "the specific claim in the draft this citation is cited for",
@@ -44,9 +44,75 @@ If you assign an individual author whose name is not printed in or signed on the
 
 `source.authors` is also the source of truth for author names rendered into prose. `[formatting mode]` (CLAUDE.md §7) reads `source.authors` to render every inline citation; if the byline is wrong here, every rendered citation that resolves through this entry is wrong. Verify it once at logging time and re-verify it any time the entry is touched in a later session (see `retrieved_at` below for the re-verification trigger).
 
+## Verification fields
+
+Four sub-fields inside `retrieval` force externalized, validator-checkable evidence that `exact_quote` and `location` are grounded in the rendered source. These exist because discipline-level rules ("verify," "cross-check") are rationalized past by logging agents; a field conspicuously missing or malformed is not.
+
+- `retrieval.printed_page_observed` — string. The printed page number visible on the rendered page header/footer, copied verbatim from the rendered view, OR the literal string `"not visible"` if the header/footer does not show one (scanned image, missing header, digital-only). Required on every entry whose source is paginated.
+- `retrieval.tool_page_index` — integer. The tool-reported page index (PDF page number, sequential page in a reader). Recorded alongside `printed_page_observed` so the offset between them is explicit.
+- `retrieval.pdf_page_offset` — integer. The difference between `tool_page_index` and `printed_page_observed`, recorded once per source. Subsequent entries from the same source reuse the recorded offset rather than recomputing it.
+- `retrieval.verification_trace` — object. `{"first_20": "...", "last_20": "..."}` — the first 20 and last 20 characters of `exact_quote` as they appeared in the rendered view, verbatim. Lets the parent's merge-protocol validator spot-check that the span is a real copy, not a reconstruction. Required on every entry with `verification_status: "verified"` whose `exact_quote` is not in list-shape (reference works, see below).
+- `retrieval.per_entity_locators` — array of `{entity: string, locator: string}`. Required when `exact_quote` enumerates multiple named entities, terms, or claims. Each object records the rendered locator (URL anchor, page, section) where that specific entity is attested. Forces the multi-entity scope check.
+
+`location` must equal `retrieval.printed_page_observed` for paginated sources (or the corresponding value for section-/chapter-/timestamp-keyed sources). The merge-protocol validator rejects entries where they disagree.
+
 ## `citation_string` is informational
 
 `citation_string` is a portability hint and a grep target; it is not load-bearing. The authoritative rendering of an inline citation comes from `source.authors` + `source.year` resolved per the project's `style.md` in `[formatting mode]` (CLAUDE.md §7). Setting `citation_string` to an APA-7 string at logging time is fine and recommended for portability across projects with different styles, but downstream rendering does not depend on it. `[formatting mode]` does not read this field during normal operation.
+
+## Reference-work shape for `exact_quote`
+
+For sources where no prose can be quoted verbatim (dictionaries, wordlists, gazetteers, structured glossaries), `exact_quote` may be a JSON array of objects instead of a string:
+
+```json
+"exact_quote": [
+  {"headword": "Ma'heo'o", "definition": "sacred mystery; sacred power", "locator": "entry M, p. 312"},
+  {"headword": "Voestaa'e", "definition": "white woman (proper name)", "locator": "entry V, p. 489"}
+]
+```
+
+Each item's fields are verbatim from the source. When `exact_quote` is in list-shape, `retrieval.verification_trace` is not required (the locators inside each item serve the same forcing function), but `retrieval.per_entity_locators` is also not required (the list itself carries locators). Whitespace, a paraphrase, a descriptive summary, or a placeholder is never an acceptable substitute for the list-shape; if you cannot populate the list, reject per section 3.
+
+## Correct-entry exemplar
+
+A valid entry under the new schema looks like this. Every externalized verification field is populated; `location` equals `retrieval.printed_page_observed`; multi-entity entries carry per-entity locators.
+
+```json
+{
+  "id": "smith-2010-001",
+  "source": {
+    "authors": ["Smith, Jane A."],
+    "year": 2010,
+    "title": "Title of Work",
+    "publication": "Journal Name",
+    "volume_issue_pages": "42(3), 12–34",
+    "doi_or_url": "https://doi.org/10.xxxx/yyyy"
+  },
+  "location": "p. 24",
+  "exact_quote": "inhibitory control, the cognitive capacity to suppress a dominant response in favor of a context-appropriate alternative",
+  "surrounding_context": "Subjects high on measures of executive function consistently outperform controls on tasks requiring inhibitory control, the cognitive capacity to suppress a dominant response in favor of a context-appropriate alternative. This effect replicates across age groups.",
+  "context_description": "Smith is defining inhibitory control as part of her executive-function framework",
+  "claim_supported": "inhibitory control is the capacity to suppress a dominant response",
+  "citation_string": "(Smith, 2010, p. 24)",
+  "provisional_reference": "subtopic:executive-function",
+  "draft_reference": null,
+  "verification_status": "verified",
+  "retrieval": {
+    "source_path": "https://doi.org/10.xxxx/yyyy",
+    "printed_page_observed": "p. 24",
+    "tool_page_index": 38,
+    "pdf_page_offset": 14,
+    "verification_trace": {
+      "first_20": "inhibitory control, ",
+      "last_20": "riate alternative"
+    }
+  },
+  "retrieved_at": "2026-04-20T09:00:00Z",
+  "added_at": "2026-04-20T09:03:00Z"
+}
+```
+
+A multi-entity entry additionally carries `retrieval.per_entity_locators` — one object per named entity with its own `locator` field.
 
 ## Allowed enum values
 
@@ -100,7 +166,15 @@ When academic-researcher dispatches multiple source-finders in parallel, each fi
 Merge protocol for academic-researcher. Do not start the merge until every finder in the batch has returned.
 
 1. Read each shard file in ascending `<finder-id>` order (lexicographic sort of the filenames). If a shard is not valid JSON on read, treat it as a failed shard per the failure handling below; do not attempt to repair a partial or malformed shard.
-2. For each entry, validate against the schema (required fields present, enum values legal, `exact_quote` and `surrounding_context` non-empty).
+2. For each entry, validate against the schema. Required fields present; enum values legal. Hard-fail each of the following:
+   - `exact_quote` and `surrounding_context` empty, whitespace-only, or punctuation-only. "Non-empty" means at least one non-whitespace, non-punctuation character.
+   - Paginated source (entry's `source.volume_issue_pages` is set) without `retrieval.printed_page_observed`.
+   - `verification_status: "verified"` with string-shape `exact_quote` lacking `retrieval.verification_trace`.
+   - `exact_quote` enumerating more than one named entity (names, terms, distinct claims) without `retrieval.per_entity_locators` covering each.
+   - `location` disagreeing with `retrieval.printed_page_observed` on paginated sources.
+   A hard-fail entry is surfaced to {{USER}} with the specific rule that fired; do not merge it. The three resolution paths below (fix in place, drop and merge rest, abandon) apply, with one carve-out: when the hard-fail is `verification_trace missing`, `per_entity_locators missing`, or `exact_quote enumerating multiple entities`, the "fix in place" path is NOT available. The source must be re-opened and the entry re-logged; reconstructing verification_trace from memory is exactly the failure these fields exist to block. Fix-in-place is reserved for formatting-only issues (whitespace trim, location-offset recorded incorrectly against an already-correct printed_page_observed).
+
+**Parent-thread spot-check.** The `verification_trace` field can be fabricated by an agent from memory, which defeats its purpose. The academic-researcher (parent thread), on every merge pass, picks up to 3 entries randomly (or by highest-stakes: verified entries cited in a load-bearing paragraph). For each picked entry, open the source at `retrieval.source_path` (or `source.doi_or_url`), locate `exact_quote`, and confirm that the actual first-20 and last-20 characters match `verification_trace`. Mismatches are surfaced as `spot-check-failed` incidents and the entry is unmerged. Spot-checks scale with batch size: 1 entry per 4 merged, capped at 3. Record spot-check outcomes in the merge report to {{USER}}.
 3. Resolve ID collisions against both the main log and any shards already merged in this pass: if the id is already taken, increment the `NNN` suffix to the next free value. Because shards are read in `<finder-id>` order, the lowest-id shard owns its original ids and higher-id shards renumber on collision. A rerun of the same batch must produce the same id assignments.
 4. Append validated entries to the main log. If the main log file does not yet exist (first dispatch batch, no prior log), create it as an empty JSON array `[]` first, then append.
 5. Delete the shard file after successful merge. If the shard is being held pending a failed-merge review, do not delete it; see failure handling below.
