@@ -63,6 +63,7 @@ Shipped skills under `skills/<name>/` mirror into `~/.claude/skills/<name>/` on 
 | `[writing mode]` | Convert refined outline into prose. Apply `voice.md`, §10 generation signatures, paraphrase default, Pandoc citation IDs. | `[editing mode]` |
 | `[annotated-bib mode]` | Per-entry annotation (4-beat: summary / relevance / location / evaluation) and draft compile. Grounded only in log fields; §3 verification inherited. Annotated-bib projects only; replaces `[outlining]` / `[refining]` / `[writing]`. | `[editing mode]` |
 | `[editing mode]` | Seven-pass audit: ID validation → §4 citation → partial-entry recheck → grammar → AI-tell (§10) → quote-density → voice (§9). Handoff gate blocks on unresolved voice-audit hits. In annotated-bib projects, pass 6 (quote-density) and the §9 flow-rules part of pass 7 are skipped. | `[formatting mode]` (handoff gate) |
+| `[finetuning mode]` | Bounded local substitution (word to paragraph): produce 3–5 alternatives with declared tradeoff axes; never applies a single-option change without explicit {{USER}} selection. {{USER}}-only entry via explicit or implicit trigger. | Returns to prior mode on completion. |
 | `[formatting mode]` | Render source prose into style-specific output for a named paste target (`word`, `google-docs`, `plain-markdown`, `latex` — all rendered via pandoc+CSL). Terminal stage; source prose never modified. | Done. |
 | `[research mode]` | Source vetting and logging. Auto-triggers from other modes when a claim needs a source. Dispatches `source-finder` subagents in parallel for 3+ sub-topics. | Returns to prior mode on completion. |
 | `[red team mode]` | Systematically challenge every claim. Counterpoints, blind spots. | Any mode. |
@@ -90,7 +91,9 @@ Shipped skills under `skills/<name>/` mirror into `~/.claude/skills/<name>/` on 
 
 Each moment is owned by exactly one mode family.
 
-1. **Logging** (`[research mode]`) — verify source, append JSON entry to the citation log. Every entry carries `source.authors`, `source.year`, `exact_quote`, `surrounding_context`, `retrieved_at`, `verification_status`.
+1. **Logging** (`[research mode]`) — verify source, append JSON entry to the citation log. Every entry carries:
+   - Core source fields: `source.authors`, `source.year`, `exact_quote`, `surrounding_context`, `retrieved_at`, `verification_status`.
+   - Externalized verification sub-fields under `retrieval`: `retrieval.printed_page_observed`, `retrieval.tool_page_index`, `retrieval.pdf_page_offset`, `retrieval.verification_trace`, and `retrieval.per_entity_locators` (required when `exact_quote` enumerates multiple named entities). See [`citations/schema.md`](./citations/schema.md) §Verification fields for when each is required.
 2. **In-prose IDs** (`[outlining mode]`, `[writing mode]`, `[editing mode]`) — prose carries `[@id]` / `@id` / `[@id, p. N]` Pandoc syntax. Never rendered author-year strings.
 3. **Rendering** (`[formatting mode]`) — resolve IDs against the log, emit style-specific inline citations and a References list into a sibling file.
 
