@@ -94,7 +94,7 @@ else
   # consume divs internally.
   case "${TARGET}" in
     google-docs|plain-markdown)
-      sed -i -e '/^::: /d' -e '/^:::$/d' "${ACTUAL}"
+      sed -i.bak -e '/^::: /d' -e '/^:::$/d' "${ACTUAL}" && rm -f "${ACTUAL}.bak"
       ;;
   esac
 fi
