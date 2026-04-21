@@ -76,7 +76,7 @@ endnote/footnote split.
 
 ### Block quotes
 
-Threshold: 100 words (roughly five typed lines). Rendered as block quotes per Chicago 17 §13.10. `[editing mode]` enforces; `[formatting mode]` verifies in pre-flight (CLAUDE.md §7 step 2) and halts if an over-threshold inline direct quote is still present.
+Threshold: 100 words (roughly five typed lines). Rendered as block quotes per Chicago 17 §13.10. `[formatting mode]` pre-flight enforces this threshold (CLAUDE.md §7 step 2) and halts if an over-threshold inline direct quote is still present.
 
 ## Paste target expression rules
 

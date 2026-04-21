@@ -64,7 +64,7 @@ end (markdown).
 
 ### Block quotes
 
-Threshold: 40 words. Direct quotes of 40 words or more are rendered as block quotes in source prose (indented, no surrounding quotation marks, citation after the closing punctuation). `[editing mode]` enforces; `[formatting mode]` verifies in pre-flight (CLAUDE.md §7 step 2) and halts if an over-threshold inline direct quote is still present.
+Threshold: 40 words. Direct quotes of 40 words or more are rendered as block quotes in source prose (indented, no surrounding quotation marks, citation after the closing punctuation). `[formatting mode]` pre-flight enforces this threshold (CLAUDE.md §7 step 2) and halts if an over-threshold inline direct quote is still present.
 
 ## Paste target expression rules
 

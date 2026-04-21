@@ -63,7 +63,7 @@ for citation; citations stay in parenthetical form.
 
 ### Block quotes
 
-Threshold: 4 lines of prose, 3 lines of verse (MLA 9 §6.36). Verse quotations use a slash `/` with spaces to mark line breaks when inline; block form for 4+ lines of prose / 3+ lines of verse with no quotation marks. `[editing mode]` enforces; `[formatting mode]` verifies in pre-flight (CLAUDE.md §7 step 2).
+Threshold: 4 lines of prose, 3 lines of verse (MLA 9 §6.36). Verse quotations use a slash `/` with spaces to mark line breaks when inline; block form for 4+ lines of prose / 3+ lines of verse with no quotation marks. `[formatting mode]` pre-flight enforces this threshold (CLAUDE.md §7 step 2).
 
 ## Paste target expression rules
 
