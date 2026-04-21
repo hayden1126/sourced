@@ -121,7 +121,7 @@ Connect abstract points to specific patterns. The TYPE of analogy varies — aca
 
 ### Punctuation
 
-Author-specific punctuation habits. Ellipses, semicolons, colons, dashes all vary. voice-extractor: identify what the corpus uses characteristically and describe the pattern. Em dashes are forbidden per §10; use commas, colons, or period-fragment instead.
+Punctuation patterns that function as AI generation signatures (em dashes, "not X but Y" pivots, ornamental triads) are governed by CLAUDE.md §10 *Generation signatures to rewrite*, which applies across every voice. The fix for a flagged em-dash is sentence-shape restructure per §10 *Restructure, don't retokenize*, not a comma, colon, or period-fragment swap that preserves the mid-clause-interruption rhythm. Use this section only for author-specific punctuation habits the corpus clearly shows (ellipses, semicolons, colons, and so on). voice-extractor: identify what the corpus uses characteristically and describe the pattern. An author-specific rule that contradicts §10 must be stated explicitly; silence defers to §10.
 
 Direct quotations follow CLAUDE.md §10 *Direct quotations* and §4 *Quote verbatim* (source punctuation preserved verbatim). This section governs the writer's own prose.
 
