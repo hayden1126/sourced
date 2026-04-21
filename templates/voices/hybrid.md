@@ -8,6 +8,8 @@ Read this file in full on entry to any of those modes; do not work from memory o
 
 **Note for downstream readers.** This skeleton is filled in by `voice-extractor` from a blended-register corpus. Any `TBD — derived from corpus` marker that remains in the rendered file signals the corpus did not settle that rule; treat such markers as "fall back to general register judgment" rather than a hard rule, and apply the surrounding prose guidance as context.
 
+Two TBD forms can appear in a voice file, distinguished by suffix: `TBD — derived from corpus` (this skeleton's placeholder — voice-extractor may fill it in, or the rendered file keeps it as a general-register-fallback signal) and `TBD — samples did not surface this pattern. Fill in or delete.` (voice-extractor's emit for a section the corpus could not settle — requires {{USER}} action before the voice is considered complete). Both prefix with `TBD —` so downstream readers can grep a single pattern for all unfilled sections; the suffix disambiguates the reason and the required response. Do not collapse the two suffixes into one form.
+
 ## Iron rules
 
 The rules in this section pass through to every derived voice file verbatim. `voice-extractor` preserves them without corpus calibration; `install.sh` refuses to install a voice file where any is missing.

@@ -41,8 +41,19 @@ function printUsage() {
   console.error('  --port <n>                 Chrome remote debugging port (default: 9222)');
 }
 
+const KNOWN_FLAGS = new Set(['-o', '--out', '--port', '--range', '--pages', '--tab-pattern', '--iframe-pattern']);
+
 function requireValue(flag, i) {
-  if (i + 1 >= args.length || args[i + 1].startsWith('--')) {
+  const atEnd = i + 1 >= args.length;
+  const next = atEnd ? undefined : args[i + 1];
+  // Filename flags (-o / --out) must reject tokens that match any known flag name,
+  // so `node overdrive.mjs -o -o` errors instead of writing a file literally named `-o`.
+  // Pattern flags (--tab-pattern / --iframe-pattern) stay permissive per F8's narrowing:
+  // they legitimately accept values like `-chapter` that start with a single dash.
+  const isFilenameFlag = flag === '-o' || flag === '--out';
+  const nextLooksLikeFlag =
+    !atEnd && (next.startsWith('--') || (isFilenameFlag && KNOWN_FLAGS.has(next)));
+  if (atEnd || nextLooksLikeFlag) {
     console.error(`Error: ${flag} requires a value.`);
     switch (flag) {
       case '--range':
@@ -68,7 +79,7 @@ function requireValue(flag, i) {
     printUsage();
     process.exit(1);
   }
-  return args[i + 1];
+  return next;
 }
 
 for (let i = 0; i < args.length; i++) {

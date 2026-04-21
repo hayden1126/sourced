@@ -1,7 +1,7 @@
 # Annotated bibliography: ship a new research deliverable project type
 
 - **Date:** 2026-04-20
-- **Status:** Design approved 2026-04-20. Implementation plan pending.
+- **Status:** Shipped 2026-04-20. Phase 1+2 complete (project-type fork, brief template, `[annotated-bib mode]`, per-style render variants, editing-mode subset); phase 3 open per `ROADMAP.md`.
 - **Scope:** Add `annotated-bib` as a `sourced` project type. New brief template, new `[annotated-bib mode]`, one new optional schema field, per-style paste-target variants for all 5 shipped styles (apa7, chicago17-ad, chicago17-nb, mla9, ieee).
 - **Out of scope:** PRISMA screening stages, per-source quality-scoring rubrics beyond the 4-beat evaluation, cross-project citation dedup, alternative output media (slide decks, interactive web). Systematic-review functionality belongs to a separate ROADMAP entry.
 
