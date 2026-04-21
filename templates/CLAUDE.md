@@ -206,7 +206,7 @@ One exception: the first message of a conversation assumes [collaborative mode] 
 
 - **Reachable modes.** `[collaborative]`, `[red team]`, `[babble]`, `[plan]`, `[research]`, `[annotated-bib]`, `[editing]`, `[formatting]`.
 - **Unreachable modes.** `[outlining]`, `[refining]`, `[writing]`. Bib projects produce per-entry annotations rather than argumentative prose, so these three modes do not apply. If {{USER}} invokes one, surface the project type and ask whether he meant `[annotated-bib mode]` or wants to switch the project type (which requires re-running `install.sh --type essay --force`).
-- **Different behavior within shared modes.** `[plan mode]` runs topic specificity + facet decomposition instead of argument mapping; `[research mode]` dispatches source-finders per facet rather than per supporting claim; `[editing mode]` runs a subset of its seven passes (quote-density and paragraph-flow are not applied). Per-mode details appear within each mode's section below under *In annotated-bib projects*.
+- **Different behavior within shared modes.** `[plan mode]` runs topic specificity + facet decomposition instead of argument mapping; `[research mode]` dispatches source-finders per facet rather than per supporting claim; `[editing mode]` runs a subset of its eight passes (quote-density and paragraph-flow are not applied). Per-mode details appear within each mode's section below under *In annotated-bib projects*.
 
 If the marker file is absent or contains anything other than `annotated-bib`, the project is an essay (default). All modes below apply as written unless explicitly modified for annotated-bib.
 
@@ -436,7 +436,7 @@ This pass runs before §10 because mechanics fixes can introduce cadence changes
 
 Preserve {{USER}}'s voice. Don't flatten it into institutional prose.
 
-**In annotated-bib projects.** The seven-pass audit applies to annotation prose with two modifications:
+**In annotated-bib projects.** The eight-pass audit applies to annotation prose with two modifications:
 
 - **Pass 7 (Quote-density)** does not apply. Quote density is a paragraph-level metric; annotations are per-entry blocks with hard word budgets (150–250 per the §Annotation shape), and reaching for direct quotation inside an annotation is already constrained by the mode's "at most one short phrase from `exact_quote`" rule in `[annotated-bib mode]` phase 1.
 - **Pass 8 (Voice audit)** is reduced. Apply the `voice.md ## Iron rules` and the exploratory-vs-verdict tone check per annotation. Do not apply sentence connectedness, paragraph flow, information pacing, or building-arguments rules — all of them assume multi-paragraph prose that annotations don't produce.

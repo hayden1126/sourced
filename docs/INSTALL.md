@@ -31,7 +31,7 @@ These paths are fixed; the install targets always go to `~/.claude/`, regardless
 
 ## Prerequisite check
 
-`install.sh` runs `check_prerequisites` near the top of every invocation (before any file writes). It verifies `pdftotext`, `pandoc`, and `python3` are on PATH and aborts with the apt/brew install commands if any is missing. This is check-only; the installer does not run sudo or touch system packages. See the README Prerequisites section for what each tool does and how to install it.
+`install.sh` runs `check_prerequisites` before any per-project file writes. It verifies `pdftotext`, `pandoc`, and `python3` are on PATH and aborts with the apt/brew install commands if any is missing. `--global-only` intentionally skips the check: that code path only copies voices, agents, skills, filters, and styles into `~/.claude/` and never invokes pandoc, python3, or pdftotext, so a fresh machine can bootstrap global files without the formatting/research toolchain installed. This is check-only; the installer does not run sudo or touch system packages. See the README Prerequisites section for what each tool does and how to install it.
 
 ## Optional: TeX Live for the `latex` paste target
 
