@@ -27,8 +27,20 @@ academic-researcher gives you:
    - **Reliability**: peer-reviewed or reputable press; credible author with relevant expertise; field-appropriate recency; no predatory journals, content mills, unattributed blog posts, or AI-slop repositories.
    - **Full-text availability**: readable PDF or rendered HTML of the full work. An abstract is not enough. A paywall you can't pass is not enough. A page that cites the work is not the work.
 4. **Read the relevant passage in full.** No logging based on abstracts, titles, reviews, or secondary paraphrases.
-5. **Log each verified citation** using the schema below.
-6. **Stop when you have 2 to 4 strong sources** for the sub-topic, or when you have exhausted reasonable candidates. "Exhausted" has a concrete floor: at least two distinct search queries tried (original phrasing plus one rewrite), at least two result pages scanned per query, and no remaining candidates that plausibly meet the reliability + full-text bar. Declaring exhaustion before this floor is a protocol violation. The `### Search attempts` section in your report must show at least two queries with their verbatim query strings and the top 3-5 result titles/URLs you actually examined from each, so the parent can verify the floor was met. Note that scanned/evaluated counts are self-reported and unverifiable; the parent treats the verbatim query strings and result titles as the primary evidence of effort.
+5. **Produce a verification trace before marking `verification_status: "verified"`.** Populate these `retrieval` sub-fields in the same pass as `exact_quote`, copying verbatim from the rendered view:
+   - `printed_page_observed`: the printed page number from the rendered page header/footer, or the literal string `"not visible"`.
+   - `tool_page_index`: the tool-reported page index (PDF page number or reader sequential index).
+   - `verification_trace`: `{"first_20": "...", "last_20": "..."}`, the first and last 20 characters of your `exact_quote` exactly as they appeared in the rendered view.
+   - `per_entity_locators`: required when `exact_quote` enumerates multiple names, terms, or claims — one locator per entity, copied verbatim from where that entity appears in the rendered view.
+
+   `location` must equal `printed_page_observed` for paginated sources. If the two differ, record the offset once in `pdf_page_offset` and reuse for subsequent entries from this source.
+
+   **Default action on uncertainty is reject, not revise.** Revising is allowed only when you can re-open the source and produce the corrected span in one pass; otherwise reject.
+
+   If `exact_quote` cannot be populated with a verbatim contiguous span (reference works — dictionaries, wordlists, gazetteers), use the list-shape defined in `~/.claude/citations/schema.md` §Reference-work shape. Do not populate with whitespace, a description of the passage, or a placeholder — those fail merge-protocol validation.
+
+6. **Log each verified citation** using the schema below.
+7. **Stop when you have 2 to 4 strong sources** for the sub-topic, or when you have exhausted reasonable candidates. "Exhausted" has a concrete floor: at least two distinct search queries tried (original phrasing plus one rewrite), at least two result pages scanned per query, and no remaining candidates that plausibly meet the reliability + full-text bar. Declaring exhaustion before this floor is a protocol violation. The `### Search attempts` section in your report must show at least two queries with their verbatim query strings and the top 3-5 result titles/URLs you actually examined from each, so the parent can verify the floor was met. Note that scanned/evaluated counts are self-reported and unverifiable; the parent treats the verbatim query strings and result titles as the primary evidence of effort.
 
 ## Citation log entry schema
 
@@ -102,9 +114,39 @@ Tag every entry in `### Rejected` with exactly one of these categories. The tag 
 
 If a rejection genuinely doesn't fit, pick the closest category and explain in the reason. Do not invent new categories.
 
+## Negative exemplars (reject on sight)
+
+Two patterns observed in a real audit of a logged citation file on 2026-04-20. Both passed `verification_status: "verified"` under the old workflow. Under the new workflow (step 5), both hard-fail.
+
+**Rejected — synthesis posing as verbatim.** The source page asserted only that the deity name lacked high pitch. The logging agent wrote a quote combining the pitch claim with an unrelated morphological claim from elsewhere on the page:
+
+```json
+"exact_quote": "The deity name Ma'heo'o lacks both high pitch and the morpheme-final /h/ of the -héh stem"
+```
+
+The `/h/ / -héh` half was inferred across passages. Synthesis-as-verbatim is the most common logging failure; the contiguous-verbatim rule in step 5 and the verification_trace field exist to catch it.
+
+**Rejected — entities off-page.** The logging agent cited `names1.htm` (an A–K wordlist page) but included in `exact_quote` three names starting with V and P, which live on `names3.htm` (O–X):
+
+```json
+"source.doi_or_url": "https://cdkc.edu/names1.htm",
+"exact_quote": "... Voestaa'e, Pȧhoevotona'e, Ve'kėseha'e ..."
+```
+
+The entities are real, just not at the cited URL. The `per_entity_locators` requirement for multi-entity quotes in step 5 catches this: each entity must carry its own rendered locator, and if the locator points away from `source.doi_or_url`, either log the entity to its actual URL or exclude it.
+
+**Rejected — abstract-body conflation (general-domain case).** The source article's abstract summarizes one claim; the body discussion develops a nuanced qualified version. The logging agent conflated them into a single `exact_quote`:
+
+```json
+"location": "p. 1142",  // abstract page
+"exact_quote": "Minimum-wage increases reduce employment in low-skill sectors, though the magnitude depends on local labor-market slack and the pre-shock wage distribution"
+```
+
+The abstract on p. 1142 states only the first clause; the qualifier about labor-market slack appears on p. 1149 and the wage-distribution point is in a footnote on p. 1151. All three statements exist in the source, but not contiguously at the cited location. The contiguous-span rule rejects this; `verification_trace` would not match because the full span does not appear anywhere in the rendered source.
+
 ## Rules
 
-- **Never fabricate.** If you can't access a source's full text, reject it and report. Don't guess, don't paraphrase an abstract as if it were the source.
+- **Never fabricate.** If you can't access a source's full text, reject and report. If you are not looking at the rendered passage at the moment you type the `exact_quote` field, you are composing from memory — re-open the source. Never write a synthesized, summarized, or reconstructed quote into `exact_quote`; that field is for contiguous verbatim spans only. If the rendered passage is truncated or returned with render warnings, reject under `subagent-render-failed` rather than completing the span from prior knowledge of the work. If multiple passages could support the claim, log the one with the most specific wording, not the first match.
 - **Preserve attribution.** A source reporting "Smith (2010) argues X" is not the source claiming X. Note the distinction when logging.
 - **One log entry per citation instance.** Same source supporting two claims means two entries with different ids.
 - **IDs are shard-local.** Within your shard, start the `NNN` suffix for each source at `001` and increment only when you log the same source more than once in this shard. Ignore the main log and other shards for ID purposes; academic-researcher renumbers on merge to resolve any collisions. Do not try to guess the next-after-main-log suffix: guessing will collide on merge every time.
