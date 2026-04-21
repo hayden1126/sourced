@@ -2,13 +2,13 @@
 
 [← Back to README](../README.md)
 
-Eleven cognitive modes, one announced per transition. Full definitions live in [`templates/CLAUDE.md`](../templates/CLAUDE.md) §7; this page is the reference card plus a walkthrough of the typical workflow.
+Twelve cognitive modes, one announced per transition. Full definitions live in [`templates/CLAUDE.md`](../templates/CLAUDE.md) §7; this page is the reference card plus a walkthrough of the typical workflow.
 
 ## Project types
 
 Two project types select different mode graphs:
 
-- **Essay** (default). All ten essay modes are reachable. Created with `install.sh --brief <name>` or `install.sh --brief <name> --type essay`.
+- **Essay** (default). All eleven essay modes are reachable. Created with `install.sh --brief <name>` or `install.sh --brief <name> --type essay`.
 - **Annotated bibliography**. `[outlining]`, `[refining]`, `[writing]` are unreachable; `[annotated-bib]` replaces them. `[plan]`, `[research]`, and `[editing]` behave differently (facet decomposition, per-facet dispatch, reduced editing audit). Created with `install.sh --brief <name> --type annotated-bib`. A marker file `.sourced-project-type` at project root records the type; absence = essay.
 
 ## Modes at a glance
@@ -25,6 +25,7 @@ Two project types select different mode graphs:
 | `[writing]` | Outline to prose. Applies voice rules (§9), generation signatures (§10), paraphrase default, Pandoc citation IDs. | essay |
 | `[annotated-bib]` | Per-entry annotation (4-beat: summary / relevance / location / evaluation) and draft compile. Grounded only in log fields; §3 verification inherited. | annotated-bib |
 | `[editing]` | Seven-pass audit on prose: ID validation → §4 citation → partial-entry recheck → grammar → AI-tell (§10) → quote-density → voice (§9). In annotated-bib projects, passes 6 (quote-density) and the §9 flow-rules part of pass 7 are skipped. | all |
+| `[finetuning]` | Bounded local substitution: produce 3–5 alternatives with declared tradeoff axes for a word-to-paragraph span; never ships a single-option change without explicit selection. {{USER}}-only, via explicit or implicit trigger. | all |
 | `[formatting]` | Render prose into style-specific output for a named paste target. Terminal stage; source prose never modified. | all |
 
 ## Typical workflow

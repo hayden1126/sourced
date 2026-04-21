@@ -26,7 +26,16 @@ Each in-text citation is one entry. Same source cited three times = three entrie
   "provisional_reference": "subtopic:animacy-grammar",
   "draft_reference": null,
   "verification_status": "verified | partial",
-  "retrieval": "URL, PDF path, library access, or 'pasted by {{USER}}'",
+  "retrieval": {
+    "source_path": "URL, PDF path, library access, or 'pasted by {{USER}}'",
+    "printed_page_observed": "p. 42",
+    "tool_page_index": 56,
+    "pdf_page_offset": 14,
+    "verification_trace": {
+      "first_20": "first 20 chars of exact_quote",
+      "last_20": "last 20 chars of exact_quote"
+    }
+  },
   "retrieved_at": "2026-04-17T14:18:00Z",
   "added_at": "2026-04-17T14:23:00Z"
 }
