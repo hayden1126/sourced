@@ -1,0 +1,28 @@
+[build-system]
+requires = ["hatchling>=1.24", "hatch-vcs>=0.4"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sourced"
+description = "Claude Code framework for academic papers"
+requires-python = ">=3.10"
+dynamic = ["version"]
+dependencies = []
+
+[project.optional-dependencies]
+test = ["pytest>=8.0", "syrupy>=4.6"]
+
+[project.scripts]
+sourced = "sourced.cli:main"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "src/sourced/_version.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sourced"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
