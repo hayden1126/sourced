@@ -167,7 +167,13 @@ while [[ $# -gt 0 ]]; do
 done
 
 # ---- prerequisites check ---------------------------------------------------
-check_prerequisites
+# --global-only copies voices/agents/skills/filters/styles into ~/.claude/ and
+# never invokes pandoc, python3, or pdftotext, so skip the prereq check on
+# that code path. A fresh machine can bootstrap global files without the
+# formatting/research toolchain installed.
+if [[ ${GLOBAL_ONLY} -eq 0 ]]; then
+  check_prerequisites
+fi
 
 # ---- repo-self-guard -------------------------------------------------------
 if [[ ${GLOBAL_ONLY} -eq 0 ]]; then
@@ -735,11 +741,22 @@ if [[ "${PROJECT_TYPE}" != "essay" ]]; then
     echo "Pass --force to replace, or --update to refresh with the new type." >&2
     exit 1
   fi
+  if [[ -n "${EXISTING_MARKER}" && "${EXISTING_MARKER}" != "${PROJECT_TYPE}" ]]; then
+    echo "  Project type changed from ${EXISTING_MARKER} to ${PROJECT_TYPE}."
+  fi
   echo "${PROJECT_TYPE}" > "${TYPE_MARKER}"
   echo "  ${TYPE_MARKER} (type: ${PROJECT_TYPE})"
-elif [[ ${TYPE_EXPLICIT} -eq 1 && -f "${TYPE_MARKER}" && ${FORCE} -eq 1 ]]; then
-  # Explicit --type essay --force on a previously-annotated-bib project: remove the marker.
+elif [[ ${TYPE_EXPLICIT} -eq 1 && -f "${TYPE_MARKER}" ]]; then
+  # Explicit --type essay on a previously-non-essay project: remove the stale marker.
+  # The marker is metadata, not user content — rewriting it to match the explicit
+  # --type flag is correct under both --force and --update semantics, and is also
+  # safe with no flags (the user asked for essay explicitly, and the marker only
+  # exists for non-essay types).
+  EXISTING_MARKER=$(head -n1 "${TYPE_MARKER}" 2>/dev/null || true)
   rm -f "${TYPE_MARKER}"
+  if [[ -n "${EXISTING_MARKER}" && "${EXISTING_MARKER}" != "essay" ]]; then
+    echo "  Project type changed from ${EXISTING_MARKER} to essay."
+  fi
   echo "  removed ${TYPE_MARKER} (reverted to essay)"
 fi
 
