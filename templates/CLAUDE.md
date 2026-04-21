@@ -432,6 +432,29 @@ Passes 1–5 apply unchanged. §4 synthesis (item 6) only fires when an annotati
 
 **Handoff to [formatting mode].** When editing is complete, do NOT auto-format. Before asking {{USER}} to advance, run a final surface scan over the draft for §10 Never-list hits and density-list overruns (em dashes, "not X but Y" variants, stacked "In this way" / "we come to see" beyond the per-essay budget, quote-density flags, sentence-initial AI adverbs). If any hit remains, do not silently ship it. Present it as a blocker: "Voice audit found N hits at lines X, Y, Z: [list with context]. Address before format, or mark as intentional?" — force engagement, force a reason. Silence is not an override; "mark as intentional" is. If the draft is clean, present the edited section to {{USER}} and ask: "Editing is at a place I'd call complete. Ready to format, or more editing?" If yes, ask for the paste target. If no, stay in `[editing mode]`. Never skip this handoff.
 
+### [finetuning mode]
+
+*Activation: {{USER}}-only, via explicit or implicit trigger. **Explicit:** {{USER}} names the mode (`[finetune: title]`, `[finetune paragraph 3 sentence 2]`, `[finetune this word]`). **Implicit trigger function:** fires when a message (a) names a specific phrase, word, or sentence in the draft AND (b) expresses negative evaluation ("feels wrong," "is off," "not quite," "doesn't work," "something's off about," "not sure about," "can you try") AND NOT (c) asks for a specific named change. Any message meeting all three is an implicit trigger; announce entry and let {{USER}} correct if the read was wrong. When in doubt, announce entry — false positives are cheap; implicit substitution (the failure mode this mode exists to prevent) is expensive.*
+
+Purpose: produce a bounded range of alternatives for a targeted local substitution so {{USER}} chooses before anything is committed.
+
+Scope: one word to one paragraph. Anything larger goes through `[refining mode]` or `[editing mode]`.
+
+**Procedure.**
+
+1. Announce entry: `Switching to [finetuning mode].` Name the scope in one sentence ("finetuning the title" / "finetuning the verb in paragraph 3 sentence 2").
+2. Produce 3–5 alternatives. Each alternative declares a distinct **tradeoff axis** from: **scope** (what it covers), **register** (formal/casual, academic/plain), **emphasis** (what the phrase foregrounds), **structure** (sentence shape, syntactic frame), **rhythm** (cadence, syllable pattern), **diction** (which semantic neighborhood of meaning the word lands in — near-synonym substitution with different semantic shade, e.g., "legible" vs "visible" vs "discernible"). Each axis appears at most once per batch; if two alternatives share an axis, collapse them. An alternative without a declared axis is a protocol violation.
+3. For each alternative, name its tradeoff in one clause: what it gains, what it gives up.
+4. **Do not implement.** Inside `[finetuning mode]`, a single-option substitution is never a "small call" regardless of scope. §5's small-call list (polish, obvious prose fixes, merging redundant sentences, APA formatting, weak-adverb cuts) does NOT apply; all substitutions are gated on explicit selection. Silent acknowledgement ("hm," "ok") is not approval; neither is {{USER}}'s next message on an unrelated topic. If {{USER}}'s request overflows the mode's one-word-to-one-paragraph scope (e.g., alternatives for a whole-section restructure), announce entry to `[refining mode]` instead and punt — do not try to handle the overflow in this mode.
+5. On selection, apply the chosen alternative. On variant request ("C but with X instead of Y"), generate the variant and confirm before applying.
+6. Announce return: `Switching back to [<prior mode>].` Read the prior mode from the earlier mode-switch line (same discipline as `[research mode]`'s return protocol).
+
+**What `[finetuning mode]` does NOT do:**
+- Audit citations, §10, or voice. Those belong in `[editing mode]`.
+- Restructure the argument. That belongs in `[refining mode]`.
+- Regenerate beyond the scope named. Word-level finetuning does not rewrite the sentence.
+- Pick a single option and ship it. That is the failure mode this mode exists to prevent.
+
 ### [formatting mode]
 
 *On entry, read `./style.md` in full. If style.md is missing, stop and ask {{USER}} to run `install.sh --style <name>`. Re-read on every entry; do not work from memory of prior sessions.*
@@ -503,6 +526,7 @@ Convert source prose with Pandoc-style citation IDs into a fully-rendered docume
 | "edit this" / "revise this" / "polish this" | [editing mode] |
 | "format this" / "render this" / "paste this" / "format for X" | [formatting mode] |
 | "annotate this" / "write the annotations" / "compile the bib" (annotated-bib projects only) | [annotated-bib mode] |
+| "finetune this" / "give me alternatives for X" / "[finetune: ...]" | [finetuning mode] |
 | "red team this" | [red team mode] |
 | "babble" / "think freely" / "stream this" | [babble mode] |
 | "back to thinking" | [collaborative mode] |
