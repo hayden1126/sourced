@@ -98,12 +98,13 @@ for (let i = 0; i < args.length; i++) {
   } else if (args[i] === '--port') {
     const val = requireValue('--port', i);
     i++;
-    debugPort = parseInt(val, 10);
-    if (!/^\d+$/.test(val) || debugPort <= 0 || debugPort > 65535) {
+    const portNum = /^\d+$/.test(val) ? parseInt(val, 10) : NaN;
+    if (!Number.isFinite(portNum) || portNum < 1 || portNum > 65535) {
       console.error(`Error: --port must be an integer between 1 and 65535 (got '${val}').`);
       printUsage();
       process.exit(1);
     }
+    debugPort = portNum;
   }
 }
 

@@ -61,6 +61,8 @@ node overdrive.mjs --iframe-pattern '\.html$'   # narrow the content-frame searc
 node overdrive.mjs --port 9333                  # non-default debug port
 ```
 
+Argument validation: `--port` must be an integer in 1..65535 (non-numeric or out-of-range values error immediately with a clear message). `--tab-pattern` and `--iframe-pattern` accept values starting with a single `-` so regex patterns like `-chapter` pass through; only `--`-prefixed tokens are rejected as missing values.
+
 The script emits a header with the spine URL and UTC timestamp, then the text. Each page boundary is marked `[p. N]` on its own line. Roman-numbered front matter (i, ii, iii...) renders with the Roman numeral preserved.
 
 **Extracting a multi-chapter sequence.** The script reads only the currently-visible spine item. For a book split across chapters, either:

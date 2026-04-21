@@ -31,7 +31,7 @@ These paths are fixed; the install targets always go to `~/.claude/`, regardless
 
 ## Prerequisite check
 
-`install.sh` runs `check_prerequisites` before any per-project file writes. It verifies `pdftotext`, `pandoc`, and `python3` are on PATH and aborts with the apt/brew install commands if any is missing. `--global-only` intentionally skips the check: that code path only copies voices, agents, skills, filters, and styles into `~/.claude/` and never invokes pandoc, python3, or pdftotext, so a fresh machine can bootstrap global files without the formatting/research toolchain installed. This is check-only; the installer does not run sudo or touch system packages. See the README Prerequisites section for what each tool does and how to install it.
+`install.sh` runs `check_prerequisites` before any per-project file writes. It verifies `pdftotext`, `pdfinfo`, `pdftoppm`, `pandoc`, and `python3` are on PATH and aborts with the apt/brew install commands if any is missing. `--global-only` intentionally skips the check: that code path only copies voices, agents, skills, filters, and styles into `~/.claude/` and never invokes pandoc, python3, or pdftotext, so a fresh machine can bootstrap global files without the formatting/research toolchain installed. This is check-only; the installer does not run sudo or touch system packages. See the README Prerequisites section for what each tool does and how to install it.
 
 ## Optional: TeX Live for the `latex` paste target
 
@@ -154,7 +154,8 @@ Global files (installed once, shared across projects) and per-project files (ren
 | `~/.claude/agents/source-finder.md` | global subagent (parallel source research) |
 | `~/.claude/agents/voice-extractor.md` | global subagent (one-shot voice calibration from samples) |
 | `~/.claude/citations/schema.md` | global citation log schema |
-| `~/.claude/templates/brief.template.md` | global brief template |
+| `~/.claude/templates/brief.template.md` | global brief template (essay) |
+| `~/.claude/templates/brief.template.annotated-bib.md` | global brief template (annotated bibliography) |
 | `~/.claude/voice/<name>.md` | voice library (shipped + custom voices available for project selection) |
 | `~/.claude/style/<name>.md` | style library (shipped + custom styles) |
 | `~/.claude/style/<name>/<asset>` | per-style asset dir (CSL file, reference.docx, on-demand reference tables like `classical-abbreviations.md`) |

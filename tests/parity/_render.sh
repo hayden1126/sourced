@@ -17,6 +17,12 @@
 
 set -euo pipefail
 
+# Tempfiles created by this run get cleaned up on any exit path (success or
+# set-e abort). Keeps BSD/GNU sed tempfile plumbing from leaking artifacts
+# into tests/parity/<style>/actual/ on failed runs.
+__tmpfiles=()
+trap 'rm -f "${__tmpfiles[@]:+${__tmpfiles[@]}}"' EXIT
+
 if [[ $# -lt 3 ]]; then
   echo "Usage: _render.sh <style-dir> <target-name> <output-ext> [extra pandoc args...]" >&2
   exit 2
@@ -32,11 +38,15 @@ STYLE_NAME="$(basename "${STYLE_DIR}")"
 REPO_DIR="$(cd "${STYLE_DIR}/../../.." && pwd)"
 
 CSL_FILES=("${REPO_DIR}/templates/styles/${STYLE_NAME}"/*.csl)
-CSL_FILE="${CSL_FILES[0]}"
-if [[ ! -f "${CSL_FILE}" ]]; then
+if [[ ! -f "${CSL_FILES[0]}" ]]; then
   echo "[${STYLE_NAME}] ${TARGET} SKIP (no CSL found in templates/styles/${STYLE_NAME}/)" >&2
   exit 2
 fi
+if (( ${#CSL_FILES[@]} > 1 )); then
+  echo "[${STYLE_NAME}] ${TARGET} FAIL (multiple CSL files in templates/styles/${STYLE_NAME}/; expected exactly one)" >&2
+  exit 2
+fi
+CSL_FILE="${CSL_FILES[0]}"
 
 mkdir -p "${STYLE_DIR}/actual"
 
@@ -94,7 +104,10 @@ else
   # consume divs internally.
   case "${TARGET}" in
     google-docs|plain-markdown)
-      sed -i.bak -e '/^::: /d' -e '/^:::$/d' "${ACTUAL}" && rm -f "${ACTUAL}.bak"
+      __tmp=$(mktemp "${ACTUAL}.XXXXXX")
+      __tmpfiles+=("${__tmp}")
+      sed -e '/^::: /d' -e '/^:::$/d' "${ACTUAL}" > "${__tmp}"
+      mv "${__tmp}" "${ACTUAL}"
       ;;
   esac
 fi

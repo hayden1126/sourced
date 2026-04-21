@@ -78,15 +78,17 @@ check_prerequisites() {
   # poppler-utils; Claude Code's built-in Read uses pdftoppm for PDF rendering,
   # and [research mode] uses pdftotext.
   # pandoc 3.1+ with citeproc is required by every [formatting mode] paste
-  # target (word, google-docs, plain-markdown). python3 is used at style-install
-  # to cross-check the CSL <title> against style.md provenance.
+  # target (word, google-docs, plain-markdown, latex). python3 is used at
+  # style-install to cross-check the CSL <title> against style.md provenance.
   local missing=()
   local poppler_missing=()
   command -v pdftotext >/dev/null 2>&1 || poppler_missing+=("pdftotext")
   command -v pdfinfo   >/dev/null 2>&1 || poppler_missing+=("pdfinfo")
   command -v pdftoppm  >/dev/null 2>&1 || poppler_missing+=("pdftoppm")
-  if (( ${#poppler_missing[@]} > 0 )); then
+  if (( ${#poppler_missing[@]} > 1 )); then
     missing+=("poppler-utils (${poppler_missing[*]})")
+  elif (( ${#poppler_missing[@]} == 1 )); then
+    missing+=("${poppler_missing[0]}")
   fi
   command -v python3   >/dev/null 2>&1 || missing+=("python3")
 
@@ -749,7 +751,7 @@ if [[ "${PROJECT_TYPE}" != "essay" ]]; then
   fi
   if [[ -n "${EXISTING_MARKER}" && "${EXISTING_MARKER}" != "${PROJECT_TYPE}" ]]; then
     echo "  Project type changed from ${EXISTING_MARKER} to ${PROJECT_TYPE}."
-  elif [[ -z "${EXISTING_MARKER}" ]]; then
+  elif [[ -z "${EXISTING_MARKER}" && ${UPDATE} -eq 0 ]]; then
     echo "  Creating project of type ${PROJECT_TYPE}."
   fi
   echo "${PROJECT_TYPE}" > "${TYPE_MARKER}"

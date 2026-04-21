@@ -54,7 +54,7 @@ collaborative → plan → research → annotated-bib → editing → formatting
 - `[plan mode]` in a bib project runs **facet decomposition** (3–6 angles of the one topic) instead of argument mapping. Strategy-propose-and-gate structure unchanged; what gets planned differs.
 - `[research mode]` runs structurally unchanged: parallel source-finder dispatch, shard merge, reject/verified reporting. Dispatch template differs in two fields (§2.5 phase 2).
 - `[annotated-bib mode]` (new) writes per-entry annotations and compiles the draft.
-- `[editing mode]` runs a subset of its seven passes (§2.6).
+- `[editing mode]` runs a subset of its eight passes (§2.6).
 - `[formatting mode for <style>-annotated-bib]` renders (§2.8).
 
 `[outlining / refining / writing]` are unreachable in bib projects. `templates/CLAUDE.md §7` gets a brief project-type preamble naming which modes apply.
@@ -102,7 +102,7 @@ Order: alphabetical by first-author surname (default) or thematic-by-facet (opti
 
 ### 2.6 Editing mode subset for bib projects
 
-The seven-pass `[editing mode]` audit in `templates/CLAUDE.md §7` assumes prose. In bib projects, three passes apply differently:
+The eight-pass `[editing mode]` audit in `templates/CLAUDE.md §7` assumes prose. In bib projects, three passes apply differently:
 
 | Pass | Apply to bib? | Reason |
 |---|---|---|
@@ -110,9 +110,10 @@ The seven-pass `[editing mode]` audit in `templates/CLAUDE.md §7` assumes prose
 | 2. §4 citation audit | yes (adapted) | scope/attribution/byline/inference per annotation; synthesis only where an annotation cross-references another entry |
 | 3. Partial-entry recheck | yes | unchanged |
 | 4. Grammar | yes | applies to annotation prose |
-| 5. §10 AI-tell | yes | Never-list applies to annotation prose |
-| 6. Quote-density | no | paragraph-level metric; annotations are blocks |
-| 7. Voice audit | partial | §9 iron rules apply; paragraph-flow and pacing metrics across annotations do not |
+| 5. Proofreading | yes | proper-noun, paste-artifact, and punctuation lists apply per annotation |
+| 6. §10 AI-tell | yes | Never-list applies to annotation prose |
+| 7. Quote-density | no | paragraph-level metric; annotations are blocks |
+| 8. Voice audit | partial | §9 iron rules apply; paragraph-flow and pacing metrics across annotations do not |
 
 `templates/CLAUDE.md §7` gets a bib-project addendum naming which passes apply. No new passes added.
 
