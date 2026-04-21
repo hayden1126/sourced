@@ -86,6 +86,7 @@ Writing is sculpting: start with raw material, then chisel. Write a draft, step 
 - Does it sound formulaic or AI-generated? (Cross-check against CLAUDE.md §10's Never list specifically; retokenizing the pattern is not a fix.)
 - Does it earn its place in the argument?
 - **Does it read fluidly aloud, or does the reader trip on it?** A clipped fragment ("none of the three resolves"), a stranded preposition that lands awkwardly ("where is the 'there' the stem points at?"), or a register-high verb where a plain one would carry the meaning ("legible" where "visible" works) all signal over-compression. Restore the word or restructure around a different shape.
+- **Does a negation sentence sit immediately before an affirmation that asserts the alternative?** That is §10's "not X but Y" pattern retokenized with a period; break the adjacency or drop the negation.
 - Does the section flow when read start to finish?
 
 If any answer is no, rewrite or cut. Then reread again. Do not stop after one pass. Keep iterating until a full reread surfaces no issues. Only then present the draft for feedback.
