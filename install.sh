@@ -81,7 +81,13 @@ check_prerequisites() {
   # target (word, google-docs, plain-markdown). python3 is used at style-install
   # to cross-check the CSL <title> against style.md provenance.
   local missing=()
-  command -v pdftotext >/dev/null 2>&1 || missing+=("poppler-utils (pdftotext, pdfinfo, pdftoppm)")
+  local poppler_missing=()
+  command -v pdftotext >/dev/null 2>&1 || poppler_missing+=("pdftotext")
+  command -v pdfinfo   >/dev/null 2>&1 || poppler_missing+=("pdfinfo")
+  command -v pdftoppm  >/dev/null 2>&1 || poppler_missing+=("pdftoppm")
+  if (( ${#poppler_missing[@]} > 0 )); then
+    missing+=("poppler-utils (${poppler_missing[*]})")
+  fi
   command -v python3   >/dev/null 2>&1 || missing+=("python3")
 
   if ! command -v pandoc >/dev/null 2>&1; then
@@ -743,6 +749,8 @@ if [[ "${PROJECT_TYPE}" != "essay" ]]; then
   fi
   if [[ -n "${EXISTING_MARKER}" && "${EXISTING_MARKER}" != "${PROJECT_TYPE}" ]]; then
     echo "  Project type changed from ${EXISTING_MARKER} to ${PROJECT_TYPE}."
+  elif [[ -z "${EXISTING_MARKER}" ]]; then
+    echo "  Creating project of type ${PROJECT_TYPE}."
   fi
   echo "${PROJECT_TYPE}" > "${TYPE_MARKER}"
   echo "  ${TYPE_MARKER} (type: ${PROJECT_TYPE})"

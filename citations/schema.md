@@ -144,6 +144,8 @@ Web pages mutate. The byline, year, title, and even the verbatim text can change
 - An entry is **stale** if `retrieved_at` is older than 90 days, or if `retrieved_at` is missing entirely (legacy entries).
 - The 90-day threshold applies to web pages, preprints, and other mutable sources. For published journal articles, books, and stable PDFs accessed by DOI, staleness is informational only: the underlying work doesn't change, but verifying that you still have access (and that `source.authors` still matches what you'd extract today) is cheap insurance.
 
+**Precedence.** Two thresholds fire, inner before outer. The inner bound is per-session: any entry touched for the first time in a new conversation is stale on that touch (CLAUDE.md §4 item 3) regardless of `retrieved_at` age — this catches drift across session boundaries. The outer bound is the 90-day rule above, blocking for mutable sources (web pages, preprints) and advisory for stable ones (DOIs, published articles, books); it catches drift within a single long-running conversation that the session-boundary check alone would miss. Both can fire on the same entry.
+
 Stale entries are not errors at logging time; they only matter when the entry is touched again. `[editing mode]` (CLAUDE.md §7, byline recheck) and `[formatting mode]` (CLAUDE.md §7, pre-flight) both surface staleness and ask {{USER}} how to proceed (re-fetch and update, accept as-is, or treat the citation as a gap). Re-fetching and re-verifying updates `retrieved_at` to the new timestamp; `added_at` is never updated.
 
 ## Reference fields

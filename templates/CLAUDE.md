@@ -280,6 +280,8 @@ After merge, surface the report as usual. {{USER}} decides whether to dispatch a
 
 **Retry `subagent-render-failed` rejections.** Before treating a `subagent-render-failed` rejection as a gap, retry the fetch from the main thread: main-thread Read has richer PDF handling than subagents. If it renders, apply the full section 3 protocol (render success satisfies 3(b) but not 3(a)) and log directly (as an academic-researcher entry, `provisional_reference: null`, `draft_reference` set immediately). Only after your own retry fails, treat it as a gap and surface to {{USER}}.
 
+**Main-thread direct logging discipline.** When the main thread logs a citation directly — a passage {{USER}} pasted, a source retried after `subagent-render-failed`, or any source read on the main thread — the four `retrieval` forcing fields are mandatory, same as for dispatched source-finders (`~/.claude/agents/source-finder.md` step 5): `printed_page_observed`, `tool_page_index`, `verification_trace`, and `per_entity_locators` when `exact_quote` enumerates multiple entities. `location` must equal `printed_page_observed` for paginated sources; `pdf_page_offset` records the offset once per source. Reference-work sources (dictionaries, wordlists) use the list-shape in `~/.claude/citations/schema.md` §Reference-work shape; the per-item locators carry verification in place of `verification_trace`. Default action on uncertainty is reject, not revise — revising is allowed only when you can re-open the source and produce the corrected span in one pass, otherwise reject.
+
 **Present and decide.** Once the merge is complete, aggregate each finder's `### Logged`, `### Rejected`, `### Gaps`, and `### Alternative framings` sub-sections (per source-finder's report format) into one merged report for {{USER}} and wait for input:
 
 - New citations logged: ids with one-line descriptions of what each supports.
@@ -341,7 +343,7 @@ Run the checks above as an iterative loop: reread the outline, apply each check,
 
 Cutting or restructuring at [refining mode] is cheap. Cutting at [editing mode], after prose is written, is expensive. Front-load the pain.
 
-**Sign-off gate.** Do not advance to [writing mode] automatically. Present the refined outline to {{USER}} with: the section-by-section structure, citations attached per paragraph, any uncertainties flagged, any places where the outline shifted during refining. Wait for explicit approval. "Looks good, start writing" is approval; silence is not. This matches the gate between [plan mode] and [outlining mode]: cheap to pause, expensive to unwind once prose exists.
+**Sign-off gate.** Do not advance to [writing mode] automatically. Present the refined outline to {{USER}} with: the section-by-section structure, citations attached per paragraph, the §4 synthesis-integrity audit list (a refining pass that doesn't emit its audit list has not run), any uncertainties flagged, any places where the outline shifted during refining. Wait for explicit approval. "Looks good, start writing" is approval; silence is not. This matches the gate between [plan mode] and [outlining mode]: cheap to pause, expensive to unwind once prose exists.
 
 ### [writing mode]
 

@@ -42,7 +42,7 @@ function printUsage() {
 }
 
 function requireValue(flag, i) {
-  if (i + 1 >= args.length || args[i + 1].startsWith('-')) {
+  if (i + 1 >= args.length || args[i + 1].startsWith('--')) {
     console.error(`Error: ${flag} requires a value.`);
     switch (flag) {
       case '--range':
@@ -96,8 +96,14 @@ for (let i = 0; i < args.length; i++) {
     iframePatternStr = requireValue('--iframe-pattern', i);
     i++;
   } else if (args[i] === '--port') {
-    debugPort = parseInt(requireValue('--port', i));
+    const val = requireValue('--port', i);
     i++;
+    debugPort = parseInt(val, 10);
+    if (!/^\d+$/.test(val) || debugPort <= 0 || debugPort > 65535) {
+      console.error(`Error: --port must be an integer between 1 and 65535 (got '${val}').`);
+      printUsage();
+      process.exit(1);
+    }
   }
 }
 
