@@ -145,9 +145,9 @@ Not every vivid anecdote earns its place. Drop it if it doesn't connect to the n
 
 ### Punctuation
 
-Em dashes are forbidden per §10; use commas instead. Semicolons are rare in journalistic prose. Colons introduce attribution or lists. Quotation marks carry direct speech, always attributed to a named source or, when the source can't be named, a clearly labeled role ("a senior official said").
+Punctuation patterns that function as AI generation signatures (em dashes, "not X but Y" pivots, ornamental triads) are governed by CLAUDE.md §10 *Generation signatures to rewrite*, which applies across every voice. The fix for a flagged em-dash is sentence-shape restructure per §10 *Restructure, don't retokenize*, not a comma or parenthesis substitution that preserves the mid-clause-interruption rhythm. Use this section only for author-specific punctuation habits the corpus clearly shows. Leave TBD rather than inventing a rule the corpus does not settle. An author-specific rule that contradicts §10 must be stated explicitly; silence defers to §10.
 
-Punctuation patterns that function as AI generation signatures ("not X but Y" pivots, ornamental triads) are governed by CLAUDE.md §10, which applies across every voice. Use this section only for author-specific punctuation habits the corpus clearly shows. Leave TBD rather than inventing a rule the corpus does not settle. An author-specific rule that contradicts §10 must be stated explicitly; silence defers to §10.
+Semicolons are rare in journalistic prose. Colons introduce attribution or lists. Quotation marks carry direct speech, always attributed to a named source or, when the source can't be named, a clearly labeled role ("a senior official said").
 
 Direct quotations follow CLAUDE.md §10 *Direct quotations* and §4 *Quote verbatim* (source punctuation preserved verbatim). This section governs the writer's own prose.
 

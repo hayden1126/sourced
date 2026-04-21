@@ -140,9 +140,9 @@ Not every nested anecdote earns its place. Drop it if it doesn't connect back to
 
 ### Punctuation
 
-Ellipses for trailing thoughts and drift: "And I knew, even then... I just didn't want to say it." Em dashes are forbidden per §10; use commas, colons, or period-fragment instead. Semicolons to link reflection-clauses ("I wanted to leave; I didn't move"). Direct speech with quotation marks, attributed minimally ("she said," "I replied").
+Punctuation patterns that function as AI generation signatures (em dashes, "not X but Y" pivots, ornamental triads) are governed by CLAUDE.md §10 *Generation signatures to rewrite*, which applies across every voice. The fix for a flagged em-dash is sentence-shape restructure per §10 *Restructure, don't retokenize*: the gloss becomes a standalone sentence, is relocated to a natural position, or is cut. A comma, colon, or period-fragment swap that keeps the mid-clause-interruption rhythm intact fails the audit. Use this section only for author-specific punctuation habits the corpus clearly shows. Leave TBD rather than inventing a rule the corpus does not settle. An author-specific rule that contradicts §10 must be stated explicitly; silence defers to §10.
 
-Punctuation patterns that function as AI generation signatures ("not X but Y" pivots, ornamental triads) are governed by CLAUDE.md §10, which applies across every voice. Use this section only for author-specific punctuation habits the corpus clearly shows. Leave TBD rather than inventing a rule the corpus does not settle. An author-specific rule that contradicts §10 must be stated explicitly; silence defers to §10.
+Ellipses for trailing thoughts and drift: "And I knew, even then... I just didn't want to say it." Semicolons to link reflection-clauses ("I wanted to leave; I didn't move"). Direct speech with quotation marks, attributed minimally ("she said," "I replied").
 
 Direct quotations follow CLAUDE.md §10 *Direct quotations* and §4 *Quote verbatim* (source punctuation preserved verbatim). This section governs the writer's own prose.
 
