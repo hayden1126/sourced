@@ -133,6 +133,14 @@ Generated from log fields only; no source re-read at annotation time (§3 verifi
 
 `[formatting mode]` reads this field when rendering an `annotated-bib` paste-target variant; essay paste targets ignore it. `[editing mode]` runs the §4 audit and §10 AI-tell pass on annotation prose; the `[editing mode]` quote-density pass and §9 paragraph-flow rules do not apply (both assume multi-paragraph prose).
 
+## Typography
+
+Fields that carry author-controlled typography (`source.title`, `source.authors`, `exact_quote`, `surrounding_context`, `annotation`) pass through the CSL-JSON emitter and pandoc+CSL rendering verbatim. Prefer Unicode characters over ASCII stand-ins when the source uses them: `'` (U+2019) for English apostrophes and right single quotes, `"` `"` (U+201C, U+201D) for curly double quotes, `—` (U+2014) for em-dashes, `–` (U+2013) for en-dashes in page ranges.
+
+`[formatting mode]` runs pandoc with the `-smart` writer extension for the `google-docs` and `plain-markdown` paste targets, which curls ASCII `'` and `"` in the emitter output automatically. A companion lua-filter (`templates/filters/smart-quotes.lua`) reverses the conversion inside italic spans to preserve linguistic glottal-stop notation (`*Ma'heo'o*`, `*-'e*`). The filter cannot tell apart a glottal-stop `'` from an English contraction `'` when both appear in the same italic span; mixed-language titles (e.g., a source title like `A sacred error: Cheyenne Ma'heo'o doesn't mean "All-Father"`) should pre-bake the English apostrophe as Unicode U+2019 in the log so the filter leaves the linguistic `'` alone and the English `'` survives the round trip.
+
+The `word` and `latex` paste targets handle typography natively via pandoc's docx and latex writers; pre-baked Unicode passes through unchanged.
+
 ## Additions
 
 Two kinds of optional fields can appear beyond the required structure above.

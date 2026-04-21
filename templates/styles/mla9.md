@@ -69,7 +69,8 @@ Threshold: 4 lines of prose, 3 lines of verse (MLA 9 §6.36). Verse quotations u
 
 ### google-docs
 
-- pandoc flags: `--citeproc --wrap=none -t markdown-citations-header_attributes`
+- pandoc flags: `--citeproc --wrap=none -t markdown-citations-header_attributes-smart`
+- lua-filter: `smart-quotes.lua` — preserves ASCII apostrophes inside italic spans for linguistic glottal-stop notation while letting pandoc's `-smart` writer curl English apostrophes and quotes outside italics. `[formatting mode]` resolves the name to `~/.claude/filters/<name>` and adds `--lua-filter=<absolute-path>` to the pandoc invocation.
 - Paste-time instructions:
   - "Apply hanging indent to Works Cited after pasting (Format > Align > Indentation options > Special > Hanging)."
   - "MLA page-number header ('Smith 3') requires a custom Google Docs header; add via Insert > Headers > Header, then type surname + page number."
@@ -77,7 +78,8 @@ Threshold: 4 lines of prose, 3 lines of verse (MLA 9 §6.36). Verse quotations u
 
 ### plain-markdown
 
-- pandoc flags: `--citeproc --wrap=preserve -t markdown-citations-header_attributes`
+- pandoc flags: `--citeproc --wrap=preserve -t markdown-citations-header_attributes-smart`
+- lua-filter: `smart-quotes.lua` — same rationale as the google-docs target.
 - Paste-time instructions: (none)
 - Post-pandoc transforms: strip pandoc fenced-div markers from the Works Cited block (`sed -e '/^::: /d' -e '/^:::$/d'`); most destinations (Obsidian, Notion, GitHub render, Reddit) paste the `:::` wrappers as literal text.
 
