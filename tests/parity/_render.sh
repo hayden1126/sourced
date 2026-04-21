@@ -60,9 +60,22 @@ if [[ "${TARGET}" == "latex" ]]; then
   awk '/\\begin\{document\}/,/\\end\{document\}/' "${RAW}" \
     | sed '1d;$d' > "${ACTUAL}"
 else
+  # Smart-quote Lua filter for markdown paste targets. Filter preserves ASCII
+  # apostrophes inside italic spans (linguistic glottal-stop notation) so the
+  # `-smart` pandoc writer extension doesn't curl them. See
+  # templates/filters/smart-quotes.lua for the filter and each style.md's
+  # `### google-docs` / `### plain-markdown` lua-filter: bullet for declaration.
+  LUA_FILTER_FLAGS=()
+  case "${TARGET}" in
+    google-docs|plain-markdown)
+      LUA_FILTER_FLAGS+=("--lua-filter=${REPO_DIR}/templates/filters/smart-quotes.lua")
+      ;;
+  esac
+
   pandoc --citeproc \
     --bibliography="${STYLE_DIR}/fixture.bib.json" \
     --csl="${CSL_FILE}" \
+    "${LUA_FILTER_FLAGS[@]}" \
     "${EXTRA_FLAGS[@]}" \
     -o "${ACTUAL}" \
     "${STYLE_DIR}/fixture.pandoc.md"

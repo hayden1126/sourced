@@ -23,20 +23,20 @@ Bibliothèque nationale de France. *Guide to the Medieval Manuscript Collections
 
 Fernández, María Luisa. *Liturgical Continuity in the Early Medieval West*. Cambridge: Cambridge University Press, 2011.
 
-Herrmann, Klaus, and Annika Schulz. "A Palaeographic Reassessment of the Leipzig Codices." *Speculum* 96, no. 2 (2021): 38--71.
+Herrmann, Klaus, and Annika Schulz. “A Palaeographic Reassessment of the Leipzig Codices.” *Speculum* 96, no. 2 (2021): 38–71.
 
-Okafor, Chidinma, Erik Lindqvist, Hiroshi Tanaka, and Giulia Rossi. "Four Scriptoria, One Editorial Program: A Comparative Study." *Scriptorium* 72, no. 1 (2018): 5--48.
+Okafor, Chidinma, Erik Lindqvist, Hiroshi Tanaka, and Giulia Rossi. “Four Scriptoria, One Editorial Program: A Comparative Study.” *Scriptorium* 72, no. 1 (2018): 5–48.
 
 [^1]: María Luisa Fernández, *Liturgical Continuity in the Early Medieval West* (Cambridge: Cambridge University Press, 2011).
 
-[^2]: Klaus Herrmann and Annika Schulz, "A Palaeographic Reassessment of the Leipzig Codices," *Speculum* 96, no. 2 (2021): 38--71.
+[^2]: Klaus Herrmann and Annika Schulz, “A Palaeographic Reassessment of the Leipzig Codices,” *Speculum* 96, no. 2 (2021): 38–71.
 
 [^3]: Fernández, *Liturgical Continuity in the Early Medieval West*, 214.
 
 [^4]: Fernández, 219.
 
-[^5]: Chidinma Okafor et al., "Four Scriptoria, One Editorial Program: A Comparative Study," *Scriptorium* 72, no. 1 (2018): 5--48.
+[^5]: Chidinma Okafor et al., “Four Scriptoria, One Editorial Program: A Comparative Study,” *Scriptorium* 72, no. 1 (2018): 5–48.
 
-[^6]: Herrmann and Schulz, "A Palaeographic Reassessment of the Leipzig Codices," 44.
+[^6]: Herrmann and Schulz, “A Palaeographic Reassessment of the Leipzig Codices,” 44.
 
 [^7]: Bibliothèque nationale de France, *Guide to the Medieval Manuscript Collections* (Paris: Bibliothèque nationale de France, 2022), <https://www.bnf.fr/fr/guide-manuscrits-medievaux>.
