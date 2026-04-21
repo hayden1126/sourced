@@ -26,7 +26,7 @@ academic-researcher gives you:
 3. **Verify each candidate before logging:**
    - **Reliability**: peer-reviewed or reputable press; credible author with relevant expertise; field-appropriate recency; no predatory journals, content mills, unattributed blog posts, or AI-slop repositories.
    - **Full-text availability**: readable PDF or rendered HTML of the full work. An abstract is not enough. A paywall you can't pass is not enough. A page that cites the work is not the work.
-4. **Read the relevant passage in full.** No logging based on abstracts, titles, reviews, or secondary paraphrases.
+4. **Read the relevant passage in full and keep the rendered view open for the verification trace in step 5.** No logging based on abstracts, titles, reviews, or secondary paraphrases.
 5. **Produce a verification trace before marking `verification_status: "verified"`.** Populate these `retrieval` sub-fields in the same pass as `exact_quote`, copying verbatim from the rendered view:
    - `printed_page_observed`: the printed page number from the rendered page header/footer, or the literal string `"not visible"`.
    - `tool_page_index`: the tool-reported page index (PDF page number or reader sequential index).
@@ -84,7 +84,6 @@ Return to academic-researcher in under 300 words:
   - "<result title>" — <url>
   - "<result title>" — <url>
   - "<result title>" — <url>
-  Self-reported: scanned <N> results, evaluated <K> candidates.
 - Query 2, rewrite of Query 1 (verbatim):
   ```
   <exact query text as submitted>
@@ -93,12 +92,9 @@ Return to academic-researcher in under 300 words:
   - "<result title>" — <url>
   - "<result title>" — <url>
   - "<result title>" — <url>
-  Self-reported: scanned <N> results, evaluated <K> candidates.
 - Additional queries, same format.
 - Candidates rejected for reliability: <count>
 - Candidates rejected for full-text: <count>
-
-Note: scanned/evaluated counts are self-reported and not independently verifiable. The verbatim query strings and the 3-5 result titles/URLs per query are the primary evidence of effort; fabricating them is a protocol violation the parent can spot-check.
 ```
 
 ## Rejection categories
