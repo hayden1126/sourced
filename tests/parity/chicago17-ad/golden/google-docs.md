@@ -8,12 +8,12 @@ Institutional reporting on classroom multilingualism adds context from outside t
 
 # References
 
-Able, Amir, Bea Baker, and Chao Chen. 2019. "Multilingual Practices in Urban Contexts." *Language in Society* 48 (1): 55--80.
+Able, Amir, Bea Baker, and Chao Chen. 2019. “Multilingual Practices in Urban Contexts.” *Language in Society* 48 (1): 55–80.
 
-Jones, Robert, and Elena Cruz. 2015. "Code-Switching in Classroom Discourse." *Applied Linguistics* 36 (2): 84--102.
+Jones, Robert, and Elena Cruz. 2015. “Code-Switching in Classroom Discourse.” *Applied Linguistics* 36 (2): 84–102.
 
-Modern Language Association. 2021. "How Do I Cite a Source with Multiple Authors?" MLA Style Center. <https://style.mla.org/citing-multiple-authors/>.
+Modern Language Association. 2021. “How Do I Cite a Source with Multiple Authors?” MLA Style Center. <https://style.mla.org/citing-multiple-authors/>.
 
-Perennial, Paul. n.d. "Undated Commentary." Perennial Blog. <https://example.com/undated>.
+Perennial, Paul. n.d. “Undated Commentary.” Perennial Blog. <https://example.com/undated>.
 
-Smith, Jane A. 2010. "Pragmatic Markers in Contact Situations." *Journal of Pragmatics* 42 (3): 12--34. <https://doi.org/10.1016/j.pragma.2010.01.005>.
+Smith, Jane A. 2010. “Pragmatic Markers in Contact Situations.” *Journal of Pragmatics* 42 (3): 12–34. <https://doi.org/10.1016/j.pragma.2010.01.005>.

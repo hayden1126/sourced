@@ -18,6 +18,7 @@ CLAUDE_TEMPLATES_DIR="${HOME}/.claude/templates"
 CLAUDE_VOICE_DIR="${HOME}/.claude/voice"
 CLAUDE_STYLE_DIR="${HOME}/.claude/style"
 CLAUDE_SKILLS_DIR="${HOME}/.claude/skills"
+CLAUDE_FILTERS_DIR="${HOME}/.claude/filters"
 
 # ---- flag parsing ----------------------------------------------------------
 GLOBAL_ONLY=0
@@ -204,7 +205,7 @@ render() {
 }
 
 # ---- step 1: global files (always) -----------------------------------------
-mkdir -p "${CLAUDE_AGENTS_DIR}" "${CLAUDE_CITATIONS_DIR}" "${CLAUDE_TEMPLATES_DIR}" "${CLAUDE_VOICE_DIR}" "${CLAUDE_STYLE_DIR}" "${CLAUDE_SKILLS_DIR}"
+mkdir -p "${CLAUDE_AGENTS_DIR}" "${CLAUDE_CITATIONS_DIR}" "${CLAUDE_TEMPLATES_DIR}" "${CLAUDE_VOICE_DIR}" "${CLAUDE_STYLE_DIR}" "${CLAUDE_SKILLS_DIR}" "${CLAUDE_FILTERS_DIR}"
 echo "Rendering global files..."
 render "${REPO_DIR}/agents/source-finder.md"     "${CLAUDE_AGENTS_DIR}/source-finder.md"
 render "${REPO_DIR}/agents/voice-extractor.md"   "${CLAUDE_AGENTS_DIR}/voice-extractor.md"
@@ -249,6 +250,20 @@ for style_assets in "${REPO_DIR}"/templates/styles/*/; do
   mkdir -p "${CLAUDE_STYLE_DIR}/${style_name}"
   cp -R "${style_assets}." "${CLAUDE_STYLE_DIR}/${style_name}/"
   echo "  ${CLAUDE_STYLE_DIR}/${style_name}/ (assets)"
+done
+
+# Pandoc Lua filters: mirror templates/filters/*.lua into ~/.claude/filters/.
+# Each style's `### google-docs` and `### plain-markdown` blocks in style.md
+# reference filters from this directory via `--lua-filter=` pandoc flags; the
+# path rendered in style.md is the post-install ~/.claude/filters/ location,
+# so [formatting mode] can resolve the absolute path at invocation time.
+# Filters are style-agnostic (they transform pandoc AST shape, not style-
+# specific rendering), so they live outside the per-style asset dirs.
+for filter_file in "${REPO_DIR}"/templates/filters/*.lua; do
+  [[ -e "${filter_file}" ]] || continue
+  filter_name=$(basename "${filter_file}")
+  cp "${filter_file}" "${CLAUDE_FILTERS_DIR}/${filter_name}"
+  echo "  ${CLAUDE_FILTERS_DIR}/${filter_name}"
 done
 
 # Skill library: mirror skills/<name>/ into ~/.claude/skills/<name>/. Skills
