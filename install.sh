@@ -86,7 +86,7 @@ check_prerequisites() {
   command -v pdfinfo   >/dev/null 2>&1 || poppler_missing+=("pdfinfo")
   command -v pdftoppm  >/dev/null 2>&1 || poppler_missing+=("pdftoppm")
   if (( ${#poppler_missing[@]} > 1 )); then
-    missing+=("poppler-utils (${poppler_missing[*]})")
+    missing+=("poppler-utils ($(IFS=', '; echo "${poppler_missing[*]}"))")
   elif (( ${#poppler_missing[@]} == 1 )); then
     missing+=("${poppler_missing[0]}")
   fi
