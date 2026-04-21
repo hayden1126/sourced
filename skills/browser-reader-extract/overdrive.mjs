@@ -31,20 +31,73 @@ let tabPatternStr = 'read\\.overdrive\\.com';
 let iframePatternStr = null;
 let debugPort = 9222;
 
+function printUsage() {
+  console.error('Usage: node overdrive.mjs [flags]');
+  console.error('  -o, --out <path>           write output to file instead of stdout');
+  console.error('  --range <start-end>        keep only Arabic pages in range (e.g. 5-20)');
+  console.error('  --pages <p1,p2,...>        keep only the listed pages (Roman or Arabic)');
+  console.error('  --tab-pattern <regex>      override browser tab URL matcher');
+  console.error('  --iframe-pattern <regex>   override content iframe URL matcher (default: auto-detect)');
+  console.error('  --port <n>                 Chrome remote debugging port (default: 9222)');
+}
+
+function requireValue(flag, i) {
+  if (i + 1 >= args.length || args[i + 1].startsWith('-')) {
+    console.error(`Error: ${flag} requires a value.`);
+    switch (flag) {
+      case '--range':
+        console.error('  example: --range 5-20');
+        break;
+      case '--pages':
+        console.error('  example: --pages i,ii,1,5');
+        break;
+      case '--port':
+        console.error('  example: --port 9222');
+        break;
+      case '--tab-pattern':
+        console.error('  example: --tab-pattern \'read\\.overdrive\\.com\'');
+        break;
+      case '--iframe-pattern':
+        console.error('  example: --iframe-pattern \'\\.html($|\\?)\'');
+        break;
+      case '-o':
+      case '--out':
+        console.error('  example: -o out.txt');
+        break;
+    }
+    printUsage();
+    process.exit(1);
+  }
+  return args[i + 1];
+}
+
 for (let i = 0; i < args.length; i++) {
-  if (args[i] === '-o' || args[i] === '--out') outPath = args[++i];
-  else if (args[i] === '--range') {
-    const m = args[++i].match(/^(\d+)-(\d+)$/);
-    if (!m) throw new Error('range must be like 5-20');
+  if (args[i] === '-o' || args[i] === '--out') {
+    outPath = requireValue(args[i], i);
+    i++;
+  } else if (args[i] === '--range') {
+    const val = requireValue('--range', i);
+    i++;
+    const m = val.match(/^(\d+)-(\d+)$/);
+    if (!m) {
+      console.error('Error: --range must be like 5-20');
+      printUsage();
+      process.exit(1);
+    }
     range = [parseInt(m[1]), parseInt(m[2])];
   } else if (args[i] === '--pages') {
-    pagesFilter = new Set(args[++i].split(',').map(s => s.trim()));
+    const val = requireValue('--pages', i);
+    i++;
+    pagesFilter = new Set(val.split(',').map(s => s.trim()));
   } else if (args[i] === '--tab-pattern') {
-    tabPatternStr = args[++i];
+    tabPatternStr = requireValue('--tab-pattern', i);
+    i++;
   } else if (args[i] === '--iframe-pattern') {
-    iframePatternStr = args[++i];
+    iframePatternStr = requireValue('--iframe-pattern', i);
+    i++;
   } else if (args[i] === '--port') {
-    debugPort = parseInt(args[++i]);
+    debugPort = parseInt(requireValue('--port', i));
+    i++;
   }
 }
 
