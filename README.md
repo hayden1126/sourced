@@ -30,7 +30,7 @@ The primary agent (academic-researcher) lives in each project's `CLAUDE.md`. Two
 - **python3**. Used at per-project install time to cross-check a vendored CSL file's `<title>` against the style's declaration (`validate_csl_title` in `install.sh`). Ships by default with current Debian, Ubuntu, WSL, and macOS; install via your package manager if missing.
 - **TeX Live** (optional). Only needed if you'll compile the `[formatting mode for latex]` output to PDF. `sourced` emits a `.tex` file; compilation is your job. Not checked by `install.sh`. See [`docs/INSTALL.md`](./docs/INSTALL.md#optional-tex-live-for-the-latex-paste-target) for package guidance per platform.
 
-`install.sh` checks that `pdftotext`, `pandoc`, and `python3` are all on PATH and aborts with a clear install command if any is missing. It does not install them for you; use your package manager.
+`install.sh` checks that `pdftotext`, `pdfinfo`, `pdftoppm`, `pandoc`, and `python3` are all on PATH and aborts with a clear install command if any is missing. It does not install them for you; use your package manager.
 
 Install on Debian, Ubuntu, or WSL (python3 is typically already present):
 
