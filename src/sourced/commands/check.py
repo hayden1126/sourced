@@ -42,8 +42,10 @@ def _check_pandoc_version() -> CheckResult:
 
 
 def _check_python3() -> CheckResult:
-    """We are python3. Report interpreter version from sys.version_info."""
+    """python3 must be ≥ 3.10."""
     major, minor = sys.version_info.major, sys.version_info.minor
+    if (major, minor) < (3, 10):
+        return CheckResult("python3", "fail", f"detected {major}.{minor}; need ≥ 3.10")
     return CheckResult("python3", "pass", f"{major}.{minor}")
 
 
