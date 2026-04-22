@@ -18,7 +18,7 @@ _RESET = "\033[0m"
 def should_color(color_pref: Literal["auto", "always", "never"], stream: IO) -> bool:
     """Decide whether to emit ANSI codes to a stream.
 
-    Precedence: --color=always > NO_COLOR env > --color=never > non-tty > default on.
+    Precedence: --color=always > NO_COLOR env > --color=never > auto fallback (on if stream is a TTY, else off).
     """
     if color_pref == "always":
         return True
