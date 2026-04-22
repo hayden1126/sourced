@@ -5,7 +5,6 @@ read_template() (importlib.resources); writes happen in commands/*.py.
 """
 from __future__ import annotations
 import contextlib
-import pathlib
 import tempfile
 from dataclasses import dataclass
 from functools import cache
@@ -24,7 +23,7 @@ def read_template(subpath: str) -> str:
     return (_data_root() / subpath).read_text(encoding="utf-8")
 
 
-def bundled_path(subpath: str) -> contextlib.AbstractContextManager[pathlib.Path]:
+def bundled_path(subpath: str) -> contextlib.AbstractContextManager[Path]:
     """Context manager yielding a real filesystem Path for a bundled directory.
     Use with shutil.copytree which needs a concrete path.
     """
@@ -61,18 +60,31 @@ def write_atomic(path: Path, content: str) -> None:
     Cross-device safe: tempfile is sibling to target → same filesystem → atomic
     rename on POSIX (and Windows 3.3+).
 
+    On mid-write exception: the partial tempfile is removed before the exception
+    propagates. (A process killed by SIGKILL still leaves a tmp; that's accepted.)
+
     Windows caveat: replace() raises PermissionError if target is open in another
     process (e.g., editor). Caller surfaces clearly.
     """
     path.parent.mkdir(parents=True, exist_ok=True)
-    with tempfile.NamedTemporaryFile(
-        "w",
-        encoding="utf-8",
-        dir=path.parent,
-        prefix=f".{path.name}.",
-        suffix=".tmp",
-        delete=False,
-    ) as tmp:
-        tmp.write(content)
-        tmp_path = Path(tmp.name)
-    tmp_path.replace(path)
+    tmp_path: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            "w",
+            encoding="utf-8",
+            dir=path.parent,
+            prefix=f".{path.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as tmp:
+            # Capture tmp_path BEFORE write() so cleanup can find it if write raises.
+            tmp_path = Path(tmp.name)
+            tmp.write(content)
+        tmp_path.replace(path)
+    except BaseException:
+        if tmp_path is not None:
+            try:
+                tmp_path.unlink(missing_ok=True)
+            except OSError:
+                pass
+        raise
