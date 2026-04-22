@@ -28,8 +28,7 @@ def _build_parser() -> argparse.ArgumentParser:
     sub = p.add_subparsers(dest="subcommand", metavar="<subcommand>")
 
     # check (PR 1 has the prereq-only version; PR 4 expands)
-    p_check = sub.add_parser("check", help="diagnose prereqs + ~/.claude/ health")
-    p_check.add_argument("--project", help="also check this project directory")
+    p_check = sub.add_parser("check", help="diagnose prereqs + ~/.claude/ health")  # noqa: F841
 
     return p
 
@@ -48,7 +47,7 @@ def _dispatch(args: argparse.Namespace) -> int:
     ctx = _ctx_from_args(args)
     if args.subcommand == "check":
         from .commands import check
-        return check.run(ctx, project=args.project)
+        return check.run(ctx)
     # No subcommand → print help and exit 2 (argparse-style usage error).
     _build_parser().print_help(sys.stderr)
     return 2
