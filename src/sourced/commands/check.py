@@ -41,6 +41,12 @@ def _check_pandoc_version() -> CheckResult:
     return CheckResult("pandoc", "pass", f"{major}.{minor}")
 
 
+def _check_python3() -> CheckResult:
+    """We are python3. Report interpreter version from sys.version_info."""
+    major, minor = sys.version_info.major, sys.version_info.minor
+    return CheckResult("python3", "pass", f"{major}.{minor}")
+
+
 def _check_simple_tool(name: str) -> CheckResult:
     if shutil.which(name) is None:
         return CheckResult(name, "fail", "not on PATH")
@@ -53,6 +59,8 @@ def check_prereqs() -> list[CheckResult]:
     for tool in PREREQ_TOOLS:
         if tool == "pandoc":
             results.append(_check_pandoc_version())
+        elif tool == "python3":
+            results.append(_check_python3())
         else:
             results.append(_check_simple_tool(tool))
     return results
