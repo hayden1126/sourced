@@ -1,27 +1,33 @@
-"""sourced check — phase 1 prereqs scaffold; full implementation in PR 4."""
+"""sourced check — diagnose prereqs + ~/.claude/ health + project state."""
 from __future__ import annotations
+import os
+import re
 import shutil
 import subprocess
 import sys
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Literal
 
 from ..context import Context
-from ..ui import ok, err, bold, should_color
+from ..render import read_template
+from ..ui import ok, err, bold, warn, should_color
+from ..validators import iron_rules as iron_rules_validator
+from ..validators import exemptions as exemptions_validator
 
 
 @dataclass(frozen=True)
 class CheckResult:
     name: str
-    status: Literal["pass", "fail"]
+    status: Literal["pass", "fail", "warn"]
     detail: str | None = None
 
 
 PREREQ_TOOLS = ["pdftotext", "pdfinfo", "pdftoppm", "pandoc", "python3"]
+CLAUDE_HOME = Path.home() / ".claude"
 
 
 def _check_pandoc_version() -> CheckResult:
-    """pandoc must be ≥ 3.1."""
     if shutil.which("pandoc") is None:
         return CheckResult("pandoc", "fail", "not on PATH")
     try:
@@ -30,8 +36,6 @@ def _check_pandoc_version() -> CheckResult:
         ).stdout.splitlines()[0]
     except (subprocess.SubprocessError, OSError) as e:
         return CheckResult("pandoc", "fail", f"could not run pandoc --version: {e}")
-    # Format: "pandoc 3.1.9" — extract first version-like token.
-    import re
     m = re.search(r"(\d+)\.(\d+)(?:\.\d+)?", out)
     if not m:
         return CheckResult("pandoc", "fail", f"unparseable version line: {out!r}")
@@ -41,14 +45,6 @@ def _check_pandoc_version() -> CheckResult:
     return CheckResult("pandoc", "pass", f"{major}.{minor}")
 
 
-def _check_python3() -> CheckResult:
-    """python3 must be ≥ 3.10."""
-    major, minor = sys.version_info.major, sys.version_info.minor
-    if (major, minor) < (3, 10):
-        return CheckResult("python3", "fail", f"detected {major}.{minor}; need ≥ 3.10")
-    return CheckResult("python3", "pass", f"{major}.{minor}")
-
-
 def _check_simple_tool(name: str) -> CheckResult:
     if shutil.which(name) is None:
         return CheckResult(name, "fail", "not on PATH")
@@ -56,44 +52,130 @@ def _check_simple_tool(name: str) -> CheckResult:
 
 
 def check_prereqs() -> list[CheckResult]:
-    """Phase-1: prereqs only. PR 4 expands with global-install + project checks."""
     results = []
     for tool in PREREQ_TOOLS:
         if tool == "pandoc":
             results.append(_check_pandoc_version())
-        elif tool == "python3":
-            results.append(_check_python3())
         else:
             results.append(_check_simple_tool(tool))
     return results
 
 
-def run(ctx: Context) -> int:
-    """sourced check entry point.
+def check_claude_writable() -> list[CheckResult]:
+    if not CLAUDE_HOME.exists():
+        return [CheckResult("~/.claude/ writable", "fail", "directory does not exist")]
+    if not os.access(CLAUDE_HOME, os.W_OK):
+        return [CheckResult("~/.claude/ writable", "fail", "not writable")]
+    return [CheckResult("~/.claude/ writable", "pass")]
 
-    Returns exit code (0 = all pass, 4 = any fail per spec §4.7).
-    """
-    use_color = should_color(ctx.color, sys.stdout)
-    results = check_prereqs()
+
+def check_global_install() -> list[CheckResult]:
+    results = []
+    for sub in ("agents", "citations", "voice", "style", "skills", "filters"):
+        d = CLAUDE_HOME / sub
+        if d.is_dir():
+            results.append(CheckResult(f"~/.claude/{sub}/", "pass"))
+        else:
+            results.append(CheckResult(f"~/.claude/{sub}/", "fail", "missing"))
+    return results
+
+
+def check_voice_iron_rules() -> list[CheckResult]:
+    voice_dir = CLAUDE_HOME / "voice"
+    if not voice_dir.is_dir():
+        return []
+    results = []
+    try:
+        claude_md = read_template("templates/CLAUDE.md")
+    except FileNotFoundError:
+        return [CheckResult("voice iron-rule check", "fail", "could not load CLAUDE.md template")]
+    for vf in sorted(voice_dir.glob("*.md")):
+        text = vf.read_text(encoding="utf-8")
+        ir_findings = iron_rules_validator.validate(
+            skeleton=text, candidate=text, voice_name=vf.stem
+        )
+        ex_findings = exemptions_validator.validate(
+            voice=text, claude_md=claude_md, voice_name=vf.stem
+        )
+        all_findings = ir_findings + ex_findings
+        if all_findings:
+            results.append(CheckResult(
+                f"voice/{vf.name}",
+                "fail",
+                f"{len(all_findings)} validation finding(s)",
+            ))
+        else:
+            results.append(CheckResult(f"voice/{vf.name}", "pass"))
+    return results
+
+
+def check_conda_env_warning() -> list[CheckResult]:
+    if os.environ.get("CONDA_PREFIX"):
+        return [CheckResult(
+            "conda environment",
+            "warn",
+            "CONDA_PREFIX is set; pipx may have used the wrong python interpreter. "
+            "If sourced misbehaves, try `conda deactivate && pipx install --force ...`.",
+        )]
+    return []
+
+
+def check_path_duplicates() -> list[CheckResult]:
+    found = []
+    for d in os.environ.get("PATH", "").split(os.pathsep):
+        candidate = Path(d) / "sourced"
+        if candidate.exists():
+            found.append(str(candidate))
+    if len(found) > 1:
+        return [CheckResult(
+            "PATH duplicates",
+            "warn",
+            f"multiple `sourced` on PATH: {found}. The first listed wins.",
+        )]
+    return []
+
+
+def _print_section(name: str, results: list[CheckResult], use_color: bool, verbose: int) -> None:
     failed = [r for r in results if r.status == "fail"]
-    passed = [r for r in results if r.status == "pass"]
+    if not results:
+        return
+    pass_count = sum(1 for r in results if r.status == "pass")
+    if verbose >= 1 or failed:
+        print(bold(f"{name}:", use_color))
+        for r in results:
+            if r.status == "pass":
+                marker = ok("✓", use_color)
+            elif r.status == "warn":
+                marker = warn("!", use_color)
+            else:
+                marker = err("✗", use_color)
+            detail = f" — {r.detail}" if r.detail else ""
+            if verbose >= 1 or r.status != "pass":
+                print(f"  {marker} {r.name}{detail}")
+    else:
+        print(f"{bold(name + ':', use_color)} {pass_count}/{len(results)} passing")
+
+
+def run(ctx: Context, project: str | None = None) -> int:
+    use_color = should_color(ctx.color, sys.stdout)
+
+    sections: list[tuple[str, list[CheckResult]]] = [
+        ("Prerequisites", check_prereqs()),
+        ("~/.claude/ writable", check_claude_writable()),
+        ("Global install", check_global_install()),
+        ("Voices", check_voice_iron_rules()),
+    ]
+    warnings = check_conda_env_warning() + check_path_duplicates()
+    if warnings:
+        sections.append(("Environment", warnings))
+
+    all_results = [r for _, results in sections for r in results]
+    failed = [r for r in all_results if r.status == "fail"]
+    passed = [r for r in all_results if r.status == "pass"]
 
     if not ctx.quiet:
-        # Default: per-check detail only on failures; one-line section summary on passes.
-        if ctx.verbose >= 1 or failed:
-            print(bold("Prerequisites:", use_color))
-            for r in results:
-                marker = ok("✓", use_color) if r.status == "pass" else err("✗", use_color)
-                detail = f" — {r.detail}" if r.detail else ""
-                if ctx.verbose >= 1 or r.status == "fail":
-                    print(f"  {marker} {r.name}{detail}")
-            if not (ctx.verbose >= 1):
-                # already printed failures above; nothing more
-                pass
-        else:
-            print(bold("Prerequisites:", use_color), f"{len(passed)}/{len(results)} passing")
-
-        # Summary line
+        for name, results in sections:
+            _print_section(name, results, use_color, ctx.verbose)
         print(f"\n{len(failed)} failed, {len(passed)} passed.")
 
     return 4 if failed else 0
