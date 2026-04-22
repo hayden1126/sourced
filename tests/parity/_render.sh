@@ -9,13 +9,19 @@
 # Diffs:  against <style-dir>/golden/<target-name>.<output-ext>
 # Exits:  0 on match, 1 on diff; emits "[<style>] <target-name> OK|FAIL"
 #
-# The CSL file is auto-discovered from templates/styles/<style-name>/*.csl.
+# The CSL file is auto-discovered from src/sourced/data/templates/styles/<style-name>/*.csl.
 #
 # For the `latex` target, the helper extracts the body between \begin{document}
 # and \end{document} from pandoc's standalone render before diffing, so that
 # preamble edits do not cascade into golden diffs. See spec §5.2.
 
 set -euo pipefail
+
+# Tempfiles created by this run get cleaned up on any exit path (success or
+# set-e abort). Keeps BSD/GNU sed tempfile plumbing from leaking artifacts
+# into tests/parity/<style>/actual/ on failed runs.
+__tmpfiles=()
+trap 'rm -f "${__tmpfiles[@]:+${__tmpfiles[@]}}"' EXIT
 
 if [[ $# -lt 3 ]]; then
   echo "Usage: _render.sh <style-dir> <target-name> <output-ext> [extra pandoc args...]" >&2
@@ -31,12 +37,16 @@ EXTRA_FLAGS=("$@")
 STYLE_NAME="$(basename "${STYLE_DIR}")"
 REPO_DIR="$(cd "${STYLE_DIR}/../../.." && pwd)"
 
-CSL_FILES=("${REPO_DIR}/templates/styles/${STYLE_NAME}"/*.csl)
-CSL_FILE="${CSL_FILES[0]}"
-if [[ ! -f "${CSL_FILE}" ]]; then
-  echo "[${STYLE_NAME}] ${TARGET} SKIP (no CSL found in templates/styles/${STYLE_NAME}/)" >&2
+CSL_FILES=("${REPO_DIR}/src/sourced/data/templates/styles/${STYLE_NAME}"/*.csl)
+if [[ ! -f "${CSL_FILES[0]}" ]]; then
+  echo "[${STYLE_NAME}] ${TARGET} SKIP (no CSL found in src/sourced/data/templates/styles/${STYLE_NAME}/)" >&2
   exit 2
 fi
+if (( ${#CSL_FILES[@]} > 1 )); then
+  echo "[${STYLE_NAME}] ${TARGET} FAIL (multiple CSL files in src/sourced/data/templates/styles/${STYLE_NAME}/; expected exactly one)" >&2
+  exit 2
+fi
+CSL_FILE="${CSL_FILES[0]}"
 
 mkdir -p "${STYLE_DIR}/actual"
 
@@ -44,9 +54,9 @@ ACTUAL="${STYLE_DIR}/actual/${TARGET}.${OUTPUT_EXT}"
 GOLDEN="${STYLE_DIR}/golden/${TARGET}.${OUTPUT_EXT}"
 
 if [[ "${TARGET}" == "latex" ]]; then
-  TEMPLATE="${REPO_DIR}/templates/styles/${STYLE_NAME}/template.tex"
+  TEMPLATE="${REPO_DIR}/src/sourced/data/templates/styles/${STYLE_NAME}/template.tex"
   if [[ ! -f "${TEMPLATE}" ]]; then
-    echo "[${STYLE_NAME}] latex SKIP (no template.tex in templates/styles/${STYLE_NAME}/)" >&2
+    echo "[${STYLE_NAME}] latex SKIP (no template.tex in src/sourced/data/templates/styles/${STYLE_NAME}/)" >&2
     exit 2
   fi
   RAW="${ACTUAL}.full"
@@ -63,12 +73,12 @@ else
   # Smart-quote Lua filter for markdown paste targets. Filter preserves ASCII
   # apostrophes inside italic spans (linguistic glottal-stop notation) so the
   # `-smart` pandoc writer extension doesn't curl them. See
-  # templates/filters/smart-quotes.lua for the filter and each style.md's
+  # src/sourced/data/filters/smart-quotes.lua for the filter and each style.md's
   # `### google-docs` / `### plain-markdown` lua-filter: bullet for declaration.
   LUA_FILTER_FLAGS=()
   case "${TARGET}" in
     google-docs|plain-markdown)
-      LUA_FILTER_FLAGS+=("--lua-filter=${REPO_DIR}/templates/filters/smart-quotes.lua")
+      LUA_FILTER_FLAGS+=("--lua-filter=${REPO_DIR}/src/sourced/data/filters/smart-quotes.lua")
       ;;
   esac
 
@@ -94,7 +104,10 @@ else
   # consume divs internally.
   case "${TARGET}" in
     google-docs|plain-markdown)
-      sed -i -e '/^::: /d' -e '/^:::$/d' "${ACTUAL}"
+      __tmp=$(mktemp "${ACTUAL}.XXXXXX")
+      __tmpfiles+=("${__tmp}")
+      sed -e '/^::: /d' -e '/^:::$/d' "${ACTUAL}" > "${__tmp}"
+      mv "${__tmp}" "${ACTUAL}"
       ;;
   esac
 fi
