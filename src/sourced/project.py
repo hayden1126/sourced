@@ -17,9 +17,13 @@ ProjectType = Literal["essay", "annotated-bib"]
 BEGIN_RE = re.compile(r"^<!-- sourced:begin managed -->$", re.MULTILINE)
 END_RE = re.compile(r"^<!-- sourced:end managed -->$", re.MULTILINE)
 
-# Voice / style first-line markers.
-VOICE_MARKER_RE = re.compile(r"<!--\s*sourced:voice=(\S+?)\s*-->")
-STYLE_MARKER_RE = re.compile(r"<!--\s*sourced:style=(\S+?)\s*-->")
+# Voice / style first-line markers — STRICT line-1-only matching to mirror
+# install.sh's `sed -n '1s/^<!-- sourced:voice=\([a-zA-Z0-9_-]*\) -->$/\1/p'`.
+# Loose matching against the full file text would silently mis-read if the
+# marker string appeared in body prose (e.g., "this voice is more formal than
+# `casual`").
+VOICE_MARKER_RE = re.compile(r"^<!-- sourced:voice=([a-zA-Z0-9_-]+) -->$")
+STYLE_MARKER_RE = re.compile(r"^<!-- sourced:style=([a-zA-Z0-9_-]+) -->$")
 
 
 # ----- project type marker -----
@@ -51,27 +55,29 @@ def write_project_type(project_dir: Path, kind: ProjectType) -> None:
     Non-essay types write the marker file."""
     p = project_type_marker_path(project_dir)
     if kind == "essay":
-        if p.exists():
-            p.unlink()
+        p.unlink(missing_ok=True)
         return
     p.write_text(f"{kind}\n", encoding="utf-8")
 
 
 # ----- voice / style markers -----
 
+def _read_first_line(p: Path) -> str:
+    """Read just the first line, trimmed of trailing newline. Empty string if file empty."""
+    return p.read_text(encoding="utf-8").partition("\n")[0]
+
+
 def read_voice_marker(voice_md: Path) -> str | None:
     if not voice_md.exists():
         return None
-    text = voice_md.read_text(encoding="utf-8")
-    m = VOICE_MARKER_RE.search(text)
+    m = VOICE_MARKER_RE.match(_read_first_line(voice_md))
     return m.group(1) if m else None
 
 
 def read_style_marker(style_md: Path) -> str | None:
     if not style_md.exists():
         return None
-    text = style_md.read_text(encoding="utf-8")
-    m = STYLE_MARKER_RE.search(text)
+    m = STYLE_MARKER_RE.match(_read_first_line(style_md))
     return m.group(1) if m else None
 
 
@@ -111,7 +117,7 @@ def replace_managed_block(text: str, new_managed: str) -> str:
         raise ProjectError("malformed sentinels; cannot replace managed block.")
     before = text[: begins[0].end()]
     after = text[ends[0].start() :]
-    if not new_managed.endswith("\n"):
+    if new_managed and not new_managed.endswith("\n"):
         new_managed += "\n"
     return f"{before}\n{new_managed}{after}"
 
