@@ -2,40 +2,64 @@
 
 [← Back to README](../README.md)
 
-## Install
+## First-time install (end user)
 
-Clone wherever you keep repos. `install.sh` finds itself via `$BASH_SOURCE`, so the clone path doesn't matter.
+Prerequisites:
+- Python 3.10+
+- `pipx` (install via `brew install pipx` on macOS, `sudo apt install pipx python3-venv` on Ubuntu/WSL, `winget install pipx` on Windows-not-WSL)
+- After installing pipx: `pipx ensurepath`, then **open a new terminal** (don't `source ~/.zshrc` — `ensurepath` may write to `.zprofile` instead)
+- Read access to `github.com/hayden1126/sourced` (request from maintainer)
+
+Install:
 
 ```bash
-git clone https://github.com/hayden1126/sourced.git
-cd sourced
-./install.sh --global-only      # first time, from inside the repo
+# HTTPS (default for non-dev users; works through corporate firewalls):
+pipx install 'git+https://<TOKEN>@github.com/hayden1126/sourced.git'
+
+# SSH (power-user path; pre-seed known_hosts on a fresh machine):
+ssh-keyscan github.com >> ~/.ssh/known_hosts
+pipx install git+ssh://git@github.com/hayden1126/sourced.git
 ```
 
-On first run you'll be prompted for your name. It gets saved to `~/.claude/sourced.config` and substituted into the templates on every render.
+Verify:
 
-After `--global-only`, the global files are available to Claude Code from any working directory:
+```bash
+sourced --version
+sourced check
+```
 
-- `~/.claude/agents/source-finder.md`
-- `~/.claude/agents/voice-extractor.md`
-- `~/.claude/citations/schema.md`
-- `~/.claude/citations/csl-json-emitter.md`
-- `~/.claude/templates/brief.template.md`
-- `~/.claude/templates/brief.template.annotated-bib.md`
-- `~/.claude/voice/<name>.md` (voice library; shipped voices land here, custom voices can be added alongside)
-- `~/.claude/style/<name>.md` (style library; same pattern)
-- `~/.claude/style/<name>/<asset>` (per-style asset directory; e.g., `chicago17-ad/chicago-author-date-17th-edition.csl`, `chicago17-ad/classical-abbreviations.md`, `chicago17-ad/reference-styled.docx` when shipped)
-- `~/.claude/skills/<name>/` (skill library; Claude Code auto-discovers skills from this path across every session under the home directory)
+`sourced check` verifies prerequisites (`pdftotext`, `pdfinfo`, `pdftoppm`, `pandoc`, `python3`) and the `~/.claude/` baseline. It does not run sudo or touch system packages.
 
-These paths are fixed; the install targets always go to `~/.claude/`, regardless of where the repo itself lives.
+First-run global setup:
 
-## Prerequisite check
+```bash
+sourced global-install   # populates ~/.claude/; prompts for user name on first run
+```
 
-`install.sh` runs `check_prerequisites` near the top of every invocation (before any file writes). It verifies `pdftotext`, `pandoc`, and `python3` are on PATH and aborts with the apt/brew install commands if any is missing. This is check-only; the installer does not run sudo or touch system packages. See the README Prerequisites section for what each tool does and how to install it.
+Per-project:
+
+```bash
+cd ~/writing/new-paper
+sourced install --brief my_paper --voice academic --style apa7
+
+# or sugar:
+cd ~/writing
+sourced new my-paper --voice academic --style apa7
+```
+
+Run `sourced <subcommand> --help` for the full flag set on each command.
+
+## Note for contributors with an existing clone
+
+The bundled templates moved under `src/sourced/data/` in phase 1. If you had
+muscle memory for `templates/CLAUDE.md` or `agents/source-finder.md`, those
+paths now live at `src/sourced/data/templates/CLAUDE.md` and
+`src/sourced/data/agents/source-finder.md`. Editable installs (`pipx install -e .`)
+hot-reload edits to these paths.
 
 ## Optional: TeX Live for the `latex` paste target
 
-The `latex` paste target emits a standalone `.tex` file. Compiling that `.tex` to a PDF is outside `sourced`'s scope — `install.sh` does not check for a TeX distribution, does not depend on one, and does not invoke `pdflatex` from any mode. If you plan to use the `latex` target, install TeX Live (or an equivalent) yourself.
+The `latex` paste target emits a standalone `.tex` file. Compiling that `.tex` to a PDF is outside `sourced`'s scope — `sourced check` does not verify a TeX distribution, and `sourced` never invokes `pdflatex` from any mode. If you plan to use the `latex` target, install TeX Live (or an equivalent) yourself.
 
 ### Minimum vs. full
 
@@ -81,69 +105,77 @@ pdflatex <draft>.tex
 
 Or `xelatex` / `lualatex` — the shipped templates compile under all three.
 
-## Per-project setup
-
-Each writing project gets its own `CLAUDE.md` (the academic-researcher definition, rendered with your name), `voice.md`, and `style.md`. Run `install.sh` from inside the project:
+## Updates
 
 ```bash
+pipx upgrade sourced
+sourced global-install   # idempotent; refresh shipped files
+
 cd ~/writing/my-paper
-/path/to/sourced/install.sh
+sourced update           # refresh managed block of CLAUDE.md
 ```
 
-This re-renders global files (cheap, idempotent) and drops `CLAUDE.md`, `voice.md`, and `style.md` into the project directory. With `--brief <name>` it also drops an empty `<name>.brief.md`:
+**Known pitfall:** `pipx upgrade` may silently no-op if `pyproject.toml`'s version doesn't bump (pip's resolver sees same version → already-satisfied). Mitigation: `hatch-vcs` derives version from git tag; the maintainer must tag releases. Reliable alternative: `pipx install --force 'git+https://...@main'`.
+
+## Version pinning / rollback
 
 ```bash
-/path/to/sourced/install.sh --brief my_paper
-# → creates CLAUDE.md, voice.md, style.md, and my_paper.brief.md in the current directory
+pipx install --force 'git+ssh://git@github.com/hayden1126/sourced.git@v0.3.0'
+pipx install --force 'git+ssh://git@github.com/hayden1126/sourced.git@<sha>'
+pipx install --force 'git+ssh://git@github.com/hayden1126/sourced.git@main'
 ```
 
-## Updating
+For rollback testing where pip's wheel cache may serve stale: add `--pip-args="--no-cache-dir"`.
 
-### Updating the sourced install
-
-When you pull new changes to the `sourced` repo, re-render the global files:
+## Uninstall
 
 ```bash
-cd /path/to/sourced
-git pull
-./install.sh --global-only
+pipx uninstall sourced
+# Manually remove ~/.claude/ if desired:
+rm -rf ~/.claude/{agents,citations,templates,voice,style,skills,filters}
+rm ~/.claude/sourced.config
+# preserve ~/.claude/settings.json and any user-added directories
 ```
 
-Then refresh each project (see below).
-
-### Updating a project
-
-To refresh a project's CLAUDE.md in place without losing content you've added outside the managed block (project-specific notes, active briefs, TODO lists):
+## Contributor onboarding
 
 ```bash
-cd ~/writing/my-paper
-/path/to/sourced/install.sh --update
+git clone git@github.com:hayden1126/sourced.git
+cd sourced
+pipx install --force -e .
 ```
 
-`--update` does three things. First, it replaces only the content between the `<!-- sourced:begin managed -->` and `<!-- sourced:end managed -->` sentinels in CLAUDE.md; everything outside those sentinels is preserved. Second, it refreshes `voice.md` from the library voice the project was installed with (read from the marker on voice.md line 1). Third, it refreshes `style.md` from the library style the project was installed with. Upstream rule changes propagate via `--update`.
+Edits to `src/sourced/*.py` AND `src/sourced/data/*` take effect immediately (the `.pth` editable-install mechanism covers the data directory because it lives under `src/sourced/`).
 
-To switch to a different voice or style on an existing project, pass `--update --voice <new>` (explicit voice switch), `--update --style <new>` (explicit style switch), or `--force` (replace everything).
-
-### Overwriting outright
-
-If a CLAUDE.md exists but you want a fresh render regardless:
-
+If `pipx install --force -e .` leaves stale metadata:
 ```bash
-/path/to/sourced/install.sh --force
+pipx uninstall sourced && pipx install -e .
 ```
 
-## Flags reference
+Tests:
+```bash
+pytest tests/cli/                          # unit + integration + parity (during dev) + golden
+pytest tests/emitter/ tests/parity/        # existing; unchanged
+bash tests/parity/run-all.sh               # 20 style × paste-target goldens
+```
 
-| Flag | Effect |
-|------|--------|
-| `--global-only` | Install or refresh global files only (source-finder, voice-extractor, schema, brief template, voice library, style library). Skip per-project files. |
-| `--project <path>` | Drop per-project files into `<path>` instead of `$PWD`. |
-| `--force` | Overwrite existing CLAUDE.md, voice.md, style.md, and brief (if `--brief`) without asking. |
-| `--update` | Refresh the managed block of CLAUDE.md (preserving content outside sentinels) and refresh `voice.md` and `style.md` from the project's installed voice and style. |
-| `--voice <name>` | Pick the voice rendered into this project's `voice.md` (default: `academic`). Shipped voices live in `templates/voices/`; custom voices can be placed at `~/.claude/voice/<name>.md`. |
-| `--style <name>` | Pick the citation/document style rendered into this project's `style.md` (default: `apa7`). Shipped styles live in `templates/styles/`; custom styles can be placed at `~/.claude/style/<name>.md`. |
-| `--brief <name>` | Also drop `<name>.brief.md` into the project, rendered from the brief template that matches `--type` (`brief.template.md` for `essay`, `brief.template.annotated-bib.md` for `annotated-bib`). |
-| `--type <kind>` | Pick the project kind: `essay` (default) or `annotated-bib`. Default writes no marker and leaves the project on the standard essay mode graph. `annotated-bib` writes a `.sourced-project-type` marker at the project root, selects `templates/brief.template.annotated-bib.md` when paired with `--brief`, and switches the project onto the annotated-bibliography mode graph (see `docs/MODES.md`). Switching the type on an existing project requires `--force` or `--update`. |
+## Migration from the legacy installer
+
+If you previously used `install.sh`, install the CLI and migrate your projects:
+
+1. `pipx install --force git+ssh://git@github.com/hayden1126/sourced.git@main` — install the new CLI.
+2. `sourced check` — verify prereqs + `~/.claude/` baseline; debug failures before any project work.
+3. **For each active project, dry-run first:**
+   ```bash
+   cd <project>
+   sourced update --dry-run    # surfaces sentinel-regex mismatches without mutation
+   ```
+4. For each project that dry-runs cleanly: `sourced update` (no flag) to apply. Each first-touch writes a `<file>.sourced.bak` sibling for rollback safety.
+5. For any project that fails dry-run: inspect, decide whether to `sourced install --force` (recreate; user re-applies any unmanaged content) or hand-fix the sentinels.
+
+## Change your name
+
+Edit or delete `~/.claude/sourced.config` then re-run `sourced global-install`.
 
 ## File layout
 
@@ -154,7 +186,8 @@ Global files (installed once, shared across projects) and per-project files (ren
 | `~/.claude/agents/source-finder.md` | global subagent (parallel source research) |
 | `~/.claude/agents/voice-extractor.md` | global subagent (one-shot voice calibration from samples) |
 | `~/.claude/citations/schema.md` | global citation log schema |
-| `~/.claude/templates/brief.template.md` | global brief template |
+| `~/.claude/templates/brief.template.md` | global brief template (essay) |
+| `~/.claude/templates/brief.template.annotated-bib.md` | global brief template (annotated bibliography) |
 | `~/.claude/voice/<name>.md` | voice library (shipped + custom voices available for project selection) |
 | `~/.claude/style/<name>.md` | style library (shipped + custom styles) |
 | `~/.claude/style/<name>/<asset>` | per-style asset dir (CSL file, reference.docx, on-demand reference tables like `classical-abbreviations.md`) |
@@ -170,9 +203,18 @@ Global files (installed once, shared across projects) and per-project files (ren
 | `<project>/.claude/citations/working.citations.json` | per-project, pre-draft |
 | `<project>/.claude/citations/working.<finder-id>.json` | per-project, source-finder shards |
 
-## Change your name
+## pipx gotchas
 
-Edit or delete `~/.claude/sourced.config` and re-run `./install.sh --global-only`.
+| Symptom | Cause | Remediation |
+|---|---|---|
+| `pipx: command not found` | `~/.local/bin` not on PATH | `pipx ensurepath` + new terminal |
+| Python version mismatch | Multiple python3 on system | `pipx install --python python3.11 ...` |
+| `Permission denied (publickey)` | SSH agent missing the key | `ssh-add ~/.ssh/id_ed25519`, or use HTTPS+PAT |
+| `Are you sure you want to continue connecting?` hang | First-time SSH to github.com in detached TTY | `ssh-keyscan github.com >> ~/.ssh/known_hosts` first |
+| `pipx upgrade` no-ops | Version not bumped | `pipx install --force ...@main` |
+| Stale `sourced` from `pip install --user sourced` | Pre-pipx remnant | `which -a sourced`, `pip uninstall sourced` |
+| Conda env active during install | pipx picked up conda's python | `conda deactivate && pipx install ...` |
+| Port 22 blocked (corporate / campus wifi) | Firewall | Use HTTPS+PAT path; or `~/.ssh/config` with `Host github.com / HostName ssh.github.com / Port 443` |
 
 ## Repo structure
 
@@ -180,56 +222,78 @@ Edit or delete `~/.claude/sourced.config` and re-run `./install.sh --global-only
 sourced/
 ├── ARCHITECTURE.md              # surface-area map (read first)
 ├── README.md                    # landing page, quickstart
+├── pyproject.toml               # package metadata + hatch-vcs versioning
 ├── docs/
 │   ├── INSTALL.md               # this file
 │   ├── MODES.md
 │   ├── SKILLS.md                # shipped skills (e.g. browser-reader-extract)
 │   ├── VOICES.md
 │   └── STYLES.md
-├── install.sh                   # global + per-project install; check_prerequisites + voice/style/skill mirroring
-├── agents/
-│   ├── source-finder.md
-│   └── voice-extractor.md
-├── citations/
-│   └── schema.md
-├── skills/
-│   └── browser-reader-extract/  # extract text + [p. N] markers from DRM'd browser readers
-│       ├── SKILL.md
-│       ├── package.json
-│       └── overdrive.mjs
-└── templates/
-    ├── CLAUDE.md
-    ├── brief.template.md
-    ├── brief.template.annotated-bib.md
-    ├── styles/
-    │   ├── apa7.md
-    │   ├── apa7/                # per-style assets
-    │   │   ├── apa.csl
-    │   │   └── template.tex
-    │   ├── chicago17-ad.md
-    │   ├── chicago17-ad/
-    │   │   ├── chicago-author-date-17th-edition.csl
-    │   │   ├── classical-abbreviations.md
-    │   │   └── template.tex
-    │   ├── chicago17-nb.md
-    │   ├── chicago17-nb/
-    │   │   ├── chicago-notes-bibliography-17th-edition.csl
-    │   │   ├── classical-abbreviations.md
-    │   │   └── template.tex
-    │   ├── ieee.md
-    │   ├── ieee/
-    │   │   ├── ieee.csl
-    │   │   └── template.tex
-    │   ├── mla9.md
-    │   └── mla9/
-    │       ├── classical-abbreviations.md
-    │       ├── modern-language-association.csl
-    │       └── template.tex
-    └── voices/
-        ├── academic.md
-        ├── casual.md
-        ├── hybrid.md
-        ├── journalistic.md
-        ├── narrative.md
-        └── technical.md
+├── src/
+│   └── sourced/
+│       ├── cli.py               # Click entrypoint; subcommand registration
+│       ├── commands/            # one module per subcommand (install, update, check, …)
+│       ├── validators/          # pre-flight checks (prereqs, sentinel regex, …)
+│       ├── render.py            # Jinja2 template rendering
+│       ├── project.py           # per-project state (voice, style, type markers)
+│       ├── mirror.py            # ~/.claude/ mirroring logic
+│       ├── config.py            # sourced.config read/write
+│       ├── context.py           # shared Click context object
+│       ├── errors.py            # structured error types
+│       ├── ui.py                # Rich-based output helpers
+│       └── data/
+│           ├── agents/
+│           │   ├── source-finder.md
+│           │   └── voice-extractor.md
+│           ├── citations/
+│           │   └── schema.md
+│           ├── filters/         # Pandoc Lua filters (promoted from templates/filters/)
+│           ├── skills/
+│           │   └── browser-reader-extract/
+│           │       ├── SKILL.md
+│           │       ├── package.json
+│           │       └── overdrive.mjs
+│           └── templates/
+│               ├── CLAUDE.md
+│               ├── brief.template.md
+│               ├── brief.template.annotated-bib.md
+│               ├── styles/
+│               │   ├── apa7.md
+│               │   ├── apa7/
+│               │   │   ├── apa.csl
+│               │   │   └── template.tex
+│               │   ├── chicago17-ad.md
+│               │   ├── chicago17-ad/
+│               │   │   ├── chicago-author-date-17th-edition.csl
+│               │   │   ├── classical-abbreviations.md
+│               │   │   └── template.tex
+│               │   ├── chicago17-nb.md
+│               │   ├── chicago17-nb/
+│               │   │   ├── chicago-notes-bibliography-17th-edition.csl
+│               │   │   ├── classical-abbreviations.md
+│               │   │   └── template.tex
+│               │   ├── ieee.md
+│               │   ├── ieee/
+│               │   │   ├── ieee.csl
+│               │   │   └── template.tex
+│               │   ├── mla9.md
+│               │   └── mla9/
+│               │       ├── classical-abbreviations.md
+│               │       ├── modern-language-association.csl
+│               │       └── template.tex
+│               └── voices/
+│                   ├── academic.md
+│                   ├── casual.md
+│                   ├── hybrid.md
+│                   ├── journalistic.md
+│                   ├── narrative.md
+│                   └── technical.md
+└── tests/
+    ├── cli/
+    │   ├── unit/
+    │   ├── integration/
+    │   └── golden/
+    ├── emitter/
+    └── parity/
+        └── run-all.sh
 ```

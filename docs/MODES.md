@@ -2,13 +2,13 @@
 
 [← Back to README](../README.md)
 
-Eleven cognitive modes, one announced per transition. Full definitions live in [`templates/CLAUDE.md`](../templates/CLAUDE.md) §7; this page is the reference card plus a walkthrough of the typical workflow.
+Twelve cognitive modes, one announced per transition. Full definitions live in [`templates/CLAUDE.md`](../templates/CLAUDE.md) §7; this page is the reference card plus a walkthrough of the typical workflow.
 
 ## Project types
 
 Two project types select different mode graphs:
 
-- **Essay** (default). All ten essay modes are reachable. Created with `install.sh --brief <name>` or `install.sh --brief <name> --type essay`.
+- **Essay** (default). All eleven essay modes are reachable. Created with `install.sh --brief <name>` or `install.sh --brief <name> --type essay`.
 - **Annotated bibliography**. `[outlining]`, `[refining]`, `[writing]` are unreachable; `[annotated-bib]` replaces them. `[plan]`, `[research]`, and `[editing]` behave differently (facet decomposition, per-facet dispatch, reduced editing audit). Created with `install.sh --brief <name> --type annotated-bib`. A marker file `.sourced-project-type` at project root records the type; absence = essay.
 
 ## Modes at a glance
@@ -24,7 +24,8 @@ Two project types select different mode graphs:
 | `[refining]` | Stress-test the outline against the citation log. Runs the §4 audit (scope, attribution, inference, cherry-pick, synthesis) and integrity checks before prose exists. | essay |
 | `[writing]` | Outline to prose. Applies voice rules (§9), generation signatures (§10), paraphrase default, Pandoc citation IDs. | essay |
 | `[annotated-bib]` | Per-entry annotation (4-beat: summary / relevance / location / evaluation) and draft compile. Grounded only in log fields; §3 verification inherited. | annotated-bib |
-| `[editing]` | Seven-pass audit on prose: ID validation → §4 citation → partial-entry recheck → grammar → AI-tell (§10) → quote-density → voice (§9). In annotated-bib projects, passes 6 (quote-density) and the §9 flow-rules part of pass 7 are skipped. | all |
+| `[editing]` | Eight-pass audit on prose: ID validation → §4 citation → partial-entry recheck → grammar → proofreading → AI-tell (§10) → quote-density → voice (§9). In annotated-bib projects, passes 7 (quote-density) and the §9 flow-rules part of pass 8 are skipped. | all |
+| `[finetuning]` | Bounded local substitution: produce 3–5 alternatives with declared tradeoff axes for a word-to-paragraph span; never ships a single-option change without explicit selection. {{USER}}-only, via explicit or implicit trigger. | all |
 | `[formatting]` | Render prose into style-specific output for a named paste target. Terminal stage; source prose never modified. | all |
 
 ## Typical workflow
@@ -41,7 +42,7 @@ One end-to-end session, showing where modes announce and where the gates fire:
 6. Agent switches to `[outlining mode]`, builds paragraph-level structure with citations attached by id. **Gate:** you approve ("ready to refine, or more outlining?").
 7. `[refining mode]` runs the §4 audit (scope, attribution, inference, cherry-pick, synthesis) against the log. **Gate:** you approve the refined outline.
 8. `[writing mode]` turns outline into prose, applying voice rules, §10 generation signatures, and the paraphrase default. The draft lands at `<draft>.md` with Pandoc citation IDs (`[@id]`, `@id`).
-9. `[editing mode]` runs the seven-pass audit. The handoff gate blocks on any unresolved §10 voice-audit hits; you must "address or mark intentional" before format. Silence ≠ override.
+9. `[editing mode]` runs the eight-pass audit. The handoff gate blocks on any unresolved §10 voice-audit hits; you must "address or mark intentional" before format. Silence ≠ override.
 10. `[formatting mode for <target>]` (e.g., `google-docs`, `plain-markdown`, `word`) renders `<draft>.md` into `<draft>.<target>.md`. Source prose is unchanged; the formatted sibling carries resolved `(Author Year, page)` citations and a References list per `style.md`. The `word` target (supported by all 5 shipped styles via pandoc+CSL) additionally runs pandoc + CSL and emits a `<draft>.docx` submission binary.
 
 At any point, `[red team]` and `[babble]` are available for stress-testing or unstructured thinking. `[non-academic]` escapes the framework for one turn.
@@ -54,7 +55,7 @@ At any point, `[red team]` and `[babble]` are available for stress-testing or un
 - **Editing → Formatting.** Agent runs a final §10 surface scan; any hits surface as blockers ("address before format, or mark as intentional?"). Silence ≠ override.
 - **Research round-trip.** When a mode auto-triggers research, the agent announces entry to `[research mode]`, runs, and announces return to the prior mode.
 
-## The editing mode seven passes
+## The editing mode eight passes
 
 `[editing mode]` runs these in fixed order. Sequence is load-bearing: citation resolution precedes the audit that depends on IDs; mechanics precede cadence.
 
@@ -62,8 +63,9 @@ At any point, `[red team]` and `[babble]` are available for stress-testing or un
 2. **§4 citation audit.** Scope, attribution, byline, inference, cherry-pick per claim; synthesis per multi-citation claim.
 3. **Partial-entry recheck.** Citations with `verification_status: "partial"` re-checked against the pasted passage.
 4. **Grammar pass.** Tense/mood consistency, attributing verbs before quotes, pronoun antecedents, restrictive/non-restrictive, dangling participles, parallel structure. Target is unambiguity, not rule compliance.
-5. **AI-tell pass (§10).** Never-list patterns flagged on sight; density-list patterns checked against per-essay budgets. Restructure sentence shape, don't retokenize.
-6. **Quote-density pass.** Direct-quote words over ~15% of a paragraph or two adjacent sentences both quoting → flag for paraphrase.
-7. **Voice audit (§9).** Connectedness, paragraph flow, pacing, concept setup, exploratory vs verdict tone. Voice does not override grammar-pass unambiguity flags.
+5. **Proofreading pass.** Mechanics the grammar pass doesn't cover: proper-noun consistency against first occurrence, paste-artifact detection (mojibake, stray combining marks, smart-quote curl inversions), punctuation mechanics (dash/hyphen/en-dash, quote-curl direction). Each list is a forced field; a pass that produces no lists has not run.
+6. **AI-tell pass (§10).** Never-list patterns flagged on sight; density-list patterns checked against per-essay budgets. Restructure sentence shape, don't retokenize.
+7. **Quote-density pass.** Direct-quote words over ~15% of a paragraph or two adjacent sentences both quoting → flag for paraphrase.
+8. **Voice audit (§9).** Connectedness, paragraph flow, pacing, concept setup, exploratory vs verdict tone. Voice does not override grammar-pass unambiguity flags.
 
 See [VOICES.md](./VOICES.md) for what `[writing]` and `[editing]` mean by "voice rules," and [STYLES.md](./STYLES.md) for what `[formatting]` does with `style.md` and paste targets.
