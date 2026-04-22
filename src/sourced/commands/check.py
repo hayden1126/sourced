@@ -58,7 +58,7 @@ def check_prereqs() -> list[CheckResult]:
     return results
 
 
-def run(ctx: Context, project: str | None = None) -> int:
+def run(ctx: Context) -> int:
     """sourced check entry point.
 
     Returns exit code (0 = all pass, 4 = any fail per spec §4.7).
