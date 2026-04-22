@@ -58,7 +58,7 @@ def install_global(ctx: Context, *, force: bool = False) -> dict:
     counts = {"mirrored": 0, "skipped_dirs": 0}
 
     # Subdirs that map directly:
-    for subdir in ("agents", "citations", "templates", "skills", "filters"):
+    for subdir in ("agents", "citations", "skills", "filters"):
         with bundled_path(subdir) as src:
             dest = CLAUDE_HOME / subdir
             if ctx.dry_run:
@@ -68,6 +68,21 @@ def install_global(ctx: Context, *, force: bool = False) -> dict:
             else:
                 mirror_tree(Path(src), dest, dry_run=False)
                 counts["mirrored"] += sum(1 for _ in dest.rglob("*") if _.is_file())
+
+    # Brief templates to ~/.claude/templates/ (install.sh-parity: only the two
+    # brief templates land here; voices and styles go to their canonical
+    # ~/.claude/voice/ and ~/.claude/style/ locations below).
+    templates_dest = CLAUDE_HOME / "templates"
+    if not ctx.dry_run:
+        templates_dest.mkdir(parents=True, exist_ok=True)
+    for brief_name in ("brief.template.md", "brief.template.annotated-bib.md"):
+        with bundled_path(f"templates/{brief_name}") as src:
+            target = templates_dest / brief_name
+            if ctx.dry_run:
+                counts["mirrored"] += 1
+            else:
+                target.write_text(Path(src).read_text(encoding="utf-8"), encoding="utf-8")
+                counts["mirrored"] += 1
 
     # Voice library: bundled templates/voices/*.md → ~/.claude/voice/<name>.md
     # Note: install.sh treats these as templates the per-project step substitutes
