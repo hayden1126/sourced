@@ -90,12 +90,17 @@ def check_voice_iron_rules() -> list[CheckResult]:
     except FileNotFoundError:
         return [CheckResult("voice iron-rule check", "fail", "could not load CLAUDE.md template")]
     for vf in sorted(voice_dir.glob("*.md")):
-        text = vf.read_text(encoding="utf-8")
+        installed_text = vf.read_text(encoding="utf-8")
+        try:
+            skeleton_text = read_template(f"templates/voices/{vf.name}")
+        except FileNotFoundError:
+            # User-derived voice with no shipped skeleton → fall back to self-check.
+            skeleton_text = installed_text
         ir_findings = iron_rules_validator.validate(
-            skeleton=text, candidate=text, voice_name=vf.stem
+            skeleton=skeleton_text, candidate=installed_text, voice_name=vf.stem,
         )
         ex_findings = exemptions_validator.validate(
-            voice=text, claude_md=claude_md, voice_name=vf.stem
+            voice=installed_text, claude_md=claude_md, voice_name=vf.stem,
         )
         all_findings = ir_findings + ex_findings
         if all_findings:

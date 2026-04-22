@@ -14,7 +14,10 @@ def test_check_flags_corrupted_voice(tmp_home, clean_ansi):
         [sys.executable, "-m", "sourced", "check"],
         capture_output=True, text=True,
     )
-    # With prereqs intact, only voice check fails → exit 4.
+    # With prereqs intact, only voice check fails → exit 4. The check command's
+    # _print_section summarizes per-voice findings as a count, so we assert on
+    # the voice filename + finding-count phrasing rather than the rule name.
     if "Prerequisites" in result.stdout and "passing" in result.stdout:
         assert result.returncode == 4
-        assert "iron-rule" in result.stdout.lower() or "iron rule" in result.stdout.lower()
+        assert "voice/academic.md" in result.stdout
+        assert "validation finding" in result.stdout.lower()
