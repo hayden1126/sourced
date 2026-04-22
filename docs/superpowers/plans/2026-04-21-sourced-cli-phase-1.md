@@ -1191,15 +1191,13 @@ git commit -m "feat(cli): mirror.py — shutil.copytree wrapper"
 - Create: `src/sourced/config.py`
 - Create: `tests/cli/unit/test_config.py`
 
-The current install.sh writes `USER_NAME="value"` shell-source format. Phase-1 reads it as text matching that exact line shape; rewrites it the same way.
+The current install.sh writes `SOURCED_USER=<value>` via `printf '%q'` (bash-style quoting). Phase-1 reads it via `shlex.split()` (which handles both bash's backslash escapes and POSIX single-quoting) and writes via `shlex.quote()` (single-quoted output, also bash-source compatible).
 
 - [ ] **Step 1: Write failing tests**
 
 Create `tests/cli/unit/test_config.py`:
 
 ```python
-import pytest
-from pathlib import Path
 from sourced.config import load_user_name, save_user_name, config_path
 
 
@@ -1216,26 +1214,61 @@ def test_save_then_load_roundtrip(tmp_home):
     assert load_user_name() == "Alice"
 
 
-def test_load_handles_quoted_value(tmp_home):
-    """install.sh writes USER_NAME="Alice"; we must read that format."""
+def test_load_handles_install_sh_bare_value(tmp_home):
+    """install.sh writes `SOURCED_USER=Alice` for plain ASCII names (printf %q)."""
     cfg = tmp_home / ".claude" / "sourced.config"
     cfg.parent.mkdir(parents=True)
-    cfg.write_text('USER_NAME="Alice"\n')
+    cfg.write_text("SOURCED_USER=Alice\n")
     assert load_user_name() == "Alice"
 
 
-def test_load_handles_unquoted_value(tmp_home):
+def test_load_handles_install_sh_backslash_escape(tmp_home):
+    """install.sh writes `SOURCED_USER=Bob\\ Smith` for names with spaces (printf %q)."""
     cfg = tmp_home / ".claude" / "sourced.config"
     cfg.parent.mkdir(parents=True)
-    cfg.write_text("USER_NAME=Alice\n")
-    assert load_user_name() == "Alice"
+    cfg.write_text("SOURCED_USER=Bob\\ Smith\n")
+    assert load_user_name() == "Bob Smith"
+
+
+def test_load_handles_install_sh_apostrophe_escape(tmp_home):
+    """install.sh writes `SOURCED_USER=O\\'Brien` for names with quotes (printf %q)."""
+    cfg = tmp_home / ".claude" / "sourced.config"
+    cfg.parent.mkdir(parents=True)
+    cfg.write_text("SOURCED_USER=O\\'Brien\n")
+    assert load_user_name() == "O'Brien"
+
+
+def test_load_handles_single_quoted_value(tmp_home):
+    """shlex.quote() output uses single-quoting; must round-trip."""
+    cfg = tmp_home / ".claude" / "sourced.config"
+    cfg.parent.mkdir(parents=True)
+    cfg.write_text("SOURCED_USER='Bob Smith'\n")
+    assert load_user_name() == "Bob Smith"
 
 
 def test_load_strips_trailing_whitespace(tmp_home):
     cfg = tmp_home / ".claude" / "sourced.config"
     cfg.parent.mkdir(parents=True)
-    cfg.write_text('USER_NAME="Alice"   \n')
+    cfg.write_text("SOURCED_USER=Alice   \n")
     assert load_user_name() == "Alice"
+
+
+def test_load_treats_empty_value_as_missing(tmp_home):
+    """`SOURCED_USER=` and `SOURCED_USER=""` should both return None."""
+    cfg = tmp_home / ".claude" / "sourced.config"
+    cfg.parent.mkdir(parents=True)
+    cfg.write_text("SOURCED_USER=\n")
+    assert load_user_name() is None
+
+
+def test_save_roundtrip_with_spaces(tmp_home):
+    save_user_name("Bob Smith")
+    assert load_user_name() == "Bob Smith"
+
+
+def test_save_roundtrip_with_apostrophe(tmp_home):
+    save_user_name("O'Brien")
+    assert load_user_name() == "O'Brien"
 
 
 def test_save_creates_parent_dir(tmp_home):
@@ -1244,11 +1277,12 @@ def test_save_creates_parent_dir(tmp_home):
     assert (tmp_home / ".claude" / "sourced.config").exists()
 
 
-def test_save_writes_install_sh_format(tmp_home):
-    """Format must round-trip with install.sh's writer for tag rollback compat."""
+def test_save_uses_sourced_user_key(tmp_home):
+    """File must start with `SOURCED_USER=` for install.sh-source compat."""
     save_user_name("Alice")
     content = (tmp_home / ".claude" / "sourced.config").read_text()
-    assert content.startswith('USER_NAME="Alice"')
+    assert content.startswith("SOURCED_USER=")
+    assert content.endswith("\n")
 ```
 
 - [ ] **Step 2: Verify failure**
@@ -1264,39 +1298,54 @@ Expected: ImportError.
 ```python
 """~/.claude/sourced.config — user-global settings (currently just user name).
 
-Format matches install.sh exactly: USER_NAME="<value>" on its own line.
-We accept a few variants on read (quoted/unquoted, trailing whitespace) but
-write the canonical form for round-trip with the legacy install.sh tag.
+Format matches install.sh exactly:
+    SOURCED_USER=<bash-quoted value>
+
+install.sh writes via `printf '%q'`. We write via `shlex.quote()`, which
+produces a different but equivalent bash-source-compatible quoting (single
+quotes vs backslash escapes — bash sources both). We read via `shlex.split()`,
+which correctly handles bash-style backslash escapes AND POSIX single-quoting,
+so it round-trips with both writers.
+
+Empty/missing values are normalized to None on read so callers don't need to
+distinguish "absent" from "blank".
 """
 from __future__ import annotations
-import re
+import shlex
 from pathlib import Path
+
+
+_KEY = "SOURCED_USER"
 
 
 def config_path() -> Path:
     return Path.home() / ".claude" / "sourced.config"
 
 
-_USER_NAME_RE = re.compile(r'^\s*USER_NAME=(?:"([^"]*)"|(\S+))\s*$')
-
-
 def load_user_name() -> str | None:
     p = config_path()
     if not p.exists():
         return None
+    prefix = f"{_KEY}="
     for line in p.read_text(encoding="utf-8").splitlines():
-        m = _USER_NAME_RE.match(line)
-        if m:
-            return m.group(1) if m.group(1) is not None else m.group(2)
+        stripped = line.strip()
+        if not stripped.startswith(prefix):
+            continue
+        rhs = stripped[len(prefix):]
+        try:
+            tokens = shlex.split(rhs, posix=True)
+        except ValueError:
+            return None
+        if not tokens or not tokens[0]:
+            return None
+        return tokens[0]
     return None
 
 
 def save_user_name(name: str) -> None:
     p = config_path()
     p.parent.mkdir(parents=True, exist_ok=True)
-    # Escape any embedded double-quote (rare; defensive).
-    safe = name.replace('"', r'\"')
-    p.write_text(f'USER_NAME="{safe}"\n', encoding="utf-8")
+    p.write_text(f"{_KEY}={shlex.quote(name)}\n", encoding="utf-8")
 ```
 
 - [ ] **Step 4: Verify**
@@ -1305,7 +1354,7 @@ def save_user_name(name: str) -> None:
 pytest tests/cli/unit/test_config.py -v
 ```
 
-Expected: 8 passed.
+Expected: 13 passed.
 
 - [ ] **Step 5: Commit**
 
@@ -4454,7 +4503,7 @@ Expected: at least the parametrized installs pass (4 cases). The skipped global-
 
 If diffs surface (CLI writes a file install.sh doesn't, or vice versa), inspect them. Allowed differences (per spec §8.3):
 - The CLI may emit a `.sourced.bak` on first-touch; install.sh doesn't. Filter `.sourced.bak` out of the file-set diff if needed.
-- The CLI may add a richer line to `~/.claude/sourced.config`; install.sh writes only `USER_NAME=...`. Confirm the file-content of `sourced.config` is install.sh-compatible (round-trips).
+- The CLI may add a richer line to `~/.claude/sourced.config`; install.sh writes only `SOURCED_USER=<bash-quoted>`. Confirm the file-content of `sourced.config` is install.sh-compatible (round-trips).
 - Order-of-mirror-write doesn't matter for the file-set diff.
 
 Adjust filters in the test if needed; document each excluded path with a one-line comment.
