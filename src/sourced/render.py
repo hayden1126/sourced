@@ -6,9 +6,11 @@ read_template() (importlib.resources); writes happen in commands/*.py.
 from __future__ import annotations
 import contextlib
 import pathlib
+import tempfile
 from dataclasses import dataclass
 from functools import cache
 from importlib.resources import files, as_file
+from pathlib import Path
 
 
 @cache
@@ -47,3 +49,30 @@ def render(template: str, ctx: RenderContext) -> str:
     if ctx.style_name is not None:
         out = out.replace("{{STYLE}}", ctx.style_name)
     return out
+
+
+def write_atomic(path: Path, content: str) -> None:
+    """Write content to path atomically (tempfile + rename in same dir).
+
+    Avoids partial-write corruption if the process dies mid-write. Uses a
+    randomized tempfile name (NamedTemporaryFile) so a stale .tmp from a
+    previous crash doesn't collide. Skip explicit fsync — overkill for config files.
+
+    Cross-device safe: tempfile is sibling to target → same filesystem → atomic
+    rename on POSIX (and Windows 3.3+).
+
+    Windows caveat: replace() raises PermissionError if target is open in another
+    process (e.g., editor). Caller surfaces clearly.
+    """
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile(
+        "w",
+        encoding="utf-8",
+        dir=path.parent,
+        prefix=f".{path.name}.",
+        suffix=".tmp",
+        delete=False,
+    ) as tmp:
+        tmp.write(content)
+        tmp_path = Path(tmp.name)
+    tmp_path.replace(path)

@@ -1,4 +1,4 @@
-from sourced.render import RenderContext, render
+from sourced.render import RenderContext, render, write_atomic
 
 
 def test_substitutes_user():
@@ -41,3 +41,30 @@ def test_render_is_pure_no_io():
     """render() must not touch the filesystem."""
     out = render("noop", RenderContext(user="A"))
     assert out == "noop"
+
+
+def test_write_atomic_creates_file(tmp_path):
+    target = tmp_path / "out.md"
+    write_atomic(target, "hello")
+    assert target.read_text() == "hello"
+
+
+def test_write_atomic_overwrites(tmp_path):
+    target = tmp_path / "out.md"
+    target.write_text("old")
+    write_atomic(target, "new")
+    assert target.read_text() == "new"
+
+
+def test_write_atomic_creates_parent_dir(tmp_path):
+    target = tmp_path / "nested" / "deep" / "out.md"
+    write_atomic(target, "hello")
+    assert target.read_text() == "hello"
+
+
+def test_write_atomic_no_stale_tmp_left(tmp_path):
+    target = tmp_path / "out.md"
+    write_atomic(target, "hello")
+    # No file matching .out.md.<random>.tmp should remain.
+    leftovers = [p for p in tmp_path.iterdir() if ".tmp" in p.name]
+    assert leftovers == []
