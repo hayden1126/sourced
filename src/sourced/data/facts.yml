@@ -1,0 +1,68 @@
+# Invariant registry for /audit's invariant-sweep step (Layer 1).
+# Phase 1: this file is the seed; phase 2 wires `sourced check --invariants`
+# to verify mirrors at runtime.
+#
+# Each invariant: id, name, authoritative, mirrors (list of file:line refs).
+invariants:
+  - id: I1
+    name: "install.sh prereq tool list (5 tools)"
+    authoritative: src/sourced/commands/check.py::PREREQ_TOOLS
+    mirrors:
+      - README.md (Prereqs section)
+      - docs/INSTALL.md (Prereq check section)
+
+  - id: I2
+    name: "[editing mode] pass count (currently 8)"
+    authoritative: src/sourced/data/templates/CLAUDE.md (§7 [editing mode])
+    mirrors:
+      - src/sourced/data/templates/CLAUDE.md (L209, L441)
+      - docs/MODES.md (L45, L58)
+      - docs/archive/specs/2026-04-20-annotated-bibliography-design.md (L57, L105)
+
+  - id: I3
+    name: "Shipped styles (5: apa7, chicago17-ad, chicago17-nb, ieee, mla9)"
+    authoritative: src/sourced/data/templates/styles/*.md
+    mirrors:
+      - ARCHITECTURE.md (L22, L135)
+      - ROADMAP.md (L23, L144)
+      - README.md (feature list)
+
+  - id: I4
+    name: "Shipped voices (6: academic, casual, technical, journalistic, narrative, hybrid)"
+    authoritative: src/sourced/data/templates/voices/*.md
+    mirrors:
+      - ARCHITECTURE.md (L108-109)
+      - README.md (feature list)
+      - docs/VOICES.md (L93)
+      - src/sourced/data/agents/voice-extractor.md (L34, L158)
+
+  - id: I5
+    name: "Paste targets (4: word, google-docs, plain-markdown, latex)"
+    authoritative: tests/parity/*/run.sh + tests/parity/_render.sh
+    mirrors:
+      - ARCHITECTURE.md (L22, L67)
+      - README.md (feature list)
+      - ROADMAP.md (L144, L154)
+      - src/sourced/commands/check.py (pandoc comment if any)
+
+  - id: I6
+    name: "Mode count (12 cognitive modes)"
+    authoritative: src/sourced/data/templates/CLAUDE.md (§7)
+    mirrors:
+      - README.md (L17)
+      - docs/MODES.md (L5)
+
+  - id: I7
+    name: "Node 18+ requirement (browser-reader-extract skill)"
+    authoritative: src/sourced/data/skills/browser-reader-extract/package.json (engines)
+    mirrors:
+      - src/sourced/data/skills/browser-reader-extract/SKILL.md (L30)
+      - README.md (L47)
+      - docs/SKILLS.md (L29)
+
+  - id: I8
+    name: "pandoc 3.1+ requirement"
+    authoritative: src/sourced/commands/check.py (_check_pandoc_version)
+    mirrors:
+      - README.md (Prereqs)
+      - tests/parity/README.md (L35)
