@@ -1,4 +1,3 @@
-import os
 import sys
 from sourced.ui import should_color, ok, err, warn, path_str
 
