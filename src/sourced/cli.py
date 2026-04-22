@@ -28,7 +28,7 @@ def _build_parser() -> argparse.ArgumentParser:
     sub = p.add_subparsers(dest="subcommand", metavar="<subcommand>")
 
     # check (PR 1 has the prereq-only version; PR 4 expands)
-    p_check = sub.add_parser("check", help="diagnose prereqs + ~/.claude/ health")  # noqa: F841
+    sub.add_parser("check", help="diagnose prereqs + ~/.claude/ health")
 
     return p
 
