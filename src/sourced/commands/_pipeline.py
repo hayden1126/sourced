@@ -131,7 +131,7 @@ def render_voice(name: str, user: str, ctx: Context) -> str:
     rendered_body = render(skeleton_text, RenderContext(user=user))
     findings = []
     findings.extend(iron_rules_validator.validate(
-        skeleton=skeleton_text, candidate=rendered_body, voice_name=name,
+        skeleton=skeleton_text, candidate=skeleton_text, voice_name=name,
     ))
     findings.extend(exemptions_validator.validate(
         voice=skeleton_text, claude_md=claude_md_template, voice_name=name,
