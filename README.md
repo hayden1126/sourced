@@ -15,22 +15,22 @@ The primary agent (academic-researcher) lives in each project's `CLAUDE.md`. Two
 - **Citation rendering is decoupled from authoring.** Prose carries Pandoc-style IDs (`[@id]`, `@id`, `[@id, p. N]`); a separate formatting mode resolves them per style into a sibling output file for a chosen paste target. Five styles ship (APA 7, Chicago 17 author-date, Chicago 17 notes-bibliography, IEEE, MLA 9) across four paste targets (`word`, `google-docs`, `plain-markdown`, `latex`). All paste targets render through `pandoc --citeproc` reading the style's vendored CSL file.
 - **Parallel research with integrity.** When three or more independent sub-topics need sources, source-finders dispatch in parallel. Each writes to its own shard; the parent merges with validation and collision resolution.
 - **Mode discipline.** Twelve cognitive modes, one announced per transition. Gates between stages require explicit approval; silence is not an override.
-- **Defense-in-depth for iron rules.** Category-level voice prohibitions ("no em dashes") are checked in three places: inside `voice-extractor` at generation time, inside `academic-researcher` at caller-return time, and inside `install.sh` at render time. Any one layer missing doesn't ship a broken voice.
-- **Per-voice exemption syntax with install-time validation.** §10's Never list carries stable IDs; a voice library file can exempt specific rules via `## §10 exemptions` bullets. `install.sh` validates the IDs against the canonical set extracted from CLAUDE.md and aborts on typos. Silence is not permission.
+- **Defense-in-depth for iron rules.** Category-level voice prohibitions ("no em dashes") are checked in three places: inside `voice-extractor` at generation time, inside `academic-researcher` at caller-return time, and inside the `sourced` CLI at render time. Any one layer missing doesn't ship a broken voice.
+- **Per-voice exemption syntax with install-time validation.** §10's Never list carries stable IDs; a voice library file can exempt specific rules via `## §10 exemptions` bullets. The `sourced` CLI validates the IDs against the canonical set extracted from CLAUDE.md and aborts on typos. Silence is not permission.
 - **Bundled skills for extraction tasks.** `browser-reader-extract` connects to a user-launched Chrome and extracts text with `[p. N]` page markers from DRM'd browser readers (OverDrive Read proven; Kindle Cloud Reader, Scribd extendable via a documented pattern). Installed into `~/.claude/skills/` by default; writers who never need it pay zero setup cost.
 
 ## Prerequisites
 
 - [Claude Code](https://claude.com/product/claude-code) installed. This project configures it; it does not replace it.
-- `bash` available for running `install.sh`.
-- `~/.claude/` writable (the installer creates it on first run).
+- Python 3.10+ (`python3 --version`).
+- `pipx` for installing the `sourced` CLI. (`brew install pipx` on macOS; `sudo apt install pipx python3-venv` on Ubuntu/WSL; `winget install pipx` on Windows native.) After installing pipx: `pipx ensurepath`, then **open a new terminal**.
+- `~/.claude/` writable (the CLI creates it on first run).
 - A directory for your paper. Any directory works: a fresh folder, a git repo you already have, or an existing project.
 - **poppler-utils** (`pdftotext`, `pdfinfo`, `pdftoppm`). Claude Code's Read tool renders PDFs through `pdftoppm`; `[research mode]` extracts text from PDF sources via `pdftotext`.
 - **pandoc** 3.1+. Required by every `[formatting mode]` paste target (`word`, `google-docs`, `plain-markdown`, `latex`); all four render through the pandoc + citeproc + CSL pipeline.
-- **python3**. Used at per-project install time to cross-check a vendored CSL file's `<title>` against the style's declaration (`validate_csl_title` in `install.sh`). Ships by default with current Debian, Ubuntu, WSL, and macOS; install via your package manager if missing.
-- **TeX Live** (optional). Only needed if you'll compile the `[formatting mode for latex]` output to PDF. `sourced` emits a `.tex` file; compilation is your job. Not checked by `install.sh`. See [`docs/INSTALL.md`](./docs/INSTALL.md#optional-tex-live-for-the-latex-paste-target) for package guidance per platform.
+- **TeX Live** (optional). Only needed if you'll compile the `[formatting mode for latex]` output to PDF. `sourced` emits a `.tex` file; compilation is your job. Not checked by `sourced check`. See [`docs/INSTALL.md`](./docs/INSTALL.md#optional-tex-live-for-the-latex-paste-target) for package guidance per platform.
 
-`install.sh` checks that `pdftotext`, `pdfinfo`, `pdftoppm`, `pandoc`, and `python3` are all on PATH and aborts with a clear install command if any is missing. It does not install them for you; use your package manager.
+Run `sourced check` to verify all prereqs are present + `~/.claude/` is healthy + installed voices are intact. It does not install missing tools for you; use your package manager.
 
 Install on Debian, Ubuntu, or WSL (python3 is typically already present):
 
@@ -46,28 +46,54 @@ brew install poppler pandoc
 
 **Optional:** the `browser-reader-extract` skill (for extracting text from DRM'd browser readers like OverDrive, Kindle Cloud Reader, Scribd) needs Node 18+ and `puppeteer-core`. Install Node via your package manager; on first use of the skill, run `npm install` inside `~/.claude/skills/browser-reader-extract/` to fetch `puppeteer-core`. Writers who never use the skill pay zero setup cost.
 
-## Quickstart
+## Install
 
 ```bash
-# first time: clone and install globally
-git clone https://github.com/hayden1126/sourced.git
-cd sourced
-./install.sh --global-only
+# HTTPS (default for non-dev users; works through corporate firewalls):
+pipx install 'git+https://<TOKEN>@github.com/hayden1126/sourced.git'
 
-# per-project: render CLAUDE.md, voice.md, style.md, and an empty brief
-cd ~/writing/my-paper
-/path/to/sourced/install.sh --brief my_paper
+# SSH (power-user path; pre-seed known_hosts on a fresh machine):
+ssh-keyscan github.com >> ~/.ssh/known_hosts
+pipx install git+ssh://git@github.com/hayden1126/sourced.git
 ```
 
-On first run you'll be prompted for your name. It gets saved to `~/.claude/sourced.config`.
+Verify and set up:
 
-After `--brief my_paper`, the project carries:
+```bash
+sourced --version
+sourced check                # verifies prereqs + ~/.claude/ readiness
+sourced global-install       # populates ~/.claude/ (prompts for your name on first run)
+```
+
+Per-project:
+
+```bash
+cd ~/writing/new-paper
+sourced install --brief my_paper --voice academic --style apa7
+
+# or sugar:
+cd ~/writing
+sourced new my-paper --voice academic --style apa7
+```
+
+After install, the project carries:
 - `CLAUDE.md` — the agent operating rules.
 - `voice.md` — the active voice (default: `academic`).
 - `style.md` — the active citation style (default: `apa7`).
-- `my_paper.brief.md` — empty intake brief for this paper.
+- `my_paper.brief.md` — empty intake brief for this paper (with `--brief`).
 
 Open Claude Code from inside the project directory and start a session. The agent opens in `[collaborative mode]` and will propose filling out the brief first.
+
+Updates:
+
+```bash
+pipx install --force 'git+ssh://git@github.com/hayden1126/sourced.git@main'
+sourced global-install       # idempotent
+cd ~/writing/my-paper
+sourced update               # refresh managed block of CLAUDE.md
+```
+
+For deeper troubleshooting (pipx gotchas, conda interference, port-22-blocked networks), see [`docs/INSTALL.md`](./docs/INSTALL.md). For a one-shot answer to "how do I X" questions, ask Claude Code — the bundled `sourced-helper` agent activates on framework questions and points at the right command or file.
 
 ## Documentation
 
@@ -85,6 +111,10 @@ None specified. Private repo for now.
 
 ## Migration from earlier versions
 
-If you installed an earlier version of sourced that placed `academic-researcher.md` as a subagent at `~/.claude/agents/academic-researcher.md`, running the new `install.sh` will remove that file automatically. The agent content now lives in each project's `CLAUDE.md`.
+**From `install.sh`-based installs:** the bash installer is retired. `pipx install` the new CLI per the install section above, then `sourced global-install` (idempotent — overwrites the bash-era files in `~/.claude/`). Projects installed via `install.sh` keep working; run `sourced update` from inside each one to refresh its managed block.
 
-Projects installed before CLAUDE.md §10 (*Generation signatures to rewrite*) existed can pull the new rules via `install.sh --update` from within the project directory; the managed block refreshes while preserving any non-managed content you've added outside the sentinels.
+The `install.sh` script remains available at the `legacy/install-sh-final` git tag for one week after phase-1 launch, in case rollback is needed.
+
+**From even earlier:** if you installed a version that placed `academic-researcher.md` at `~/.claude/agents/academic-researcher.md`, `sourced global-install` will not remove it — but the agent content now lives in each project's `CLAUDE.md`, so the standalone agent file is dead weight. Delete it manually if you want a clean tree.
+
+Projects installed before CLAUDE.md §10 (*Generation signatures to rewrite*) existed can pull the new rules via `sourced update` from within the project directory; the managed block refreshes while preserving any non-managed content you've added outside the sentinels.
