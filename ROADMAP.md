@@ -215,10 +215,69 @@ Harvest citations from a Google Scholar author page or search results with autom
 
 Cross-cutting features that touch multiple modes.
 
-### Installable `sourced` executable on `$PATH`
-**Priority:** later · **Effort:** S · **Status:** open.
+### Python CLI (`sourced`) — install.sh decomposition
+**Priority:** next · **Effort:** L · **Status:** in progress (phase 1 started 2026-04-21).
 
-Ship a user-facing executable so installation and updates don't require users to know the absolute path to `install.sh`. Likely shape: rename `install.sh` to `sourced` with subcommands (`sourced install`, `sourced update`, `sourced uninstall`), plus a bootstrap one-liner (`curl … | sh`) that drops the binary into `/usr/local/bin` or `~/.local/bin`. Lowers adoption friction for non-developer writers who don't keep a mental map of cloned-repo paths. No schema / mode / gate impact — distribution ergonomics only, but it gates how reachable the core value prop is for less-technical users.
+Phase 1: Python package at `src/sourced/`, pipx-installed from private git URL. Ports all install.sh responsibilities. Replaces install.sh entirely. Six subcommands (`install`, `global-install`, `new`, `update`, `switch`, `check`). Tier 1 + Tier 2 UX improvements.
+
+Design spec: [`docs/superpowers/specs/2026-04-21-sourced-cli-decomposition-design.md`](./docs/superpowers/specs/2026-04-21-sourced-cli-decomposition-design.md).
+
+Phase 2 (follow-on): GitHub Actions CI, `sourced check --invariants` wiring `facts.yml` into runtime verification, `sourced doctor` deeper diagnostics (conda poisoning, PATH duplicates, orphan file detection per issues.md #14), `--format=json` structured output, shell completion (bash/zsh/fish), user-defaults config migration from `~/.claude/sourced.config` to `~/.config/sourced/config.toml`.
+
+### Single-binary distribution (Go or Rust)
+**Priority:** later · **Effort:** L · **Status:** open. Depends on Python CLI phase 1+2.
+
+Rewrite the Python CLI as a statically-linked single binary (Go or Rust, pick per migration-time language maturity). Distribute via GitHub releases + Homebrew formula + `curl | sh` installer. Eliminates pipx + Python 3 as a user prereq — for non-dev writers who stumble on Python tooling, reduces install to a single shell command. Behavior-identical to Python CLI; just a distribution upgrade. Migration: ship Go binary alongside pipx for one release cycle, then document the binary as the primary path.
+
+### Per-agent model selection via `sourced model`
+**Priority:** maybe · **Effort:** S · **Status:** open · **decision TBD.**
+
+Each shipped agent (`source-finder`, `voice-extractor`, `sourced-helper`, future agents) currently has a hardcoded `model:` in its frontmatter. A `sourced model <agent> <model>` subcommand would let the user override the model per agent — e.g., switch `source-finder` from `sonnet` to `opus` for a more expensive but more thorough research run, or downgrade `sourced-helper` to `haiku` for cost.
+
+**Architecture decision TBD.** Two candidate shapes:
+1. **Mutate the mirrored copy** at `~/.claude/agents/<name>.md`. Simple to ship; user choices get clobbered by `sourced global-install` unless the CLI learns to detect-and-preserve the mutation.
+2. **Config overlay** in `~/.claude/sourced.config` under an `[agents.<name>] model = "..."` section. Apply at mirror time so user choices survive bundle updates. Cleaner but adds a config surface.
+
+Option 2 is the favored read; needs spec work before commit.
+
+### Scoped subagents (private to `sourced` commands)
+**Priority:** maybe · **Effort:** M · **Status:** open · **decision TBD.**
+
+Some shipped agents (notably `voice-extractor`) shouldn't auto-trigger when Claude Code's agent dispatcher decides a "voice corpus extraction" sounds relevant to general academic-researcher work. They're meant to run only when explicitly invoked by a sourced subcommand (`sourced voice extract`, not yet shipped). Today every agent in `~/.claude/agents/` is fair game for the dispatcher.
+
+**Architecture decision TBD.** Three candidate shapes:
+1. **Relocate to `~/.claude/sourced/internal-prompts/`** outside the `agents/` discovery tree. `sourced voice extract` invokes Anthropic API directly with the prompt as system message. Bypasses the Claude Code dispatcher entirely; aligns with the "direct-API offload" entry below.
+2. **Aggressive description-scoping** — rewrite the agent's `description:` to actively discourage auto-trigger ("ONLY when explicitly dispatched by a sourced voice subcommand — never proactively"). Easiest; least reliable.
+3. **Wait for a Claude Code "private agent" mechanism** if one becomes available upstream.
+
+Decision depends on whether the direct-API path lands first (option 1 falls out for free) or whether the aggressive-scoping route is good enough as a stopgap.
+
+### `sourced-helper` agent — extensions
+**Priority:** maybe · **Effort:** S–M · **Status:** open · **decision TBD.** Depends on the basic agent (shipped in phase 1, PR 5).
+
+Phase 1 ships `sourced-helper.md` — a `haiku` agent that knows the CLI surface, file layout, voices, styles, modes, and common gotchas, and answers questions read-only. Extensions worth scoping:
+
+1. **`/sourced-help` slash-command skill** alongside the agent so users can summon it explicitly without relying on dispatcher heuristics.
+2. **Doc reflection.** The agent's system prompt is self-contained today; phase 2 could have it `Read` shipped docs (`docs/MODES.md`, `docs/VOICES.md`, etc.) on demand for deeper questions, similar to how `claude-code-guide` reads its own knowledge base.
+3. **Live introspection.** Wire the agent to surface `sourced check` output, current project state, etc. for diagnostic questions. Would need read-only project-state helpers in the CLI.
+
+Decision TBD per item; ship in order of observed friction.
+
+### Direct-API offload for deterministic workflows
+**Priority:** maybe · **Effort:** L · **Status:** open · **decision TBD.**
+
+Today `sourced` is a Python CLI for file mirroring + validation; the cognitive work happens inside Claude Code where `academic-researcher` dispatches subagents. Some workflows are well-defined enough to offload to direct Anthropic API calls inside the CLI — deterministic Python flow control, tuned prompts, cheaper models per step (`haiku` for boring extraction, `sonnet` for judgment, `opus` only when warranted). Candidates:
+
+1. **Voice extraction from a corpus** — currently a `voice-extractor` subagent dispatched from inside Claude Code; could become `sourced voice extract <samples-dir> [--register academic]` that scripts the same prompt sequence with hardcoded conditionals.
+2. **Citation parsing/validation** — verify a `<draft>.citations.json` log against source PDFs without spinning up an interactive agent session.
+3. **Style validation** — the existing `validators/csl.py` already runs without the LLM; the `style.md` schema check could grow LLM-assisted suggestions for malformed entries.
+
+**Architecture decision TBD.** The hybrid is the leading read: keep Claude Code as the substrate for interactive writing/research, use direct API for narrow workflows where flow control matters more than dispatcher creativity. Tradeoff: each migrated workflow needs careful prompt engineering plus golden tests, and the codebase grows a runtime dependency on the `anthropic` SDK. Don't rebuild Claude Code wholesale — a separate platform is months of effort that competes with `sourced` rather than complementing it.
+
+### Installable `sourced` executable on `$PATH` (deprecated entry — see Python CLI above)
+**Status:** ~~open~~ → superseded 2026-04-22 by the Python CLI + Single-binary entries above.
+
+The original "rename install.sh to sourced" entry described the right idea at the wrong substrate level; the Python CLI ships that capability with subcommands, validation, dry-run, and color UX, and the Single-binary entry covers the eventual `curl | sh` distribution path.
 
 ### Per-project directory restructure
 **Priority:** later · **Effort:** M · **Status:** open.
