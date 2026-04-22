@@ -113,8 +113,10 @@ def render_voice(name: str, user: str, ctx: Context) -> str:
     """Render a voice library file into a per-project voice.md.
 
     Reads ~/.claude/voice/<name>.md (the library — already mirrored by global-install),
-    runs iron-rule + exemption validation against that text, prepends the marker line,
-    substitutes {{USER}}, returns the rendered text.
+    validates the installed file against the bundled skeleton (same pattern as
+    commands.check; falls back to self-check for user-derived voices that have no
+    shipped skeleton), prepends the marker line, substitutes {{USER}}, returns the
+    rendered text.
     """
     src = CLAUDE_HOME / "voice" / f"{name}.md"
     if not src.exists():
@@ -127,11 +129,17 @@ def render_voice(name: str, user: str, ctx: Context) -> str:
     # POST-render validation: read CLAUDE.md template for canonical ids.
     claude_md_template = read_template("templates/CLAUDE.md")
 
-    # Validators need the rendered text; for voice we substitute then validate.
+    # Validate the installed voice against the bundled skeleton; fall back to
+    # self-check for user-derived voices with no shipped skeleton.
+    try:
+        bundled_skeleton = read_template(f"templates/voices/{name}.md")
+    except FileNotFoundError:
+        bundled_skeleton = skeleton_text
+
     rendered_body = render(skeleton_text, RenderContext(user=user))
     findings = []
     findings.extend(iron_rules_validator.validate(
-        skeleton=skeleton_text, candidate=skeleton_text, voice_name=name,
+        skeleton=bundled_skeleton, candidate=skeleton_text, voice_name=name,
     ))
     findings.extend(exemptions_validator.validate(
         voice=skeleton_text, claude_md=claude_md_template, voice_name=name,
