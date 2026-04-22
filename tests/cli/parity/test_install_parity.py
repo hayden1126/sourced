@@ -71,12 +71,17 @@ def test_install_file_set_matches(flags, tmp_path, repo_with_legacy_paths):
     assert not diff_a_only, f"install.sh wrote files CLI didn't: {diff_a_only}"
     assert not diff_b_only, f"CLI wrote files install.sh didn't: {diff_b_only}"
 
-    # ---- Diff ~/.claude/ file sets (excluding sourced.config — content format
-    # is a documented diff per spec §8.3) ----
+    # ---- Diff ~/.claude/ file sets — documented allowed diffs filtered out:
+    #   - sourced.config: content-format diff per spec §8.3
+    #   - agents/sourced-helper.md: phase-1 user-requested addition that ships
+    #     in the CLI but predates install.sh's hardcoded agent render block
+    #     (install.sh:224-225 only renders source-finder + voice-extractor).
+    #     install.sh is being deleted in Task 5.8; this filter goes with it.
     claude_a = home_a / ".claude"
     claude_b = home_b / ".claude"
-    set_ca = _file_set(claude_a) - {"sourced.config"}
-    set_cb = _file_set(claude_b) - {"sourced.config"}
+    documented_diffs = {"sourced.config", "agents/sourced-helper.md"}
+    set_ca = _file_set(claude_a) - documented_diffs
+    set_cb = _file_set(claude_b) - documented_diffs
     assert set_ca == set_cb, (
         f"~/.claude/ diff:\n"
         f"  install.sh-only: {set_ca - set_cb}\n"
