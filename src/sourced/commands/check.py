@@ -41,6 +41,14 @@ def _check_pandoc_version() -> CheckResult:
     return CheckResult("pandoc", "pass", f"{major}.{minor}")
 
 
+def _check_python3() -> CheckResult:
+    """python3 must be ≥ 3.10."""
+    major, minor = sys.version_info.major, sys.version_info.minor
+    if (major, minor) < (3, 10):
+        return CheckResult("python3", "fail", f"detected {major}.{minor}; need ≥ 3.10")
+    return CheckResult("python3", "pass", f"{major}.{minor}")
+
+
 def _check_simple_tool(name: str) -> CheckResult:
     if shutil.which(name) is None:
         return CheckResult(name, "fail", "not on PATH")
@@ -53,12 +61,14 @@ def check_prereqs() -> list[CheckResult]:
     for tool in PREREQ_TOOLS:
         if tool == "pandoc":
             results.append(_check_pandoc_version())
+        elif tool == "python3":
+            results.append(_check_python3())
         else:
             results.append(_check_simple_tool(tool))
     return results
 
 
-def run(ctx: Context, project: str | None = None) -> int:
+def run(ctx: Context) -> int:
     """sourced check entry point.
 
     Returns exit code (0 = all pass, 4 = any fail per spec §4.7).
