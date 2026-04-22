@@ -1,7 +1,7 @@
 """argparse root + subcommand dispatch + top-level error→exit-code mapping.
 
-This is the ONLY module that touches argparse. Subcommand modules (commands/*.py)
-accept plain Python args, not argparse.Namespace.
+This is the ONLY module that touches argparse. Subcommand modules accept
+plain Python args, not argparse.Namespace.
 """
 from __future__ import annotations
 import argparse
@@ -11,7 +11,7 @@ from typing import NoReturn
 
 from . import __version__
 from .context import Context
-from .errors import SourcedError
+from .errors import SourcedError, UsageError
 from .ui import print_error, print_unexpected, should_color
 
 
@@ -27,8 +27,48 @@ def _build_parser() -> argparse.ArgumentParser:
 
     sub = p.add_subparsers(dest="subcommand", metavar="<subcommand>")
 
-    # check (PR 1 has the prereq-only version; PR 4 expands)
-    sub.add_parser("check", help="diagnose prereqs + ~/.claude/ health")
+    # install
+    p_install = sub.add_parser("install", help="install per-project files in PWD or --project")
+    p_install.add_argument("--project", help="target project directory (default: PWD)")
+    p_install.add_argument("--voice", default="academic")
+    p_install.add_argument("--style", default="apa7")
+    p_install.add_argument("--type", dest="project_type",
+                           choices=["essay", "annotated-bib"], default="essay")
+    p_install.add_argument("--brief", help="also create <name>.brief.md")
+    p_install.add_argument("--force", action="store_true")
+
+    # global-install
+    p_gi = sub.add_parser("global-install", help="install/refresh ~/.claude/ files")
+    p_gi.add_argument("--force", action="store_true")
+
+    # new
+    p_new = sub.add_parser("new", help="create project dir + brief + install")
+    p_new.add_argument("project_name", help="project directory to create")
+    p_new.add_argument("--voice", default="academic")
+    p_new.add_argument("--style", default="apa7")
+    p_new.add_argument("--type", dest="project_type",
+                       choices=["essay", "annotated-bib"], default="essay")
+    p_new.add_argument("--brief", help="brief filename (default: <project_name>)")
+    p_new.add_argument("--force", action="store_true")
+
+    # update
+    p_update = sub.add_parser("update", help="refresh managed block of CLAUDE.md")
+    p_update.add_argument("--project", help="target project directory (default: PWD)")
+    p_update.add_argument("--force", action="store_true")
+
+    # switch
+    p_switch = sub.add_parser("switch", help="swap voice or style on existing project")
+    switch_sub = p_switch.add_subparsers(dest="switch_kind", metavar="<voice|style>", required=True)
+    p_sv = switch_sub.add_parser("voice", help="swap voice")
+    p_sv.add_argument("name", help="library voice name")
+    p_sv.add_argument("--project", help="target project directory (default: PWD)")
+    p_ss = switch_sub.add_parser("style", help="swap style")
+    p_ss.add_argument("name", help="library style name")
+    p_ss.add_argument("--project", help="target project directory (default: PWD)")
+
+    # check
+    p_check = sub.add_parser("check", help="diagnose prereqs + ~/.claude/ health")
+    p_check.add_argument("--project", help="also check this project directory")
 
     return p
 
@@ -45,10 +85,34 @@ def _ctx_from_args(args: argparse.Namespace) -> Context:
 
 def _dispatch(args: argparse.Namespace) -> int:
     ctx = _ctx_from_args(args)
-    if args.subcommand == "check":
+    sub = args.subcommand
+
+    if sub == "install":
+        from .commands import install
+        return install.run(
+            ctx, project=args.project, voice=args.voice, style=args.style,
+            project_type=args.project_type, brief=args.brief, force=args.force,
+        )
+    if sub == "global-install":
+        from .commands import global_install
+        return global_install.run(ctx, force=args.force)
+    if sub == "new":
+        from .commands import new
+        return new.run(
+            ctx, project_name=args.project_name, voice=args.voice, style=args.style,
+            project_type=args.project_type, brief=args.brief, force=args.force,
+        )
+    if sub == "update":
+        from .commands import update
+        return update.run(ctx, project=args.project, force=args.force)
+    if sub == "switch":
+        from .commands import switch
+        return switch.run(ctx, kind=args.switch_kind, name=args.name, project=args.project)
+    if sub == "check":
         from .commands import check
-        return check.run(ctx)
-    # No subcommand → print help and exit 2 (argparse-style usage error).
+        return check.run(ctx, project=args.project)
+
+    # No subcommand → print help, exit 2.
     _build_parser().print_help(sys.stderr)
     return 2
 
@@ -66,8 +130,7 @@ def main(argv: list[str] | None = None) -> NoReturn:
     except KeyboardInterrupt:
         sys.exit(130)
     except Exception as e:
-        debug_env = os.environ.get("SOURCED_DEBUG", "").lower()
-        debug = debug_env not in ("", "0", "false", "no") or args.verbose >= 2
+        debug = os.environ.get("SOURCED_DEBUG") or args.verbose >= 2
         if debug:
             raise
         print_unexpected(e)
