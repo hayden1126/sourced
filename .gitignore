@@ -18,3 +18,7 @@ __pycache__/
 *.egg-info/
 dist/
 build/
+
+# Local virtualenvs (subagent task workflow)
+.venv/
+venv/
