@@ -130,7 +130,8 @@ def main(argv: list[str] | None = None) -> NoReturn:
     except KeyboardInterrupt:
         sys.exit(130)
     except Exception as e:
-        debug = os.environ.get("SOURCED_DEBUG") or args.verbose >= 2
+        debug_env = os.environ.get("SOURCED_DEBUG", "").lower()
+        debug = debug_env not in ("", "0", "false", "no") or args.verbose >= 2
         if debug:
             raise
         print_unexpected(e)
