@@ -1,4 +1,3 @@
-import pytest
 from sourced.render import RenderContext, render
 
 
@@ -22,6 +21,11 @@ def test_substitutes_style_when_present():
     assert out == "style=apa7"
 
 
+def test_style_token_kept_when_style_name_none():
+    out = render("style={{STYLE}}", RenderContext(user="A"))
+    assert out == "style={{STYLE}}"
+
+
 def test_unknown_token_kept_verbatim():
     out = render("hello {{UNKNOWN}}", RenderContext(user="A"))
     assert out == "hello {{UNKNOWN}}"
@@ -33,7 +37,7 @@ def test_handles_user_with_special_chars():
     assert out == "by O'Brien & Co."
 
 
-def test_render_is_pure_no_io(tmp_path, monkeypatch):
+def test_render_is_pure_no_io():
     """render() must not touch the filesystem."""
     out = render("noop", RenderContext(user="A"))
     assert out == "noop"
