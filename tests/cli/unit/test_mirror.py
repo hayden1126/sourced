@@ -41,7 +41,7 @@ def test_mirror_tree_dry_run_does_not_write(tmp_path):
 
     mirror_tree(src, dest, dry_run=True)
 
-    assert not dest.exists() or not (dest / "a.txt").exists()
+    assert not dest.exists()
 
 
 def test_mirror_tree_preserves_mtime(tmp_path):
