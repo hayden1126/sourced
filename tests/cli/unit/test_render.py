@@ -1,3 +1,4 @@
+import pytest
 from sourced.render import RenderContext, render, write_atomic
 
 
@@ -65,6 +66,18 @@ def test_write_atomic_creates_parent_dir(tmp_path):
 def test_write_atomic_no_stale_tmp_left(tmp_path):
     target = tmp_path / "out.md"
     write_atomic(target, "hello")
-    # No file matching .out.md.<random>.tmp should remain.
-    leftovers = [p for p in tmp_path.iterdir() if ".tmp" in p.name]
-    assert leftovers == []
+    # Exactly one file remains and it's the target — implementation-independent.
+    assert list(tmp_path.iterdir()) == [target]
+
+
+def test_write_atomic_cleans_up_on_write_failure(tmp_path, monkeypatch):
+    """If write() raises, no partial .tmp must survive on disk."""
+    target = tmp_path / "out.md"
+
+    # Force write to raise by passing a non-string. The TypeError happens
+    # inside the `with` block, after the tempfile is created.
+    with pytest.raises(TypeError):
+        write_atomic(target, 12345)  # type: ignore[arg-type]
+
+    # No leftover .tmp files in the parent dir.
+    assert list(tmp_path.iterdir()) == []
