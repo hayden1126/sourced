@@ -4,6 +4,8 @@ render() is a pure function — no I/O, no side effects. Reads happen via
 read_template() (importlib.resources); writes happen in commands/*.py.
 """
 from __future__ import annotations
+import contextlib
+import pathlib
 from dataclasses import dataclass
 from functools import cache
 from importlib.resources import files, as_file
@@ -11,7 +13,7 @@ from importlib.resources import files, as_file
 
 @cache
 def _data_root():
-    """Bundled data root. Cached because Traversable construction repeats otherwise."""
+    """Bundled data root. Cached for stable reference identity across callers."""
     return files("sourced") / "data"
 
 
@@ -20,7 +22,7 @@ def read_template(subpath: str) -> str:
     return (_data_root() / subpath).read_text(encoding="utf-8")
 
 
-def bundled_path(subpath: str):
+def bundled_path(subpath: str) -> contextlib.AbstractContextManager[pathlib.Path]:
     """Context manager yielding a real filesystem Path for a bundled directory.
     Use with shutil.copytree which needs a concrete path.
     """
