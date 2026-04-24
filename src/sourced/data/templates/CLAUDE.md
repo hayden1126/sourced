@@ -270,7 +270,7 @@ Transitions between modes are gated. A gate with a forcing artifact has not been
 | outlining → refining | outline sign-off from {{USER}} | — |
 | refining → writing | §4 audit emitted with zero unresolved `flagged` rows; refined outline approved by {{USER}} | §4 audit list |
 | writing → editing | {{USER}}-initiated only | — |
-| editing → formatting | edit-complete gate + paste target named + voice audit surface-scan clean | voice audit surface-scan report |
+| editing → formatting | revision report + §4 audit clean (zero unresolved flagged rows) + voice audit surface-scan report emitted (empty or `mark as intentional`) + paste target named | revision report, §4 audit list, voice audit surface-scan report |
 | formatting → (terminal) | pre-flight pass (all checks in `docs/modes/formatting.md` step 2) | inline-quote-threshold list |
 | * → research (auto) | §3 self-correction trigger OR unsourced-claim detected | — |
 | research → (return to invoking mode) | source logged per §8 Moment 1 OR {{USER}} accepts the gap | — |
@@ -290,7 +290,8 @@ A gate that requires an artifact has not been satisfied unless the artifact is e
 - **§4 audit list.** One row per citation audited, each row recording pass/`flagged: <reason>` for items 1, 2, 4, 5, 6 of §4. Emitted by `[refining]` on outline and `[editing]` pass 2 on prose. Gates: `refining → writing`, `editing → formatting`.
 - **Scope-delta list.** Entries of the form `{trigger_observed, original_scope, proposed_scope_change, load_bearing?}`. Emitted by §6 scope-growth soft-stop in any mode. Empty iff no drift observed in the triggering turn. A triggered self-check that doesn't produce the list has not run.
 - **Inline-quote-threshold list.** Per flagged span: `{paragraph_ref, quote_word_count, threshold, @id (if attached)}`. Emitted by `[formatting mode]` pre-flight step 2. Empty list required on zero hits. Gate: formatting pre-flight.
-- **Voice audit surface-scan report.** Lists §10 never-list hits and density-list overruns with line references. Emitted by `[editing mode]` handoff before formatting. Gate: `editing → formatting`.
+- **Revision report.** Emitted by `[editing mode]` Pass 0: one row per sub-check (0a purpose/main-claim, 0b sub-claim support, 0c outline correspondence at paragraph level, 0d transition evaluation, 0e paragraph one-job), each recording `pass` or `flagged: <reason>`. Plus an optional `0-plan: <pass | flagged | n/a>` row for prose-plan correspondence when a plan exists. Gate: `editing → formatting`.
+- **Voice audit surface-scan report.** Lists §10 never-list hits (Pass 6), voice.md cut-pattern hits (Pass 7), quote-density flags (Pass 8), and voice-audit flags (Pass 9) with line references. Emitted by `[editing mode]` handoff before formatting. Gate: `editing → formatting`.
 
 ### 7.6 Precedence and canonical §10 IDs
 
@@ -308,6 +309,7 @@ Precedence rules, in order. Later items are subordinate to earlier items. Rank i
 - `throat-clearing-openers` — sentence-initial "Crucially," / "Ultimately," / "Fundamentally," / "Importantly," / "In essence," / "It is worth noting that," / "It bears mentioning that," / "What is striking is."
 - `demonstrative-openers` — demonstrative-noun paragraph openers ("This tension," "These dynamics," "This shift") without specific recent antecedent.
 - `ornamental-compounds` — hyphenated conceptual compounds that disappear after one use.
+- `aphoristic-closures` — paragraph endings on rhetorically-balanced pronouncements ("X is itself Y," "W handles what it handles," "That is the limit the paper holds") that simulate thesis-closure in place of earned conclusion. Fix requires restructure to `closure-type: transitional`, `synthesis`, or `question-out`.
 
 Full pattern prose, density list, and restructure guidance: `docs/modes/writing.md` §Never-list. Read on entry to [writing mode] and [editing mode].
 
