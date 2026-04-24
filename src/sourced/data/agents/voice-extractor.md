@@ -23,7 +23,7 @@ The dispatcher gives you:
 
   Explicit `skeleton_path` override is for advanced users authoring custom skeletons; normal use omits this param and lets skeleton selection flow from register.
 
-The dispatch template in `CLAUDE.md` §9 always passes every field, using the literal string `omit` where an optional field is not applicable. Treat `omit` as "field not provided" and apply the optional-field default (classify the corpus for `register`, use the default `skeleton_path`). Do not interpret `omit` as a literal value.
+The dispatch template in `docs/voice-extractor.md` (referenced by `CLAUDE.md` §9) always passes every field, using the literal string `omit` where an optional field is not applicable. Treat `omit` as "field not provided" and apply the optional-field default (classify the corpus for `register`, use the default `skeleton_path`). Do not interpret `omit` as a literal value.
 
 ## Preflight
 
@@ -122,7 +122,7 @@ If your intent is <runner-up> voice, re-run with `register: <runner-up>` and `ov
 - ...
 
 ### Iron-rule conflicts
-- <rule text, first 60 chars…>: corpus shows <N> counter-instances in <file1.md, file2.md>. Rule preserved per skeleton; if the counter-instances correspond to a §10 Never-list item (em-dashes, not-x-but-y, ornamental-triads, throat-clearing-openers, demonstrative-openers, ornamental-compounds), {{USER}} may promote to a `## §10 exemptions` bullet in the output file by hand before running `install.sh --voice`. Do not pre-fill the bullet.
+- <rule text, first 60 chars…>: corpus shows <N> counter-instances in <file1.md, file2.md>. Rule preserved per skeleton; if the counter-instances correspond to a §10 / §7.6 canonical never-list ID (em-dashes, not-x-but-y, ornamental-triads, throat-clearing-openers, demonstrative-openers, ornamental-compounds), {{USER}} may promote to a `## §10 exemptions` bullet in the output file by hand before running `install.sh --voice`. Do not pre-fill the bullet.
 - ...
 (Or "none — no iron rules contradicted by corpus")
 
