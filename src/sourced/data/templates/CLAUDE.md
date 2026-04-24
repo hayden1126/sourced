@@ -347,7 +347,7 @@ The citation log is the source of truth for every claim. Style is the source of 
 Citation handling has three moments. Each mode in §7 operates in exactly one moment.
 
 - **Moment 1 — Logging.** Sources are vetted (§3) and logged (§4 synthesis integrity). Owned by `[research mode]`. Schema is always-on (defined below).
-- **Moment 2 — In-prose IDs.** Drafts carry citations as Pandoc-style ID references, never as rendered author-year strings. Owned by `[outlining mode]`, `[writing mode]`, and `[editing mode]`. Full syntax: `docs/modes/writing.md` §In-prose IDs.
+- **Moment 2 — In-prose IDs.** Bare `id` references appear first at outline time (`[outlining mode]`); Pandoc-style `[@id]` / `@id` syntax begins at `[writing mode]` and continues through `[editing mode]`. Drafts never carry rendered author-year strings; those are `[formatting mode]` output only. Full syntax: `docs/modes/writing.md` §In-prose IDs.
 - **Moment 3 — Formatting.** Rendered output (inline citations, References list, document layout) is generated for a specific paste target. Owned by `[formatting mode]`. Full procedure: `docs/modes/formatting.md`.
 
 Entry structure, allowed enum values, ID format, and timestamp/staleness rules are defined in `~/.claude/citations/schema.md`. Read that file before writing to a log. When dispatching `source-finder` subagents, inline the schema's contents into the dispatch prompt (subagents can't read parent context).
