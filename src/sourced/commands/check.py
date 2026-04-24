@@ -14,6 +14,7 @@ from ..render import read_template
 from ..ui import ok, err, bold, warn, should_color
 from ..validators import iron_rules as iron_rules_validator
 from ..validators import exemptions as exemptions_validator
+from ..validators import invariants as invariants_validator
 
 
 @dataclass(frozen=True)
@@ -161,8 +162,36 @@ def _print_section(name: str, results: list[CheckResult], use_color: bool, verbo
         print(f"{bold(name + ':', use_color)} {pass_count}/{len(results)} passing")
 
 
-def run(ctx: Context, project: str | None = None) -> int:
+def check_invariants() -> list[CheckResult]:
+    """Run the manifest-structural invariants I1-I10 (I2 and I10 dormant until
+    their prerequisites land; see validators/invariants.py module docstring).
+    Each invariant surfaces as its own CheckResult row."""
+    results = []
+    for rule_id, findings in invariants_validator.run_all_invariants():
+        if not findings:
+            results.append(CheckResult(rule_id, "pass"))
+            continue
+        detail = "; ".join(
+            f"[{f.location}] {f.message}" for f in findings
+        )
+        # Errors fail the check; warnings degrade to warn status.
+        has_error = any(f.severity == "error" for f in findings)
+        status: Literal["pass", "fail", "warn"] = "fail" if has_error else "warn"
+        results.append(CheckResult(rule_id, status, detail))
+    return results
+
+
+def run(ctx: Context, project: str | None = None, invariants: bool = False) -> int:
     use_color = should_color(ctx.color, sys.stdout)
+
+    if invariants:
+        results = check_invariants()
+        if not ctx.quiet:
+            _print_section("Invariants (I1-I10)", results, use_color, ctx.verbose)
+            failed = [r for r in results if r.status == "fail"]
+            passed = [r for r in results if r.status == "pass"]
+            print(f"\n{len(failed)} failed, {len(passed)} passed.")
+        return 4 if any(r.status == "fail" for r in results) else 0
 
     sections: list[tuple[str, list[CheckResult]]] = [
         ("Prerequisites", check_prereqs()),

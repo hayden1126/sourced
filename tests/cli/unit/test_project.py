@@ -4,6 +4,10 @@ from sourced.project import (
     read_voice_marker, read_style_marker,
     extract_managed_block, replace_managed_block,
     write_bak_sibling,
+    parse_user_additions, merge_managed_block, UserAddition,
+    MIGRATED_ADDITIONS_HEADING,
+    detect_phase1_layout, deploy_docs_tree, migrate_phase1_to_phase2,
+    PHASE1_BAK_NAME,
 )
 from sourced.errors import ProjectError
 
@@ -183,3 +187,250 @@ def test_write_bak_sibling_no_op_when_target_missing(tmp_project):
     f = tmp_project / "CLAUDE.md"
     write_bak_sibling(f)  # should not raise
     assert not (tmp_project / "CLAUDE.md.sourced.bak").exists()
+
+
+# ----- user-addition region parsing (phase 2 spec §7) -----
+
+def test_parse_user_additions_empty_when_no_markers():
+    text = "## §1\nsome framework prose\n## §2\nmore prose\n"
+    assert parse_user_additions(text) == []
+
+
+def test_parse_user_additions_finds_single_region_under_section():
+    text = (
+        "## §7\n"
+        "### 7.1 Mode registry\n"
+        "| collaborative | inline | all | session start |\n"
+        "\n"
+        "<!-- sourced:user-addition start -->\n"
+        "| debugging | docs/modes/debugging.md | all | explicit trigger |\n"
+        "<!-- sourced:user-addition end -->\n"
+    )
+    regions = parse_user_additions(text)
+    assert len(regions) == 1
+    assert regions[0].section_heading == "§7"
+    assert "debugging" in regions[0].content
+    assert regions[0].content.startswith("<!-- sourced:user-addition start -->")
+    assert regions[0].content.endswith("<!-- sourced:user-addition end -->")
+
+
+def test_parse_user_additions_multiple_regions_across_sections():
+    text = (
+        "## §3\n"
+        "<!-- sourced:user-addition start -->\n"
+        "custom §3 note\n"
+        "<!-- sourced:user-addition end -->\n"
+        "## §10\n"
+        "<!-- sourced:user-addition start -->\n"
+        "custom §10 note\n"
+        "<!-- sourced:user-addition end -->\n"
+    )
+    regions = parse_user_additions(text)
+    assert len(regions) == 2
+    assert regions[0].section_heading == "§3"
+    assert "custom §3 note" in regions[0].content
+    assert regions[1].section_heading == "§10"
+    assert "custom §10 note" in regions[1].content
+
+
+def test_parse_user_additions_region_before_any_section_has_none_heading():
+    text = (
+        "<!-- sourced:user-addition start -->\n"
+        "preamble-level custom note\n"
+        "<!-- sourced:user-addition end -->\n"
+        "## §1\nframework prose\n"
+    )
+    regions = parse_user_additions(text)
+    assert len(regions) == 1
+    assert regions[0].section_heading is None
+
+
+def test_parse_user_additions_rejects_unclosed_start():
+    text = (
+        "## §7\n"
+        "<!-- sourced:user-addition start -->\n"
+        "custom content\n"
+        "(no end marker)\n"
+    )
+    with pytest.raises(ProjectError, match="unclosed"):
+        parse_user_additions(text)
+
+
+def test_parse_user_additions_rejects_orphan_end():
+    text = (
+        "## §7\n"
+        "some prose\n"
+        "<!-- sourced:user-addition end -->\n"
+    )
+    with pytest.raises(ProjectError, match="without a preceding"):
+        parse_user_additions(text)
+
+
+def test_parse_user_additions_rejects_nested_start():
+    text = (
+        "## §7\n"
+        "<!-- sourced:user-addition start -->\n"
+        "<!-- sourced:user-addition start -->\n"
+        "<!-- sourced:user-addition end -->\n"
+    )
+    with pytest.raises(ProjectError, match="nested"):
+        parse_user_additions(text)
+
+
+def test_parse_user_additions_ignores_indented_markers():
+    """Column-0 strict: indented markers (legitimate prose) must not be parsed as regions."""
+    text = (
+        "## §7\n"
+        "documentation text: wrap hand-added sections in\n"
+        "  <!-- sourced:user-addition start -->\n"
+        "  ...custom content...\n"
+        "  <!-- sourced:user-addition end -->\n"
+        "markers to preserve them.\n"
+    )
+    assert parse_user_additions(text) == []
+
+
+# ----- merge_managed_block -----
+
+def test_merge_managed_block_preserves_region_under_matching_section():
+    old_managed = (
+        "## §1\nframework §1\n\n"
+        "## §7\nframework §7\n"
+        "<!-- sourced:user-addition start -->\n"
+        "custom content\n"
+        "<!-- sourced:user-addition end -->\n"
+    )
+    fresh_managed = (
+        "## §1\nframework §1\n\n"
+        "## §7\nframework §7\n"
+    )
+    merged, warnings = merge_managed_block(old_managed, fresh_managed)
+    assert "custom content" in merged
+    assert "<!-- sourced:user-addition start -->" in merged
+    assert "<!-- sourced:user-addition end -->" in merged
+    # Region placed under §7 section, not somewhere else.
+    s7_idx = merged.index("## §7")
+    # If there's a §8 or something after §7, custom content should land before it.
+    assert merged.index("custom content") > s7_idx
+
+
+def test_merge_managed_block_no_regions_returns_fresh_verbatim():
+    old = "## §1\nold framework\n"
+    fresh = "## §1\nfresh framework (changed)\n"
+    merged, warnings = merge_managed_block(old, fresh)
+    # Fresh wins.
+    assert "fresh framework (changed)" in merged
+    assert "old framework" not in merged
+    # Drift warning fires because framework content differs.
+    assert any("drifted" in w for w in warnings)
+
+
+def test_merge_managed_block_identical_no_warnings():
+    text = "## §1\nidentical framework\n"
+    merged, warnings = merge_managed_block(text, text)
+    assert merged == text
+    assert warnings == []
+
+
+def test_merge_managed_block_fresh_framework_wins_over_old():
+    """Writer edited framework content directly (no user-addition wrapper);
+    fresh wins and a warning is surfaced."""
+    old = "## §1\nwriter edited this framework prose\n"
+    fresh = "## §1\nfresh framework prose from template\n"
+    merged, warnings = merge_managed_block(old, fresh)
+    assert "fresh framework prose from template" in merged
+    assert "writer edited this framework prose" not in merged
+    assert len(warnings) >= 1
+    assert any("drift" in w.lower() for w in warnings)
+
+
+def test_merge_managed_block_orphaned_region_migrates_to_custom_section():
+    """If fresh removed the section containing a user-addition, migrate region
+    to a 'Custom additions (migrated)' section appended at end."""
+    old = (
+        "## §1\nframework\n"
+        "## §99 Legacy\n"
+        "<!-- sourced:user-addition start -->\n"
+        "custom legacy note\n"
+        "<!-- sourced:user-addition end -->\n"
+    )
+    fresh = "## §1\nframework\n"
+    merged, warnings = merge_managed_block(old, fresh)
+    assert MIGRATED_ADDITIONS_HEADING in merged
+    assert "custom legacy note" in merged
+    assert any("no matching" in w for w in warnings)
+
+
+def test_merge_managed_block_malformed_markers_raises():
+    old = "## §7\n<!-- sourced:user-addition start -->\nunclosed\n"
+    fresh = "## §7\nfresh\n"
+    with pytest.raises(ProjectError):
+        merge_managed_block(old, fresh)
+
+
+# ----- phase-1 → phase-2 migration -----
+
+def test_detect_phase1_layout_true_when_docs_modes_missing(tmp_project, monkeypatch):
+    """Requires bundled templates/docs/modes/ to exist. In development the
+    repo ships it; test passes only when the bundle is present."""
+    (tmp_project / "CLAUDE.md").write_text("monolithic")
+    # docs/modes/ does NOT exist in tmp_project.
+    assert (tmp_project / "docs" / "modes").exists() is False
+    # detect_phase1 returns True iff bundled docs/modes/ is present.
+    # In this repo's checkout it is; if the test is run on a minimal install
+    # without the bundle, skip.
+    from sourced.project import _bundled_docs_modes_present
+    if not _bundled_docs_modes_present():
+        pytest.skip("bundled templates/docs/modes/ not present in this install")
+    assert detect_phase1_layout(tmp_project) is True
+
+
+def test_detect_phase1_layout_false_when_claude_md_missing(tmp_project):
+    """No CLAUDE.md → not a phase-1 project (or not a sourced project at all)."""
+    assert detect_phase1_layout(tmp_project) is False
+
+
+def test_detect_phase1_layout_false_when_docs_modes_already_present(tmp_project):
+    (tmp_project / "CLAUDE.md").write_text("phase 2 layout")
+    (tmp_project / "docs" / "modes").mkdir(parents=True)
+    assert detect_phase1_layout(tmp_project) is False
+
+
+def test_deploy_docs_tree_copies_bundled_files(tmp_project):
+    from sourced.project import _bundled_docs_modes_present
+    if not _bundled_docs_modes_present():
+        pytest.skip("bundled templates/docs/modes/ not present")
+    written = deploy_docs_tree(tmp_project)
+    assert len(written) > 0
+    # At least the canonical mode bodies should land.
+    assert (tmp_project / "docs" / "modes" / "editing.md").exists()
+    assert (tmp_project / "docs" / "modes" / "research.md").exists()
+
+
+def test_migrate_phase1_to_phase2_renames_old_and_deploys(tmp_project):
+    from sourced.project import _bundled_docs_modes_present
+    if not _bundled_docs_modes_present():
+        pytest.skip("bundled templates/docs/modes/ not present")
+    old_content = "# Monolithic phase-1 CLAUDE.md\n...lots of content..."
+    (tmp_project / "CLAUDE.md").write_text(old_content)
+    fresh = "# Phase-2 manifest\n...new content..."
+    notes = migrate_phase1_to_phase2(tmp_project, fresh)
+    assert (tmp_project / PHASE1_BAK_NAME).read_text() == old_content
+    assert (tmp_project / "CLAUDE.md").read_text() == fresh
+    assert (tmp_project / "docs" / "modes").exists()
+    assert any("migrated" in n for n in notes)
+    assert any("docs/" in n for n in notes)
+
+
+def test_migrate_phase1_preserves_existing_bak(tmp_project):
+    """If .phase1.bak already exists (second run), don't clobber it."""
+    from sourced.project import _bundled_docs_modes_present
+    if not _bundled_docs_modes_present():
+        pytest.skip("bundled templates/docs/modes/ not present")
+    existing_bak = "first migration backup"
+    (tmp_project / PHASE1_BAK_NAME).write_text(existing_bak)
+    (tmp_project / "CLAUDE.md").write_text("current state")
+    notes = migrate_phase1_to_phase2(tmp_project, "fresh")
+    # Old bak untouched.
+    assert (tmp_project / PHASE1_BAK_NAME).read_text() == existing_bak
+    assert any("already exists" in n for n in notes)

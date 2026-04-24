@@ -69,6 +69,11 @@ def _build_parser() -> argparse.ArgumentParser:
     # check
     p_check = sub.add_parser("check", help="diagnose prereqs + ~/.claude/ health")
     p_check.add_argument("--project", help="also check this project directory")
+    p_check.add_argument(
+        "--invariants",
+        action="store_true",
+        help="run structural invariants I1-I10 against the bundled template + shipped mode bodies",
+    )
 
     return p
 
@@ -110,7 +115,7 @@ def _dispatch(args: argparse.Namespace) -> int:
         return switch.run(ctx, kind=args.switch_kind, name=args.name, project=args.project)
     if sub == "check":
         from .commands import check
-        return check.run(ctx, project=args.project)
+        return check.run(ctx, project=args.project, invariants=args.invariants)
 
     # No subcommand → print help, exit 2.
     _build_parser().print_help(sys.stderr)
