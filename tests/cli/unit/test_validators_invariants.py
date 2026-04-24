@@ -12,6 +12,7 @@ from sourced.validators.invariants import (
     check_i7_precedence_ordering,
     check_i8_mode_body_compliance,
     check_i9_size_limits,
+    check_i10_cache_discipline,
     parse_registry,
     parse_gate_table,
     parse_forcing_artifacts,
@@ -295,11 +296,64 @@ def test_i9_fails_on_overlong_registry_row():
 def test_run_all_invariants_returns_tuples():
     results = run_all_invariants()
     rule_ids = [r for r, _ in results]
-    # Commits 3 + 4 ship I1-I9. I10 is not yet in the shipped list.
-    assert rule_ids == ["I1", "I2", "I3", "I4", "I5", "I6", "I7", "I8", "I9"]
+    # Phase-2 ships all 10 invariants once the I10 cache-discipline follow-up lands.
+    assert rule_ids == ["I1", "I2", "I3", "I4", "I5", "I6", "I7", "I8", "I9", "I10"]
     # Every finding list is iterable.
     for _, findings in results:
         assert isinstance(findings, list)
+
+
+# ----- I10 cache-discipline -----
+
+def test_i10_passes_on_shipped_pipeline():
+    """The shipped _pipeline.render_claude_md routes through cache_stable_section."""
+    findings = check_i10_cache_discipline(inv._load_bundled_template())
+    assert findings == []
+
+
+def test_i10_fails_on_bare_string_return(monkeypatch):
+    """Mutate render_claude_md in-memory to return a bare string; I10 fires."""
+    from sourced.commands import _pipeline as pipeline
+    from sourced.render import RenderContext, render, read_template
+
+    def bare_string_render(user, ctx):
+        # Bare-string assembly: no cache primitive routing.
+        return render(read_template("templates/CLAUDE.md"), RenderContext(user=user))
+
+    monkeypatch.setattr(pipeline, "render_claude_md", bare_string_render)
+    findings = check_i10_cache_discipline(inv._load_bundled_template())
+    assert any(
+        "not a cache-primitive call" in f.message
+        or "AST" in f.message
+        or "always-on content" in f.message
+        for f in findings
+    )
+
+
+def test_uncached_section_requires_non_empty_reason():
+    """The runtime primitive itself rejects an empty reason."""
+    from sourced.commands._pipeline import uncached_section
+
+    with pytest.raises(ValueError, match="non-empty"):
+        uncached_section("test-section", lambda: "content", reason="")
+    with pytest.raises(ValueError, match="non-empty"):
+        uncached_section("test-section", lambda: "content", reason="   ")
+
+
+def test_cache_stable_section_returns_compute_output():
+    """The cache-stable primitive is a pass-through wrapper."""
+    from sourced.commands._pipeline import cache_stable_section
+
+    result = cache_stable_section("test", lambda: "expected output")
+    assert result == "expected output"
+
+
+def test_uncached_section_returns_compute_output_with_valid_reason():
+    """uncached_section returns the compute output when reason is valid."""
+    from sourced.commands._pipeline import uncached_section
+
+    result = uncached_section("test", lambda: "expected", reason="session-stamp changes per turn")
+    assert result == "expected"
 
 
 def test_run_all_invariants_passes_on_shipped_bundle():
