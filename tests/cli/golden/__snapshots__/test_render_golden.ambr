@@ -381,7 +381,7 @@
   | outlining → refining | outline sign-off from TestUser | — |
   | refining → writing | §4 audit emitted with zero unresolved `flagged` rows; refined outline approved by TestUser | §4 audit list |
   | writing → editing | TestUser-initiated only | — |
-  | editing → formatting | edit-complete gate + paste target named + voice audit surface-scan clean | voice audit surface-scan report |
+  | editing → formatting | revision report + §4 audit clean (zero unresolved flagged rows) + voice audit surface-scan report emitted (empty or `mark as intentional`) + paste target named | revision report, §4 audit list, voice audit surface-scan report |
   | formatting → (terminal) | pre-flight pass (all checks in `docs/modes/formatting.md` step 2) | inline-quote-threshold list |
   | * → research (auto) | §3 self-correction trigger OR unsourced-claim detected | — |
   | research → (return to invoking mode) | source logged per §8 Moment 1 OR TestUser accepts the gap | — |
@@ -401,7 +401,8 @@
   - **§4 audit list.** One row per citation audited, each row recording pass/`flagged: <reason>` for items 1, 2, 4, 5, 6 of §4. Emitted by `[refining]` on outline and `[editing]` pass 2 on prose. Gates: `refining → writing`, `editing → formatting`.
   - **Scope-delta list.** Entries of the form `{trigger_observed, original_scope, proposed_scope_change, load_bearing?}`. Emitted by §6 scope-growth soft-stop in any mode. Empty iff no drift observed in the triggering turn. A triggered self-check that doesn't produce the list has not run.
   - **Inline-quote-threshold list.** Per flagged span: `{paragraph_ref, quote_word_count, threshold, @id (if attached)}`. Emitted by `[formatting mode]` pre-flight step 2. Empty list required on zero hits. Gate: formatting pre-flight.
-  - **Voice audit surface-scan report.** Lists §10 never-list hits and density-list overruns with line references. Emitted by `[editing mode]` handoff before formatting. Gate: `editing → formatting`.
+  - **Revision report.** Emitted by `[editing mode]` Pass 0: one row per sub-check (0a purpose/main-claim, 0b sub-claim support, 0c outline correspondence at paragraph level, 0d transition evaluation, 0e paragraph one-job), each recording `pass` or `flagged: <reason>`. Plus an optional `0-plan: <pass | flagged | n/a>` row for prose-plan correspondence when a plan exists. Gate: `editing → formatting`.
+  - **Voice audit surface-scan report.** Lists §10 never-list hits (Pass 6), voice.md cut-pattern hits (Pass 7), quote-density flags (Pass 8), and voice-audit flags (Pass 9) with line references. Emitted by `[editing mode]` handoff before formatting. Gate: `editing → formatting`.
   
   ### 7.6 Precedence and canonical §10 IDs
   
@@ -419,6 +420,7 @@
   - `throat-clearing-openers` — sentence-initial "Crucially," / "Ultimately," / "Fundamentally," / "Importantly," / "In essence," / "It is worth noting that," / "It bears mentioning that," / "What is striking is."
   - `demonstrative-openers` — demonstrative-noun paragraph openers ("This tension," "These dynamics," "This shift") without specific recent antecedent.
   - `ornamental-compounds` — hyphenated conceptual compounds that disappear after one use.
+  - `aphoristic-closures` — paragraph endings on rhetorically-balanced pronouncements ("X is itself Y," "W handles what it handles," "That is the limit the paper holds") that simulate thesis-closure in place of earned conclusion. Fix requires restructure to `closure-type: transitional`, `synthesis`, or `question-out`.
   
   Full pattern prose, density list, and restructure guidance: `docs/modes/writing.md` §Never-list. Read on entry to [writing mode] and [editing mode].
   
@@ -1097,180 +1099,365 @@
   '''
   # Voice rules
   
-  Voice calibration tuned to TestUser's academic writing. The shipped `academic` voice is a register-specific skeleton: it encodes academic-register defaults for tone (stance, sentence shape, stance markers), structure (connectedness, pacing, argument building), and dimension (analogies, punctuation habits, formatting). Copy to a new name and edit for a different author within the academic register; for a different register (casual, technical, journalistic, narrative) start from the matching shipped skeleton instead. Applies in `[outlining mode]` (Paragraph Flow at outline time), `[writing mode]` (all rules, strictly), and `[editing mode]` (voice audit).
+  Voice calibration tuned to TestUser's academic writing. The shipped `academic` voice encodes academic-register defaults for tone (stance, sentence shape, stance markers), structure (connectedness, pacing, argument building), and dimension (analogies, punctuation habits, formatting). Copy to a new name and edit for a different author within the academic register; for a different register (casual, technical, journalistic, narrative) start from the matching shipped skeleton instead. Applies in `[outlining mode]` (Paragraph Flow at outline time), `[writing mode]` (Phase 1 plan + Phase 2 `prose-drafter` dispatch), and `[editing mode]` (Pass 0 Revision + Pass 8 voice audit).
   
   Read this file in full on entry to any of those modes; do not work from memory of prior sessions. The rules are load-bearing for the project's voice-preservation promise.
   
-  ## Iron rules
+  ## Sub-register taxonomy
   
-  The rules in this section pass through to every derived voice file verbatim. `voice-extractor` preserves them without corpus calibration; `install.sh` refuses to install a voice file where any is missing.
+  Academic writing is not a single register. This voice covers three sub-registers; rules below are tagged with the sub-register where they apply strongly. Untagged rules apply across all three.
   
-  CLAUDE.md §10 *Generation signatures to rewrite* applies to this voice in full. No item on §10's Never list is softened or downgraded to TBD, regardless of what the writing-samples corpus shows.
+  - **`academic-report`** — formal third-person prose with declarative thesis, citation-dense development, and section-end synthesis. Default when the brief does not specify sub-register. Examples: research papers, literature reviews, course reports.
+  - **`prospectus`** — compressed academic-report, usually 3–4 pages. Claim-forward opening (no narrative lure), argument-first development, forward-looking closing ("In the poster I will..."). No first-person stance; first-person appears only in process statements about the paper itself.
+  - **`personal-essay`** — first-person argumentative with question-driven structure. May delay thesis across multiple paragraphs for a narrative lure. Examples: admissions essays, reflection pieces.
   
-  When removing a §10 pattern in existing prose, restructure the sentence shape rather than substituting punctuation or reordering tokens; retokenization preserves the rhythm that reads as AI.
+  When the corpus spans multiple sub-registers, `voice-extractor` produces one voice file per sub-register rather than unioning them; see `data/agents/voice-extractor.md § Multi-register corpora`. Unioning is the documented failure mode (a `personal-essay` first-person commitment rule imported into an `academic-report` produces awkward prose).
   
-  ### §10 exemptions
+  **Determining sub-register at write time.** `[writing mode]` Phase 1 declares the sub-register for the section in the prose-plan's Register Mode field. The declaration filters which rules below apply. If the brief does not specify, assume `academic-report` and flag the assumption in the prose-plan.
   
-  Per-voice overrides to CLAUDE.md §10's Never list. An exemption suspends a named rule for this voice's writer prose only; scope and format are defined in CLAUDE.md §10 *Exemptions*. Leave the bullet list empty to inherit §10 in full.
+  ## Worked paragraphs
   
-  `voice-extractor` does not populate this section; corpus §10-pattern evidence goes into its `### Iron-rule conflicts` report and TestUser promotes bullets here by hand.
+  Paragraph-scale exhibits with per-sentence annotation. Each exhibit's annotation shape (`S1=…; S2=…; closure-type=…`) matches the prose-plan's sentence-role sequence — the plan uses the same vocabulary, so an exhibit IS a model for a plan block.
+  
+  ### Exhibit 1 — academic-report
+  
+  > The material manifestation of this religious ideology is concentrated in two primary sacred objects: the Sacred Buffalo Hat (*Ésevone*) and the Sacred Arrows (*Maahōtse*). The Sacred Buffalo Hat was brought to the Cheyenne by the cultural hero Erect Horns, who received the gift from the Creator after entering a sacred mountain alongside a woman. This journey represents a passage into the Deep Earth (*Nsthoaman*), a subterranean realm that corresponds to the absolute downward direction of the universe, or the nadir. Because the Hat originates from this realm, this explains why the Cheyenne recognize it as "the female power." This identity is further reflected in the Hat's name; while *Ésevone* colloquially translates to "female bison," its linguistic roots mean "Something Coming Out of the Ground."
+  
+  <!-- annotation:
+  S1=opener-claim (names the two objects, sets up the pair structure); opener-shape=state-claim-flat
+  S2=development-narrative (origin story of object A); parenthetical-gloss on Ésevone
+  S3=development-connect (connects origin to cosmological location); parenthetical-gloss on Nsthoaman
+  S4=development-interpret (because-clause ties location to gender coding)
+  S5=closure-etymological-confirmation (translation pairing confirms the gender reading); closure-type=synthesis
+  paragraph-pattern: state-pair → develop-A → connect-to-cosmology → interpret → confirm-via-etymology
+  handoff-to-next: transitions from "the Hat" to the Arrows, which structures the next paragraph
+  source: my_writing/report_2.txt (adapted for brevity)
+  -->
+  
+  ### Exhibit 2 — prospectus
+  
+  > Cheyenne personal names function as morphologically transparent predicates: small claims about their bearers, assembled from parts with identifiable meanings. And these place their bearers along a vertical cosmological axis. Standing at the top of the cosmological axis is the Creator, *Ma'heo'o*. Contrarily, *Ma'heo'o* is not morphologically transparent. Its translation, "All-Father," does not hold up under Cheyenne phonology, and no alternatives accurately translate.
+  
+  <!-- annotation:
+  S1=opener-thesis-flat (declarative thesis, no lure); opener-shape=state-claim-flat
+  S2=thesis-amplifier (adds the cosmological placement claim)
+  S3=thesis-specialize (introduces the Creator as the apex of the axis)
+  S4=pivot (names the contrast that drives the paper)
+  S5=closure-problem-statement (sets up the phonological argument for body paragraphs); closure-type=transitional
+  paragraph-pattern: thesis → amplifier → specialize → pivot → problem-statement
+  handoff-to-next: "All-Father" becomes the load-bearing term of the next paragraph, which explains transparent predicates
+  source: report_3.pdf (Hayden's edited prospectus opening)
+  -->
+  
+  ### Exhibit 3 — personal-essay
+  
+  > I believe language itself can be heterotopiac — both a bridge and a boundary. Heritage language instruction creates spaces where bilingual students can think in their native tongue, preserving cultural identity while engaging with dominant academic discourse. Yet this same instruction risks reinforcing the separation it seeks to dismantle. If students develop fluency in their heritage language but never build comparable capacity in the surrounding society's language of power, the classroom becomes a refuge rather than a bridge. Would it create an environment so comfortable that there is no incentive to engage with the broader society?
+  
+  <!-- annotation:
+  S1=opener-first-person-commitment (stance claim); opener-shape=state-commitment-I
+  S2=development-positive-case (builds the claim's affirmative support)
+  S3=pivot-contrast ("Yet" signals the counterpoint; handoff connective)
+  S4=development-counter-case (builds the risk)
+  S5=closure-question-out (question that opens the next paragraph); closure-type=question-out
+  paragraph-pattern: I-commit → amplify → pivot-Yet → counter-case → question-out
+  handoff-to-next: question asked in S5 is answered in the next paragraph, which picks up the "environment" frame
+  source: my_writing/UW Essay 2.pdf (condensed from multiple paragraphs)
+  -->
+  
+  Voice-extractor replaces these shipped exhibits with corpus-derived paragraphs when run against an author's samples. The shipped exhibits are illustrative of the shape, not defaults to retain; the extractor's output file carries the author's actual patterns.
   
   ## Tone
   
   ### Stance
   
-  State views clearly. Acknowledge uncertainty when it's real, but don't hedge for safety.
+  **Rule `[register: personal-essay]`.** State views in the first person and commit to positions: "I believe," "I think," "I notice," "I struggle to imagine." When uncertainty is genuine, name it directly ("The more I consider it, the less certain I become") rather than adding modal qualifiers for safety. First-person commitment is a genre marker of the personal essay; absence of it flattens the register.
   
-  - "I think the issue here is X"
-  - "I feel like something is off with this approach"
+  **Rule `[register: academic-report, prospectus]`.** State views in third-person declarative. First-person stance markers ("I think," "I believe," "my claim is") are genre-wrong in formal academic writing; they mark undergraduate-essay register where the genre expects scholarly-voice. First-person is acceptable only in process statements about the paper itself ("In the poster I will extend...", "In the next section I address..."). Commit to positions through the structure of the sentence (what it asserts, how it handles counterpoints) rather than through pronoun markers.
   
-  Not: "It is evident that the current approach is suboptimal."
-  Not: "Perhaps we might consider possibly thinking about..."
+  **Exemplars `[personal-essay]`:**
+  - "I believe language itself can be heterotopiac — both a bridge and a boundary."
+  <!-- source: UW Essay 2.pdf -->
+  - "The more I consider it, the less certain I become on supporting either model."
+  <!-- source: UW Essay 2.pdf -->
+  
+  **Exemplars `[academic-report, prospectus]`:**
+  - "Cheyenne personal names function as morphologically transparent predicates: small claims about their bearers, assembled from parts with identifiable meanings."
+  <!-- source: report_3.pdf -->
+  - "For the Cheyenne people, or *Tsétsėhéstȧhese*, the universe is an animate system that requires constant spiritual maintenance to survive."
+  <!-- source: my_writing/report_2.txt -->
+  
+  **Not:** "It is evident that..." / "Perhaps one might consider possibly..." (register-neutral hedging). In academic-report: "I think the evidence suggests..." (first-person import from personal-essay).
   
   ### Sentence Structure
   
-  Short sentences. Break up long thoughts, but don't overdo it.
+  **Rule.** Sentences are medium to long by default, with connective tissue binding them. Short declaratives ("Likely not." "Change will not come easily.") mark pivots and emphatic endpoints — they are not the baseline. Do not default to fragments; the short form signals that the argument has reached a turning point.
   
-  - "This works. But here's the thing: it's also fragile."
-  - "It memorized the pattern, it didn't learn the principle."
+  **Exemplars:**
+  - "This deep spiritual connection is reflected in Cheyenne grammar, which spiritually imbues certain objects with peoplehood, the state of being a person."
+  <!-- source: my_writing/report_1.txt -->
+  - "Change will not come easily. But if we succeed, perhaps we will witness a world where minorities are no longer fighting to be heard."
+  <!-- source: UW Essay 2.pdf -->
   
-  Not: "This works, but the thing is that it's also fragile, which means that under slightly different conditions it will break."
+  **Not:** a paragraph composed entirely of short isolated declaratives, with no causal or contrastive links between them.
   
   ### Exploratory vs Verdict Tone
   
-  Claims along the way should read as exploration; verdicts are for conclusions. Reserve decisive framings for synthesis at paragraph or section ends, not for every sentence en route.
+  **Rule.** Claims along the way read as exploration; verdicts are reserved for conclusions. Hold questions open for multiple paragraphs before resolving them. Body paragraphs may end with a question (especially in `personal-essay`) rather than a closed statement. Reserve decisive framings for synthesis at section ends, not for every sentence en route.
   
-  - Exploratory: "Crucially, while the replication produced results consistent with the original finding, the experimenters noted that the apparatus differed in ways the published protocol had not disclosed..." — nuance is surfaced, not collapsed.
-  - Verdict-stacked: "The distinction is structural. It tracks the disciplinary boundary." — back-to-back verdicts with no exploratory sentence between.
-  
-  ### Thinking Out Loud
-  
-  Show reasoning. Ask questions, then answer them.
-  
-  - "So what does this actually mean? I think it means we need to rethink our approach."
-  - "Which raises the question: why does this keep happening?"
+  **Exemplars `[personal-essay]`:**
+  - "Would it create an environment so comfortable that there is no incentive to engage with the broader society?"
+  <!-- source: UW Essay 2.pdf -->
+  - "Have our genes made us too 'selfish'? How can we claim greater value if we increasingly sabotage the survival of the very copies we are meant to protect?"
+  <!-- source: UW Essay 3.pdf -->
   
   ### Including the Reader
   
-  Use "we" to make writing collaborative rather than lecturing.
+  **Rule `[register: personal-essay]`.** Use "we" to make the argument collaborative. Move between "I" (personal stance) and "we" (shared reasoning) within the same essay. The shift is not mechanical — "I" grounds a personal observation, "we" invites the reader into the argument's implications.
   
-  - "So what do we actually want here?"
-  - "If we step back and look at the bigger picture..."
+  **Rule `[register: academic-report, prospectus]`.** "We" is rare; "the reader," "one," "this paper" are also flattening if overused. Default to third-person declarative about the subject matter; the argument speaks through what it claims, not through a rhetorical reader-address.
   
-  Not: "The reader must recognize..." "One should consider..." "It must be understood that..." These lecture. Also don't force "we" in where it sounds mechanical; drop it if the sentence works without.
+  **Exemplars `[personal-essay]`:**
+  - "If we neglect this, we risk reinforcing the very heterotopias that bilingual education seeks to dismantle. We risk creating a new era of separation, of prejudice."
+  <!-- source: UW Essay 2.pdf -->
+  
+  **Not:** "The reader must recognize..." / "One should consider..." — these lecture rather than invite.
   
   ### Weak Adverbs
   
-  Cut weak adverbs: "really", "very", "quite", "somewhat", "fairly", "rather", "basically", "actually", "honestly". "This is really quite important" becomes "This is important." Ground claims with numbers or comparisons, not vague qualifiers. "Many papers have been retracted for manipulation" becomes "In 2019, 23% of retracted papers had been cited more than 100 times."
+  **Rule.** Cut "really," "very," "quite," "somewhat," "fairly," "rather," "basically," "actually," "honestly." Ground claims with numbers, specific conditions, or concrete comparisons — not vague qualifiers. "Perhaps" appears in genuine uncertainty ("Perhaps the Walled City warns us...") but not as padding. When in doubt, cut it and check whether the claim is weaker or just more honest.
   
   ### No Preamble
   
-  Never start with "Great question!" or "That's interesting." Just start with substance.
+  **Rule.** Never start a paragraph or turn with "Great question!" / "That's interesting." / "Let me..." Open on substance: a term to define, a claim to interrogate, a named scholar's position, or a personal observation that frames the argument.
   
   ## Structure
   
   ### The Core Rule
   
-  Every word fights to stay. If a sentence adds nothing, cut it. If two sentences say the same thing differently, merge them into one shorter sentence. No filler, no padding, no repetition.
+  **Rule.** Every word fights to stay. If a sentence adds nothing, cut it. If two sentences say the same thing differently, merge them into one shorter sentence. No filler, no padding, no repetition.
   
   Writing is sculpting: start with raw material, then chisel. Write a draft, step back, cut, rewrite. Repeat. The first version is never the final version.
   
-  **Concision is a means, not an end.** The baseline register for this voice is medium-to-long connected prose (see §Sentence Connectedness); chiseling below that baseline is a failure mode, not a success. If cutting a word makes the sentence awkward to read aloud, put the word back. If compressing two sentences into one merges two different thoughts, do not merge them. "Every word fights to stay" means filler doesn't survive; it does not mean every removal is a win. A grammatically tight sentence that trips the reader on first read has been over-chiseled. The fix is to restore connective tissue, not to defend the compression.
+  **Concision is a means, not an end.** The baseline register for this voice is medium-to-long connected prose (see `### Sentence Connectedness`); chiseling below that baseline is a failure mode, not a success. If cutting a word makes the sentence awkward to read aloud, put the word back. If compressing two sentences into one merges two different thoughts, do not merge them. "Every word fights to stay" means filler doesn't survive; it does not mean every removal is a win. A grammatically tight sentence that trips the reader on first read has been over-chiseled. The fix is to restore connective tissue, not to defend the compression.
   
   **The iteration loop.** After writing a draft, reread every sentence and ask:
   - Does this sentence add something the reader doesn't already know?
   - Does it repeat an idea from another part of the text?
   - Does it sound formulaic or AI-generated? (Cross-check against CLAUDE.md §10's Never list specifically; retokenizing the pattern is not a fix.)
   - Does it earn its place in the argument?
-  - **Does it read fluidly aloud, or does the reader trip on it?** A clipped fragment ("none of the three resolves"), a stranded preposition that lands awkwardly ("where is the 'there' the stem points at?"), or a register-high verb where a plain one would carry the meaning ("legible" where "visible" works) all signal over-compression. Restore the word or restructure around a different shape.
-  - **Does a negation sentence sit immediately before an affirmation that asserts the alternative?** That is §10's "not X but Y" pattern retokenized with a period; break the adjacency or drop the negation.
+  - Does it read fluidly aloud, or does the reader trip on it? A clipped fragment ("none of the three resolves"), a stranded preposition that lands awkwardly ("where is the 'there' the stem points at?"), or a register-high verb where a plain one would carry the meaning ("legible" where "visible" works) all signal over-compression. Restore the word or restructure around a different shape.
+  - Does this paragraph end on an aphoristic closure ("X is itself Y," "W handles what it handles," "That is the limit the paper holds")? That is a `## Cut patterns > aphoristic-closure` hit (also §10 canonical ID `aphoristic-closures`); restructure to `closure-type: transitional` or `synthesis` and drop the rhetorical shape.
+  - Does a negation sentence sit immediately before an affirmation that asserts the alternative? That is §10's "not X but Y" pattern retokenized with a period; break the adjacency or drop the negation.
   - Does the section flow when read start to finish?
   
-  If any answer is no, rewrite or cut. Then reread again. Do not stop after one pass. Keep iterating until a full reread surfaces no issues. Only then present the draft for feedback.
-  
-  This is not optional polish. This is the process. First drafts are raw material, not output.
+  If any answer is no, rewrite or cut. Do not stop after one pass. Keep iterating until a full reread surfaces no issues. Only then present the draft for feedback. This is not optional polish; this is the process. First drafts are raw material, not output.
   
   ### Sentence Connectedness
   
-  Sentences hand off. Each connects to the previous through a causal, contrastive, or sequencing connective ("because," "since," "while," "instead," "so that," "as," "when"). A paragraph of complete-on-their-own declaratives makes the reader do the connecting and reads as a stream of verdicts rather than an argument.
+  **Rule.** Sentences hand off. Each connects to the previous through a causal, contrastive, or sequencing connective ("because," "since," "while," "instead," "so that," "as," "when"). Sentence-initial connectives ("Yet," "Still," "Whereas," "Nevertheless," "However," "While") appear throughout the corpus — this is the defining structural habit. A paragraph of complete-on-their-own declaratives makes the reader do the connecting and reads as a stream of verdicts rather than an argument.
   
-  - Connected: "Because the archive was destroyed during the 1944 bombing, later historians worked from secondary summaries rather than primary documents. Those summaries compressed what the originals made explicit; each subsequent citation loses a layer of specificity."
-  - Disconnected: "The tension is productive. The gap between theory and practice appears throughout the economics literature. It recurs at the level of individual policy debates."
+  **Exemplars:**
+  - "Whereas Benjamin laments that the original's aura 'withers' through reproduction, French sociologist Jean Baudrillard questions whether an 'original' still exists at all."
+  <!-- source: UW Essay 3.pdf -->
+  - "While the Hat embodies generative female power, it functions alongside the Sacred Arrows, which is operated under a male-governed framework."
+  <!-- source: my_writing/report_2.txt -->
   
   Academic prose defaults to longer connected sentences; the short form is for emphasis at pivots, not the baseline.
   
   ### Paragraph Flow
   
-  Paragraphs set up, develop, and hand off. End a paragraph on a transition to the next paragraph's topic, not on a verdict that closes the door. Open the next paragraph with a connective, a reference back, or a concept the prior paragraph positioned.
+  **Rule.** Paragraphs set up, develop, and hand off. End a paragraph on a transition that opens the next paragraph's topic, not on a verdict that closes the door. Open the next paragraph with a contrastive connector, a concept the prior paragraph positioned, or a direct reference back.
   
-  - Connected: a paragraph on Brown's 1954 cross-sectional data ends on the methodological gap it exposed; the next opens "While Brown worked with cross-sectional samples, the longitudinal follow-up found substantially different patterns..." — "While" carries the handoff.
-  - Disconnected: a paragraph ends "The statistical model captures the correlation; the mechanism remains unspecified." The next opens cold; the reader has to jump the gap themselves.
+  **Exemplar (paragraph-pair handoff):**
+  - A paragraph on the balanced bilingual model ends on Rodriguez's critique of it; the next opens "The transitional model uses the heritage language as a temporary bridge..." — the handoff is the contrast between the two models, not a summary verdict on the first.
+  <!-- source: UW Essay 2.pdf -->
+  
+  **Not:** ending a paragraph on "And so copies of art, however cherished, cannot fully match the original in aura or value" and then opening the next paragraph cold on Baudrillard without a bridging connector.
   
   ### Information Pacing
   
-  Not every sentence carries a new claim plus citation. Interleave elaboration sentences that develop the prior claim without introducing new evidence. Readers need breathing room between heavy claims; packed prose exhausts them.
+  **Rule.** Not every sentence carries a new claim plus citation. Interleave elaboration sentences that develop a prior claim without introducing new evidence. After citing a scholar, typically add a sentence of implication or synthesis before moving to the next source.
   
-  - Paced: "Because the replication used a larger and more diverse sample, the effect size contracted (Patel and Kim, 2019). This reduction reflects not a failure of the original finding but a correction to its population validity..." — the second sentence elaborates without new evidence.
-  - Packed: every sentence loads a new claim plus a parenthetical citation; the reader processes evidence continuously with no synthesis sentence to rest on.
+  **Exemplar:**
+  - "Aura and authenticity may not belong solely then, to original 'originals.'" (elaboration after the description of the Tuscan painting) — the synthesis sentence precedes the next scholar.
+  <!-- source: UW Essay 3.pdf -->
   
   ### Concept Setup
   
-  Introduce technical or specialized terms with a one-clause framing on first use. Don't drop terminology and move on; a reader without the domain background is blocked.
+  **Rule.** Introduce technical or specialized terms with a one-clause framing on first use. Define inline: "heterotopia," "simulacra," "hyperreality," "ExAhestOtse," "obviative" all get framed before use. Do not drop terminology and move on.
   
-  - Set up: "the role of inhibitory control, the cognitive capacity to suppress a dominant response in favor of a context-appropriate alternative" — the term is defined inline before further use.
-  - Dropped: "The analysis assumes *Gauss-Markov conditions* hold across the panel..." — "Gauss-Markov conditions" expects prior econometric knowledge the reader may not have.
+  **Exemplar:**
+  - "The term *heterotopia*, first introduced by philosopher Michel Foucault, describes spaces that exist as 'other': 'effectively enacted utopias' that 'represent' yet simultaneously 'challenge and invert' the societies that surround them."
+  <!-- source: UW Essay 2.pdf -->
   
   ### Building Arguments
   
-  Walk through reasoning. When there's a counterpoint worth addressing, address it briefly.
+  **Rule.** Walk through reasoning. When there is a counterpoint worth addressing, address it. Present multiple competing scholars' positions within a single essay and adjudicate between them rather than ignoring the competition. Say when an argument is compelling and when it is incomplete.
   
-  - "I'm not saying we shouldn't do X (we probably should, in some cases). But I'm worried we're over-indexing on it."
+  **Exemplar `[personal-essay]`:**
+  - "I want to believe in Villanueva's vision: that bilingual education empowers marginalized students in America. Yet Rodriguez's concern lingers: does linguistic comfort foster 'public alienation'?"
+  <!-- source: UW Essay 2.pdf -->
   
   ### Paragraph Length
   
-  3 to 5 sentences per paragraph maximum. Each paragraph has one job. Show the example first, then explain the principle.
+  **Rule.** 3 to 5 sentences per paragraph. Each paragraph has one job. Show the example first, then explain the principle (for inductive paragraphs); state the claim first, then develop (for deductive paragraphs — academic-report default).
   
   ### Reduced Structures and Parse Load
   
-  A reduced relative clause (dropped "that"), a cataphoric pronoun ("one," "this," "that," pointing forward to content the sentence hasn't yet delivered), or a long noun-phrase subject is each acceptable on its own. Two or three stacked in one sentence force the reader to backtrack to identify the subject. Limit yourself to one parse-load element per sentence; if the argument needs more, split the sentence.
+  **Rule.** A reduced relative clause (dropped "that"), a cataphoric pronoun ("one," "this," "that," pointing forward to content the sentence hasn't yet delivered), or a long noun-phrase subject is each acceptable on its own. Two or three stacked in one sentence force the reader to backtrack to identify the subject. Limit yourself to one parse-load element per sentence; if the argument needs more, split the sentence.
   
   Prefer the explicit "that" when the sentence already has a long subject, a cataphoric reference, or multiple clauses. The word savings are not worth the parse cost. This is a principled exception to the Core Rule's cut bias: "that" is optional grammatically but load-bearing for readability once a sentence carries other parse-load elements.
   
-  - Stacked: "The axis Moore's data reveals is one the names themselves display across the census record, and the morphological contrast this prospectus has traced reads onto it directly." Three reduced relatives plus a cataphoric "one"; the reader backtracks to find each subject.
-  - Split: "Moore's data reveals a vertical axis, and the names themselves display the same axis across the census record. The morphological contrast between transparent names and Ma'heo'o reads onto that axis directly." One idea per sentence, with explicit noun phrases in place of the cataphora.
-  
-  Signal: if the reader has to re-read a clause to identify its subject, a reduced relative is probably doing the damage. Restore the "that," or split the sentence at the clause boundary.
+  **Exemplars:**
+  - Stacked (violates): "The axis Moore's data reveals is one the names themselves display across the census record, and the morphological contrast this prospectus has traced reads onto it directly." Three reduced relatives plus a cataphoric "one"; the reader backtracks.
+  - Split (fix): "Moore's data reveals a vertical axis, and the names themselves display the same axis across the census record. The morphological contrast between transparent names and *Ma'heo'o* reads onto that axis directly."
+  <!-- source: report_3 (before/after from tmp.md §2) -->
   
   ### Weak Nominalizations
   
-  Prefer verbs over nouns made from verbs. Prefer concrete subjects over abstract ones. A chain of abstract nouns ("the scope of X… the widening into Y… the strategies Z uses to place W in relation to…") reads as institutional padding even when every word passes the Core Rule's cut test. This is the opposite failure mode of over-compression: when the cut-bias stops firing, the prose expands into abstract-noun cascades that disconnect the agent from the action.
+  **Rule.** Prefer verbs over nouns made from verbs. Prefer concrete subjects over abstract ones. A chain of abstract nouns ("the scope of X… the widening into Y… the strategies Z uses to place W in relation to…") reads as institutional padding even when every word passes the Core Rule's cut test. Opposite failure mode of over-compression: when the cut-bias stops firing, prose expands into abstract-noun cascades.
   
+  **Exemplars:**
   - Nominalized: "widening the scope to the morphological strategies the Cheyenne lexicon uses to place bearers in relation to what the culture considers sacred"
   - Verbed: "widening the scope to the Cheyenne morphology that marks which bearers the culture treats as sacred"
+  <!-- source: tmp.md §1 -->
   
-  Watch especially for sentences whose subject is an abstract noun made from a verb ("the argument," "the question," "the distinction," "the tension," "the refusal") when every clause extends the cascade. Rewrite around a concrete agent and an active verb when the subject doesn't need to stay abstract. Small-word redundancy is a related tell; a repeated "as" ("read as X rather than as Y" should be "read as X rather than Y") survives the Core Rule because individual words pass but the pattern is compression-artifact slack.
+  Watch especially for sentences whose subject is an abstract noun made from a verb ("the argument," "the question," "the distinction," "the tension," "the refusal") when every clause extends the cascade. Rewrite around a concrete agent and an active verb when the subject doesn't need to stay abstract. Small-word redundancy is a related tell; repeated "as" ("read as X rather than as Y" should be "read as X rather than Y") survives the Core Rule because individual words pass but the pattern is compression-artifact slack.
+  
+  ### Parenthetical Gloss `[register: academic-report, prospectus]`
+  
+  **Rule.** Introduce transliterated terms, proper nouns from a non-English language, or specialized vocabulary with a parenthetical gloss inline on first use. Use `(English gloss)` after a native term or `(native term)` after an English gloss, not footnotes. On second and later appearances, no gloss needed — the term is established. This is one of the most consistently visible structural habits in academic prose that touches non-English material.
+  
+  **Exemplars:**
+  - "For the Cheyenne people, or *Tsétsėhéstȧhese*, the universe is an animate system..."
+  <!-- source: my_writing/report_2.txt -->
+  - "...a passage into the Deep Earth (*Nsthoaman*), a subterranean realm..."
+  <!-- source: my_writing/report_2.txt -->
+  - "at the axis's nadir (downward direction)"
+  <!-- source: report_3.pdf -->
   
   ## Dimension
   
   ### Analogies and Anecdotes
   
-  Connect ideas to broader patterns. Use specific, memorable stories to anchor abstract points.
+  **Rule.** Connect ideas to broader patterns. Use specific, memorable anchors to make abstract claims concrete: a self-contained historical or cultural example is introduced, described briefly, and then explicitly connected to the essay's central argument. The connection is always stated, never implied and left for the reader to infer.
   
   **Anchors:** TBD — derived from corpus. Academic-register anchors often include recurring case studies, named experiments, or specific empirical phenomena the author returns to across multiple papers as illustrative touchstones for abstract claims — canonical cross-disciplinary patterns are things like Ship of Theseus (identity under incremental change), the streetlight effect (methodological convenience vs. truth), or Chesterton's fence (epistemic humility about removing structures you don't understand). voice-extractor replaces this placeholder with the author's actual anchors from the corpus; the patterns above are illustrative of the kind, not defaults to keep.
   
-  Not every vivid analogy earns its place. Drop it if the connection to your specific claim is loose ("this reminds me of..."). Cut back an analogy you find yourself extending across multiple paragraphs to keep it working: it should illuminate one point, not run the argument.
+  Not every vivid analogy earns its place. Drop it if the connection to your specific claim is loose. Cut back an analogy you find yourself extending across multiple paragraphs to keep it working: it should illuminate one point, not run the argument.
   
   ### Punctuation
   
-  Punctuation patterns that function as AI generation signatures (em dashes, "not X but Y" pivots, ornamental triads) are governed by CLAUDE.md §10 *Generation signatures to rewrite*, which applies across every voice. Use this section only for author-specific punctuation habits the corpus clearly shows (semicolon style, ellipsis use, colon introducing evidence, etc.). Leave TBD rather than inventing a rule the corpus does not settle. An author-specific rule that contradicts §10 must be stated explicitly ("this author uses em-dashes for appositives"); silence defers to §10.
+  **Rule.** Punctuation patterns that function as AI generation signatures (em dashes, "not X but Y" pivots, ornamental triads, aphoristic closures) are governed by CLAUDE.md §10 *Generation signatures to rewrite*, which applies across every voice. Use this section only for author-specific punctuation habits the corpus clearly shows beyond the §10-governed patterns.
   
   Direct quotations follow CLAUDE.md §10 *Direct quotations* and §4 *Quote verbatim* (source punctuation preserved verbatim). This section governs the writer's own prose.
   
-  **Ellipses** for trailing thoughts: "And if you just... change it slightly, the whole thing breaks."
+  **Author-specific patterns (academic corpus typical):**
+  - Colons introduce evidence, elaboration, or a question the preceding clause poses.
+  - Semicolons: light use in reports, rare in personal essays.
+  - No trailing ellipses.
   
   ### Formatting
   
-  **Bold** for emphasis (not caps). *Italics* for technical terms. Bullet points sparingly.
+  **Rule.** **Bold** for emphasis (not caps). *Italics* for technical terms, transliterated words, and cited titles. Bullet points sparingly, and not in the body of analytical prose.
+  
+  ## Cut patterns
+  
+  Named failure modes observed in AI-drafted prose that `voice-extractor` and `[editing mode]` Pass 8 explicitly flag. Each pattern carries a provisional-name tag; mining `failures_dir` pairs (`<stem>.ai.md` / `<stem>.edit.md`) populates author-specific instances into this section at extraction time. Shipped patterns are register-default; the extractor adds or removes based on corpus evidence.
+  
+  Canonical patterns (shipped defaults):
+  
+  ### aphoristic-closure
+  
+  **Pattern.** Paragraph ends on a crisp, rhetorically-balanced pronouncement that substitutes rhetoric for reasoning. Signatures: "X is itself Y," "W handles what it handles," "That is the limit the paper holds," "Y persists while X drifts," "No stronger claim is intended."
+  
+  **Why it reads as AI.** The shape is a "profundity closure" — it sounds thesis-like without doing argument work. The reader has been given a feeling of resolution, not actual resolution.
+  
+  **Fix.** Restructure to a `transitional` or `synthesis` closure: end on what the next paragraph picks up, or end on a factual consequence the argument has earned.
+  
+  **Before / after:**
+  - AI: "The grammar of placement has a ceiling, and the Creator's name sits above it."
+  - Edit: (cut entirely; the claim is redundant given the preceding paragraph's setup)
+  <!-- source: report_3 v2 → pdf -->
+  
+  - AI: "*Ma'heo'o*'s exemption is itself the interesting linguistic fact: it holds both phonetically and morphologically."
+  - Edit: (cut; the next paragraph's phonological argument makes the point directly)
+  <!-- source: report_3 v2 → pdf -->
+  
+  This pattern corresponds to canonical §10 ID `aphoristic-closures`. A `## §10 exemptions` bullet naming `aphoristic-closures` is required to use this pattern in writer prose.
+  
+  ### compression-stranded-verb
+  
+  **Pattern.** Verb stripped of its object or qualifier for the sake of concision, producing a sentence that reads as a fragment of a longer thought. Signatures: "none of the three resolves" (resolves what?), "any correction has to reach" (reach what?), "the argument becomes visible" (visible where/how?).
+  
+  **Why it reads as AI.** The cut-bias of the Core Rule has fired past the readability threshold. The sentence is grammatically optimal and word-count minimal; it trips the reader on first read.
+  
+  **Fix.** Restore the stranded complement. The word savings are not worth the parse cost (same principle as `### Reduced Structures and Parse Load`).
+  
+  **Before / after:**
+  - AI: "none of the three resolves"
+  - Edit: "none of the three readings settles the meaning"
+  <!-- source: tmp.md §1 -->
+  
+  - AI: "where is the 'there' the stem points at?"
+  - Edit: "what 'there' does the stem point to?"
+  <!-- source: tmp.md §1 -->
+  
+  ### abstract-nominalization-cascade
+  
+  **Pattern.** Sequence of abstract nouns made from verbs ("scope," "strategies," "lexicon," "relation," "placement") stacked across clauses without a concrete agent or active verb. Signature: sentences whose subject is "the argument," "the question," "the tension," "the refusal," extended across 2+ clauses.
+  
+  **Why it reads as AI.** Inverse failure mode of `compression-stranded-verb`: when the cut-bias stops firing, prose expands into institutional-noun cascades that disconnect agent from action.
+  
+  **Fix.** Rewrite around a concrete subject + active verb. Same guidance as `### Weak Nominalizations`.
+  
+  ### reduced-relative-stacking
+  
+  **Pattern.** Two or three reduced relative clauses (dropped "that") stacked in a single sentence, often combined with a cataphoric pronoun. Signature: "the axis Moore's data reveals is one the names themselves display across the census record, and the morphological contrast this prospectus has traced reads onto it directly."
+  
+  **Why it reads as AI.** Each reduced relative is individually grammatical; three in one sentence force the reader to backtrack. Same root as `compression-stranded-verb` — optimization for word count at the cost of parseability.
+  
+  **Fix.** Restore "that" and/or split the sentence. See `### Reduced Structures and Parse Load`.
+  
+  ### first-person-commitment-in-academic-report
+  
+  **Pattern `[register-drift: personal-essay → academic-report]`.** First-person stance markers ("I think," "I believe," "my claim is," "I read these as...") appearing in `academic-report` or `prospectus` prose.
+  
+  **Why it reads as AI.** When a voice file is extracted from a multi-register corpus and unioned, personal-essay stance rules bleed into formal-register drafting. The resulting prose reads as undergraduate-essay register where the genre expects scholarly-voice.
+  
+  **Fix.** Rewrite as third-person declarative. First-person only in process statements about the paper itself ("In the poster I will extend...").
+  
+  **Before / after:**
+  - AI: "I think that irresolution is worth the analysis. My claim in this paper is this: Cheyenne personal names are..."
+  - Edit: "Cheyenne personal names function as morphologically transparent predicates: small claims about their bearers, assembled from parts with identifiable meanings."
+  <!-- source: report_3 v2 → pdf -->
+  
+  ### citation-atomization
+  
+  **Pattern `[register: academic-report, prospectus]`.** Fine-grained Pandoc IDs for the same domain treated as separate sources when a human writer would merge. Signature: `@leman-nda-001; @leman-ndb-001; @leman-ndc-001; @leman-ndd-001` all pointing at cheyennelanguage.org pages; each rendered as a separate parenthetical citation.
+  
+  **Why it reads as AI.** Granular IDs betray the `source-finder` shard architecture. A human writer recognizes that multiple pages of one site or multiple entries of one dictionary are one citation.
+  
+  **Fix.** At `[formatting mode]` time (or at drafting time for inline parentheticals), consolidate IDs that resolve to the same References entry.
+  
+  **Before / after:**
+  - AI: "(Leman, n.d.-a), (Leman, n.d.-b), (Leman, n.d.-c)..."
+  - Edit: "(Cheyenne Language Web Site)" — single-citation consolidation
+  <!-- source: report_3 v2 → pdf -->
+  
+  ## Iron rules
+  
+  The rules in this section pass through to every derived voice file verbatim. `voice-extractor` preserves them without corpus calibration; `sourced check` refuses to install a voice file where any is missing.
+  
+  CLAUDE.md §10 *Generation signatures to rewrite* applies to this voice in full. No item on §10's Never list is softened or downgraded to TBD, regardless of what the writing-samples corpus shows.
+  
+  When removing a §10 pattern in existing prose, restructure the sentence shape rather than substituting punctuation or reordering tokens; retokenization preserves the rhythm that reads as AI.
+  
+  ## §10 exemptions
+  
+  Per-voice overrides to CLAUDE.md §10's Never list. An exemption suspends a named rule for this voice's writer prose only; scope and format are defined in CLAUDE.md §10 *Exemptions*. Leave the bullet list empty to inherit §10 in full.
+  
+  `voice-extractor` does not populate this section; corpus §10-pattern evidence goes into its `### Iron-rule conflicts` report and TestUser promotes bullets here by hand.
   
   '''
 # ---
@@ -1278,89 +1465,119 @@
   '''
   # Voice rules
   
-  Voice calibration tuned to TestUser's casual writing — blog posts, personal essays, conversational pieces. The shipped `casual` voice is a register-specific skeleton: it encodes conversational-register defaults for tone (first-person ease, contractions, short sentences), structure (explicit connectives, short argument arcs), and dimension (analogies close to experience, inline punctuation, light formatting). Copy to a new name and edit for a different author within the casual register; for a different register (academic, technical, journalistic, narrative) start from the matching shipped skeleton instead. Applies in `[outlining mode]` (Paragraph Flow at outline time), `[writing mode]` (all rules, strictly), and `[editing mode]` (voice audit).
+  Voice calibration tuned to TestUser's casual writing — blog posts, personal essays, conversational pieces. Encodes conversational-register defaults under the phase-3 sub-register contract: tone (first-person ease, contractions, short sentences), structure (explicit connectives, short argument arcs), dimension (analogies close to experience, inline punctuation, light formatting). Applies in `[outlining mode]` (Paragraph Flow at outline time), `[writing mode]` (Phase 1 plan + Phase 2 `prose-drafter` dispatch), and `[editing mode]` (Pass 0 Revision + Pass 8 voice audit).
   
   Read this file in full on entry to any of those modes; do not work from memory of prior sessions. The rules are load-bearing for the project's voice-preservation promise.
   
-  ## Iron rules
+  ## Sub-register taxonomy
   
-  The rules in this section pass through to every derived voice file verbatim. `voice-extractor` preserves them without corpus calibration; `install.sh` refuses to install a voice file where any is missing.
+  Casual writing is not a single register. This voice covers three sub-registers; rules below are tagged with the sub-register where they apply strongly. Untagged rules apply across all three.
   
-  CLAUDE.md §10 *Generation signatures to rewrite* applies to this voice in full. No item on §10's Never list is softened or downgraded to TBD, regardless of what the writing-samples corpus shows.
+  - **`personal-essay`** — first-person reflective prose, narrative-driven, thesis-light or thesis-late. Examples: blog posts about an experience, mini-memoir pieces, "what I learned from X" reflections.
+  - **`commentary`** — opinion take on something current or specific, named stance, argument-forward. Examples: Substack-style posts taking a position, opinion blog posts, conversational responses to ongoing discourse.
+  - **`process-post`** — "how I built X / what I learned from Y" walkthrough, first-person setup + concrete steps + reflection. Examples: technical-adjacent how-to posts, recipe-style narratives, project retrospectives.
   
-  When removing a §10 pattern in existing prose, restructure the sentence shape rather than substituting punctuation or reordering tokens; retokenization preserves the rhythm that reads as AI.
+  When the corpus spans multiple sub-registers, `voice-extractor` produces one voice file per sub-register rather than unioning them; see `data/agents/voice-extractor.md § Multi-register corpora`. Unioning is the documented failure mode (a `commentary` sharper-stance rule imported into `personal-essay` reflective prose produces over-emphatic essays).
   
-  ### §10 exemptions
+  **Determining sub-register at write time.** `[writing mode]` Phase 1 declares the sub-register for the section in the prose-plan's Register Mode field. The declaration filters which rules below apply. If the brief does not specify, assume `personal-essay` (the casual default) and flag the assumption in the prose-plan.
   
-  Per-voice overrides to CLAUDE.md §10's Never list. An exemption suspends a named rule for this voice's writer prose only; scope and format are defined in CLAUDE.md §10 *Exemptions*. Leave the bullet list empty to inherit §10 in full.
+  ## Worked paragraphs
   
-  `voice-extractor` does not populate this section; corpus §10-pattern evidence goes into its `### Iron-rule conflicts` report and TestUser promotes bullets here by hand.
+  Paragraph-scale exhibits with per-sentence annotation. Each exhibit's annotation shape (`S1=…; S2=…; closure-type=…`) matches the prose-plan's sentence-role sequence — the plan uses the same vocabulary, so an exhibit IS a model for a plan block.
+  
+  ### Exhibit 1 — personal-essay (illustrative)
+  
+  > The first time I tried to bake bread without a recipe, the loaf came out dense and grey. I'd watched my grandmother do it a hundred times, flour and water and a pinch of salt and the dough's surface tightening into a smooth dome, but watching wasn't the same as knowing. What I'd missed was waiting. She'd let the dough sit far longer than I had, and the difference between her loaf and mine came down to time I hadn't given it.
+  
+  <!-- annotation:
+  S1=opener-scene (first-person, concrete sensory detail; sets up the failure); opener-shape=narrative-anecdote
+  S2=expansion-context (recalls the watched ritual in a list; serial commas, no em-dashes)
+  S3=pivot-realization (short sentence names what the writer missed; sets up the reflection)
+  S4=closure-synthesis (returns to the difference and names time as the variable); closure-type=synthesis
+  paragraph-pattern: scene → context-recall → pivot → synthesis
+  handoff-to-next: the next paragraph picks up "time I hadn't given it" and generalizes
+  source: illustrative; voice-extractor replaces with corpus paragraph at extraction time
+  -->
+  
+  ### Exhibit 2 — commentary (illustrative)
+  
+  TBD — voice-extractor populates from corpus when commentary samples are present. If the corpus is purely personal-essay or process-post, this exhibit stays TBD.
+  
+  ### Exhibit 3 — process-post (illustrative)
+  
+  TBD — voice-extractor populates from corpus when process-post samples are present. If the corpus is purely personal-essay or commentary, this exhibit stays TBD.
+  
+  Voice-extractor replaces these shipped exhibits with corpus-derived paragraphs when run against an author's samples. The shipped exhibits are illustrative of the shape, not defaults to retain; the extractor's output file carries the author's actual patterns.
   
   ## Tone
   
   ### Stance
   
-  State views like you're talking to one person. Contractions are fine. First-person is welcome. Acknowledge when you're not sure — but don't hedge for its own sake.
+  **Rule.** State views like you're talking to one person. Contractions are fine. First-person is welcome. Acknowledge when you're not sure but don't hedge for its own sake.
   
+  **Exemplars `[personal-essay, commentary]`:**
   - "I think this is worth doing, even if it's inconvenient."
   - "Honestly, I'm not sure what the right move is here."
   
-  Not: "It is my considered opinion that this course of action merits pursuit."
-  Not: "One might argue that..."
+  **Not:** "It is my considered opinion that this course of action merits pursuit." / "One might argue that..."
   
   ### Sentence Structure
   
-  Short sentences. Fragments are fine when they land. Contractions throughout.
+  **Rule.** Short sentences. Fragments are fine when they land. Contractions throughout. Casual prose's baseline is shorter than academic — but stacked one-clause declaratives with no hand-off still read as choppy. Vary the length; a short sentence earns its punch by sitting between longer ones.
   
+  **Exemplars:**
   - "This works. Sort of."
   - "You wouldn't believe how often this breaks."
   - "It's not the most elegant fix, but it's a fix."
   
-  Not: "One might observe that the implementation, while functional, does not demonstrate optimal elegance."
+  **Not:** "One might observe that the implementation, while functional, does not demonstrate optimal elegance."
   
   ### Exploratory vs Verdict Tone
   
-  Think out loud more than pronounce. Conversational writing earns its authority by showing the reasoning; verdict-stacking reads as lecturing.
+  **Rule.** Think out loud more than pronounce. Conversational writing earns its authority by showing the reasoning; verdict-stacking reads as lecturing. In `commentary`, the verdict is allowed at the end of the argument, not at the start.
   
+  **Exemplars:**
   - Exploratory: "Which makes me wonder whether the whole framing is off."
-  - Verdict-stacked: "This is clearly the wrong approach. The right approach is obvious." — back-to-back verdicts kill the conversation.
+  - Verdict-stacked (avoid): "This is clearly the wrong approach. The right approach is obvious." — back-to-back verdicts kill the conversation.
   
   ### Thinking Out Loud
   
-  Questions and answers, asides, second thoughts. Let the reader follow the thinking, don't hand them conclusions.
+  **Rule.** Questions and answers, asides, second thoughts. Let the reader follow the thinking; don't hand them conclusions.
   
+  **Exemplars:**
   - "Wait, does this actually matter? I think it does, but only if you're optimizing for X."
   - "So what does this tell us? Maybe nothing. Or maybe it's the whole point."
   
   ### Including the Reader
   
-  "You" and "we" both work. Pick based on feel. "You" is direct; "we" is collaborative. Don't lecture.
+  **Rule.** "You" and "we" both work. Pick based on feel. "You" is direct; "we" is collaborative. Don't lecture.
   
+  **Exemplars:**
   - "You end up choosing between two bad options."
   - "We've all been here before."
   
-  Not: "The reader must understand..."
+  **Not:** "The reader must understand..."
   
   ### Weak Adverbs
   
-  Cut weak adverbs: "really", "very", "quite", "somewhat", "fairly", "rather", "basically", "actually", "honestly". "This is really quite important" becomes "This is important." Casual prose allows "kind of" / "sort of" as authentic hedges when they carry actual meaning — "I sort of agree" can be genuine ambivalence. Cut them when they stack or dilute. "This is sort of basically actually a problem" is not casual, it's bad.
+  **Rule.** Cut "really," "very," "quite," "somewhat," "fairly," "rather," "basically," "actually," "honestly." "This is really quite important" becomes "This is important." Casual prose allows "kind of" / "sort of" as authentic hedges when they carry meaning ("I sort of agree" can be genuine ambivalence). Cut them when they stack or dilute. "This is sort of basically actually a problem" is not casual, it's bad.
   
   ### No Preamble
   
-  Never start with "Great question!" or "That's interesting." Just start with substance.
+  **Rule.** Never start a paragraph or turn with "Great question!" / "That's interesting." Open on substance.
   
   ## Structure
   
   ### The Core Rule
   
-  Casual prose doesn't mean sloppy. Every sentence earns its place; if it doesn't add something the reader couldn't guess, cut it. The iteration loop applies here too: draft, reread, cut, rewrite.
+  **Rule.** Casual prose doesn't mean sloppy. Every sentence earns its place; if it doesn't add something the reader couldn't guess, cut it.
   
-  Casual writing usually has a lower ceiling for length than academic — aim to be shorter than you think. Blog posts and personal essays that run long lose their conversational energy.
+  **Concision is a means, not an end.** Casual prose has a lower length ceiling than academic, but chiseling below the conversational rhythm is a failure mode, not a success. If cutting a word makes the sentence read like a stub, put the word back. Stranded verbs ("none of the three resolves") read as AI even in casual register; see `## Cut patterns > compression-stranded-verb`.
   
   **The iteration loop.** After writing a draft, reread every sentence and ask:
   - Does this sentence add something the reader doesn't already know?
   - Does it repeat an idea from another part of the text?
-  - Does it sound formulaic or AI-generated? (Cross-check against CLAUDE.md §10's Never list specifically; retokenizing the pattern is not a fix.)
+  - Does it sound formulaic or AI-generated? (Cross-check against CLAUDE.md §10's Never list.)
   - Does it earn its place?
   - Does the piece flow when read start to finish?
   
@@ -1368,63 +1585,139 @@
   
   ### Sentence Connectedness
   
-  Sentences hand off, but the connectives are lighter. "And," "but," "so," "then" carry more weight than in academic prose; full subordinators ("because," "whereas") appear but not every sentence.
+  **Rule.** Sentences hand off, but the connectives are lighter than academic. "And," "but," "so," "then" carry more weight than full subordinators ("because," "whereas"). Casual prose can chain shorter sentences than academic prose, but full disconnection still reads as choppy.
   
+  **Exemplars:**
   - Connected: "I tried the first approach and it broke immediately. So I backed off and tried something simpler."
-  - Disconnected: "I tried the first approach. It broke. I tried something simpler."
-  
-  Casual prose can chain shorter sentences more than academic prose, but full disconnection still reads as choppy.
+  - Disconnected (avoid): "I tried the first approach. It broke. I tried something simpler."
   
   ### Paragraph Flow
   
-  Paragraphs are conversational beats. They can be shorter than academic paragraphs — a single idea, one or two sentences, then a paragraph break. But they still connect: end on a question, a setup, or a callback the next paragraph picks up.
+  **Rule.** Paragraphs are conversational beats. They can be shorter than academic — a single idea, one or two sentences, then a paragraph break. But they still connect: end on a question, a setup, or a callback the next paragraph picks up.
   
+  **Exemplars:**
   - Connected: A paragraph ends "I couldn't get it out of my head." The next opens "That nagging sense is usually worth listening to."
-  - Disconnected: Every paragraph ends on a full stop and opens cold.
+  - Disconnected (avoid): Every paragraph ends on a full stop and opens cold.
   
   ### Information Pacing
   
-  Heavy points get their own paragraphs. Light points cluster. Don't load every sentence, let some just breathe.
+  **Rule.** Heavy points get their own paragraphs. Light points cluster. Don't load every sentence; let some just breathe.
   
+  **Exemplar:**
   - Paced: "The demo crashed on stage. Everyone laughed politely. Then we spent three weeks rebuilding."
-  - Packed: claim + evidence + caveat + pivot all in one sentence, every sentence.
   
   ### Concept Setup
   
-  Define terms inline but lightly — a parenthetical or a "basically, it's X" aside. Don't formally introduce every specialized word; casual readers can handle inference better than textbook readers.
+  **Rule.** Define terms inline but lightly — a parenthetical or a "basically, it's X" aside. Don't formally introduce every specialized word; casual readers can handle inference better than textbook readers.
   
+  **Exemplars:**
   - Set up: "Chicken sexing (telling male and female chicks apart, which expert sexers can do reliably but can't explain how) is the classic example."
-  - Dropped: "The phenomenon exhibits characteristics consistent with implicit learning." (no setup; assumes the reader already knows the term)
+  - Dropped (avoid): "The phenomenon exhibits characteristics consistent with implicit learning."
   
   ### Building Arguments
   
-  Walk through the reasoning but feel free to skip steps the reader will fill in. Counterpoints appear as "yeah, but" moments, not formal objections.
+  **Rule.** Walk through reasoning but feel free to skip steps the reader will fill in. Counterpoints appear as "yeah, but" moments, not formal objections. In `commentary`, sharper objection-naming is allowed; in `personal-essay`, keep counterpoints conversational.
   
+  **Exemplar:**
   - "I know, I know, you could just use X. But X has its own problems."
   
   ### Paragraph Length
   
-  2 to 4 sentences per paragraph is the casual baseline. One-sentence paragraphs are allowed for emphasis. Avoid paragraphs longer than 5 sentences — the conversational energy dies.
+  **Rule.** 2 to 4 sentences per paragraph is the casual baseline. One-sentence paragraphs are allowed for emphasis. Avoid paragraphs longer than 5 sentences — the conversational energy dies.
+  
+  ### Reduced Structures and Parse Load
+  
+  **Rule.** Drop "that" freely in casual prose ("the thing she said," not "the thing that she said") — but don't stack two or three reduced relatives in one sentence. The reader has to backtrack to identify the subject. See `## Cut patterns > reduced-relative-stacking`.
   
   ## Dimension
   
   ### Analogies and Anecdotes
   
-  Anecdotes from personal experience anchor casual writing. Specific, small-scale, concrete. The reader should be able to picture the scene.
+  **Rule.** Anecdotes from personal experience anchor casual writing. Specific, small-scale, concrete. The reader should be able to picture the scene. Cut any anchor that requires domain knowledge to land — casual register's reach is wider than academic's.
   
-  **Anchors:** TBD — derived from corpus. Casual-register anchors lean on everyday objects or situations — cooking, commuting, tools-at-hand — rather than technical or academic examples. Cut any anchor that requires domain knowledge to land.
+  **Anchors:** TBD — derived from corpus. Casual-register anchors lean on everyday objects or situations (cooking, commuting, tools-at-hand) rather than technical or academic examples.
   
   ### Punctuation
   
-  Punctuation patterns that function as AI generation signatures (em dashes, "not X but Y" pivots, ornamental triads) are governed by CLAUDE.md §10 *Generation signatures to rewrite*, which applies across every voice. Use this section only for author-specific punctuation habits the corpus clearly shows (semicolon style, ellipsis use, parenthetical style, etc.). Leave TBD rather than inventing a rule the corpus does not settle. An author-specific rule that contradicts §10 must be stated explicitly; silence defers to §10.
+  **Rule.** Punctuation patterns that function as AI generation signatures (em dashes, "not X but Y" pivots, ornamental triads, aphoristic closures) are governed by CLAUDE.md §10 *Generation signatures to rewrite*. Use this section only for author-specific punctuation habits the corpus shows beyond the §10-governed patterns.
   
   Direct quotations follow CLAUDE.md §10 *Direct quotations* and §4 *Quote verbatim* (source punctuation preserved verbatim). This section governs the writer's own prose.
   
-  **Ellipses** for trailing thoughts and drift: "And if you just... change it slightly, the whole thing breaks." Parentheticals (like this) are welcome but don't stack them.
+  **Author-specific patterns (casual-register baseline):**
+  - Ellipses for trailing thoughts and drift: "And if you just... change it slightly, the whole thing breaks." Use sparingly.
+  - Parentheticals (like this) are welcome but don't stack them.
   
   ### Formatting
   
-  Minimal. **Bold** for genuine emphasis, not caps. *Italics* for a word you're using self-consciously. Bullet lists only when the content really is a list; flowing prose otherwise.
+  **Rule.** Minimal. **Bold** for genuine emphasis (not caps). *Italics* for a word being used self-consciously. Bullet lists only when the content really is a list; flowing prose otherwise.
+  
+  ## Cut patterns
+  
+  Named failure modes observed in AI-drafted prose that `voice-extractor` and `[editing mode]` Pass 7 explicitly flag. Each pattern carries a canonical ID; `failures_dir` before/after pairs populate author-specific instances at extraction time. Shipped patterns are register-default.
+  
+  ### aphoristic-closure
+  
+  **Pattern.** Paragraph ends on a crisp, rhetorically-balanced pronouncement that substitutes rhetoric for reasoning. Casual signatures: "And maybe that's the whole point." / "Sometimes that's all you can do." / "Some things really are that simple."
+  
+  **Why it reads as AI.** Casual prose's strength is forward momentum and specific observation. A profundity-closure trades both for a vague gesture toward universality.
+  
+  **Fix.** Restructure to a `transitional` or `synthesis` closure: end on what the next paragraph picks up, or end on a concrete observation. Corresponds to canonical §10 ID `aphoristic-closures`.
+  
+  ### compression-stranded-verb
+  
+  **Pattern.** Verb stripped of its object or qualifier for the sake of concision, producing a fragment-like sentence. "It just doesn't" (doesn't what?), "She got it" (got what?).
+  
+  **Why it reads as AI.** Conversational prose tolerates fragments, but only when context makes the missing complement obvious. A stranded verb without context-recovery trips the reader on first read.
+  
+  **Fix.** Restore the stranded complement, or restructure so the fragment IS the joke / IS the point.
+  
+  ### abstract-nominalization-cascade
+  
+  **Pattern.** Sequence of abstract nouns made from verbs ("the realization that," "the awareness of," "the experience of") stacked across clauses without a concrete agent. Casual prose drifts here when imitating thoughtful-essay register.
+  
+  **Why it reads as AI.** Casual register's hallmark is concrete subjects + active verbs ("I noticed," "she said," "the room got quiet"). When the cut-bias stops firing, prose expands into abstract-noun cascades that read as performed-thoughtful rather than thinking.
+  
+  **Fix.** Rewrite around a concrete agent and an active verb.
+  
+  ### reduced-relative-stacking
+  
+  **Pattern.** Two or three reduced relative clauses (dropped "that") stacked in one sentence, often combined with a cataphoric pronoun.
+  
+  **Why it reads as AI.** Each reduced relative is individually grammatical; three in one sentence force the reader to backtrack. Casual prose drops "that" naturally — but stacking is a sentence-engineering tell.
+  
+  **Fix.** Restore "that" and/or split the sentence.
+  
+  ### explainer-padding `[register: personal-essay, commentary]`
+  
+  **Pattern.** Phrases that perform helpfulness or framing without adding information. Signatures: "As you might know," "It's worth pointing out," "What's interesting is," "One thing to note here is," "The thing is..."
+  
+  **Why it reads as AI.** Casual prose's hallmark is forward momentum — a personal voice pulling the reader through. Performative-helpful framings stop the momentum to signal "now I will explain something" instead of just doing it. A reader who came for the writer's voice doesn't need the meta-narration.
+  
+  **Fix.** Cut the framing entirely. The sentence underneath usually stands on its own; if it doesn't, the framing wasn't the problem.
+  
+  ### second-person-drift `[register: personal-essay]`
+  
+  **Pattern.** Slip from first-person ("I noticed," "I tried") to generic second-person ("you notice," "you try") mid-paragraph, where the second-person is doing assertion-by-implication rather than direct address.
+  
+  **Why it reads as AI.** The shift hides the writer's stance behind a generalized "you." First-person owns the claim ("I find this annoying"); second-person flattens it into received wisdom ("you'll find this annoying"). In a personal essay, the personal frame IS the voice — drifting to "you" surrenders it.
+  
+  **Fix.** Pick one. If the claim is personal observation, keep "I." If the writer is genuinely addressing the reader directly (process-post advice, commentary call-to-action), keep "you" but make it explicit. Don't drift.
+  
+  Additional canonical patterns apply in register-specific contexts: `first-person-commitment-in-academic-report` (academic registers only — N/A here), `citation-atomization` (citation-dense registers only — N/A here).
+  
+  ## Iron rules
+  
+  The rules in this section pass through to every derived voice file verbatim. `voice-extractor` preserves them without corpus calibration; `sourced check` refuses to install a voice file where any is missing.
+  
+  CLAUDE.md §10 *Generation signatures to rewrite* applies to this voice in full. No item on §10's Never list is softened or downgraded to TBD, regardless of what the writing-samples corpus shows.
+  
+  When removing a §10 pattern in existing prose, restructure the sentence shape rather than substituting punctuation or reordering tokens; retokenization preserves the rhythm that reads as AI.
+  
+  ## §10 exemptions
+  
+  Per-voice overrides to CLAUDE.md §10's Never list. An exemption suspends a named rule for this voice's writer prose only; scope and format are defined in CLAUDE.md §10 *Exemptions*. Leave the bullet list empty to inherit §10 in full.
+  
+  `voice-extractor` does not populate this section; corpus §10-pattern evidence goes into its `### Iron-rule conflicts` report and TestUser promotes bullets here by hand.
   
   '''
 # ---
@@ -1432,9 +1725,11 @@
   '''
   # Voice rules
   
-  Voice calibration for blended-register corpora. The shipped `hybrid` voice is a register-neutral skeleton: it encodes the UNDERLYING rules (connectedness, pacing, concept setup, iron prohibitions) without committing to a register's specific framing. Use as the base skeleton when the writing-samples corpus spans registers (e.g., school essays that are structurally academic but tonally casual; blog posts that mix reflective and journalistic patterns). voice-extractor selects hybrid.md automatically when the classifier finds no single register above 85% of the corpus.
+  Voice calibration for blended-register corpora. Encodes the UNDERLYING rules (connectedness, pacing, concept setup, iron prohibitions) without committing to a register's specific framing. Use as the base skeleton when the writing-samples corpus spans registers (e.g., school essays that are structurally academic but tonally casual; blog posts that mix reflective and journalistic patterns).
   
-  For a register-specific calibration (academic papers, casual blog posts, technical documentation, journalistic pieces, narrative reflection), start from the matching shipped skeleton instead. Applies in `[outlining mode]` (Paragraph Flow at outline time), `[writing mode]` (all rules, strictly), and `[editing mode]` (voice audit).
+  `voice-extractor` selects `hybrid.md` automatically when the classifier finds no single register above 85% of the corpus AND `multi_register=segmented`. Other `multi_register` settings (`split`, `primary`) route differently — see `data/agents/voice-extractor.md § Multi-register corpora`.
+  
+  For a register-specific calibration (academic papers, casual blog posts, technical documentation, journalistic pieces, narrative reflection), start from the matching shipped skeleton instead. Applies in `[outlining mode]` (Paragraph Flow at outline time), `[writing mode]` (Phase 1 plan + Phase 2 `prose-drafter` dispatch), and `[editing mode]` (Pass 0 Revision + Pass 8 voice audit).
   
   Read this file in full on entry to any of those modes; do not work from memory of prior sessions. The rules are load-bearing for the project's voice-preservation promise.
   
@@ -1442,130 +1737,220 @@
   
   Two TBD forms can appear in a voice file, distinguished by suffix: `TBD — derived from corpus` (this skeleton's placeholder — voice-extractor may fill it in, or the rendered file keeps it as a general-register-fallback signal) and `TBD — samples did not surface this pattern. Fill in or delete.` (voice-extractor's emit for a section the corpus could not settle — requires TestUser action before the voice is considered complete). Both prefix with `TBD —` so downstream readers can grep a single pattern for all unfilled sections; the suffix disambiguates the reason and the required response. Do not collapse the two suffixes into one form.
   
-  ## Iron rules
+  ## Sub-register taxonomy
   
-  The rules in this section pass through to every derived voice file verbatim. `voice-extractor` preserves them without corpus calibration; `install.sh` refuses to install a voice file where any is missing.
+  Hybrid voice files are produced from cross-register corpora; the sub-register taxonomy is therefore corpus-specific rather than fixed. `voice-extractor` populates this section with the register clusters identified in the corpus, naming each cluster's dominant register tag and its share of the word count. A typical hybrid voice covers 2–3 sub-registers; rules below are tagged with the sub-register where they apply strongly, using the register tags `[register: <tag>]` form (e.g., `[register: academic-report]`, `[register: casual-personal-essay]`). Untagged rules apply across the hybrid corpus.
   
-  CLAUDE.md §10 *Generation signatures to rewrite* applies to this voice in full. No item on §10's Never list is softened or downgraded to TBD, regardless of what the writing-samples corpus shows.
+  When the corpus is genuinely cross-register and TestUser accepts a single hybrid file, the segmented extraction produces this voice file. When TestUser prefers separate voice files per cluster, voice-extractor returns `multi-register-corpus` with a cluster manifest and TestUser re-dispatches once per cluster — see the `split` mode in `data/agents/voice-extractor.md`.
   
-  When removing a §10 pattern in existing prose, restructure the sentence shape rather than substituting punctuation or reordering tokens; retokenization preserves the rhythm that reads as AI.
+  **Sub-registers identified in corpus:** TBD — derived from corpus. voice-extractor lists detected register clusters with word-count shares.
   
-  ### §10 exemptions
+  **Determining sub-register at write time.** `[writing mode]` Phase 1 declares the sub-register for the section in the prose-plan's Register Mode field, choosing from the sub-register tags identified above. The declaration filters which rules below apply. If the brief does not specify, surface the ambiguity to TestUser rather than guessing.
   
-  Per-voice overrides to CLAUDE.md §10's Never list. An exemption suspends a named rule for this voice's writer prose only; scope and format are defined in CLAUDE.md §10 *Exemptions*. Leave the bullet list empty to inherit §10 in full.
+  ## Worked paragraphs
   
-  `voice-extractor` does not populate this section; corpus §10-pattern evidence goes into its `### Iron-rule conflicts` report and TestUser promotes bullets here by hand.
+  Paragraph-scale exhibits with per-sentence annotation. Each exhibit's annotation shape (`S1=…; S2=…; closure-type=…`) matches the prose-plan's sentence-role sequence — the plan uses the same vocabulary, so an exhibit IS a model for a plan block.
+  
+  In a hybrid voice file, exhibits are populated per detected sub-register. If the corpus has 2 register clusters, 2 exhibits; 3 clusters, 3 exhibits.
+  
+  ### Exhibit 1 — primary cluster
+  
+  TBD — derived from corpus. voice-extractor populates with a paragraph-scale exhibit from the corpus's largest register cluster, with provenance header and per-sentence annotation.
+  
+  ### Exhibit 2 — secondary cluster
+  
+  TBD — derived from corpus. voice-extractor populates if a second register cluster exists in the corpus; otherwise this section is omitted.
+  
+  ### Exhibit 3 — tertiary cluster
+  
+  TBD — derived from corpus. voice-extractor populates if a third register cluster exists in the corpus; otherwise this section is omitted.
+  
+  Voice-extractor replaces these placeholders with corpus-derived paragraphs at extraction time. The annotation block on each exhibit names the sub-register tag the exhibit belongs to.
   
   ## Tone
   
   ### Stance
   
-  State views clearly. How hedged vs. how direct varies by register — academic prose hedges more, technical prose is direct, narrative prose reflective. voice-extractor: set the stance calibration from corpus evidence. Do NOT default to a specific register's hedging level.
+  **Rule.** State views clearly. How hedged vs. how direct varies by register — academic prose hedges more, technical prose is direct, narrative prose reflective. voice-extractor: set the stance calibration from corpus evidence per sub-register cluster. Do NOT default to a specific register's hedging level; emit register-tagged rule blocks where the corpus shows different stance discipline by cluster.
   
-  TBD — derived from corpus.
+  **Exemplars:** TBD — derived from corpus, populated per sub-register cluster.
   
   ### Sentence Structure
   
-  Sentences vary in length and shape across registers. Academic prose defaults long; casual short; technical imperative; narrative scene-aware; journalistic inverted. voice-extractor: set the baseline sentence-length rhythm from corpus evidence. Reserve short/punchy forms for emphasis at pivots regardless of baseline.
+  **Rule.** Sentences vary in length and shape across registers. Academic prose defaults long; casual short; technical imperative; narrative scene-aware; journalistic inverted. voice-extractor: set the baseline sentence-length rhythm from corpus evidence per sub-register cluster. Reserve short/punchy forms for emphasis at pivots regardless of baseline.
   
-  TBD — derived from corpus.
+  **Exemplars:** TBD — derived from corpus.
   
   ### Exploratory vs Verdict Tone
   
-  Exploration dominates in narrative and academic reflection; verdict dominates in reporting and technical reference. voice-extractor: identify where the corpus falls on this axis and calibrate. Do not default to any register's balance.
+  **Rule.** Exploration dominates in narrative and academic reflection; verdict dominates in reporting and technical reference. voice-extractor: identify where the corpus falls on this axis per cluster and calibrate. Do not default to any register's balance.
   
-  TBD — derived from corpus.
+  **Exemplars:** TBD — derived from corpus.
   
   ### Thinking Out Loud
   
-  Present in narrative and casual prose; rare in reporting and reference documentation. voice-extractor: if the corpus shows this pattern, calibrate exemplars; if absent, emit TBD rather than adding it.
-  
-  TBD — derived from corpus.
+  **Rule.** Present in narrative and casual prose; rare in reporting and reference documentation. voice-extractor: if the corpus shows this pattern in any cluster, calibrate exemplars; if absent, emit TBD rather than adding it.
   
   ### Including the Reader
   
-  First-person, second-person, third-person each dominate in different registers. voice-extractor: identify which pronoun-perspective the corpus uses and set as the baseline.
-  
-  TBD — derived from corpus.
+  **Rule.** First-person, second-person, third-person each dominate in different registers. voice-extractor: identify which pronoun-perspective each corpus cluster uses and set per-cluster baselines.
   
   ### Weak Adverbs
   
-  Cut weak adverbs: "really", "very", "quite", "somewhat", "fairly", "rather", "basically", "actually", "honestly". "This is really quite important" becomes "This is important." Ground claims with numbers or comparisons, not vague qualifiers. "Many papers have been retracted for manipulation" becomes "In 2019, 23% of retracted papers had been cited more than 100 times."
+  **Rule.** Cut "really," "very," "quite," "somewhat," "fairly," "rather," "basically," "actually," "honestly." Ground claims with numbers or comparisons, not vague qualifiers. "Many papers have been retracted for manipulation" becomes "In 2019, 23% of retracted papers had been cited more than 100 times." This rule applies across registers; the THRESHOLD for grounding may vary (technical prose grounds with units; narrative prose grounds with sensory detail), but the cut-the-vague-qualifier discipline holds.
   
   ### No Preamble
   
-  Never start with "Great question!" or "That's interesting." Just start with substance.
+  **Rule.** Never start a paragraph or turn with "Great question!" / "That's interesting." / "Let me..." Open on substance. Applies across all registers in the hybrid corpus.
   
   ## Structure
   
   ### The Core Rule
   
-  Every word fights to stay. If a sentence adds nothing, cut it. If two sentences say the same thing differently, merge them into one shorter sentence. No filler, no padding, no repetition.
+  **Rule.** Every word fights to stay. If a sentence adds nothing, cut it. If two sentences say the same thing differently, merge them into one shorter sentence. No filler, no padding, no repetition.
   
-  Writing is sculpting: start with raw material, then chisel. Write a draft, step back, cut, rewrite. Repeat. The first version is never the final version.
+  **Concision is a means, not an end.** The baseline rhythm varies by register — academic prefers medium-to-long connected prose; casual prefers shorter; technical prefers parallel imperatives. Chiseling below the cluster-specific baseline is a failure mode. Stranded verbs and reduced-relative stacking trip the reader regardless of register; see `## Cut patterns`.
   
   **The iteration loop.** After writing a draft, reread every sentence and ask:
   - Does this sentence add something the reader doesn't already know?
   - Does it repeat an idea from another part of the text?
-  - Does it sound formulaic or AI-generated? (Cross-check against CLAUDE.md §10's Never list specifically; retokenizing the pattern is not a fix.)
+  - Does it sound formulaic or AI-generated? (Cross-check against CLAUDE.md §10's Never list.)
   - Does it earn its place in the argument?
   - Does the section flow when read start to finish?
   
-  If any answer is no, rewrite or cut. Then reread again. Do not stop after one pass. Keep iterating until a full reread surfaces no issues. Only then present the draft for feedback.
-  
-  This is not optional polish. This is the process. First drafts are raw material, not output.
+  If any answer is no, rewrite or cut. Then reread again. First drafts are raw material, not output.
   
   ### Sentence Connectedness
   
-  Sentences hand off. Each connects to the previous through a causal, contrastive, or sequencing relationship (explicit connectives, parallel structure, or implicit logical flow). How the connection is MARKED varies — explicit connectives, semicolons, short-sentence juxtaposition, restatement. The baseline rhythm varies too — some writers chain short, some build long.
+  **Rule.** Sentences hand off. Each connects to the previous through a causal, contrastive, or sequencing relationship (explicit connectives, parallel structure, or implicit logical flow). How the connection is MARKED varies — explicit connectives, semicolons, short-sentence juxtaposition, restatement.
   
-  voice-extractor: set the marker style AND baseline rhythm from corpus evidence. Do NOT default to "longer connected sentences" or any register-specific shape; extract what the corpus shows. If the corpus is thin on this section, TBD rather than impose a register-specific pattern.
+  voice-extractor: set the marker style AND baseline rhythm from corpus evidence per sub-register cluster. Do NOT default to "longer connected sentences" or any register-specific shape; extract what the corpus shows. If the corpus is thin on this section, TBD rather than impose a register-specific pattern.
+  
+  **Exemplars:** TBD — derived from corpus per cluster.
   
   ### Paragraph Flow
   
-  Paragraphs set up, develop, and hand off. End a paragraph on a transition to the next paragraph's topic, not on a verdict that closes the door. Open the next paragraph with a connective, a reference back, or a concept the prior paragraph positioned.
+  **Rule.** Paragraphs set up, develop, and hand off. End a paragraph on a transition to the next paragraph's topic, not on a verdict that closes the door. Open the next paragraph with a connective, a reference back, or a concept the prior paragraph positioned.
   
-  How the handoff is MARKED varies by register: academic uses explicit connectives ('While,' 'Moreover'); casual uses shorter bridges; narrative uses sensory callbacks; journalistic uses inverted-pyramid ordering.
+  How the handoff is MARKED varies by register: academic uses explicit connectives ("While," "Moreover"); casual uses shorter bridges; narrative uses sensory callbacks; journalistic uses inverted-pyramid ordering.
   
-  voice-extractor: set the handoff style from corpus evidence. TBD if unclear.
+  voice-extractor: set the handoff style from corpus evidence per cluster. TBD if unclear.
   
   ### Information Pacing
   
-  Claim density varies by register. Academic prose can pack multiple claims per paragraph; technical prose emits one claim per sentence; narrative prose alternates heavy and light. voice-extractor: identify the pacing pattern the corpus shows and calibrate. Interleave elaboration sentences appropriately for the identified register.
+  **Rule.** Claim density varies by register. Academic prose can pack multiple claims per paragraph; technical prose emits one claim per sentence; narrative prose alternates heavy and light. voice-extractor: identify the pacing pattern the corpus shows per cluster and calibrate.
   
   ### Concept Setup
   
-  Introduce specialized terms or domain references with appropriate framing on first use. The DEGREE of setup varies — academic prose can run longer definitions; casual prose uses parentheticals; technical prose uses formal definition blocks; narrative prose uses scene. voice-extractor: set the setup convention from corpus evidence.
+  **Rule.** Introduce specialized terms or domain references with appropriate framing on first use. The DEGREE of setup varies — academic prose can run longer definitions; casual prose uses parentheticals; technical prose uses formal definition blocks; narrative prose uses scene. voice-extractor: set the setup convention from corpus evidence per cluster.
   
   ### Building Arguments
   
-  Develop reasoning. Address counterpoints. How formally — full objection-response vs. casual "yeah, but" — varies by register. voice-extractor: set the argumentation style from corpus evidence.
+  **Rule.** Develop reasoning. Address counterpoints. How formally — full objection-response vs. casual "yeah, but" — varies by register. voice-extractor: set the argumentation style from corpus evidence per cluster.
   
   ### Paragraph Length
   
-  Paragraph length varies dramatically by register. Journalistic: 1-3 sentences. Casual: 2-4. Academic: 3-5. Narrative: highly variable. voice-extractor: measure the corpus's paragraph-length distribution and set the baseline accordingly.
+  **Rule.** Paragraph length varies dramatically by register. Journalistic: 1–3 sentences. Casual: 2–4. Academic: 3–5. Narrative: highly variable. voice-extractor: measure the corpus's paragraph-length distribution per cluster and set the baseline accordingly.
+  
+  ### Reduced Structures and Parse Load
+  
+  **Rule.** A reduced relative clause (dropped "that"), a cataphoric pronoun, or a long noun-phrase subject is each acceptable on its own. Two or three stacked in one sentence force the reader to backtrack. Limit yourself to one parse-load element per sentence; if the argument needs more, split the sentence. This rule applies across registers in the hybrid corpus. See `## Cut patterns > reduced-relative-stacking`.
+  
+  ### Weak Nominalizations
+  
+  **Rule.** Prefer verbs over nouns made from verbs. Prefer concrete subjects over abstract ones. A chain of abstract nouns reads as institutional padding even when every word passes the Core Rule's cut test. This rule applies across registers in the hybrid corpus.
   
   ## Dimension
   
   ### Analogies and Anecdotes
   
-  Connect abstract points to specific patterns. The TYPE of analogy varies — academic uses technical illustrations; casual uses everyday objects; technical uses system analogies; journalistic uses anecdotes about named people; narrative is itself anecdote. voice-extractor: identify the analogy type the corpus uses and calibrate.
+  **Rule.** Connect abstract points to specific patterns. The TYPE of analogy varies — academic uses technical illustrations; casual uses everyday objects; technical uses system analogies; journalistic uses anecdotes about named people; narrative is itself anecdote. voice-extractor: identify the analogy type the corpus uses per cluster and calibrate.
   
-  **Anchors:** TBD — derived from corpus.
+  **Anchors:** TBD — derived from corpus. voice-extractor populates with cross-cluster recurring touchstones if the corpus has them; otherwise leaves TBD.
   
   ### Punctuation
   
-  Punctuation patterns that function as AI generation signatures (em dashes, "not X but Y" pivots, ornamental triads) are governed by CLAUDE.md §10 *Generation signatures to rewrite*, which applies across every voice. The fix for a flagged em-dash is sentence-shape restructure per §10 *Restructure, don't retokenize*, not a comma, colon, or period-fragment swap that preserves the mid-clause-interruption rhythm. Use this section only for author-specific punctuation habits the corpus clearly shows (ellipses, semicolons, colons, and so on). voice-extractor: identify what the corpus uses characteristically and describe the pattern. An author-specific rule that contradicts §10 must be stated explicitly; silence defers to §10.
+  **Rule.** Punctuation patterns that function as AI generation signatures (em dashes, "not X but Y" pivots, ornamental triads, aphoristic closures) are governed by CLAUDE.md §10 *Generation signatures to rewrite*. The fix for a flagged em-dash is sentence-shape restructure per §10 *Restructure, don't retokenize*, not a comma, colon, or period-fragment swap that preserves the mid-clause-interruption rhythm. Use this section only for author-specific punctuation habits the corpus shows beyond the §10-governed patterns.
+  
+  voice-extractor: identify what the corpus uses characteristically per cluster and describe the pattern. An author-specific rule that contradicts §10 must be stated explicitly; silence defers to §10.
   
   Direct quotations follow CLAUDE.md §10 *Direct quotations* and §4 *Quote verbatim* (source punctuation preserved verbatim). This section governs the writer's own prose.
   
-  TBD — derived from corpus.
+  **Author-specific patterns:** TBD — derived from corpus.
   
   ### Formatting
   
-  Markdown formatting density varies by destination. voice-extractor: identify the corpus's formatting conventions (bold frequency, italics use, bullet-point density, code-block presence) and set the baseline.
+  **Rule.** Markdown formatting density varies by destination. voice-extractor: identify the corpus's formatting conventions per cluster (bold frequency, italics use, bullet-point density, code-block presence) and set the baseline.
   
   TBD — derived from corpus.
+  
+  ## Cut patterns
+  
+  Named failure modes observed in AI-drafted prose that `voice-extractor` and `[editing mode]` Pass 7 explicitly flag. Each pattern carries a canonical ID; `failures_dir` before/after pairs populate author-specific instances at extraction time. Shipped patterns below are register-agnostic — they apply across the hybrid corpus regardless of cluster.
+  
+  Hybrid voice files inherit all 6 canonical academic cut patterns because a hybrid corpus may contain academic-register samples; if the corpus has no academic cluster, the academic-specific patterns (`first-person-commitment-in-academic-report`, `citation-atomization`) are dropped at extraction time and noted in the report's `### Excluded patterns` section.
+  
+  ### aphoristic-closure
+  
+  **Pattern.** Paragraph ends on a crisp, rhetorically-balanced pronouncement that substitutes rhetoric for reasoning.
+  
+  **Why it reads as AI.** The shape sounds thesis-like without doing argument work. The reader has been given a feeling of resolution, not actual resolution.
+  
+  **Fix.** Restructure to `closure-type: transitional`, `synthesis`, or `question-out`. Corresponds to canonical §10 ID `aphoristic-closures`.
+  
+  ### compression-stranded-verb
+  
+  **Pattern.** Verb stripped of its object or qualifier for the sake of concision, producing a sentence that reads as a fragment of a longer thought.
+  
+  **Why it reads as AI.** The cut-bias of the Core Rule has fired past the readability threshold. The sentence is grammatically optimal and word-count minimal; it trips the reader on first read.
+  
+  **Fix.** Restore the stranded complement.
+  
+  ### abstract-nominalization-cascade
+  
+  **Pattern.** Sequence of abstract nouns made from verbs stacked across clauses without a concrete agent or active verb.
+  
+  **Why it reads as AI.** Inverse failure mode of `compression-stranded-verb`: when the cut-bias stops firing, prose expands into institutional-noun cascades that disconnect agent from action.
+  
+  **Fix.** Rewrite around a concrete subject + active verb.
+  
+  ### reduced-relative-stacking
+  
+  **Pattern.** Two or three reduced relative clauses (dropped "that") stacked in a single sentence, often combined with a cataphoric pronoun.
+  
+  **Why it reads as AI.** Each reduced relative is individually grammatical; three in one sentence force the reader to backtrack. Same root as `compression-stranded-verb` — optimization for word count at the cost of parseability.
+  
+  **Fix.** Restore "that" and/or split the sentence.
+  
+  ### first-person-commitment-in-academic-report `[register-drift: personal-essay → academic-report]`
+  
+  **Pattern.** First-person stance markers ("I think," "I believe," "my claim is") appearing in `academic-report` or `prospectus` prose. Applies only when the hybrid corpus contains an academic-register cluster.
+  
+  **Why it reads as AI.** When a voice file is extracted from a multi-register corpus and unioned, personal-essay stance rules bleed into formal-register drafting. The resulting prose reads as undergraduate-essay register where the genre expects scholarly-voice.
+  
+  **Fix.** Rewrite as third-person declarative. First-person only in process statements about the paper itself.
+  
+  ### citation-atomization `[register: academic-report, prospectus]`
+  
+  **Pattern.** Fine-grained Pandoc IDs for the same domain treated as separate sources when a human writer would merge. Applies only when the hybrid corpus contains an academic-register cluster.
+  
+  **Why it reads as AI.** Granular IDs betray the `source-finder` shard architecture. A human writer recognizes that multiple pages of one site or multiple entries of one dictionary are one citation.
+  
+  **Fix.** At `[formatting mode]` time (or at drafting time for inline parentheticals), consolidate IDs that resolve to the same References entry.
+  
+  ## Iron rules
+  
+  The rules in this section pass through to every derived voice file verbatim. `voice-extractor` preserves them without corpus calibration; `sourced check` refuses to install a voice file where any is missing.
+  
+  CLAUDE.md §10 *Generation signatures to rewrite* applies to this voice in full. No item on §10's Never list is softened or downgraded to TBD, regardless of what the writing-samples corpus shows.
+  
+  When removing a §10 pattern in existing prose, restructure the sentence shape rather than substituting punctuation or reordering tokens; retokenization preserves the rhythm that reads as AI.
+  
+  ## §10 exemptions
+  
+  Per-voice overrides to CLAUDE.md §10's Never list. An exemption suspends a named rule for this voice's writer prose only; scope and format are defined in CLAUDE.md §10 *Exemptions*. Leave the bullet list empty to inherit §10 in full.
+  
+  `voice-extractor` does not populate this section; corpus §10-pattern evidence goes into its `### Iron-rule conflicts` report and TestUser promotes bullets here by hand.
   
   '''
 # ---
@@ -1573,160 +1958,283 @@
   '''
   # Voice rules
   
-  Voice calibration tuned to TestUser's journalistic writing — news stories, feature pieces, commentary, reported essays. The shipped `journalistic` voice is a register-specific skeleton: it encodes journalistic-register defaults for tone (lede-first, active voice, attributed), structure (inverted pyramid, news-peg argumentation), and dimension (illustrative anecdotes, plain punctuation, formatting light). Copy to a new name and edit for a different author within the journalistic register; for a different register (academic, casual, technical, narrative) start from the matching shipped skeleton instead. Applies in `[outlining mode]` (Paragraph Flow at outline time), `[writing mode]` (all rules, strictly), and `[editing mode]` (voice audit).
+  Voice calibration tuned to TestUser's journalistic writing — news stories, feature pieces, commentary, reported essays. Encodes journalistic-register defaults under the phase-3 sub-register contract: tone (lede-first, active voice, attributed), structure (inverted pyramid, news-peg argumentation), dimension (illustrative anecdotes, plain punctuation, formatting light). Applies in `[outlining mode]` (Paragraph Flow at outline time), `[writing mode]` (Phase 1 plan + Phase 2 `prose-drafter` dispatch), and `[editing mode]` (Pass 0 Revision + Pass 8 voice audit).
   
   Read this file in full on entry to any of those modes; do not work from memory of prior sessions. The rules are load-bearing for the project's voice-preservation promise.
   
-  ## Iron rules
+  ## Sub-register taxonomy
   
-  The rules in this section pass through to every derived voice file verbatim. `voice-extractor` preserves them without corpus calibration; `install.sh` refuses to install a voice file where any is missing.
+  Journalistic writing is not a single register. This voice covers three sub-registers; rules below are tagged with the sub-register where they apply strongly. Untagged rules apply across all three.
   
-  CLAUDE.md §10 *Generation signatures to rewrite* applies to this voice in full. No item on §10's Never list is softened or downgraded to TBD, regardless of what the writing-samples corpus shows.
+  - **`news-report`** — straight reporting; inverted pyramid; full attribution; no first-person; no editorial stance. Examples: news stories, agency briefs, court reports.
+  - **`feature`** — narrative reporting; scene-setting allowed; named subjects with quoted dialogue; first-person occasionally if the writer is in the story. Examples: longform features, profiles, reported essays.
+  - **`commentary`** — opinion column; named stance; first-person standard; argument-forward with anticipated counterarguments. Examples: op-eds, opinion columns, editorial-page pieces.
   
-  When removing a §10 pattern in existing prose, restructure the sentence shape rather than substituting punctuation or reordering tokens; retokenization preserves the rhythm that reads as AI.
+  When the corpus spans multiple sub-registers, `voice-extractor` produces one voice file per sub-register rather than unioning them; see `data/agents/voice-extractor.md § Multi-register corpora`. Unioning is the documented failure mode (a `commentary` first-person stance rule imported into `news-report` produces editorialized reporting that fails the basic attribution discipline of the genre).
   
-  ### §10 exemptions
+  **Determining sub-register at write time.** `[writing mode]` Phase 1 declares the sub-register for the section in the prose-plan's Register Mode field. The declaration filters which rules below apply. If the brief does not specify, assume `news-report` (the journalistic default — strictest baseline) and flag the assumption in the prose-plan.
   
-  Per-voice overrides to CLAUDE.md §10's Never list. An exemption suspends a named rule for this voice's writer prose only; scope and format are defined in CLAUDE.md §10 *Exemptions*. Leave the bullet list empty to inherit §10 in full.
+  ## Worked paragraphs
   
-  `voice-extractor` does not populate this section; corpus §10-pattern evidence goes into its `### Iron-rule conflicts` report and TestUser promotes bullets here by hand.
+  Paragraph-scale exhibits with per-sentence annotation. Each exhibit's annotation shape (`S1=…; S2=…; closure-type=…`) matches the prose-plan's sentence-role sequence — the plan uses the same vocabulary, so an exhibit IS a model for a plan block.
+  
+  ### Exhibit 1 — news-report (illustrative)
+  
+  > A federal judge on Tuesday blocked the new visa rule, siding with a coalition of universities that sued last month. The ruling reopens the pipeline for an estimated 40,000 graduate students whose applications had been frozen since January. Administration lawyers said they would appeal; the plaintiffs called the ruling a vindication of established law. The decision is the third in two months to halt agency rules issued under emergency authority.
+  
+  <!-- annotation:
+  S1=lede (who, what, when in one clause); opener-shape=lede-active-voice
+  S2=development-stakes (why-it-matters: scope of impact with one specific number)
+  S3=development-conflict (both sides quoted; semicolon links the two attributions)
+  S4=closure-context (places the decision in a pattern; transitions to next paragraph on the broader trend); closure-type=transitional
+  paragraph-pattern: lede → stakes → conflict → context
+  handoff-to-next: the next paragraph picks up "third in two months" and details the prior two rulings
+  source: illustrative; voice-extractor replaces with corpus paragraph at extraction time
+  -->
+  
+  ### Exhibit 2 — feature (illustrative)
+  
+  TBD — voice-extractor populates from corpus when feature samples are present. If the corpus is purely news-report or commentary, this exhibit stays TBD.
+  
+  ### Exhibit 3 — commentary (illustrative)
+  
+  TBD — voice-extractor populates from corpus when commentary samples are present. If the corpus is purely news-report or feature, this exhibit stays TBD.
+  
+  Voice-extractor replaces these shipped exhibits with corpus-derived paragraphs when run against an author's samples. The shipped exhibits are illustrative of the shape, not defaults to retain; the extractor's output file carries the author's actual patterns.
   
   ## Tone
   
   ### Stance
   
-  Claims carry attribution. "According to X, Y" rather than "Y is true." In commentary, state the view once, plainly; don't hedge repeatedly.
+  **Rule `[register: news-report, feature]`.** Claims carry attribution. "According to X, Y" rather than "Y is true." Anonymous attribution requires a labeled role ("a senior official said") and editorial justification.
   
+  **Rule `[register: commentary]`.** State the view once, plainly; don't hedge repeatedly. The commentary's stance is the writer's own; attribution is not required for the claim, but reporting that supports the claim still is.
+  
+  **Exemplars `[news-report]`:**
   - "Federal officials said the program would launch in June."
   - "Critics argued the timeline was unrealistic."
   
-  Not: "It is believed that the program will launch in June."
-  Not: "The timeline is, arguably, possibly, perhaps unrealistic."
+  **Exemplars `[commentary]`:**
+  - "The bill is worse than its sponsors claim."
+  - "The agency's rejection reads as procedural cover for a decision made weeks earlier."
+  
+  **Not:** "It is believed that the program will launch in June." (no attributed actor) / "The timeline is, arguably, possibly, perhaps unrealistic." (stacked hedges)
   
   ### Sentence Structure
   
-  Subject-verb-object, active voice. Keep subjects concrete: people, organizations, actions, not abstractions. Subordinate clauses allowed when they add context, not when they defer the main point.
+  **Rule.** Subject-verb-object, active voice. Keep subjects concrete: people, organizations, actions, not abstractions. Subordinate clauses allowed when they add context, not when they defer the main point.
   
+  **Exemplars:**
   - "The mayor announced the plan Monday."
   - "Officials declined to name the source, citing ongoing negotiations."
   
-  Not: "It was announced by the office of the mayor that the plan would proceed."
+  **Not:** "It was announced by the office of the mayor that the plan would proceed."
   
   ### Exploratory vs Verdict Tone
   
-  Journalistic prose is fact-forward; verdicts appear only in commentary and opinion. Reporting states what is known and attributes it. Opinion pieces can take a stance but must make it visible as a stance, not smuggle it in as fact.
+  **Rule `[register: news-report, feature]`.** Fact-forward. State what is known and attribute it. Speculation belongs to sourced analysts, not the reporter. Verdict-language ("predictably," "as expected," "in a stunning move") is editorialization and fails the audit.
   
+  **Rule `[register: commentary]`.** Take a stance and make it visible. The reader should be able to tell the column's argument from its reporting. Smuggled verdicts ("the agency, predictably, rejected the application") are weaker than named verdicts ("the agency's rejection was predictable, and here's why").
+  
+  **Exemplars:**
   - Reporting: "The agency rejected the application on April 3, citing incomplete documentation."
   - Commentary (stance visible): "The agency's rejection reads as procedural cover for a decision made weeks earlier."
-  - Smuggled verdict (fails audit): "The agency, predictably, rejected the application." Reporting prose cannot carry "predictably" without attribution.
+  - Smuggled verdict (avoid): "The agency, predictably, rejected the application."
   
   ### Thinking Out Loud
   
-  Rare in reporting. Common in columns and commentary. In commentary, walk the reader through your reasoning but keep it tight; journalistic prose doesn't indulge the mental wandering that academic or casual prose permits.
+  **Rule `[register: news-report]`.** Omit. Reporting does not narrate the reporter's reasoning.
   
-  - Column: "The obvious objection is that voters don't care about procedural norms. Maybe. But the polling from March suggests otherwise."
-  - Reporting (no thinking-out-loud): state the facts and attributions; speculation belongs to sourced analysts, not the reporter.
+  **Rule `[register: feature, commentary]`.** Walk the reader through reasoning briefly, but keep it tight. Journalistic prose doesn't indulge the mental wandering that academic or casual prose permits. Mark exploratory passages so the reader can tell them apart from reporting.
+  
+  **Exemplar `[commentary]`:**
+  - "The obvious objection is that voters don't care about procedural norms. Maybe. But the polling from March suggests otherwise."
   
   ### Including the Reader
   
-  Third person dominates in reporting. First-person is reserved for reported essays and columns, where the writer's presence in the story is the point.
+  **Rule `[register: news-report]`.** Third person dominates. First-person is excluded.
   
-  - Reporting: "Readers may wonder whether the agency had authority to act unilaterally."
-  - Reported essay: "The central question, as I followed the case through three hearings, is whether the statute means what it says."
+  **Rule `[register: feature]`.** First-person is reserved for reported essays where the writer's presence in the story is the point. Use sparingly and intentionally.
   
-  Not: "We all know the agency overstepped." Reporting cannot assume reader agreement; commentary must earn it.
+  **Rule `[register: commentary]`.** First-person is the column's voice. "We" risks claiming reader agreement that hasn't been earned; default to "I" for stance and "the reader" or named groups for shared reasoning.
+  
+  **Exemplars:**
+  - News-report: "Readers may wonder whether the agency had authority to act unilaterally."
+  - Feature: "The central question, as I followed the case through three hearings, is whether the statute means what it says."
+  
+  **Not:** "We all know the agency overstepped." (assumed reader agreement; commentary must earn it.)
   
   ### Weak Adverbs
   
-  Cut weak adverbs: "really", "very", "quite", "somewhat", "fairly", "rather", "basically", "actually", "honestly". "This is really quite important" becomes "This is important." Ground claims with numbers, attributed quotes, or specific comparisons, not vague qualifiers. "Many papers have been retracted for manipulation" becomes "In 2019, 23% of retracted papers had been cited more than 100 times." Journalistic prose prizes concrete detail; weak adverbs feel especially out of place next to a hard number or a named source.
+  **Rule.** Cut "really," "very," "quite," "somewhat," "fairly," "rather," "basically," "actually," "honestly." Ground claims with numbers, attributed quotes, or specific comparisons, not vague qualifiers. "Many papers have been retracted for manipulation" becomes "In 2019, 23% of retracted papers had been cited more than 100 times." Journalistic prose prizes concrete detail; weak adverbs feel especially out of place next to a hard number or a named source.
   
   ### No Preamble
   
-  Start with the lede. Skip throat-clearing entirely, no "Recent events have prompted..." or "This week saw..." The first sentence carries the who, what, when, or why; warm-up sentences don't exist in journalistic prose.
+  **Rule.** Start with the lede. Skip throat-clearing entirely; no "Recent events have prompted..." or "This week saw..." The first sentence carries the who, what, when, or why; warm-up sentences don't exist in journalistic prose.
   
   ## Structure
   
   ### The Core Rule
   
-  Every paragraph earns its place in the story. If a paragraph doesn't advance the reader's understanding of the news peg, cut it. Reporting has a tight word budget; feature pieces run slightly looser; columns tightest of all.
+  **Rule.** Every paragraph earns its place in the story. If a paragraph doesn't advance the reader's understanding of the news peg, cut it. Reporting has a tight word budget; feature pieces run slightly looser; columns tightest of all.
   
-  Drafting is sculpting: start with the reporting, then chisel to the story. Write a draft, step back, cut everything that doesn't advance the lede, rewrite. Repeat. The first version is never the filed version.
+  **Concision is a means, not an end.** Journalistic prose tolerates compression but stranded verbs and dropped attributions still trip the reader. See `## Cut patterns > compression-stranded-verb` and `## Cut patterns > unattributed-claim`.
   
   **The iteration loop.** After writing a draft, reread every paragraph and ask:
   - Does this paragraph advance the reader's understanding of the news peg?
   - Does it repeat information already delivered?
-  - Does it sound formulaic or AI-generated? (Cross-check against CLAUDE.md §10's Never list specifically; retokenizing the pattern is not a fix.)
-  - Is every factual claim attributed?
+  - Does it sound formulaic or AI-generated? (Cross-check against CLAUDE.md §10's Never list.)
+  - Is every factual claim attributed (in news-report and feature; in commentary, are claims supported)?
   - Does the piece hold when read from top to bottom at pace?
   
-  If any answer is no, rewrite or cut. Then reread again. Do not stop after one pass. Keep iterating until a full reread surfaces no issues. Only then file the draft.
-  
-  This is not optional polish. This is the process. First drafts are reporting notes in paragraph shape, not copy.
+  If any answer is no, rewrite or cut. Then reread again. First drafts are reporting notes in paragraph shape, not copy.
   
   ### Sentence Connectedness
   
-  Sentences connect through shared subjects and chronological progression. Formal connectives ("because," "however," "instead") appear at key pivots, not between every sentence. Journalistic prose favors implicit connection: the next sentence continues the same actor or picks up the next moment in the sequence.
+  **Rule.** Sentences connect through shared subjects and chronological progression. Formal connectives ("because," "however," "instead") appear at key pivots, not between every sentence. Journalistic prose favors implicit connection: the next sentence continues the same actor or picks up the next moment in the sequence.
   
+  **Exemplars:**
   - Connected (shared subject): "The governor vetoed the bill Thursday. She said the measure would have exposed the state to federal litigation. Her office released the veto message within the hour."
   - Connected (pivot with "however"): "The committee voted 9 to 4 to advance the nomination. However, two members who voted yes said they would oppose the nominee on the floor."
-  - Disconnected: "The veto came Thursday. The federal government had threatened litigation. Her office stayed quiet." The reader has to supply the causal link.
+  
+  **Not:** "The veto came Thursday. The federal government had threatened litigation. Her office stayed quiet." (reader has to supply the causal link)
   
   ### Paragraph Flow
   
-  Inverted pyramid. The most important fact goes in the first paragraph. The second-most-important in the second. And so on. Feature pieces relax this but still lead with the hook.
+  **Rule `[register: news-report]`.** Inverted pyramid. The most important fact goes in the first paragraph; the second-most-important in the second; and so on.
   
-  - First paragraph names the who, what, when. "A federal judge on Tuesday blocked the new visa rule, siding with a coalition of universities that sued last month."
-  - Second paragraph adds context, why it matters. "The ruling reopens the pipeline for an estimated 40,000 graduate students whose applications had been frozen since January."
-  - Third paragraph introduces the tension or conflict. "Administration lawyers said they would appeal; the plaintiffs called the ruling a vindication of established law."
+  **Rule `[register: feature, commentary]`.** Inverted pyramid relaxes; lead with the hook (a scene, a question, a specific image) but the news peg should land within the first 2–3 paragraphs.
   
-  Disconnected flow: leading with setup ("For decades, visa policy has been contested...") defers the news and loses the reader by paragraph three.
+  **Exemplar `[news-report]`:**
+  - First paragraph names the who, what, when. Second paragraph adds context (why it matters). Third paragraph introduces the tension or conflict.
+  
+  **Not:** Leading with setup ("For decades, visa policy has been contested...") in a news-report defers the news and loses the reader by paragraph three.
   
   ### Information Pacing
   
-  Facts and attribution alternate. Claim, attribution, claim, attribution. Heavy packing of facts without attribution reads as editorial; dense strings of attributions without content read as hedged.
+  **Rule.** Facts and attribution alternate. Claim, attribution, claim, attribution. Heavy packing of facts without attribution reads as editorial; dense strings of attributions without content read as hedged.
   
+  **Exemplars:**
   - Paced: "The district spent $2.3 million on the program last year, according to the superintendent's office. The money covered training, materials, and a new assessment system. Teachers said the assessment was the most visible change in the classroom."
-  - Packed (fact-heavy, no attribution): "The district spent $2.3 million on training, materials, and an assessment system that teachers found visible in the classroom, a change driven by last year's board decision that also restructured the central office." The reader cannot tell which clause is reported and which is analysis.
+  - Packed (avoid): "The district spent $2.3 million on training, materials, and an assessment system that teachers found visible in the classroom, a change driven by last year's board decision that also restructured the central office." (reader can't tell which clause is reported and which is analysis)
   
   ### Concept Setup
   
-  Define unfamiliar terms parenthetically and quickly. Readers won't tolerate a pause for a three-sentence definition; give them enough to keep reading and move on.
+  **Rule.** Define unfamiliar terms parenthetically and quickly. Readers won't tolerate a pause for a three-sentence definition; give them enough to keep reading and move on.
   
-  - Set up: "The agency uses reverse-repurchase agreements (overnight loans collateralized by Treasury securities) to manage short-term rates."
-  - Set up, one clause: "The union filed a ULP, an unfair labor practice charge, alleging the district bargained in bad faith."
-  - Dropped: "The agency's repo operations set the floor on the policy rate." Readers without a finance desk background cannot follow.
+  **Exemplars:**
+  - "The agency uses reverse-repurchase agreements (overnight loans collateralized by Treasury securities) to manage short-term rates."
+  - "The union filed a ULP, an unfair labor practice charge, alleging the district bargained in bad faith."
   
-  ### Building Arguments
+  **Not:** "The agency's repo operations set the floor on the policy rate." (readers without a finance desk background can't follow)
   
-  In commentary: name your claim, support it with reporting, anticipate the obvious counterargument briefly, move on. Don't stage-manage a debate the reader didn't come for.
+  ### Building Arguments `[register: commentary]`
   
+  **Rule.** Name your claim, support it with reporting, anticipate the obvious counterargument briefly, move on. Don't stage-manage a debate the reader didn't come for.
+  
+  **Exemplar:**
   - "The bill is worse than its sponsors claim. Three provisions, on funding, enforcement, and reporting, do less than the sponsors' own summary suggests. The obvious defense, that the bill is a first step, doesn't hold: the first-step framing was also offered in 2019, and the 2019 bill was never followed up."
   
   ### Paragraph Length
   
-  1 to 3 sentences is the baseline for reporting. 2 to 4 for features. 3 to 5 for columns. Single-sentence paragraphs are common at pivot points and shouldn't be avoided; they mark the shift from one phase of the story to the next.
+  **Rule.** 1–3 sentences for news-report. 2–4 for features. 3–5 for commentary. Single-sentence paragraphs are common at pivot points and shouldn't be avoided; they mark the shift from one phase of the story to the next.
+  
+  ### Reduced Structures and Parse Load
+  
+  **Rule.** Drop "that" sparingly in journalistic prose. Reporting has the tightest precision requirements of any register; a stacked reduced relative ("the document the agency the court named released") forces the reader to backtrack and may misidentify the actor. See `## Cut patterns > reduced-relative-stacking`.
   
   ## Dimension
   
   ### Analogies and Anecdotes
   
-  Anecdotes anchor human stories. One-paragraph vignettes: a named person, a specific moment, a quoted line. Analogies draw from everyday experience, not domain-technical machinery.
+  **Rule `[register: feature, commentary]`.** Anecdotes anchor human stories. One-paragraph vignettes: a named person, a specific moment, a quoted line. Analogies draw from everyday experience, not domain-technical machinery. Cut an anecdote you find yourself extending across multiple paragraphs — a vignette is a moment, not a scene.
   
-  **Anchors:** TBD, derived from corpus. Journalistic-register anecdotes often feature named subjects, specific scenes, and direct quotes.
+  **Rule `[register: news-report]`.** Anecdotes appear sparingly and only when they advance the news peg. A vignette that doesn't connect to the lede is decoration.
   
-  Not every vivid anecdote earns its place. Drop it if it doesn't connect to the news peg; the story isn't about the anecdote, the anecdote serves the story. Cut an anecdote you find yourself extending across multiple paragraphs: a vignette is a moment, not a scene.
+  **Anchors:** TBD — derived from corpus. Journalistic-register anecdotes often feature named subjects, specific scenes, and direct quotes.
   
   ### Punctuation
   
-  Punctuation patterns that function as AI generation signatures (em dashes, "not X but Y" pivots, ornamental triads) are governed by CLAUDE.md §10 *Generation signatures to rewrite*, which applies across every voice. The fix for a flagged em-dash is sentence-shape restructure per §10 *Restructure, don't retokenize*, not a comma or parenthesis substitution that preserves the mid-clause-interruption rhythm. Use this section only for author-specific punctuation habits the corpus clearly shows. Leave TBD rather than inventing a rule the corpus does not settle. An author-specific rule that contradicts §10 must be stated explicitly; silence defers to §10.
-  
-  Semicolons are rare in journalistic prose. Colons introduce attribution or lists. Quotation marks carry direct speech, always attributed to a named source or, when the source can't be named, a clearly labeled role ("a senior official said").
+  **Rule.** Punctuation patterns that function as AI generation signatures (em dashes, "not X but Y" pivots, ornamental triads, aphoristic closures) are governed by CLAUDE.md §10 *Generation signatures to rewrite*. The fix for a flagged em-dash is sentence-shape restructure per §10 *Restructure, don't retokenize*, not a comma or parenthesis substitution that preserves the mid-clause-interruption rhythm. Use this section only for author-specific punctuation habits the corpus shows beyond the §10-governed patterns.
   
   Direct quotations follow CLAUDE.md §10 *Direct quotations* and §4 *Quote verbatim* (source punctuation preserved verbatim). This section governs the writer's own prose.
   
+  **Author-specific patterns (journalistic-register baseline):**
+  - Semicolons rare. Used to link two attributions on the same fact ("officials said X; critics said Y").
+  - Colons introduce attribution or lists.
+  - Quotation marks carry direct speech, always attributed to a named source or, when the source can't be named, a clearly labeled role ("a senior official said").
+  
   ### Formatting
   
-  Sparingly. **Bold** for pull quotes in some publications; check house style. *Italics* for publication titles, ship names, and legal case names. Bullets only when content is genuinely list-shaped (vote tallies, enumerated findings, day-by-day timelines); flowing prose otherwise.
+  **Rule.** Sparingly. **Bold** for pull quotes in some publications; check house style. *Italics* for publication titles, ship names, and legal case names. Bullets only when content is genuinely list-shaped (vote tallies, enumerated findings, day-by-day timelines); flowing prose otherwise.
+  
+  ## Cut patterns
+  
+  Named failure modes observed in AI-drafted prose that `voice-extractor` and `[editing mode]` Pass 7 explicitly flag. Each pattern carries a canonical ID; `failures_dir` before/after pairs populate author-specific instances at extraction time. Shipped patterns are register-default.
+  
+  ### aphoristic-closure
+  
+  **Pattern.** Paragraph ends on a crisp, rhetorically-balanced pronouncement that substitutes rhetoric for reasoning. Journalistic signatures: "And the questions only multiply." / "In a town defined by such tensions, the latest chapter writes itself." / "Time will tell whether the gamble pays off."
+  
+  **Why it reads as AI.** Reporting should end on a fact, an attribution, or a transition to the next paragraph. A profundity-closure trades concrete information for editorial gesture, blurring the line between reporting and commentary.
+  
+  **Fix.** Restructure to a `transitional` or `synthesis` closure: end on the next development the story will pick up, or end on the most recent attributed fact. Corresponds to canonical §10 ID `aphoristic-closures`.
+  
+  ### compression-stranded-verb
+  
+  **Pattern.** Verb stripped of its object or qualifier for the sake of concision. Journalistic signatures: "officials denied" (denied what?), "the report concluded" (concluded what?), "the case proceeds" (proceeds where?).
+  
+  **Why it reads as AI.** Journalism's precision demand is high — a stranded verb leaves the reader to guess the object, and guesses become misquotes.
+  
+  **Fix.** Restore the stranded complement. Be specific: officials denied the allegation, the report concluded the program was effective, the case proceeds to oral argument next month.
+  
+  ### abstract-nominalization-cascade
+  
+  **Pattern.** Sequence of abstract nouns made from verbs ("the implementation," "the consideration," "the determination") stacked across clauses without a concrete agent.
+  
+  **Why it reads as AI.** Journalistic prose's hallmark is concrete actors + active verbs ("the mayor announced," "officials said," "the judge ruled"). Nominalization cascades hide the actor behind bureaucratic vocabulary, undermining attribution.
+  
+  **Fix.** Rewrite around a named agent and an active verb. "The implementation of the policy resulted in concerns" → "Officials raised concerns about how the policy was carried out."
+  
+  ### reduced-relative-stacking
+  
+  **Pattern.** Two or three reduced relative clauses (dropped "that") stacked in one sentence, often combined with a long noun-phrase subject.
+  
+  **Why it reads as AI.** Each reduced relative is individually grammatical; three in one sentence force the reader to backtrack to identify the actor — fatal in a news report where mis-identification means a correction.
+  
+  **Fix.** Restore "that" and/or split the sentence. Prefer the explicit "that" when the sentence already carries a long subject or multiple clauses.
+  
+  ### unattributed-claim `[register: news-report, feature]`
+  
+  **Pattern.** Factual claim presented without attribution, as if the reporter independently knows the fact. Signatures: "The program has been popular." / "Officials are concerned." / "The plan would cost the city millions."
+  
+  **Why it reads as AI.** AI-drafted journalistic prose tends to assert facts the model has internalized from training, without the chain of attribution that reporting requires. The result reads as authoritative but is operationally editorial.
+  
+  **Fix.** Attribute every factual claim. Either name the source ("according to a 2024 review by the city auditor"), the document ("the program's annual report"), or the labeled role ("a department official familiar with the matter said"). If the claim can't be attributed, drop it.
+  
+  ### smuggled-verdict `[register: news-report]`
+  
+  **Pattern.** Editorializing adverb or adjective inserted into reporting prose, where the modifier carries a stance the reporting itself does not establish. Signatures: "The agency, predictably, rejected the application." / "In a stunning move, the council voted to..." / "The administration's bizarre reasoning was that..."
+  
+  **Why it reads as AI.** AI-drafted reporting tends to import opinion-piece adverbs into news prose. The reader sees an editorialized framing that the reporting doesn't support and the reporter wouldn't have signed off on.
+  
+  **Fix.** Cut the editorializing modifier. If the stance is supported, move to commentary register and make the stance explicit. If the stance is not supported, removing the modifier strengthens the report.
+  
+  Additional canonical patterns apply in register-specific contexts: `first-person-commitment-in-academic-report` (academic registers only — N/A here), `citation-atomization` (citation-dense registers only — N/A here).
+  
+  ## Iron rules
+  
+  The rules in this section pass through to every derived voice file verbatim. `voice-extractor` preserves them without corpus calibration; `sourced check` refuses to install a voice file where any is missing.
+  
+  CLAUDE.md §10 *Generation signatures to rewrite* applies to this voice in full. No item on §10's Never list is softened or downgraded to TBD, regardless of what the writing-samples corpus shows.
+  
+  When removing a §10 pattern in existing prose, restructure the sentence shape rather than substituting punctuation or reordering tokens; retokenization preserves the rhythm that reads as AI.
+  
+  ## §10 exemptions
+  
+  Per-voice overrides to CLAUDE.md §10's Never list. An exemption suspends a named rule for this voice's writer prose only; scope and format are defined in CLAUDE.md §10 *Exemptions*. Leave the bullet list empty to inherit §10 in full.
+  
+  `voice-extractor` does not populate this section; corpus §10-pattern evidence goes into its `### Iron-rule conflicts` report and TestUser promotes bullets here by hand.
   
   '''
 # ---
@@ -1734,76 +2242,108 @@
   '''
   # Voice rules
   
-  Voice calibration tuned to TestUser's narrative writing — personal essays, reflection pieces, college application essays, memoir-adjacent work. The shipped `narrative` voice is a register-specific skeleton: it encodes narrative-register defaults for tone (first-person, scene-aware, reflective), structure (chronological or thematic arcs, scene → reflection alternation), and dimension (specific sensory detail, deliberate punctuation for rhythm, minimal formatting). Copy to a new name and edit for a different author within the narrative register; for a different register (academic, casual, technical, journalistic) start from the matching shipped skeleton instead. Applies in `[outlining mode]` (Paragraph Flow at outline time), `[writing mode]` (all rules, strictly), and `[editing mode]` (voice audit).
+  Voice calibration tuned to TestUser's narrative writing — personal essays, reflection pieces, college application essays, memoir-adjacent work. Encodes narrative-register defaults under the phase-3 sub-register contract: tone (first-person, scene-aware, reflective), structure (chronological or thematic arcs, scene → reflection alternation), dimension (specific sensory detail, deliberate punctuation for rhythm, minimal formatting). Applies in `[outlining mode]` (Paragraph Flow at outline time), `[writing mode]` (Phase 1 plan + Phase 2 `prose-drafter` dispatch), and `[editing mode]` (Pass 0 Revision + Pass 8 voice audit).
   
   Read this file in full on entry to any of those modes; do not work from memory of prior sessions. The rules are load-bearing for the project's voice-preservation promise.
   
-  ## Iron rules
+  ## Sub-register taxonomy
   
-  The rules in this section pass through to every derived voice file verbatim. `voice-extractor` preserves them without corpus calibration; `install.sh` refuses to install a voice file where any is missing.
+  Narrative writing is not a single register. This voice covers three sub-registers; rules below are tagged with the sub-register where they apply strongly. Untagged rules apply across all three.
   
-  CLAUDE.md §10 *Generation signatures to rewrite* applies to this voice in full. No item on §10's Never list is softened or downgraded to TBD, regardless of what the writing-samples corpus shows.
+  - **`scene-driven`** — present-tense or past-tense scene with sensory detail, dialogue, embodied action; reflection minimized or deferred. Examples: opening scenes of memoir chapters, vignettes, action-forward pieces.
+  - **`reflective`** — past-tense looking back; abstract movement; meaning-making in the foreground; scene used as illustration. Examples: meditation essays, retrospective reflections, mid-life reckonings.
+  - **`argumentative-personal`** — first-person essay with thesis; scene + reflection alternation in service of an argument; closer to academic personal-essay than memoir. Examples: New York Times Modern Love columns, polished college-application essays, thesis-driven personal essays.
   
-  When removing a §10 pattern in existing prose, restructure the sentence shape rather than substituting punctuation or reordering tokens; retokenization preserves the rhythm that reads as AI.
+  When the corpus spans multiple sub-registers, `voice-extractor` produces one voice file per sub-register rather than unioning them; see `data/agents/voice-extractor.md § Multi-register corpora`. Unioning is the documented failure mode (a `scene-driven` sensory-density rule imported into `argumentative-personal` produces over-described prose where every paragraph stops to describe a room before resuming the argument).
   
-  ### §10 exemptions
+  **Determining sub-register at write time.** `[writing mode]` Phase 1 declares the sub-register for the section in the prose-plan's Register Mode field. The declaration filters which rules below apply. If the brief does not specify, assume `reflective` (the narrative middle-baseline) and flag the assumption in the prose-plan.
   
-  Per-voice overrides to CLAUDE.md §10's Never list. An exemption suspends a named rule for this voice's writer prose only; scope and format are defined in CLAUDE.md §10 *Exemptions*. Leave the bullet list empty to inherit §10 in full.
+  ## Worked paragraphs
   
-  `voice-extractor` does not populate this section; corpus §10-pattern evidence goes into its `### Iron-rule conflicts` report and TestUser promotes bullets here by hand.
+  Paragraph-scale exhibits with per-sentence annotation. Each exhibit's annotation shape (`S1=…; S2=…; closure-type=…`) matches the prose-plan's sentence-role sequence — the plan uses the same vocabulary, so an exhibit IS a model for a plan block.
+  
+  ### Exhibit 1 — reflective (illustrative)
+  
+  > The afternoon I left, my grandmother was already in the garden. She didn't look up when the cab honked. I had said goodbye the night before, in the kitchen, and we both seemed to have agreed that the morning version would be smaller. Years later, I would wonder whether she was sparing me or sparing herself. By then there was no one to ask.
+  
+  <!-- annotation:
+  S1=opener-scene-anchor (specific time, named figure, embodied action); opener-shape=scene-anchor-past-tense
+  S2=development-detail (concrete sensory detail; the cab honk, the not-looking-up)
+  S3=development-context (explanation of the prior night; introduces the agreement that frames the question)
+  S4=pivot-reflection (years-later move; introduces the unanswered question)
+  S5=closure-loss (short sentence; the loss is named without being explained); closure-type=synthesis
+  paragraph-pattern: scene-anchor → detail → context → reflection-pivot → loss
+  handoff-to-next: the next paragraph either steps further back into reflection or returns to a different scene from the same period
+  source: illustrative; voice-extractor replaces with corpus paragraph at extraction time
+  -->
+  
+  ### Exhibit 2 — scene-driven (illustrative)
+  
+  TBD — voice-extractor populates from corpus when scene-driven samples are present. If the corpus is purely reflective or argumentative-personal, this exhibit stays TBD.
+  
+  ### Exhibit 3 — argumentative-personal (illustrative)
+  
+  TBD — voice-extractor populates from corpus when argumentative-personal samples are present. If the corpus is purely scene-driven or reflective, this exhibit stays TBD.
+  
+  Voice-extractor replaces these shipped exhibits with corpus-derived paragraphs when run against an author's samples. The shipped exhibits are illustrative of the shape, not defaults to retain; the extractor's output file carries the author's actual patterns.
   
   ## Tone
   
   ### Stance
   
-  Claims are often provisional, grounded in experience. "I thought" / "I realized" / "it turned out" rather than "research shows" or "I argue." First-person is the baseline, not a stylistic choice.
+  **Rule.** Claims are often provisional, grounded in experience. "I thought" / "I realized" / "it turned out" rather than "research shows" or "I argue." First-person is the baseline, not a stylistic choice. In `argumentative-personal`, first-person commitment to a position is allowed and expected; in `scene-driven` and `reflective`, the stance accumulates from accumulated specifics rather than declarative claim.
   
+  **Exemplars:**
   - "I didn't understand, at first, why it mattered."
   - "Looking back, I was asking the wrong question."
   
-  Not: "It is evident that the experience was formative."
-  Not: "One comes to recognize that..."
+  **Not:** "It is evident that the experience was formative." / "One comes to recognize that..."
   
   ### Sentence Structure
   
-  Varies with scene vs. reflection. Scene sentences are tight, concrete, often sensory. Reflection sentences are longer, more abstract, often questioning.
+  **Rule.** Varies with scene vs. reflection. Scene sentences are tight, concrete, often sensory. Reflection sentences are longer, more abstract, often questioning. Uniform medium-length sentences across both modes flatten the rhythm.
   
+  **Exemplars:**
   - Scene: "The room smelled like burnt coffee. She didn't look up when I walked in."
   - Reflection: "Something about that afternoon stayed with me, not the conversation itself, but the way the light fell across the desk while she talked."
   
-  Not: uniform medium-length sentences across both modes. Rhythm comes from the contrast.
+  **Not:** uniform medium-length sentences across both modes — rhythm comes from the contrast.
   
   ### Exploratory vs Verdict Tone
   
-  Narrative prose lives in exploration. Verdicts are rare and reserved for rhetorical impact. Most of the writing earns its authority through specificity, not conclusion.
+  **Rule.** Narrative prose lives in exploration. Verdicts are rare and reserved for rhetorical impact. Most of the writing earns its authority through specificity, not conclusion. In `argumentative-personal`, verdicts can land at section ends or in the closing paragraph; even there, the verdict should follow accumulated scene rather than open the section.
   
+  **Exemplars:**
   - Exploratory: "I keep coming back to that afternoon, and I still don't know what to make of it."
   - Verdict (earned, rare): "That was the moment I stopped believing him."
   
   ### Thinking Out Loud
   
-  This IS narrative writing — the thinking-out-loud quality is the form. Ask questions, answer them, reverse yourself, reconsider. The reader follows your mind in motion.
+  **Rule.** This IS narrative writing — the thinking-out-loud quality is the form. Ask questions, answer them, reverse yourself, reconsider. The reader follows your mind in motion.
   
+  **Exemplars:**
   - "At the time, I thought it was about control. Maybe it was. Or maybe, and this is harder to admit, it was about being afraid."
   - "Why did I stay? I've told myself a dozen reasons. None of them are true, exactly."
   
   ### Including the Reader
   
-  Second-person ("you") appears but is usually the universal-you, not direct address. First-person dominates. "We" appears rarely, usually as a moment of solidarity.
+  **Rule.** Second-person ("you") appears but is usually the universal-you, not direct address. First-person dominates. "We" appears rarely, usually as a moment of solidarity.
   
+  **Exemplars:**
   - Universal-you: "You know the feeling when someone says your name and you can tell they've been practicing it."
   - First-person baseline: "I had never seen her cry before."
   
-  Not: "The reader will recognize..." "One might imagine..." These lecture and break the intimacy narrative depends on.
+  **Not:** "The reader will recognize..." / "One might imagine..." (lectures and breaks the intimacy narrative depends on)
   
   ### Weak Adverbs
   
-  Cut weak adverbs: "really", "very", "quite", "somewhat", "fairly", "rather", "basically", "actually", "honestly". "This is really quite important" becomes "This is important." In narrative, concrete sensory detail replaces hedged qualification. "I was very scared" becomes "My hands wouldn't stop shaking." Ground claims with specific memory, not vague intensifiers.
+  **Rule.** Cut "really," "very," "quite," "somewhat," "fairly," "rather," "basically," "actually," "honestly." In narrative, concrete sensory detail replaces hedged qualification. "I was very scared" becomes "My hands wouldn't stop shaking." Ground claims with specific memory, not vague intensifiers.
   
   ### No Preamble
   
-  Start in scene or with a question. Skip "I want to tell you about..." or "Recently I've been thinking about..."
+  **Rule.** Start in scene or with a question. Skip "I want to tell you about..." or "Recently I've been thinking about..."
   
+  **Exemplars:**
   - "I was seventeen the first time I understood that grown-ups lie."
   - "There's a particular kind of silence in a parked car."
   
@@ -1811,78 +2351,155 @@
   
   ### The Core Rule
   
-  Every paragraph either advances the story or earns the reflection. Scene without reflection is a transcript; reflection without scene is an essay. Both feel untethered. Alternate.
+  **Rule.** Every paragraph either advances the story or earns the reflection. Scene without reflection is a transcript; reflection without scene is an essay. Both feel untethered. Alternate.
   
-  Writing is sculpting: start with raw material, then chisel. Write a draft, step back, cut, rewrite. Repeat. The first version is never the final version.
+  **Concision is a means, not an end.** Narrative prose tolerates more sensory detail than other registers, but stranded verbs and aphoristic closures still trip the reader. See `## Cut patterns > compression-stranded-verb` and `## Cut patterns > aphoristic-closure`.
   
   **The iteration loop.** After writing a draft, reread every paragraph and ask:
   - Does this paragraph advance the story or earn the reflection?
   - Does it repeat a scene or an insight already delivered?
-  - Does it sound formulaic or AI-generated? (Cross-check against CLAUDE.md §10's Never list specifically; retokenizing the pattern is not a fix.)
+  - Does it sound formulaic or AI-generated? (Cross-check against CLAUDE.md §10's Never list.)
   - Is the sensory detail specific, or is it a generic placeholder?
   - Does the piece hold when read start to finish?
   
-  If any answer is no, rewrite or cut. Then reread again. Do not stop after one pass. Keep iterating until a full reread surfaces no issues. Only then present the draft for feedback.
-  
-  This is not optional polish. This is the process. First drafts are raw material, not output.
+  If any answer is no, rewrite or cut. Then reread again. First drafts are raw material, not output.
   
   ### Sentence Connectedness
   
-  Sentences connect through time ("then," "later," "that afternoon"), through parallel sensory detail ("I heard... I saw... I remember..."), or through reflective pivots ("but what I didn't know was..."). Avoid chains of declaratives that read as enumeration.
+  **Rule.** Sentences connect through time ("then," "later," "that afternoon"), through parallel sensory detail ("I heard... I saw... I remember..."), or through reflective pivots ("but what I didn't know was..."). Avoid chains of declaratives that read as enumeration.
   
+  **Exemplars:**
   - Connected (time): "We left the house a little after seven. The streetlights were already on. By the time we reached the bridge, I had stopped talking."
   - Connected (sensory parallel): "I remember the cold of the doorknob. I remember my breath fogging the glass. I remember not wanting to turn around."
-  - Disconnected: "The house was quiet. The door was locked. The car was in the driveway." The reader gets facts, not a scene.
+  
+  **Not:** "The house was quiet. The door was locked. The car was in the driveway." (reader gets facts, not a scene)
   
   ### Paragraph Flow
   
-  Paragraphs move between scene and reflection. A scene paragraph may end on a sensory detail or a line of dialogue; the next paragraph steps back to interpret, then returns to scene.
+  **Rule.** Paragraphs move between scene and reflection. A scene paragraph may end on a sensory detail or a line of dialogue; the next paragraph steps back to interpret, then returns to scene.
   
+  **Exemplar:**
   - Connected: a scene paragraph ends "She closed the door without answering." The next opens: "For years afterward, I tried to figure out what that silence meant."
-  - Disconnected: a scene paragraph ends on a verdict ("It was the worst day of my life"), which leaves nothing for the reflection paragraph to do.
+  
+  **Not:** a scene paragraph ending on a verdict ("It was the worst day of my life"), which leaves nothing for the reflection paragraph to do.
   
   ### Information Pacing
   
-  Scene is dense with detail; reflection is sparse. The rhythm alternates: pack the scene, breathe in the reflection, return to scene. Avoid stacking reflection paragraphs or stacking scene paragraphs; the form depends on the alternation.
+  **Rule.** Scene is dense with detail; reflection is sparse. The rhythm alternates: pack the scene, breathe in the reflection, return to scene. Avoid stacking reflection paragraphs or stacking scene paragraphs; the form depends on the alternation.
   
   ### Concept Setup
   
-  Narrative concepts set up through scene, not definition. Instead of defining a term, show it happening. A reader meets a word for a family ritual by watching the ritual once; an abstract noun earns its place by being embodied first.
+  **Rule.** Narrative concepts set up through scene, not definition. Instead of defining a term, show it happening. A reader meets a word for a family ritual by watching the ritual once; an abstract noun earns its place by being embodied first.
   
-  - Set up in scene: "Every Sunday, my grandmother served a soup she called *chorba*. I didn't ask what was in it until I was nine." The term enters through practice.
-  - Dropped: "*Chorba* is a North African soup often served on Sundays" — the sentence is a gloss, not a scene, and reads as exposition.
+  **Exemplars:**
+  - Set up in scene: "Every Sunday, my grandmother served a soup she called *chorba*. I didn't ask what was in it until I was nine." (the term enters through practice)
+  - Dropped (avoid): "*Chorba* is a North African soup often served on Sundays" (the sentence is a gloss, not a scene, and reads as exposition)
   
-  ### Building Arguments
+  ### Building Arguments `[register: argumentative-personal]`
   
-  Narrative writing builds arguments indirectly. Specific scenes accumulate into an argument the reader constructs themselves. Direct assertion is rare and weighty when it appears.
+  **Rule.** Narrative writing builds arguments indirectly. Specific scenes accumulate into an argument the reader constructs themselves. Direct assertion is rare and weighty when it appears. In `argumentative-personal`, named thesis is allowed, but it should land after the scene work has earned it.
   
+  **Exemplar:**
   - "I'm not going to tell you he was cruel. I'm going to tell you what he said at the dinner table when I was twelve, and you can decide."
   
   ### Paragraph Length
   
-  Varies widely. Scene paragraphs can be long (6-8 sentences of cumulative detail) or short (single-sentence impact). Reflection paragraphs 3-5 sentences. Avoid uniformity, variation IS the rhythm.
+  **Rule.** Varies widely. Scene paragraphs can be long (6–8 sentences of cumulative detail) or short (single-sentence impact). Reflection paragraphs 3–5 sentences. Avoid uniformity — variation IS the rhythm.
+  
+  ### Reduced Structures and Parse Load
+  
+  **Rule.** Drop "that" freely in narrative prose ("the thing she said," not "the thing that she said") — but don't stack two or three reduced relatives in one sentence. The reader has to backtrack to identify the subject. See `## Cut patterns > reduced-relative-stacking`.
   
   ## Dimension
   
   ### Analogies and Anecdotes
   
-  The whole piece IS anecdote, essentially. Within the larger narrative, smaller anecdotes can nest (a remembered moment, a friend's story) to illuminate the main arc.
+  **Rule.** The whole piece IS anecdote, essentially. Within the larger narrative, smaller anecdotes can nest (a remembered moment, a friend's story) to illuminate the main arc. Cut a nested anecdote you find yourself extending across multiple paragraphs — a vignette is a moment, not another scene.
   
-  **Anchors:** TBD — derived from corpus. Narrative-register anchors often include recurring images, named people, specific settings that surface across multiple samples — concrete pattern-kinds are things like a returned-to setting (the grandmother's kitchen, the back road home), a named recurring figure (the teacher who said X, a sibling at a specific age), or a sensory image the writer returns to as shorthand (the smell of wet asphalt, a specific light at dusk). voice-extractor replaces this placeholder with the author's actual anchors from the corpus; the patterns above are illustrative of the kind, not defaults to keep.
-  
-  Not every nested anecdote earns its place. Drop it if it doesn't connect back to the main arc; a detour that goes nowhere is a detour. Cut back a nested anecdote you find yourself extending: it should illuminate a moment, not run the piece.
+  **Anchors:** TBD — derived from corpus. Narrative-register anchors often include recurring images, named people, specific settings that surface across multiple samples — a returned-to setting (the grandmother's kitchen, the back road home), a named recurring figure (the teacher who said X, a sibling at a specific age), or a sensory image the writer returns to as shorthand (the smell of wet asphalt, a specific light at dusk).
   
   ### Punctuation
   
-  Punctuation patterns that function as AI generation signatures (em dashes, "not X but Y" pivots, ornamental triads) are governed by CLAUDE.md §10 *Generation signatures to rewrite*, which applies across every voice. The fix for a flagged em-dash is sentence-shape restructure per §10 *Restructure, don't retokenize*: the gloss becomes a standalone sentence, is relocated to a natural position, or is cut. A comma, colon, or period-fragment swap that keeps the mid-clause-interruption rhythm intact fails the audit. Use this section only for author-specific punctuation habits the corpus clearly shows. Leave TBD rather than inventing a rule the corpus does not settle. An author-specific rule that contradicts §10 must be stated explicitly; silence defers to §10.
-  
-  Ellipses for trailing thoughts and drift: "And I knew, even then... I just didn't want to say it." Semicolons to link reflection-clauses ("I wanted to leave; I didn't move"). Direct speech with quotation marks, attributed minimally ("she said," "I replied").
+  **Rule.** Punctuation patterns that function as AI generation signatures (em dashes, "not X but Y" pivots, ornamental triads, aphoristic closures) are governed by CLAUDE.md §10 *Generation signatures to rewrite*. The fix for a flagged em-dash is sentence-shape restructure per §10 *Restructure, don't retokenize*: the gloss becomes a standalone sentence, is relocated to a natural position, or is cut. A comma, colon, or period-fragment swap that keeps the mid-clause-interruption rhythm intact fails the audit.
   
   Direct quotations follow CLAUDE.md §10 *Direct quotations* and §4 *Quote verbatim* (source punctuation preserved verbatim). This section governs the writer's own prose.
   
+  **Author-specific patterns (narrative-register baseline):**
+  - Ellipses for trailing thoughts and drift: "And I knew, even then... I just didn't want to say it."
+  - Semicolons to link reflection-clauses: "I wanted to leave; I didn't move."
+  - Direct speech with quotation marks, attributed minimally ("she said," "I replied"). Attributed dialogue with sensory action beat is preferred over "she said" alone.
+  
   ### Formatting
   
-  Minimal. *Italics* for emphasis of a single word (often a remembered phrase). **Bold** rare. Bullet points usually break the mood; avoid unless the list is a genuine list (ingredients, steps, etc.).
+  **Rule.** Minimal. *Italics* for emphasis of a single word (often a remembered phrase). **Bold** rare. Bullet points usually break the mood; avoid unless the list is a genuine list (ingredients, steps, etc.).
+  
+  ## Cut patterns
+  
+  Named failure modes observed in AI-drafted prose that `voice-extractor` and `[editing mode]` Pass 7 explicitly flag. Each pattern carries a canonical ID; `failures_dir` before/after pairs populate author-specific instances at extraction time. Shipped patterns are register-default.
+  
+  ### aphoristic-closure
+  
+  **Pattern.** Paragraph ends on a crisp, rhetorically-balanced pronouncement that substitutes rhetoric for reasoning. Narrative signatures: "And maybe that was enough." / "The silence said everything." / "Some doors stay closed for a reason."
+  
+  **Why it reads as AI.** Narrative prose's strength is specificity earning its meaning. A profundity-closure trades the specific scene the paragraph just delivered for a vague universal — undoing the work the scene did.
+  
+  **Fix.** Restructure to a `transitional` or `synthesis` closure. End on a remembered sensory detail, a line of dialogue, or a question that the next paragraph picks up. Corresponds to canonical §10 ID `aphoristic-closures`.
+  
+  ### compression-stranded-verb
+  
+  **Pattern.** Verb stripped of its object or qualifier for the sake of concision, producing a fragment-like sentence. Narrative signatures: "I knew" (knew what?), "She had stopped" (stopped doing what?), "It was over" (over how?).
+  
+  **Why it reads as AI.** Narrative prose tolerates fragments when context anchors them, but a stranded verb without scene-anchor reads as performed-significance rather than earned-significance.
+  
+  **Fix.** Restore the stranded complement, OR restructure so the fragment IS the scene's beat (e.g., "I knew what she meant. I knew what she meant before she finished the sentence.").
+  
+  ### abstract-nominalization-cascade
+  
+  **Pattern.** Sequence of abstract nouns made from verbs ("the realization," "the recognition," "the awareness") stacked across clauses without a concrete agent or scene-anchor.
+  
+  **Why it reads as AI.** Narrative register's hallmark is concrete subjects + specific scene ("I noticed," "she said," "the room got quiet"). When the cut-bias stops firing, prose expands into abstract-noun cascades that read as performed-thoughtful rather than thinking.
+  
+  **Fix.** Rewrite around a concrete agent and an active verb. "The realization that she had been right came slowly" → "It took me weeks to see she'd been right."
+  
+  ### reduced-relative-stacking
+  
+  **Pattern.** Two or three reduced relative clauses (dropped "that") stacked in one sentence, often combined with a cataphoric pronoun.
+  
+  **Why it reads as AI.** Each reduced relative is individually grammatical; three in one sentence force the reader to backtrack — fatal in narrative prose where the reader needs to stay anchored in scene.
+  
+  **Fix.** Restore "that" and/or split the sentence. Narrative drops "that" naturally in close-third or dialogue voicing; stacking is sentence-engineering, not voice.
+  
+  ### telling-not-showing `[register: scene-driven, reflective]`
+  
+  **Pattern.** Summary-statement of an emotional or experiential claim where a scene would do the work. Signatures: "The argument was painful." / "I felt very alone that year." / "Their relationship was complicated."
+  
+  **Why it reads as AI.** AI-drafted narrative prose tends to summarize emotional content in abstract terms, because describing the specific scene that conveys the feeling requires sensory commitment the model defers. The reader gets a label instead of an experience.
+  
+  **Fix.** Replace the summary with a scene that delivers the feeling. "The argument was painful" → "She put her cup down without drinking from it. She said my name twice before I looked up." The reader infers the feeling from the embodied detail.
+  
+  ### generic-sensory-placeholder `[register: scene-driven]`
+  
+  **Pattern.** Sensory detail stated in generic terms that could describe many scenes. Signatures: "the cool morning air," "the warm afternoon sun," "the smell of fresh coffee," "the sound of laughter."
+  
+  **Why it reads as AI.** AI-drafted scene prose tends to reach for the most-likely sensory cliché when the model lacks the specific scene-detail. The result reads as scene-shaped but doesn't anchor anywhere — the reader can't picture which morning, which kitchen, which laugh.
+  
+  **Fix.** Replace the generic with the specific. "The cool morning air" → "the first cold morning that fall, when my breath caught at the door." If you can't recall the specific, the scene may not be earning its place — consider whether reflection or summary handles the moment better.
+  
+  Additional canonical patterns apply in register-specific contexts: `first-person-commitment-in-academic-report` (academic registers only — N/A here), `citation-atomization` (citation-dense registers only — N/A here).
+  
+  ## Iron rules
+  
+  The rules in this section pass through to every derived voice file verbatim. `voice-extractor` preserves them without corpus calibration; `sourced check` refuses to install a voice file where any is missing.
+  
+  CLAUDE.md §10 *Generation signatures to rewrite* applies to this voice in full. No item on §10's Never list is softened or downgraded to TBD, regardless of what the writing-samples corpus shows.
+  
+  When removing a §10 pattern in existing prose, restructure the sentence shape rather than substituting punctuation or reordering tokens; retokenization preserves the rhythm that reads as AI.
+  
+  ## §10 exemptions
+  
+  Per-voice overrides to CLAUDE.md §10's Never list. An exemption suspends a named rule for this voice's writer prose only; scope and format are defined in CLAUDE.md §10 *Exemptions*. Leave the bullet list empty to inherit §10 in full.
+  
+  `voice-extractor` does not populate this section; corpus §10-pattern evidence goes into its `### Iron-rule conflicts` report and TestUser promotes bullets here by hand.
   
   '''
 # ---
@@ -1890,156 +2507,280 @@
   '''
   # Voice rules
   
-  Voice calibration tuned to TestUser's technical writing — documentation, API references, procedural guides, technical blog posts. The shipped `technical` voice is a register-specific skeleton: it encodes technical-register defaults for tone (imperative, precise, minimal ornament), structure (one-step-per-sentence, parallel form, bulleted sequences), and dimension (diagrams-not-analogies, precise punctuation, code-block-friendly formatting). Copy to a new name and edit for a different author within the technical register; for a different register (academic, casual, journalistic, narrative) start from the matching shipped skeleton instead. Applies in `[outlining mode]` (Paragraph Flow at outline time), `[writing mode]` (all rules, strictly), and `[editing mode]` (voice audit).
+  Voice calibration tuned to TestUser's technical writing — documentation, API references, procedural guides, RFCs, postmortems. Encodes technical-register defaults under the phase-3 sub-register contract: tone (imperative, precise, minimal ornament), structure (one-step-per-sentence, parallel form, bulleted sequences), dimension (diagrams-not-analogies, precise punctuation, code-block-friendly formatting). Applies in `[outlining mode]` (Paragraph Flow at outline time), `[writing mode]` (Phase 1 plan + Phase 2 `prose-drafter` dispatch), and `[editing mode]` (Pass 0 Revision + Pass 8 voice audit).
   
   Read this file in full on entry to any of those modes; do not work from memory of prior sessions. The rules are load-bearing for the project's voice-preservation promise.
   
-  ## Iron rules
+  ## Sub-register taxonomy
   
-  The rules in this section pass through to every derived voice file verbatim. `voice-extractor` preserves them without corpus calibration; `install.sh` refuses to install a voice file where any is missing.
+  Technical writing is not a single register. This voice covers three sub-registers; rules below are tagged with the sub-register where they apply strongly. Untagged rules apply across all three.
   
-  CLAUDE.md §10 *Generation signatures to rewrite* applies to this voice in full. No item on §10's Never list is softened or downgraded to TBD, regardless of what the writing-samples corpus shows.
+  - **`reference`** — API docs, function signatures, configuration references. Imperative voice; no first-person; no exploratory hedging. Each entry describes one observable behavior. Examples: language reference, library API docs, CLI flag descriptions.
+  - **`tutorial`** — step-by-step walkthroughs aimed at a specific learning outcome. Second-person ("you call connect, then..."); contextual asides allowed; concrete examples per step. Examples: getting-started guides, "your first X" posts, codelabs.
+  - **`design-rationale`** — RFCs, design docs, postmortems, ADRs. Discursive prose with named tradeoffs; first-person plural ("we chose B because...") allowed for team-authored docs; counterargument-naming required. Examples: architecture decision records, postmortems, RFC documents.
   
-  When removing a §10 pattern in existing prose, restructure the sentence shape rather than substituting punctuation or reordering tokens; retokenization preserves the rhythm that reads as AI.
+  When the corpus spans multiple sub-registers, `voice-extractor` produces one voice file per sub-register rather than unioning them; see `data/agents/voice-extractor.md § Multi-register corpora`. Unioning is the documented failure mode (a `tutorial` second-person rule imported into `reference` produces inconsistent prose where some entries address the reader and others state behavior).
   
-  ### §10 exemptions
+  **Determining sub-register at write time.** `[writing mode]` Phase 1 declares the sub-register for the section in the prose-plan's Register Mode field. The declaration filters which rules below apply. If the brief does not specify, assume `reference` (the technical default — strictest baseline) and flag the assumption in the prose-plan.
   
-  Per-voice overrides to CLAUDE.md §10's Never list. An exemption suspends a named rule for this voice's writer prose only; scope and format are defined in CLAUDE.md §10 *Exemptions*. Leave the bullet list empty to inherit §10 in full.
+  ## Worked paragraphs
   
-  `voice-extractor` does not populate this section; corpus §10-pattern evidence goes into its `### Iron-rule conflicts` report and TestUser promotes bullets here by hand.
+  Paragraph-scale exhibits with per-sentence annotation. Each exhibit's annotation shape (`S1=…; S2=…; closure-type=…`) matches the prose-plan's sentence-role sequence — the plan uses the same vocabulary, so an exhibit IS a model for a plan block.
+  
+  ### Exhibit 1 — reference (illustrative)
+  
+  > The `connect()` method establishes a connection to the configured endpoint. It returns a `Connection` object on success and raises `ConnectionError` on failure. The method is idempotent: calling it on an already-connected instance returns the existing `Connection` without performing additional handshake work. Authentication is not performed here; call `authenticate()` after `connect()` returns.
+  
+  <!-- annotation:
+  S1=opener-signature (names the method, states its purpose in one clause); opener-shape=imperative-declaration
+  S2=development-return-shape (return value on success, exception on failure; parallel structure)
+  S3=development-property (idempotence; specific behavior the caller may rely on)
+  S4=closure-cross-reference (points the reader to the next required call); closure-type=transitional
+  paragraph-pattern: signature → return-shape → property → cross-reference
+  handoff-to-next: the next paragraph documents `authenticate()`
+  source: illustrative; voice-extractor replaces with corpus paragraph at extraction time
+  -->
+  
+  ### Exhibit 2 — tutorial (illustrative)
+  
+  TBD — voice-extractor populates from corpus when tutorial samples are present. If the corpus is purely reference or design-rationale, this exhibit stays TBD.
+  
+  ### Exhibit 3 — design-rationale (illustrative)
+  
+  TBD — voice-extractor populates from corpus when design-rationale samples are present. If the corpus is purely reference or tutorial, this exhibit stays TBD.
+  
+  Voice-extractor replaces these shipped exhibits with corpus-derived paragraphs when run against an author's samples. The shipped exhibits are illustrative of the shape, not defaults to retain; the extractor's output file carries the author's actual patterns.
   
   ## Tone
   
   ### Stance
   
-  Be exact. Acknowledge limits explicitly (preconditions, edge cases, unsupported inputs). Don't hedge for politeness — either a claim is true or it isn't.
+  **Rule.** Be exact. Acknowledge limits explicitly (preconditions, edge cases, unsupported inputs). Don't hedge for politeness — either a claim is true or it isn't.
   
+  **Exemplars `[reference]`:**
   - "Returns null when the input is empty; raises TypeError on non-string input."
   - "Caching is disabled by default; set cache=True to enable."
   
-  Not: "One would hope the function behaves reasonably under most conditions."
-  Not: "It is generally the case that null may perhaps be returned."
+  **Exemplars `[design-rationale]`:**
+  - "We chose B because restart survival is a hard requirement; A's lower latency does not offset the operational cost."
+  - "Considered a retry-with-backoff loop; rejected because the upstream service returns non-idempotent responses on retry."
+  
+  **Not:** "One would hope the function behaves reasonably under most conditions." / "It is generally the case that null may perhaps be returned."
   
   ### Sentence Structure
   
-  One instruction per sentence. Parallel structure for sequences (all imperatives, all declaratives — don't mix). Avoid subordinate clauses that bury the main action.
+  **Rule.** One instruction per sentence. Parallel structure for sequences (all imperatives, all declaratives — don't mix). Avoid subordinate clauses that bury the main action. In `design-rationale`, longer sentences are allowed when walking through a tradeoff.
   
+  **Exemplars:**
   - "Call connect() first. Then call authenticate(). The sequence matters because connection state is established lazily."
   - "Invoke the hook on mount; unregister it on unmount."
   
-  Not: "When you need to connect, which you do before authenticating, and only after having set up the socket state, the handshake proceeds."
+  **Not:** "When you need to connect, which you do before authenticating, and only after having set up the socket state, the handshake proceeds."
   
   ### Exploratory vs Verdict Tone
   
-  Technical documentation reports observed behavior. Frame claims as exact: what the code does, what it returns, what it raises. Exploratory prose is rare — reserve it for design rationale or tradeoff discussion, not for reference documentation.
+  **Rule `[register: reference]`.** Reference documentation reports observed behavior. Frame claims as exact: what the code does, what it returns, what it raises. Exploratory prose is not allowed in reference register.
   
+  **Rule `[register: tutorial, design-rationale]`.** Exploratory prose is permitted when reasoning through a tradeoff or anticipating reader confusion. Mark it visibly ("Considered approach A; rejected because..." or "If you're wondering why X, the answer is..."). Don't smuggle exploration into reference-style declaratives.
+  
+  **Exemplars:**
   - Reference: "The function returns the first matching element, or null if no match exists."
-  - Design rationale (exploratory is permitted): "A linear scan works because the collection is small in practice; a hash index would add setup cost that rarely pays back."
+  - Design rationale: "A linear scan works because the collection is small in practice; a hash index would add setup cost that rarely pays back."
   
   ### Thinking Out Loud
   
-  In reference documentation, omit this entirely. In design docs or tradeoff discussions, you may reason through options, but mark it visibly ("Considered approach A; rejected because...").
+  **Rule `[register: reference]`.** Omit. Reference documentation does not narrate reasoning.
   
+  **Rule `[register: tutorial, design-rationale]`.** Reason through options, but mark it visibly. The reader should be able to tell exposition apart from decision.
+  
+  **Exemplars:**
   - "Considered a retry-with-backoff loop; rejected because the upstream service returns non-idempotent responses on retry."
   - "Two designs were evaluated: a pull-based poller and a push-based webhook receiver. The push-based design was chosen because latency requirements ruled out polling intervals above one second."
   
   ### Including the Reader
   
-  Use "you" for instructions directed at the reader. Avoid "we" in pure reference documentation; it confuses whose code does what.
+  **Rule `[register: tutorial]`.** Use "you" for instructions directed at the reader. The tutorial's frame is teach-the-reader-to-do-this.
   
-  - "You receive a Context object when the handler fires."
-  - "The caller supplies the hash; the function does not compute it."
+  **Rule `[register: reference]`.** Avoid "we." Avoid "you" except in error-message templates and parameter descriptions where the caller is the natural subject. Default to passive-of-record where the actor is the system itself: "the function returns," "the cache is invalidated," "the lock is acquired."
   
-  Not: "We typically recommend that one first consider the socket state before invoking the handshake."
+  **Rule `[register: design-rationale]`.** "We" allowed for team-authored decisions. Avoid second-person; the reader is a peer reviewing the decision, not a learner being instructed.
+  
+  **Exemplars:**
+  - Tutorial: "You receive a Context object when the handler fires."
+  - Reference: "The caller supplies the hash; the function does not compute it."
+  - Design-rationale: "We chose Postgres because the team already operates it; an SQLite-based design would have lower setup cost but require new operational expertise."
+  
+  **Not:** "We typically recommend that one first consider the socket state before invoking the handshake." (mixes pronouns and registers)
   
   ### Weak Adverbs
   
-  Cut weak adverbs: "really", "very", "quite", "somewhat", "fairly", "rather", "basically", "actually", "honestly". "This is really quite fast" becomes "This completes in under 5 ms." Ground claims with numbers, units, or comparisons, not vague qualifiers. "The cache is fairly effective" becomes "The cache hits 92% of requests in the benchmark."
+  **Rule.** Cut "really," "very," "quite," "somewhat," "fairly," "rather," "basically," "actually," "honestly." Ground claims with numbers, units, or comparisons, not vague qualifiers. "This is really quite fast" becomes "This completes in under 5 ms." "The cache is fairly effective" becomes "The cache hits 92% of requests in the benchmark."
   
   ### No Preamble
   
-  Start with the function signature, not an essay about why the function exists. Skip "This document describes..." openings entirely.
+  **Rule.** Start with the function signature, the configuration shape, or the decision being documented. Skip "This document describes..." openings entirely. The reader knows what kind of document they're reading.
   
   ## Structure
   
   ### The Core Rule
   
-  Every word fights to stay. If a sentence adds nothing, cut it. If two sentences say the same thing differently, merge them into one shorter sentence. No filler, no padding, no repetition.
+  **Rule.** Every word fights to stay. If a sentence adds nothing, cut it. If two sentences say the same thing differently, merge them into one shorter sentence. No filler, no padding, no repetition.
   
-  Writing is sculpting: start with raw material, then chisel. Write a draft, step back, cut, rewrite. Repeat. The first version is never the final version.
+  **Concision is a means, not an end.** Technical prose tolerates compression better than narrative prose, but stranded verbs and reduced-relative stacking still trip the reader. See `## Cut patterns > compression-stranded-verb` and `## Cut patterns > reduced-relative-stacking`. The cut-bias should fire on filler words, not on the connective tissue that makes a sentence parseable.
   
   **The iteration loop.** After writing a draft, reread every sentence and ask:
   - Does this sentence describe observable behavior, or speculate?
   - Does this instruction chain parallel prior instructions in the same section?
-  - Does it sound formulaic or AI-generated? (Cross-check against CLAUDE.md §10's Never list specifically; retokenizing the pattern is not a fix.)
+  - Does it sound formulaic or AI-generated? (Cross-check against CLAUDE.md §10's Never list.)
   - Does it earn its place in the reference or procedure?
   - Does the section flow when read start to finish?
   
-  If any answer is no, rewrite or cut. Then reread again. Do not stop after one pass. Keep iterating until a full reread surfaces no issues. Only then present the draft for feedback.
-  
-  This is not optional polish. This is the process. First drafts are raw material, not output.
+  If any answer is no, rewrite or cut. Then reread again. First drafts are raw material, not output.
   
   ### Sentence Connectedness
   
-  Instructions chain through parallel verbs and shared subjects. Subordinators appear sparingly; when they do, they mark causation or precondition precisely.
+  **Rule.** Instructions chain through parallel verbs and shared subjects. Subordinators ("because," "while," "if") appear sparingly; when they do, they mark causation or precondition precisely. Technical prose favors parallel structure over explicit connectives; repeated sentence shape carries the handoff that connectives carry in academic prose.
   
+  **Exemplars:**
   - Connected: "Open the file. Read the header. Validate the version field. If validation fails, close the file and raise InvalidFormatError."
-  - Disconnected: "The file should be opened. Version validation is important. Errors may be raised."
-  
-  Technical prose favors parallel structure over explicit connectives; repeated sentence shape carries the handoff that connectives carry in academic prose.
+  - Disconnected (avoid): "The file should be opened. Version validation is important. Errors may be raised."
   
   ### Paragraph Flow
   
-  Technical paragraphs are often single-purpose: one behavior described, then the next. Flow through proximity, not connectives.
+  **Rule.** Technical paragraphs are often single-purpose: one behavior described, then the next. Flow through proximity, not connectives. Section structure (subheadings, bullets) carries the navigational signal; paragraph openings can be cold within a section.
   
-  - Connected: "A paragraph describes the happy path. The next paragraph describes error conditions. The connection is structural, not linguistic."
-  - Disconnected: a paragraph on request parsing ends on an unrelated aside; the next paragraph opens on response formatting with no structural signal that a new topic has begun.
+  **Exemplar:**
+  - Connected: a paragraph describes the happy path; the next paragraph describes error conditions. The connection is structural (parallel under the same subheading), not linguistic.
   
   ### Information Pacing
   
-  Technical pacing: claim density higher, complexity per sentence lower. Readers digest facts as a stream.
+  **Rule.** Claim density higher than narrative; complexity per sentence lower. Readers digest facts as a stream.
   
+  **Exemplars:**
   - Paced: "Instead of one heavy claim with nested caveats, emit four simple claims in sequence."
-  - Packed: "The function, which under certain conditions related to buffer state and provided that the caller has not already acquired the lock, may return a partial result that the caller must reassemble."
+  - Packed (avoid): "The function, which under certain conditions related to buffer state and provided that the caller has not already acquired the lock, may return a partial result that the caller must reassemble."
   
   ### Concept Setup
   
-  Define every specialized term on first use. No assumptions about domain background.
+  **Rule.** Define every specialized term on first use. No assumptions about domain background. In `tutorial`, the definition can be informal ("a `Promise` is an object that..."); in `reference`, the definition should match the canonical specification.
   
+  **Exemplars:**
   - Set up: "A promise is an object that represents the future result of an asynchronous operation. Its state is one of: pending, fulfilled, rejected."
-  - Dropped: "The promise resolves before the microtask queue drains." ("promise" and "microtask queue" both assume prior knowledge.)
+  - Dropped (avoid): "The promise resolves before the microtask queue drains." ("promise" and "microtask queue" both assume prior knowledge.)
   
-  ### Building Arguments
+  ### Building Arguments `[register: design-rationale]`
   
-  Technical arguments are usually tradeoff analyses. Frame as: option A (pros, cons), option B (pros, cons), chosen. Address counterpoints by naming them, not by explicitly rebutting.
+  **Rule.** Technical arguments are usually tradeoff analyses. Frame as: option A (pros, cons), option B (pros, cons), chosen. Address counterpoints by naming them, not by explicitly rebutting. Counterargument-naming is required in design-rationale; absent it, the document reads as advocacy rather than decision.
   
+  **Exemplar:**
   - "Option A: in-memory cache. Lower latency (sub-millisecond reads), but state is lost on restart. Option B: Redis. Adds one network hop per read, but state survives restart. We chose B because restart survival is a hard requirement."
   
   ### Paragraph Length
   
-  2-4 sentences typical. Reference documentation can run shorter (single-sentence paragraphs for function descriptions). Design docs can run longer (5-7 sentences when walking through a tradeoff). Exceed 7 only if every sentence is load-bearing.
+  **Rule.** 2–4 sentences typical. Reference documentation can run shorter (single-sentence paragraphs for function descriptions). Design docs can run longer (5–7 sentences when walking through a tradeoff). Exceed 7 only if every sentence is load-bearing.
+  
+  ### Reduced Structures and Parse Load
+  
+  **Rule.** Drop "that" sparingly in technical prose. Reference documentation often has long noun-phrase subjects (`the response object the handler returns`); stacking a reduced relative on top forces the reader to backtrack. Limit yourself to one parse-load element per sentence; if the doc-claim needs more, split the sentence. See `## Cut patterns > reduced-relative-stacking`.
   
   ## Dimension
   
   ### Analogies and Anecdotes
   
-  Technical writing uses analogies sparingly. Prefer diagrams, code examples, or precise descriptions. When analogy helps, make it computationally grounded (locks, queues, caches, protocols).
+  **Rule.** Technical writing uses analogies sparingly. Prefer diagrams, code examples, or precise descriptions. When analogy helps, make it computationally grounded (locks, queues, caches, protocols) — not everyday-object analogies that don't carry the precision the technical claim needs.
   
-  **Anchors:** TBD — derived from corpus. Technical-register analogies often lean on familiar systems (locks, queues, caches, protocols) rather than everyday objects.
+  **Anchors:** TBD — derived from corpus. Technical-register anchors lean on familiar systems (locks, queues, caches, protocols, common data structures) rather than narrative anchors.
   
   Not every vivid analogy earns its place. Drop it if the connection to your specific claim is loose. A precise description or a code example almost always beats a metaphor.
   
   ### Punctuation
   
-  Punctuation patterns that function as AI generation signatures (em dashes, "not X but Y" pivots, ornamental triads) are governed by CLAUDE.md §10 *Generation signatures to rewrite*, which applies across every voice. Use this section only for author-specific punctuation habits the corpus clearly shows (semicolon style, ellipsis use, colon introducing evidence, etc.). Leave TBD rather than inventing a rule the corpus does not settle. An author-specific rule that contradicts §10 must be stated explicitly ("this author uses em-dashes for appositives"); silence defers to §10.
+  **Rule.** Punctuation patterns that function as AI generation signatures (em dashes, "not X but Y" pivots, ornamental triads, aphoristic closures) are governed by CLAUDE.md §10 *Generation signatures to rewrite*. Use this section only for author-specific punctuation habits the corpus shows beyond the §10-governed patterns.
   
   Direct quotations follow CLAUDE.md §10 *Direct quotations* and §4 *Quote verbatim* (source punctuation preserved verbatim). This section governs the writer's own prose.
   
-  Technical prose uses more colons (introducing code, examples, definitions). Semicolons rare. Ellipses avoided (implies incomplete thought, not welcome in reference docs).
+  **Author-specific patterns (technical-register baseline):**
+  - Colons introduce code, examples, or definitions: "The signature is: `connect(host: str, port: int) -> Connection`."
+  - Semicolons rare. Used to link two independent statements about the same behavior, not for ornamental balance.
+  - Ellipses avoided (implies incomplete thought, not welcome in reference docs).
   
   ### Formatting
   
-  Technical writing has more markdown surface than other registers. Use `code` for identifiers (function names, variables, flags, paths). Use ```code blocks``` for runnable examples and multi-line snippets. Use **bold** for warnings and load-bearing notes. Use *italics* for filenames or technical terms on first use. Bullet lists are common for parameter sets, return values, and step sequences.
+  **Rule.** Technical writing has more markdown surface than other registers.
+  
+  - `code` for identifiers (function names, variables, flags, paths).
+  - ```code blocks``` for runnable examples and multi-line snippets.
+  - **bold** for warnings and load-bearing notes ("**Note:** this method blocks; do not call from the UI thread").
+  - *italics* for filenames or technical terms on first use.
+  - Bullet lists are common for parameter sets, return values, and step sequences.
+  
+  ## Cut patterns
+  
+  Named failure modes observed in AI-drafted prose that `voice-extractor` and `[editing mode]` Pass 7 explicitly flag. Each pattern carries a canonical ID; `failures_dir` before/after pairs populate author-specific instances at extraction time. Shipped patterns are register-default.
+  
+  ### aphoristic-closure
+  
+  **Pattern.** Paragraph ends on a rhetorically-balanced pronouncement that substitutes rhetoric for reasoning. Technical signatures: "After all, simplicity is the ultimate goal." / "The right answer is always: it depends." / "Engineering, in the end, is about tradeoffs."
+  
+  **Why it reads as AI.** Reference documentation should end on a cross-reference or a fact. Design rationale should end on a decision. A profundity-closure trades concrete information for a vague gesture toward universal engineering wisdom.
+  
+  **Fix.** Restructure to a `transitional` or `synthesis` closure: end on the next behavior, the next section, or the chosen option. Corresponds to canonical §10 ID `aphoristic-closures`.
+  
+  ### compression-stranded-verb
+  
+  **Pattern.** Verb stripped of its object or qualifier for the sake of concision. Technical signatures: "the cache invalidates" (invalidates what?), "the handler returns" (returns what?), "the function may fail" (fails how?).
+  
+  **Why it reads as AI.** Technical prose that omits the object or condition fails the precision iron rule. The reader should never have to guess which value, which condition, which mode of failure.
+  
+  **Fix.** Restore the stranded complement. Be specific: what is invalidated, what is returned, what kind of failure.
+  
+  ### abstract-nominalization-cascade
+  
+  **Pattern.** Sequence of abstract nouns made from verbs ("the invocation," "the completion," "the resolution") stacked across clauses without a concrete agent.
+  
+  **Why it reads as AI.** Technical prose's hallmark is concrete subjects + active verbs ("the function returns," "the handler fires," "the cache invalidates"). When the cut-bias stops firing, prose expands into nominalization cascades that read as bureaucratic rather than precise.
+  
+  **Fix.** Rewrite around a concrete agent and an active verb. "The completion of the invocation triggers..." → "When the call completes, ..."
+  
+  ### reduced-relative-stacking
+  
+  **Pattern.** Two or three reduced relative clauses (dropped "that") stacked in one sentence, often combined with a long noun-phrase subject.
+  
+  **Why it reads as AI.** Each reduced relative is individually grammatical; three in one sentence force the reader to backtrack to identify the subject — fatal in reference documentation where misidentification means misuse.
+  
+  **Fix.** Restore "that" and/or split the sentence. Prefer the explicit "that" when the sentence already carries a long subject or multiple clauses.
+  
+  ### imperative-without-precondition `[register: reference, tutorial]`
+  
+  **Pattern.** Imperative instruction stated without naming the precondition the reader must satisfy first. Signatures: "Call `flush()` to commit pending writes." (when `flush()` requires the connection to be in `WRITE` state).
+  
+  **Why it reads as AI.** AI-drafted technical prose tends to state the action without the gating condition, because the gating condition is in another part of the documentation the model didn't traverse. The result reads as confident but is operationally wrong.
+  
+  **Fix.** Name the precondition: "After `connect()` returns successfully and `authenticate()` has been called, `flush()` commits pending writes." Don't trust the reader to reconstruct the precondition from elsewhere; the rule is name-it-or-don't-write-it.
+  
+  ### speculative-future-behavior `[register: reference]`
+  
+  **Pattern.** Reference documentation that speculates about future behavior or unsupported scenarios. Signatures: "The handler may return additional fields in future versions." / "Behavior on null input is currently unspecified."
+  
+  **Why it reads as AI.** Reference documentation should describe what IS, not what MIGHT BE. Speculation invites callers to depend on unsupported guarantees; "currently unspecified" is a license for callers to assume any behavior is acceptable.
+  
+  **Fix.** Either document the actual behavior on null input (authoritative claim) or omit the case entirely (let it be undefined behavior). For future-behavior speculation, move it to a separate "Stability" or "Roadmap" section where speculation is the genre.
+  
+  Additional canonical patterns apply in register-specific contexts: `first-person-commitment-in-academic-report` (academic registers only — N/A here), `citation-atomization` (citation-dense registers only — N/A here).
+  
+  ## Iron rules
+  
+  The rules in this section pass through to every derived voice file verbatim. `voice-extractor` preserves them without corpus calibration; `sourced check` refuses to install a voice file where any is missing.
+  
+  CLAUDE.md §10 *Generation signatures to rewrite* applies to this voice in full. No item on §10's Never list is softened or downgraded to TBD, regardless of what the writing-samples corpus shows.
+  
+  When removing a §10 pattern in existing prose, restructure the sentence shape rather than substituting punctuation or reordering tokens; retokenization preserves the rhythm that reads as AI.
+  
+  ## §10 exemptions
+  
+  Per-voice overrides to CLAUDE.md §10's Never list. An exemption suspends a named rule for this voice's writer prose only; scope and format are defined in CLAUDE.md §10 *Exemptions*. Leave the bullet list empty to inherit §10 in full.
+  
+  `voice-extractor` does not populate this section; corpus §10-pattern evidence goes into its `### Iron-rule conflicts` report and TestUser promotes bullets here by hand.
   
   '''
 # ---
