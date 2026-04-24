@@ -36,30 +36,41 @@ def test_extract_voice_exemptions_returns_empty_when_section_absent():
 
 def test_extract_canonical_ids_from_claude_md():
     claude_md = (
-        "## 10. Generation signatures\n\n"
-        "### Never (rewrite on sight)\n\n"
-        "- **Em dashes**. [id: em-dash-allowed]\n"
-        "- **'Not X but Y' pivots**. [id: not-x-but-y]\n\n"
-        "### Watch for density\n"
-        "- **Other [id: density-foo]**\n"
+        "## 7. Modes\n\n"
+        "### 7.6 Precedence and canonical §10 IDs\n\n"
+        "Precedence rules...\n\n"
+        "**Canonical §10 IDs (source of truth).**\n\n"
+        "- `em-dashes` — em-dash appositives.\n"
+        "- `not-x-but-y` — contrastive pivots.\n"
+        "- `ornamental-triads` — rhythmic lists.\n\n"
+        "### 7.7 Inline mode bodies\n"
+        "- `something-else` — should not be picked up.\n"
     )
     ids = extract_canonical_ids(claude_md)
-    assert "em-dash-allowed" in ids
+    assert "em-dashes" in ids
     assert "not-x-but-y" in ids
-    # density-foo is in a different section — should not appear.
-    assert "density-foo" not in ids
+    assert "ornamental-triads" in ids
+    # something-else is in 7.7, not 7.6 — must not appear.
+    assert "something-else" not in ids
 
 
 def test_validate_passes_when_all_exemption_ids_canonical():
-    claude_md = "### Never (rewrite on sight)\n- **X**. [id: foo]\n- **Y**. [id: bar]\n"
-    voice = "## §10 exemptions\n- foo\n- bar\n"
+    claude_md = (
+        "### 7.6 Precedence and canonical §10 IDs\n\n"
+        "- `em-dashes` — em-dash appositives.\n"
+        "- `not-x-but-y` — contrastive pivots.\n"
+    )
+    voice = "## §10 exemptions\n- em-dashes\n- not-x-but-y\n"
     findings = validate(voice=voice, claude_md=claude_md, voice_name="academic")
     assert findings == []
 
 
 def test_validate_finds_unknown_exemption_id():
-    claude_md = "### Never (rewrite on sight)\n- **X**. [id: foo]\n"
-    voice = "## §10 exemptions\n- foo\n- typo-id\n"
+    claude_md = (
+        "### 7.6 Precedence and canonical §10 IDs\n\n"
+        "- `em-dashes` — em-dash appositives.\n"
+    )
+    voice = "## §10 exemptions\n- em-dashes\n- typo-id\n"
     findings = validate(voice=voice, claude_md=claude_md, voice_name="academic")
     assert len(findings) == 1
     assert findings[0].rule == "exemption-unknown-id"
@@ -68,7 +79,10 @@ def test_validate_finds_unknown_exemption_id():
 
 def test_validate_no_section_no_findings():
     """Voice with no §10 exemptions section → nothing to validate."""
-    claude_md = "### Never (rewrite on sight)\n- **X**. [id: foo]\n"
+    claude_md = (
+        "### 7.6 Precedence and canonical §10 IDs\n\n"
+        "- `em-dashes` — em-dash appositives.\n"
+    )
     voice = "no exemptions section\n"
     findings = validate(voice=voice, claude_md=claude_md, voice_name="academic")
     assert findings == []
@@ -77,3 +91,34 @@ def test_validate_no_section_no_findings():
 def test_validate_never_raises_on_garbage():
     findings = validate(voice="", claude_md="", voice_name="x")
     assert findings == []
+
+
+def test_extract_voice_exemptions_rejects_h3_section():
+    """Regression guard: phase-3 promoted §10 exemptions from H3 (nested under
+    ## Iron rules) to H2 (its own top-level section). A skeleton or voice file
+    that still uses ### §10 exemptions must NOT have its bullets silently picked
+    up — the section must use H2."""
+    voice = (
+        "## Iron rules\n\n"
+        "Iron rule prose.\n\n"
+        "### §10 exemptions\n\n"
+        "- em-dash-allowed: legacy H3 placement.\n"
+        "- not-x-but-y: legacy H3 placement.\n"
+    )
+    ids = extract_voice_exemptions(voice)
+    assert ids == [], "H3 §10 exemptions section must not be picked up"
+
+
+def test_extract_voice_exemptions_picks_up_h2_after_iron_rules():
+    """H2 §10 exemptions following H2 Iron rules is the canonical phase-3
+    layout. Confirm bullets are extracted from the H2 section, not from
+    Iron rules' bulleted prose."""
+    voice = (
+        "## Iron rules\n\n"
+        "Iron rule prose with no canonical-id bullets.\n\n"
+        "## §10 exemptions\n\n"
+        "- throat-clearing-openers: light corpus use earns its place.\n"
+        "- ornamental-triads: grounded triads, not rhythmic flourish.\n"
+    )
+    ids = extract_voice_exemptions(voice)
+    assert ids == ["throat-clearing-openers", "ornamental-triads"]

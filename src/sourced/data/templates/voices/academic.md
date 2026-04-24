@@ -354,7 +354,7 @@ CLAUDE.md §10 *Generation signatures to rewrite* applies to this voice in full.
 
 When removing a §10 pattern in existing prose, restructure the sentence shape rather than substituting punctuation or reordering tokens; retokenization preserves the rhythm that reads as AI.
 
-### §10 exemptions
+## §10 exemptions
 
 Per-voice overrides to CLAUDE.md §10's Never list. An exemption suspends a named rule for this voice's writer prose only; scope and format are defined in CLAUDE.md §10 *Exemptions*. Leave the bullet list empty to inherit §10 in full.
 
