@@ -218,13 +218,13 @@ The canonical list of modes. `Body` points to the file loaded on mode entry (`in
 | Mode | Body | Project types | Auto-enters from |
 |------|------|---------------|-------------------|
 | collaborative | inline (§7.7) | all | session start (default) |
-| research | `docs/modes/research.md` | all | §3 self-correction (unverified citation; stale byline at write time; stale byline at format time); unsourced-claim detected in any prose mode |
-| plan | `docs/modes/plan.md` | all | explicit trigger only; gated by brief (§6) |
-| outlining | `docs/modes/outlining.md` | essay | explicit trigger; gated by brief complete enough for outlining |
+| research | `docs/modes/research.md` | all | §3 self-correction; unsourced-claim in any prose mode (§7.3) |
+| plan | `docs/modes/plan.md` | all | explicit trigger; gated by brief (§6) |
+| outlining | `docs/modes/outlining.md` | essay | explicit trigger; gated by brief (§6) |
 | refining | `docs/modes/refining.md` | essay | explicit trigger; gated by outline sign-off |
 | writing | `docs/modes/writing.md` | essay | explicit trigger; gated by refined-outline approval |
 | editing | `docs/modes/editing.md` | all | explicit trigger |
-| formatting | `docs/modes/formatting.md` | all | explicit trigger; gated by edit-complete + paste target named |
+| formatting | `docs/modes/formatting.md` | all | explicit trigger; gated by edit-complete + paste target |
 | annotated-bib | `docs/modes/annotated-bib.md` | annotated-bib | explicit trigger |
 | finetuning | `docs/modes/finetuning.md` | all | explicit trigger; implicit 3-part trigger (see §7.3) |
 | red-team | inline (§7.7) | all | explicit trigger only |
