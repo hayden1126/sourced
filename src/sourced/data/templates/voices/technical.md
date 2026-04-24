@@ -150,3 +150,35 @@ Technical prose uses more colons (introducing code, examples, definitions). Semi
 ### Formatting
 
 Technical writing has more markdown surface than other registers. Use `code` for identifiers (function names, variables, flags, paths). Use ```code blocks``` for runnable examples and multi-line snippets. Use **bold** for warnings and load-bearing notes. Use *italics* for filenames or technical terms on first use. Bullet lists are common for parameter sets, return values, and step sequences.
+
+## Worked paragraphs
+
+Paragraph-scale exhibits with per-sentence annotation. The annotation vocabulary (`S1=<role>; ... closure-type=...`) matches the prose-plan's sentence-role sequence used by `[writing mode]` Phase 1 and `prose-drafter`.
+
+TBD — derived from corpus. voice-extractor populates this section with 1–3 corpus-derived paragraphs when run against an author's samples.
+
+## Cut patterns
+
+Named failure modes observed in AI-drafted prose. `voice-extractor` and `[editing mode]` Pass 7 flag these explicitly. Shipped patterns below are register-default; the extractor adds author-specific patterns when a `failures_dir` is provided.
+
+### aphoristic-closure
+
+**Pattern.** Paragraph ends on a rhetorically-balanced pronouncement that substitutes rhetoric for reasoning.
+**Fix.** Restructure to `closure-type: transitional`, `synthesis`, or `question-out`. Corresponds to canonical §10 ID `aphoristic-closures`.
+
+### compression-stranded-verb
+
+**Pattern.** Verb stripped of its object or qualifier for concision, producing a fragment-like sentence.
+**Fix.** Restore the stranded complement.
+
+### abstract-nominalization-cascade
+
+**Pattern.** Sequence of abstract nouns made from verbs stacked across clauses without a concrete agent.
+**Fix.** Rewrite around a concrete subject + active verb.
+
+### reduced-relative-stacking
+
+**Pattern.** Two or three reduced relative clauses (dropped "that") stacked in one sentence.
+**Fix.** Restore "that" or split the sentence.
+
+Additional canonical patterns apply in register-specific contexts: `first-person-commitment-in-academic-report` (academic registers only), `citation-atomization` (citation-dense registers only).
