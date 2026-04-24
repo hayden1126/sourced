@@ -5,7 +5,7 @@ from pathlib import Path
 
 from ..context import Context
 from ..errors import UsageError, ProjectError
-from ..project import write_project_type, write_bak_sibling, deploy_docs_tree
+from ..project import write_project_type, write_bak_sibling, deploy_docs_tree, deploy_overlays
 from ..render import write_atomic
 from ..ui import bold, path_str, should_color
 from . import _pipeline
@@ -75,6 +75,11 @@ def run(
     docs_written = deploy_docs_tree(target)
     if docs_written and not ctx.quiet:
         print(f"  deployed {len(docs_written)} file(s) under {path_str(str(target / 'docs'), use_color)}")
+
+    # Deploy CLAUDE.d/ overlays (README + project-type drop-in).
+    overlays_written = deploy_overlays(target, project_type)
+    if overlays_written and not ctx.quiet:
+        print(f"  deployed {len(overlays_written)} overlay(s) under {path_str(str(target / 'CLAUDE.d'), use_color)}")
 
     # Project-type marker.
     write_project_type(target, project_type)

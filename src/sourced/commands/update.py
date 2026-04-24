@@ -17,6 +17,8 @@ from ..project import (
     detect_phase1_layout,
     migrate_phase1_to_phase2,
     deploy_docs_tree,
+    deploy_overlays,
+    read_project_type,
     read_voice_marker,
     read_style_marker,
     write_bak_sibling,
@@ -103,6 +105,13 @@ def run(ctx: Context, *, project: str | None = None, force: bool = False) -> int
         docs_written = deploy_docs_tree(target)
         if docs_written and not ctx.quiet:
             print(f"  refreshed {len(docs_written)} file(s) under {path_str(str(target / 'docs'), use_color)}")
+
+    # Keep CLAUDE.d/ overlays in sync with the bundle (idempotent). Reads the
+    # project-type marker to decide which overlay to deploy.
+    project_type = read_project_type(target)
+    overlays_written = deploy_overlays(target, project_type)
+    if overlays_written and not ctx.quiet:
+        print(f"  refreshed {len(overlays_written)} overlay(s) under {path_str(str(target / 'CLAUDE.d'), use_color)}")
 
     if new_voice:
         write_atomic(voice_path, new_voice)

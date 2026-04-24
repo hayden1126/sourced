@@ -4,6 +4,7 @@ import pytest
 from sourced.validators import invariants as inv
 from sourced.validators.invariants import (
     check_i1_mode_body_presence,
+    check_i2_overlay_scope,
     check_i3_canonical_id_integrity,
     check_i4_manifest_syntax,
     check_i5_forcing_artifact_reachability,
@@ -17,6 +18,7 @@ from sourced.validators.invariants import (
     parse_precedence_rules,
     parse_canonical_ids,
     run_all_invariants,
+    ALLOWED_OVERLAY_PATCH_SECTIONS,
 )
 
 
@@ -104,6 +106,72 @@ def test_i1_tolerates_inline_body_marker():
     # `collaborative` is `inline` — no finding expected for it; only `research`
     # is non-inline and its body file does not exist in this synthetic fixture.
     assert all("collaborative" not in f.location for f in findings)
+
+
+# ----- I2 overlay scope -----
+
+def test_i2_passes_on_shipped_bundle():
+    """Shipped annotated-bib overlay patches only base-manifest sections."""
+    findings = check_i2_overlay_scope(inv._load_bundled_template())
+    assert findings == []
+
+
+def test_i2_fails_on_unknown_patch_section(tmp_path, monkeypatch):
+    """An overlay that patches a section outside §§7.1-7.6 fails I2."""
+    # Build a synthetic bundle with a malformed overlay.
+    fake_claude_d = tmp_path / "CLAUDE.d"
+    fake_claude_d.mkdir()
+    (fake_claude_d / "README.md").write_text("drop-in pattern docs")
+    (fake_claude_d / "99-malformed.md").write_text(
+        "# Malformed overlay\n\n"
+        "## Patches to §99 Nonexistent section\n\n"
+        "- Remove: something\n"
+    )
+
+    # Point bundled_path at the fake bundle for "templates/CLAUDE.d".
+    from contextlib import contextmanager
+    @contextmanager
+    def fake_bundled_path(subpath):
+        if subpath == "templates/CLAUDE.d":
+            yield fake_claude_d
+        else:
+            # Fall through to real implementation for other paths.
+            from sourced.render import bundled_path as real
+            with real(subpath) as p:
+                yield p
+
+    monkeypatch.setattr(inv, "bundled_path", fake_bundled_path)
+
+    findings = check_i2_overlay_scope(inv._load_bundled_template())
+    assert any("99 Nonexistent section" in f.message for f in findings)
+
+
+def test_i2_dormant_when_no_overlays(tmp_path, monkeypatch):
+    """I2 reports no findings when the bundle ships no overlays."""
+    fake_empty = tmp_path / "CLAUDE.d"
+    fake_empty.mkdir()
+
+    from contextlib import contextmanager
+    @contextmanager
+    def fake_bundled_path(subpath):
+        if subpath == "templates/CLAUDE.d":
+            yield fake_empty
+        else:
+            from sourced.render import bundled_path as real
+            with real(subpath) as p:
+                yield p
+
+    monkeypatch.setattr(inv, "bundled_path", fake_bundled_path)
+
+    findings = check_i2_overlay_scope(inv._load_bundled_template())
+    assert findings == []
+
+
+def test_allowed_overlay_patch_sections_covers_76_range():
+    """Sanity check the allowed-sections set matches spec §§7.1-7.6."""
+    expected_prefixes = {"7.1", "7.2", "7.3", "7.4", "7.5", "7.6"}
+    actual_prefixes = {s.split(" ")[0] for s in ALLOWED_OVERLAY_PATCH_SECTIONS}
+    assert actual_prefixes == expected_prefixes
 
 
 # ----- I3 canonical ID integrity (integration — uses real writing.md) -----
@@ -227,8 +295,8 @@ def test_i9_fails_on_overlong_registry_row():
 def test_run_all_invariants_returns_tuples():
     results = run_all_invariants()
     rule_ids = [r for r, _ in results]
-    # Commit 3 ships I1, I3-I9. I2 and I10 are not in the shipped list.
-    assert rule_ids == ["I1", "I3", "I4", "I5", "I6", "I7", "I8", "I9"]
+    # Commits 3 + 4 ship I1-I9. I10 is not yet in the shipped list.
+    assert rule_ids == ["I1", "I2", "I3", "I4", "I5", "I6", "I7", "I8", "I9"]
     # Every finding list is iterable.
     for _, findings in results:
         assert isinstance(findings, list)

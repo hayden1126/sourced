@@ -22,6 +22,19 @@ from . import Finding
 # Per spec §13.1: rigid modes require an Iron Law section.
 RIGID_MODES = frozenset({"finetuning", "research", "formatting"})
 
+# Per spec I2: overlays may patch only sections defined in the base manifest.
+# Allowed `## Patches to ...` headings reference the base §§7.1–7.6.
+ALLOWED_OVERLAY_PATCH_SECTIONS = frozenset({
+    "7.1 Mode registry",
+    "7.2 Explicit triggers",
+    "7.3 Implicit and auto-fire triggers",
+    "7.4 Mode-to-mode gates",
+    "7.5 Forcing artifacts",
+    "7.6 Precedence and canonical §10 IDs",
+})
+
+OVERLAY_PATCH_HEADING_RE = re.compile(r"^## Patches to §(.+?)\s*$", re.MULTILINE)
+
 # Per spec §13.1: every non-inline mode body carries these sections in order.
 REQUIRED_SECTIONS = (
     "Overview",
@@ -220,6 +233,54 @@ def check_i1_mode_body_presence(claude_md: str) -> list[Finding]:
                 message=f"mode body file `templates/docs/modes/{name}.md` is missing from the bundle.",
                 fix_hint=f"create `src/sourced/data/templates/docs/modes/{name}.md` or remove the row from §7.1.",
             ))
+    return findings
+
+
+# ----- I2 overlay scope -----
+
+def _bundled_overlay_files() -> list[tuple[str, str]]:
+    """Return [(filename, text)] for every bundled CLAUDE.d/*.md overlay,
+    excluding README.md (which is documentation, not a patch file).
+
+    Returns an empty list if the bundle carries no CLAUDE.d/ tree.
+    """
+    try:
+        with bundled_path("templates/CLAUDE.d") as src:
+            src_path = Path(src)
+            if not src_path.exists():
+                return []
+            return [
+                (f.name, f.read_text(encoding="utf-8"))
+                for f in sorted(src_path.glob("*.md"))
+                if f.name != "README.md"
+            ]
+    except (FileNotFoundError, ModuleNotFoundError):
+        return []
+
+
+def check_i2_overlay_scope(claude_md: str) -> list[Finding]:
+    """Every shipped overlay under CLAUDE.d/ patches only sections defined in
+    the base manifest (§§7.1–7.6). Overlays that introduce new patch headings
+    fail.
+
+    Dormant when the bundle carries no overlays — phase-2 commit 4 is the
+    first commit shipping any overlay (annotated-bib).
+    """
+    findings: list[Finding] = []
+    for filename, text in _bundled_overlay_files():
+        for m in OVERLAY_PATCH_HEADING_RE.finditer(text):
+            section = m.group(1).strip()
+            if section not in ALLOWED_OVERLAY_PATCH_SECTIONS:
+                findings.append(Finding(
+                    rule="I2",
+                    location=f"CLAUDE.d/{filename}",
+                    severity="error",
+                    message=(
+                        f"overlay patches §{section!r}, which is not a "
+                        f"base-manifest section (allowed: {sorted(ALLOWED_OVERLAY_PATCH_SECTIONS)})."
+                    ),
+                    fix_hint="patch only §7.1–7.6 headings; new categories require a base-manifest change first.",
+                ))
     return findings
 
 
@@ -548,6 +609,7 @@ def check_i9_size_limits(claude_md: str) -> list[Finding]:
 
 INVARIANT_CHECKERS = [
     ("I1", check_i1_mode_body_presence),
+    ("I2", check_i2_overlay_scope),
     ("I3", check_i3_canonical_id_integrity),
     ("I4", check_i4_manifest_syntax),
     ("I5", check_i5_forcing_artifact_reachability),

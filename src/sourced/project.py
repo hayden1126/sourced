@@ -420,6 +420,53 @@ def deploy_docs_tree(project_root: Path) -> list[Path]:
     return written
 
 
+# Overlay filename template: `20-project-type-<type>.md` per CLAUDE.d README's
+# naming convention.
+def _overlay_name_for_project_type(project_type: str) -> str:
+    return f"20-project-type-{project_type}.md"
+
+
+def deploy_overlays(project_root: Path, project_type: ProjectType) -> list[Path]:
+    """Copy bundled CLAUDE.d/ drop-ins to `<project_root>/CLAUDE.d/`.
+
+    Always deploys README.md (the drop-in pattern explanation). Additionally
+    deploys the `20-project-type-<type>.md` overlay when `project_type` is
+    non-default (anything other than `essay`). Essay projects get the README
+    only; the base manifest is already complete for essays.
+
+    Writer-authored overlays in the `10-local-*` band are preserved across
+    calls: only files shipped in the bundle are overwritten.
+
+    Returns the list of files written. No-op on the README / overlay if the
+    bundle carries no CLAUDE.d/ tree.
+    """
+    from .render import bundled_path
+
+    written: list[Path] = []
+    dest_dir = project_root / "CLAUDE.d"
+    dest_dir.mkdir(exist_ok=True)
+
+    shipped_names = ["README.md"]
+    if project_type != "essay":
+        shipped_names.append(_overlay_name_for_project_type(project_type))
+
+    try:
+        with bundled_path("templates/CLAUDE.d") as src:
+            src_path = Path(src)
+            if not src_path.exists():
+                return written
+            for name in shipped_names:
+                src_file = src_path / name
+                if not src_file.exists():
+                    continue
+                dest_file = dest_dir / name
+                dest_file.write_text(src_file.read_text(encoding="utf-8"), encoding="utf-8")
+                written.append(dest_file)
+    except (FileNotFoundError, ModuleNotFoundError):
+        pass
+    return written
+
+
 def migrate_phase1_to_phase2(project_root: Path, fresh_claude_md: str) -> list[str]:
     """Atomic migration for a phase-1 project.
 
