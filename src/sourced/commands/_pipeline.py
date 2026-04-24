@@ -177,10 +177,52 @@ def render_style(name: str, user: str, ctx: Context) -> str:
     return f"<!-- sourced:style={name} -->\n\n{rendered_body}"
 
 
+# ----- cache-discipline primitives (spec §5; I10 enforced in validators/invariants.py) -----
+
+# These wrap section-emitting compute callables so cache classification is
+# explicit at the call site. Today render_claude_md emits a single
+# cache-stable section (the full template); future renderers may decompose
+# the manifest into multiple sections, at which point each call becomes
+# auditable in code review.
+#
+# `cache_stable_section(name, compute)` is the default: the section text is
+# memoizable across the cache window. `uncached_section(name, compute, reason)`
+# is the escape hatch — `reason` is required and must be non-empty so cache
+# breakage is reviewable. Spec I10 verifies (a) render_claude_md does not
+# perform bare-string assembly of always-on content, (b) every uncached_section
+# call carries a non-empty reason argument.
+
+
+def cache_stable_section(name: str, compute) -> str:
+    """Mark a section as cache-stable (memoizable until /clear or /compact).
+    Default for any always-on content. `compute` is called once and its output
+    is returned. `name` is for traceability; callers should pass a stable
+    short identifier."""
+    return compute()
+
+
+def uncached_section(name: str, compute, *, reason: str) -> str:
+    """Mark a section as cache-breaking (recomputed every turn). Use only for
+    content that legitimately changes mid-session (e.g., a session-timestamp
+    header). The `reason` kwarg is required and must be a non-empty explanation
+    so the cache-discipline review surface stays auditable.
+
+    Raises ValueError if `reason` is empty or whitespace-only.
+    """
+    if not reason or not reason.strip():
+        raise ValueError(
+            f"uncached_section({name!r}) requires a non-empty `reason` "
+            f"explaining why this section cannot be cache-stable."
+        )
+    return compute()
+
+
 def render_claude_md(user: str, ctx: Context) -> str:
     """Render the per-project CLAUDE.md."""
-    template = read_template("templates/CLAUDE.md")
-    return render(template, RenderContext(user=user))
+    return cache_stable_section(
+        "claude-md-base",
+        lambda: render(read_template("templates/CLAUDE.md"), RenderContext(user=user)),
+    )
 
 
 def render_brief(name: str, user: str, project_type: str, ctx: Context) -> str:

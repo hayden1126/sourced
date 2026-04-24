@@ -46,7 +46,7 @@ my-paper/
 
 ### Voices (6 shipped)
 
-`academic`, `casual`, `hybrid`, `journalistic`, `narrative`, `technical`. Library lives at `~/.claude/voice/<name>.md`. Each voice declares `## Iron rules`, `## AI-tells`, or `## Generation signatures` sections — text that MUST appear verbatim (modulo whitespace and trailing punctuation) in any rendered voice file derived from the skeleton. The `iron_rules` validator enforces this; the `exemptions` validator checks that any `## §10 exemptions` ids resolve to canonical ids in `CLAUDE.md` §10 *Never (rewrite on sight)*.
+`academic`, `casual`, `hybrid`, `journalistic`, `narrative`, `technical`. Library lives at `~/.claude/voice/<name>.md`. Each voice declares `## Iron rules`, `## AI-tells`, or `## Generation signatures` sections — text that MUST appear verbatim (modulo whitespace and trailing punctuation) in any rendered voice file derived from the skeleton. The `iron_rules` validator enforces this; the `exemptions` validator checks that any `## §10 exemptions` ids resolve to canonical ids in `CLAUDE.md` §7.6 (canonical §10 IDs).
 
 ### Styles (5 shipped)
 
@@ -54,7 +54,7 @@ my-paper/
 
 ### Cognitive modes (12)
 
-Defined in `CLAUDE.md` §7. Major ones: `[research mode]` (citation-graph build), `[outlining mode]`, `[writing mode]` (paraphrase-default, voice-preserved), `[editing mode]` (8-pass), `[formatting mode]` (style-driven render to a paste target), `[refining mode]`, `[primary-source mode]`, `[peer-review mode]` (planned), plus a few short utilities. Modes are gates — the agent enters/exits them explicitly and the user can request a transition.
+Defined in `CLAUDE.md` §7 (dispatch manifest) with full procedures in `docs/modes/<name>.md` for non-inline modes. Major ones: `[research mode]` (citation-graph build), `[outlining mode]`, `[writing mode]` (paraphrase-default, voice-preserved), `[editing mode]` (8-pass), `[formatting mode]` (style-driven render to a paste target), `[refining mode]`, `[annotated-bib mode]` (project-type-gated), `[finetuning mode]` (bounded local substitutions), plus three inline utilities (`[collaborative mode]`, `[red team mode]`, `[babble mode]`). Modes are gates — the agent enters/exits them explicitly and the user can request a transition.
 
 ### Paste targets (4)
 
