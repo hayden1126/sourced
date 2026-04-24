@@ -5,7 +5,7 @@ from pathlib import Path
 
 from ..context import Context
 from ..errors import UsageError, ProjectError
-from ..project import write_project_type, write_bak_sibling
+from ..project import write_project_type, write_bak_sibling, deploy_docs_tree
 from ..render import write_atomic
 from ..ui import bold, path_str, should_color
 from . import _pipeline
@@ -69,6 +69,12 @@ def run(
         write_atomic(p, content)
         if not ctx.quiet:
             print(f"  wrote {path_str(str(p), use_color)}")
+
+    # Deploy bundled docs/ tree (mode bodies + subagent docs).
+    # No-op if the bundle carries no docs/ (pre-phase-2 bundle).
+    docs_written = deploy_docs_tree(target)
+    if docs_written and not ctx.quiet:
+        print(f"  deployed {len(docs_written)} file(s) under {path_str(str(target / 'docs'), use_color)}")
 
     # Project-type marker.
     write_project_type(target, project_type)
