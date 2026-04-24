@@ -4,12 +4,13 @@ Invariants are defined in the phase-2 design spec §8 (`docs/superpowers/specs/
 2026-04-23-claude-md-manifest-extraction-design.md`). Each invariant function
 returns list[Finding]; callers decide how to surface.
 
-Scope: commit 3 ships I1, I3, I4, I5, I6, I7, I8, I9. I2 (overlay scope) is
-dormant until CLAUDE.d/ overlays land in commit 4. I10 (cache-discipline
-auditing) is deferred to a follow-up after cache primitives land in
-_pipeline.py per spec §5.
+Scope: I1 + I3-I9 shipped in commit 3. I2 activated in commit 4 (overlay scope).
+I10 (cache-discipline auditing) activated in this follow-up via AST inspection
+of `_pipeline.render_claude_md` and the cache-discipline primitives in §5.
 """
 from __future__ import annotations
+import ast
+import inspect
 import re
 from pathlib import Path
 
@@ -605,6 +606,167 @@ def check_i9_size_limits(claude_md: str) -> list[Finding]:
     return findings
 
 
+# ----- I10 cache-discipline auditing -----
+
+# Names of the cache primitives in `_pipeline.py`. Calls to these are auditable
+# at the AST level; calls to anything else that returns always-on content
+# are bare-string assembly.
+CACHE_PRIMITIVES = frozenset({"cache_stable_section", "uncached_section"})
+
+
+def check_i10_cache_discipline(claude_md: str) -> list[Finding]:
+    """Verify `_pipeline.render_claude_md` routes through the cache-discipline
+    primitives:
+
+      (a) The function body uses `cache_stable_section(...)` or
+          `uncached_section(..., reason=...)` for every value-producing
+          expression that contributes to the return.
+      (b) Every `uncached_section(...)` call carries a `reason=` kwarg whose
+          value is a non-empty string literal at static analysis time.
+
+    The check inspects the function's source via `ast`. Bare-string assembly
+    (string concatenation, f-strings, format() calls) at the return path
+    fails with a finding citing the line.
+    """
+    findings: list[Finding] = []
+    try:
+        from ..commands import _pipeline
+    except ImportError as e:
+        findings.append(Finding(
+            rule="I10",
+            location="_pipeline import",
+            severity="error",
+            message=f"could not import _pipeline for AST inspection: {e}",
+        ))
+        return findings
+
+    try:
+        source = inspect.getsource(_pipeline.render_claude_md)
+    except OSError as e:
+        findings.append(Finding(
+            rule="I10",
+            location="_pipeline.render_claude_md",
+            severity="error",
+            message=f"could not read source: {e}",
+        ))
+        return findings
+
+    try:
+        tree = ast.parse(source)
+    except SyntaxError as e:
+        findings.append(Finding(
+            rule="I10",
+            location="_pipeline.render_claude_md",
+            severity="error",
+            message=f"AST parse failed: {e}",
+        ))
+        return findings
+
+    # Find the function definition (single top-level def in the slice).
+    func_def = None
+    for node in tree.body:
+        if isinstance(node, ast.FunctionDef) and node.name == "render_claude_md":
+            func_def = node
+            break
+    if func_def is None:
+        findings.append(Finding(
+            rule="I10",
+            location="_pipeline.render_claude_md",
+            severity="error",
+            message="render_claude_md not found at AST top level.",
+        ))
+        return findings
+
+    # Walk the body for return-producing expressions and uncached_section calls.
+    return_nodes: list[ast.Return] = []
+    uncached_calls: list[ast.Call] = []
+    cache_primitive_calls: list[ast.Call] = []
+
+    for node in ast.walk(func_def):
+        if isinstance(node, ast.Return):
+            return_nodes.append(node)
+        elif isinstance(node, ast.Call):
+            fn_name = _call_name(node)
+            if fn_name == "uncached_section":
+                uncached_calls.append(node)
+                cache_primitive_calls.append(node)
+            elif fn_name == "cache_stable_section":
+                cache_primitive_calls.append(node)
+
+    # (a) Each return must originate from a cache-primitive call.
+    if not return_nodes:
+        findings.append(Finding(
+            rule="I10",
+            location="_pipeline.render_claude_md",
+            severity="error",
+            message="function has no return statement.",
+        ))
+    for ret in return_nodes:
+        if ret.value is None:
+            continue
+        if not _is_cache_primitive_expr(ret.value):
+            findings.append(Finding(
+                rule="I10",
+                location=f"_pipeline.render_claude_md (return at line {ret.lineno})",
+                severity="error",
+                message=(
+                    "return value is not a cache-primitive call. Always-on "
+                    "content must route through cache_stable_section() or "
+                    "uncached_section(..., reason=...)."
+                ),
+                fix_hint="wrap the return expression in cache_stable_section('<name>', lambda: ...).",
+            ))
+
+    # (b) Every uncached_section call carries a non-empty `reason` kwarg.
+    for call in uncached_calls:
+        reason_kw = next((kw for kw in call.keywords if kw.arg == "reason"), None)
+        if reason_kw is None:
+            findings.append(Finding(
+                rule="I10",
+                location=f"_pipeline.render_claude_md (line {call.lineno})",
+                severity="error",
+                message="uncached_section() call missing required `reason=` kwarg.",
+            ))
+            continue
+        if not isinstance(reason_kw.value, ast.Constant) or not isinstance(reason_kw.value.value, str):
+            findings.append(Finding(
+                rule="I10",
+                location=f"_pipeline.render_claude_md (line {call.lineno})",
+                severity="error",
+                message="uncached_section(..., reason=...) value must be a string literal at static analysis time.",
+            ))
+            continue
+        if not reason_kw.value.value.strip():
+            findings.append(Finding(
+                rule="I10",
+                location=f"_pipeline.render_claude_md (line {call.lineno})",
+                severity="error",
+                message="uncached_section(..., reason=...) literal is empty or whitespace-only.",
+            ))
+
+    return findings
+
+
+def _call_name(node: ast.Call) -> str | None:
+    """Return the simple name of the called function, or None if not a Name/Attribute."""
+    func = node.func
+    if isinstance(func, ast.Name):
+        return func.id
+    if isinstance(func, ast.Attribute):
+        return func.attr
+    return None
+
+
+def _is_cache_primitive_expr(expr: ast.AST) -> bool:
+    """An expression is cache-primitive-rooted iff it is itself a
+    cache_stable_section / uncached_section call. We do not unwrap conditional
+    expressions or subscripts — the contract is "the return value is the
+    primitive's return," not "somewhere a primitive is called."""
+    if isinstance(expr, ast.Call):
+        return _call_name(expr) in CACHE_PRIMITIVES
+    return False
+
+
 # ----- Aggregator -----
 
 INVARIANT_CHECKERS = [
@@ -617,6 +779,7 @@ INVARIANT_CHECKERS = [
     ("I7", check_i7_precedence_ordering),
     ("I8", check_i8_mode_body_compliance),
     ("I9", check_i9_size_limits),
+    ("I10", check_i10_cache_discipline),
 ]
 
 

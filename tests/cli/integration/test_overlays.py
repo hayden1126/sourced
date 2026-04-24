@@ -97,9 +97,10 @@ def test_check_invariants_passes_on_shipped_overlays(tmp_home, clean_ansi):
         capture_output=True, text=True,
     )
     assert result.returncode == 0, result.stdout + "\n" + result.stderr
-    # I2 now reports explicitly (no longer dormant).
+    # I2 now reports explicitly (no longer dormant after commit 4).
     assert "I2" in result.stdout
-    # No "dormant" label; commit 4 activates I2.
-    # (I10 remains dormant — check the header line.)
+    # I10 also reports explicitly after the cache-discipline follow-up landed.
+    assert "I10" in result.stdout
     header_line = next(l for l in result.stdout.splitlines() if "Invariants" in l)
-    assert "I10 dormant" in header_line
+    # Header lists the active range; no dormant invariants remain.
+    assert "I1-I10" in header_line

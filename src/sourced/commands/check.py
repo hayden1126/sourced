@@ -187,7 +187,7 @@ def run(ctx: Context, project: str | None = None, invariants: bool = False) -> i
     if invariants:
         results = check_invariants()
         if not ctx.quiet:
-            _print_section("Invariants (I1-I9, I10 dormant)", results, use_color, ctx.verbose)
+            _print_section("Invariants (I1-I10)", results, use_color, ctx.verbose)
             failed = [r for r in results if r.status == "fail"]
             passed = [r for r in results if r.status == "pass"]
             print(f"\n{len(failed)} failed, {len(passed)} passed.")
