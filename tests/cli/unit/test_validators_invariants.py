@@ -296,8 +296,8 @@ def test_i9_fails_on_overlong_registry_row():
 def test_run_all_invariants_returns_tuples():
     results = run_all_invariants()
     rule_ids = [r for r, _ in results]
-    # Phase-2 ships all 10 invariants once the I10 cache-discipline follow-up lands.
-    assert rule_ids == ["I1", "I2", "I3", "I4", "I5", "I6", "I7", "I8", "I9", "I10"]
+    # Phase-4 ships I11 (no-flat-paths invariant) as the 11th check.
+    assert rule_ids == ["I1", "I2", "I3", "I4", "I5", "I6", "I7", "I8", "I9", "I10", "I11"]
     # Every finding list is iterable.
     for _, findings in results:
         assert isinstance(findings, list)
@@ -364,3 +364,41 @@ def test_run_all_invariants_passes_on_shipped_bundle():
             f"{rule_id} failed on shipped bundle: "
             + "; ".join(f"[{f.location}] {f.message}" for f in findings)
         )
+
+
+# --- I11: no flat-path references ---
+
+def test_i11_detects_bare_voice_md():
+    """A line with `voice.md` (no config/ prefix) triggers a pattern."""
+    from sourced.validators.invariants import FLAT_PATH_RULES, _i11_line_exempt
+    import re as _re
+    line = "Read `voice.md` on every mode entry."
+    assert not _i11_line_exempt(line)
+    matches = [r for r, _, _ in FLAT_PATH_RULES if _re.search(r, line)]
+    assert matches, "expected voice.md pattern to match"
+
+
+def test_i11_allows_config_prefix():
+    from sourced.validators.invariants import FLAT_PATH_RULES
+    import re as _re
+    line = "Read `config/voice.md` on every mode entry."
+    matches = [r for r, _, _ in FLAT_PATH_RULES if _re.search(r, line)]
+    assert not matches
+
+
+def test_i11_exempts_marker_line():
+    from sourced.validators.invariants import _i11_line_exempt
+    assert _i11_line_exempt("<!-- sourced:voice=academic -->")
+
+
+def test_i11_exempts_file_tree_diagram():
+    from sourced.validators.invariants import _i11_line_exempt
+    assert _i11_line_exempt("├── voice.md")
+    assert _i11_line_exempt("│   └── voice.md")
+
+
+def test_i11_full_check_passes_on_shipped_templates():
+    """After phase-4 template rewrites land, I11 is green on shipped bundle."""
+    from sourced.validators.invariants import check_i11_no_flat_paths
+    findings = check_i11_no_flat_paths("")  # claude_md arg unused by this check
+    assert findings == [], f"I11 should be green post-rewrite; got {findings}"

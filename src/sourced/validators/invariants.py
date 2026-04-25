@@ -767,6 +767,89 @@ def _is_cache_primitive_expr(expr: ast.AST) -> bool:
     return False
 
 
+# ----- I11 no flat-path references -----
+
+# Paths to scan, grouped by bundled subpath key. Globs are relative to
+# the subpath root (e.g. "templates" resolves to src/sourced/data/templates/).
+I11_SCAN_TARGETS: dict[str, tuple[str, ...]] = {
+    "templates": (
+        "CLAUDE.md",
+        "docs/modes/*.md",
+        "docs/voice-extractor.md",
+        "brief.template.md",
+        "brief.template.annotated-bib.md",
+    ),
+    "agents": ("*.md",),
+    "citations": ("schema.md",),
+}
+
+# Each tuple is (regex_pattern, rule_label, fix_hint).
+# Patterns use negative lookbehind to allow the correctly-prefixed form.
+FLAT_PATH_RULES: tuple[tuple[str, str, str], ...] = (
+    (r"(?<!/)\bvoice\.md\b", "flat voice.md reference", "prefix with `config/`"),
+    (r"(?<!/)\bstyle\.md\b", "flat style.md reference", "prefix with `config/`"),
+    (r"(?<!sources/)<draft[^>]*>\.citations\.json", "flat <draft>.citations.json reference", "prefix with `sources/`"),
+    (r"(?<!config/)<(?:draft|name)[^>]*>\.brief\.md", "flat <draft>.brief.md reference", "prefix with `config/`"),
+    (r"\.claude/briefs/working\.brief\.md", "obsolete .claude/briefs/ ref", "rewrite to `config/working.brief.md`"),
+    (r"\.claude/citations/working\.citations\.json", "obsolete .claude/citations/ main-log ref", "rewrite to `sources/working.citations.json`"),
+)
+
+# Substrings that mark a line as exempt from I11 scanning.
+I11_LINE_ALLOWLIST_SUBSTRINGS: tuple[str, ...] = (
+    "<!-- sourced:voice=",
+    "<!-- sourced:style=",
+    "phase-3 layout",
+    "phase-4 migration",
+)
+
+
+def _i11_line_exempt(line: str) -> bool:
+    """Return True if the line is exempt from I11 flat-path scanning."""
+    s = line.lstrip()
+    # File-tree diagram lines (box-drawing characters used by `tree`).
+    if s.startswith("├──") or s.startswith("│") or s.startswith("└──"):
+        return True
+    return any(marker in line for marker in I11_LINE_ALLOWLIST_SUBSTRINGS)
+
+
+def check_i11_no_flat_paths(claude_md: str) -> list[Finding]:
+    """Scan bundled templates for flat-path references that phase-4 migrated.
+
+    Globs over templates/**/*.md, agents/*.md, and citations/schema.md.
+    Lines matching FLAT_PATH_RULES emit an error finding, unless the line
+    is exempted by _i11_line_exempt().
+    """
+    import re as _re
+
+    findings: list[Finding] = []
+    for subpath, globs in I11_SCAN_TARGETS.items():
+        try:
+            with bundled_path(subpath) as base:
+                base_path = Path(base)
+                for glob in globs:
+                    for target in base_path.glob(glob):
+                        if not target.is_file():
+                            continue
+                        rel = Path(subpath) / target.relative_to(base_path)
+                        for lineno, line in enumerate(
+                            target.read_text(encoding="utf-8").splitlines(), 1
+                        ):
+                            if _i11_line_exempt(line):
+                                continue
+                            for regex, rule_label, fix in FLAT_PATH_RULES:
+                                if _re.search(regex, line):
+                                    findings.append(Finding(
+                                        rule="I11",
+                                        location=f"{rel}:{lineno}",
+                                        severity="error",
+                                        message=f"{rule_label}: {line.strip()[:100]}",
+                                        fix_hint=fix,
+                                    ))
+        except (FileNotFoundError, ModuleNotFoundError):
+            continue
+    return findings
+
+
 # ----- Aggregator -----
 
 INVARIANT_CHECKERS = [
@@ -780,6 +863,7 @@ INVARIANT_CHECKERS = [
     ("I8", check_i8_mode_body_compliance),
     ("I9", check_i9_size_limits),
     ("I10", check_i10_cache_discipline),
+    ("I11", check_i11_no_flat_paths),
 ]
 
 
