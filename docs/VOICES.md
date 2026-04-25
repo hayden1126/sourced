@@ -2,7 +2,7 @@
 
 [← Back to README](../README.md)
 
-Voice rules live in a per-project `voice.md` rendered from a named voice in the voice library. Voice is per-project, so concurrent Claude Code sessions on different projects can carry different voices without conflict.
+Voice rules live in a per-project `config/voice.md` rendered from a named voice in the voice library. Voice is per-project, so concurrent Claude Code sessions on different projects can carry different voices without conflict.
 
 The shipped `academic` voice is the author's own: personal register plus specific analogy anchors (Clever Hans, chicken sexing, split-brain) calibrated to one writer. Treat it as an example, not a neutral academic default. For a different author or a different register, copy it to a new name and edit, or generate one from a corpus (see below).
 
@@ -56,13 +56,13 @@ The classifier surfaces the full breakdown in the report's `### Register drift` 
 ## Pick a voice at install
 
 ```bash
-/path/to/sourced/install.sh --voice academic   # default
-/path/to/sourced/install.sh --voice mycustom   # requires ~/.claude/voice/mycustom.md
+sourced install --voice academic   # default, in current directory
+sourced install --voice mycustom   # requires ~/.claude/voice/mycustom.md
 ```
 
 `--voice` is validated before any project file is written. An invalid name errors out cleanly with the list of available voices; no half-installed project.
 
-Library voice files are templates: any `{{USER}}` token is substituted with your configured name when `install.sh --voice` renders the voice into a project. That's why the shipped `academic.md` shows `{{USER}}` on line 3 — the token is replaced per-project, so each project's `voice.md` carries the right name without the library file having to store it.
+Library voice files are templates: any `{{USER}}` token is substituted with your configured name when `sourced install --voice` (or `sourced switch voice`) renders the voice into a project. That's why the shipped `academic.md` shows `{{USER}}` on line 3 — the token is replaced per-project, so each project's `config/voice.md` carries the right name without the library file having to store it.
 
 ## Authoring a custom voice by hand
 
@@ -71,7 +71,7 @@ Copy the shipped skeleton and edit:
 ```bash
 cp ~/.claude/voice/academic.md ~/.claude/voice/mycustom.md
 # edit ~/.claude/voice/mycustom.md
-/path/to/sourced/install.sh --voice mycustom   # inside the target project directory
+sourced switch voice mycustom   # from inside the target project directory
 ```
 
 The skeleton's section structure is canonical: every section appears in every derived voice. Don't delete sections — leave `TBD` rather than inventing a rule your taste doesn't settle. Iron rules (under `## Iron rules` in the skeleton, or anywhere else carrying the `[iron]` token) must pass through verbatim.
@@ -105,7 +105,7 @@ The agent will announce a switch to `[collaborative mode]` if needed, dispatch `
 
 ```bash
 cd ~/writing/my-paper
-/path/to/sourced/install.sh --voice mycustom
+sourced switch voice mycustom
 ```
 
 **Re-running:**
@@ -114,7 +114,7 @@ cd ~/writing/my-paper
 - **Register was inferred and came out wrong.** Re-run with the correct `register:` label (`academic | technical | casual | journalistic | narrative`).
 - **Want a different skeleton.** Pass `skeleton_path: <absolute path>` pointing at another voice in `~/.claude/voice/`.
 
-**Scope.** Voice-extractor is a one-shot setup utility. It runs only when you ask, never auto-triggers during writing or research, and never runs in parallel with itself. It does not modify your project's `CLAUDE.md`, `voice.md`, or anything under the project directory — it writes exactly one file, `~/.claude/voice/<voice_name>.md`. Rendering into a project is always a deliberate `install.sh --voice <voice_name>` step you run yourself.
+**Scope.** Voice-extractor is a one-shot setup utility. It runs only when you ask, never auto-triggers during writing or research, and never runs in parallel with itself. It does not modify your project's `CLAUDE.md`, `config/voice.md`, or anything under the project directory — it writes exactly one file, `~/.claude/voice/<voice_name>.md`. Rendering into a project is always a deliberate `sourced switch voice <voice_name>` step you run yourself.
 
 ## Iron rules and defense-in-depth
 
@@ -127,7 +127,7 @@ Iron rules are enforced in three places:
 
 1. **Inside `voice-extractor`.** Step 3 identifies iron rules from the skeleton; step 5 preserves them verbatim; step 8 self-checks the draft before writing.
 2. **Caller-side in `academic-researcher`.** After `voice-extractor` returns, the agent substring-checks each iron rule against the produced file before surfacing the report. A missing iron rule blocks the report from being treated as success.
-3. **Install-time in `install.sh`.** `validate_iron_rules` normalizes both skeleton and candidate (lowercase, collapse whitespace, strip trailing punctuation), substring-matches each iron rule, and aborts install with non-zero exit on any miss.
+3. **Install-time in `sourced install` / `sourced switch voice`.** `validate_iron_rules` normalizes both skeleton and candidate (lowercase, collapse whitespace, strip trailing punctuation), substring-matches each iron rule, and aborts install with non-zero exit on any miss.
 
 Any one layer failing doesn't ship a broken voice. All three would have to miss.
 
@@ -141,7 +141,7 @@ If a substitution is genuinely unavoidable (downstream renderer cannot emit the 
 
 ## Exempting a §10 pattern for one voice
 
-If a writer legitimately uses a pattern on CLAUDE.md §10's Never list (em-dashes for appositives, ornamental triads for rhetorical emphasis, etc.), the voice library file can exempt that specific rule. Silence in the voice file is not permission; the exemption has to be declared explicitly, and `install.sh` validates it at render time.
+If a writer legitimately uses a pattern on CLAUDE.md §10's Never list (em-dashes for appositives, ornamental triads for rhetorical emphasis, etc.), the voice library file can exempt that specific rule. Silence in the voice file is not permission; the exemption has to be declared explicitly, and `sourced` validates it at render time.
 
 **Canonical IDs.** Each bullet on §10's Never list carries a stable ID:
 
@@ -165,14 +165,14 @@ The IDs are extracted from `templates/CLAUDE.md` §10 at install time, so adding
 - ornamental-triads: deliberate balanced lists for rhetorical cadence; 12 instances.
 ```
 
-Only the leading ID is machine-read; the rationale is for the reader. Unknown IDs (typos, outdated names) fail install-time validation and abort the render. `install.sh` prints the known-ID list when it rejects an exemption so the fix is immediate.
+Only the leading ID is machine-read; the rationale is for the reader. Unknown IDs (typos, outdated names) fail install-time validation and abort the render. `sourced` prints the known-ID list when it rejects an exemption so the fix is immediate.
 
 **Why the workflow has a manual step.** `voice-extractor` will not auto-populate `## §10 exemptions`. Corpus evidence of a §10 pattern surfaces in the subagent's `### Iron-rule conflicts` report; promoting a conflict to an exemption bullet is a deliberate decision made after reviewing the flagged instances. Auto-exemption would defeat the voice-preservation-with-guardrails promise the framework is built around — the guardrails should only drop when the writer confirms the pattern is intentional.
 
-**Scope and runtime.** An exemption suspends the named §10 rule for the writer's own prose and no other surface. Quoted text, other Never-list items, density thresholds, and iron rules are all unaffected. At runtime, `[writing mode]` and `[editing mode]` scan `voice.md`'s `## §10 exemptions` on entry; each listed ID suspends its §10 rule, others continue to fire.
+**Scope and runtime.** An exemption suspends the named §10 rule for the writer's own prose and no other surface. Quoted text, other Never-list items, density thresholds, and iron rules are all unaffected. At runtime, `[writing mode]` and `[editing mode]` scan `config/voice.md`'s `## §10 exemptions` on entry; each listed ID suspends its §10 rule, others continue to fire.
 
 ## Project-level voice handling
 
-Each project's `voice.md` records which library voice it was installed from (as an HTML comment on the first line). A later bare `install.sh --update` reuses that choice and refreshes `voice.md` from the current library version, so upstream voice-rule changes propagate. Switching to a different voice on an existing project requires `--force` (replace) or `--update --voice <new>` (explicit switch).
+Each project's `config/voice.md` records which library voice it was installed from (as an HTML comment on the first line). A later bare `sourced update` reuses that choice and refreshes `config/voice.md` from the current library version, so upstream voice-rule changes propagate. Switching to a different voice on an existing project requires `sourced update --force` (re-render) or `sourced switch voice <new>` (explicit switch).
 
 Shipped voices at `~/.claude/voice/<shipped-name>.md` are refreshed on every install from the repo. User-authored voices (names that don't collide with shipped ones) are left untouched. To customize a shipped voice without losing edits, copy to a new name first.

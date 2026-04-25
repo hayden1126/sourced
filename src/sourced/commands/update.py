@@ -1,4 +1,4 @@
-"""sourced update — refresh managed block of CLAUDE.md + voice.md + style.md.
+"""sourced update — refresh managed block of CLAUDE.md + config/voice.md + config/style.md.
 
 Phase-2 upgrade: preserves `<!-- sourced:user-addition start/end -->` regions
 inside the managed block, migrates phase-1 projects to the new layout, and
@@ -16,6 +16,8 @@ from ..project import (
     merge_managed_block,
     detect_phase1_layout,
     migrate_phase1_to_phase2,
+    detect_phase3_layout,
+    migrate_phase3_to_phase4,
     deploy_docs_tree,
     deploy_overlays,
     read_project_type,
@@ -43,6 +45,8 @@ def run(ctx: Context, *, project: str | None = None, force: bool = False) -> int
 
     # Phase-1 detection: monolithic CLAUDE.md with no docs/modes/ sibling.
     is_phase1 = detect_phase1_layout(target)
+    # Phase-3 detection: voice.md at root without config/voice.md.
+    is_phase3 = detect_phase3_layout(target)
 
     warnings: list[str] = []
     migration_notes: list[str] = []
@@ -67,9 +71,23 @@ def run(ctx: Context, *, project: str | None = None, force: bool = False) -> int
         merged_managed, warnings = merge_managed_block(old_managed, fresh_managed)
         new_claude = replace_managed_block(old_text, merged_managed)
 
+    # Phase-3 → phase-4 early migration (must run before voice/style path reads).
+    # Dry-run: skip the actual migration; the announcement is in the dry-run block below.
+    # `--force` is the "re-render from scratch" escape hatch; it skips the
+    # state-lifting migration path the same way phase-1 wire-up at line 112 does.
+    if is_phase3 and not force and not ctx.dry_run:
+        migration_notes.extend(migrate_phase3_to_phase4(target))
+
     # Voice / style refresh from currently-installed library.
-    voice_path = target / "voice.md"
-    style_path = target / "style.md"
+    # Phase-4 layout: config/. Phase-3 + --force: layout stays flat (migration
+    # was skipped), so voice/style still live at root and `--force` would
+    # otherwise silently no-op the refresh — read from root in that case.
+    if is_phase3 and force:
+        voice_path = target / "voice.md"
+        style_path = target / "style.md"
+    else:
+        voice_path = target / "config" / "voice.md"
+        style_path = target / "config" / "style.md"
     voice_name = read_voice_marker(voice_path)
     style_name = read_style_marker(style_path)
     new_voice = _pipeline.render_voice(voice_name, user, ctx) if voice_name else None
@@ -81,6 +99,10 @@ def run(ctx: Context, *, project: str | None = None, force: bool = False) -> int
             if is_phase1:
                 print(f"  would migrate phase-1 CLAUDE.md → CLAUDE.md.phase1.bak at {path_str(str(target), use_color)}")
                 print(f"  would deploy docs/ tree under {path_str(str(target / 'docs'), use_color)}")
+            if is_phase3 and not force:
+                print(f"  would migrate phase-3 layout to phase-4 subdirs at {path_str(str(target), use_color)}")
+                print(f"  would refresh {path_str(str(target / 'config' / 'voice.md'), use_color)} (post-migration)")
+                print(f"  would refresh {path_str(str(target / 'config' / 'style.md'), use_color)} (post-migration)")
             print(f"  would refresh {path_str(str(claude_md_path), use_color)}")
             if new_voice:
                 print(f"  would refresh {path_str(str(voice_path), use_color)}")
@@ -98,7 +120,7 @@ def run(ctx: Context, *, project: str | None = None, force: bool = False) -> int
         write_bak_sibling(style_path)
 
     if is_phase1 and not force:
-        migration_notes = migrate_phase1_to_phase2(target, new_claude)
+        migration_notes.extend(migrate_phase1_to_phase2(target, new_claude))
     else:
         write_atomic(claude_md_path, new_claude)
         # Keep docs/ in sync with the bundle on every update (idempotent).

@@ -8,7 +8,7 @@ Outlining produces a paragraph-level structural plan — claim, citation ids, ro
 
 **Enter when:**
 - **Explicit trigger.** {{USER}} says "draft this" / "outline this" / "structure this" or equivalent (see manifest §7.2).
-- The brief is complete enough for outlining: every load-bearing field in `<draft>.brief.md` is filled or explicitly TBD'd (manifest §7.4, `plan → outlining` gate).
+- The brief is complete enough for outlining: every load-bearing field in `config/<draft>.brief.md` is filled or explicitly TBD'd (manifest §7.4, `plan → outlining` gate).
 
 **Do not enter when:**
 - The brief is not yet ready (key fields blank, scope still open). Return to `[plan mode]` or ask {{USER}} to fill the brief first.
@@ -29,9 +29,9 @@ Outlining is generative, not evaluative. Attach citation ids to claims as you dr
 
 1. **Announce entry.** First output of the turn: `Switching to [outlining mode].`
 
-2. **Read `voice.md` in full.** Paragraph Flow rules apply at outline time — you need them to construct the handoff line for each paragraph. If `voice.md` is missing, stop and ask {{USER}} to run `sourced switch voice <name>` before continuing. Do not guess at voice rules.
+2. **Read `config/voice.md` in full.** Paragraph Flow rules apply at outline time — you need them to construct the handoff line for each paragraph. If `config/voice.md` is missing, stop and ask {{USER}} to run `sourced switch voice <name>` before continuing. Do not guess at voice rules.
 
-3. **Load the citation log.** Open `<draft>.citations.json` adjacent to the draft (or `.claude/citations/working.citations.json` before a draft file exists). The outline attaches bare ids from this log to each paragraph's claim. If the log is missing, stop — directing {{USER}} to `[research mode]` is the correct move, not inventing placeholder ids.
+3. **Load the citation log.** Open `sources/<draft>.citations.json` (or `sources/working.citations.json` before a draft file exists). The outline attaches bare ids from this log to each paragraph's claim. If the log is missing, stop — directing {{USER}} to `[research mode]` is the correct move, not inventing placeholder ids.
 
 4. **Read the brief.** Confirm the thesis, scope, audience, and section structure (if the brief names one). These govern what sections exist and what the argument needs to accomplish.
 
@@ -40,7 +40,7 @@ Outlining is generative, not evaluative. Attach citation ids to claims as you dr
    - **Claim.** One sentence. What this paragraph asserts.
    - **Citation ids.** Bare ids from the log that support the claim (e.g., `smith-2010-001`, `chen-2021-003`). NOT Pandoc `[@id]` syntax — that belongs in `[writing mode]`.
    - **Role.** One clause: what the paragraph does in the argument (introduces the problem, presents the main evidence, addresses the counterpoint, synthesizes two threads).
-   - **Handoff.** The transition, reference-back, or concept that bridges this paragraph to the next, per `voice.md §Paragraph Flow`. If you cannot name the handoff, the paragraphs are not connected yet — resolve the connection before moving on.
+   - **Handoff.** The transition, reference-back, or concept that bridges this paragraph to the next, per `config/voice.md §Paragraph Flow`. If you cannot name the handoff, the paragraphs are not connected yet — resolve the connection before moving on.
 
    If a claim has no supporting id from the log, mark it explicitly: `[UNSOURCED: <claim>]`. Do not invent ids or skip the slot silently.
 
@@ -62,7 +62,7 @@ Outlining is generative, not evaluative. Attach citation ids to claims as you dr
 - *"The handoff between paragraphs 3 and 4 is obvious — I'll leave it implicit."* — No. If you can't write the handoff in one clause, the connection isn't settled. Name it or rearrange.
 - *"The outline looks good to me — I'll announce the switch to refining."* — No. Present the outline, ask, wait. The gate is {{USER}}'s sign-off, not your assessment.
 - *"I'll use `[@smith-2010-001]` syntax — it looks cleaner."* — No. Pandoc syntax is `[writing mode]`'s notation. Use bare ids in the outline.
-- *"voice.md is probably the same as last session — I'll work from memory."* — Re-read on every entry. The file is the authority.
+- *"`config/voice.md` is probably the same as last session — I'll work from memory."* — Re-read on every entry. The file is the authority.
 
 ## Rationalizations
 
@@ -73,7 +73,7 @@ Outlining is generative, not evaluative. Attach citation ids to claims as you dr
 | "The `[@id]` syntax is more precise than a bare id." | Precision is not the issue. `[@id]` is write-time notation; bare ids are outline-time notation. Mixing them makes the outline look like a draft and blurs the mode boundary. |
 | "I know the outline is ready — the handoff question is just formality." | Completion is {{USER}}'s judgment. Your read of readiness is a data point, not the gate. Present and ask. |
 | "{{USER}} said 'looks good' or 'seems fine' — I'll advance." | Those are positive evaluations, not explicit sign-off. The required question is "Ready to refine, or more outlining?" and the accepted answer names advance ("ready to refine" or equivalent). A compliment is not a gate. |
-| "voice.md's Paragraph Flow rules are simple enough to apply from memory." | Apply them from the file. Paragraph Flow is the specific section relevant at outline time; re-reading takes seconds and prevents stale-rule drift. |
+| "`config/voice.md`'s Paragraph Flow rules are simple enough to apply from memory." | Apply them from the file. Paragraph Flow is the specific section relevant at outline time; re-reading takes seconds and prevents stale-rule drift. |
 | "The project type is annotated-bib but the outline would help." | Annotated-bib projects don't use outlining — the mode registry (manifest §7.1) is clear. An overlay may have already removed this mode from the allowed list; check `CLAUDE.d/` if present. |
 
 ## Quick Reference
@@ -81,7 +81,7 @@ Outlining is generative, not evaluative. Attach citation ids to claims as you dr
 ```
 ENTRY:   Switching to [outlining mode].
 
-LOAD:    Read voice.md (Paragraph Flow only — applies now).
+LOAD:    Read config/voice.md (Paragraph Flow only — applies now).
          Load citation log.
          Read brief (thesis, scope, audience).
 
@@ -91,7 +91,7 @@ BUILD:   Sections → Paragraphs. Per paragraph:
                           NOT [@id] syntax
                           Mark gaps as [UNSOURCED: <claim>]
            Role       — one clause
-           Handoff    — one clause per voice.md §Paragraph Flow
+           Handoff    — one clause per config/voice.md §Paragraph Flow
                         If you can't name it, the connection isn't settled.
          Counterpoints — in their structural location, with supporting ids.
 
@@ -123,4 +123,4 @@ HANDOFF: Present outline in full.
 - `CLAUDE.md §8` — citation log; Moment 2 (in-prose ids) begins in `[writing mode]`, not here.
 - `docs/modes/refining.md` — the next mode; runs the §4 audit on the outline before prose exists.
 - `docs/modes/writing.md` — where `[@id]` Pandoc syntax is introduced and Paragraph Flow is fully applied.
-- `voice.md §Paragraph Flow` — the handoff-line rule applied at step 5.
+- `config/voice.md §Paragraph Flow` — the handoff-line rule applied at step 5.

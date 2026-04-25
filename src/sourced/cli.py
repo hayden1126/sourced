@@ -72,7 +72,7 @@ def _build_parser() -> argparse.ArgumentParser:
     p_check.add_argument(
         "--invariants",
         action="store_true",
-        help="run structural invariants I1-I10 against the bundled template + shipped mode bodies",
+        help="run structural invariants I1-I11 against the bundled template + shipped mode bodies",
     )
 
     return p

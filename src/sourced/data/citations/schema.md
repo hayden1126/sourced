@@ -1,6 +1,6 @@
 # Citation log schema
 
-Single source of truth for the structure of entries in any citation log (`<draft>.citations.json` or `.claude/citations/working.citations.json`). Semantic rules for when to use each value live in the project's `CLAUDE.md` and in `source-finder.md`; this file defines structure, allowed values, and ID format only.
+Single source of truth for the structure of entries in any citation log (`sources/<draft>.citations.json` or `sources/working.citations.json`). Semantic rules for when to use each value live in the project's `CLAUDE.md` and in `source-finder.md`; this file defines structure, allowed values, and ID format only.
 
 ## Entry structure
 
@@ -67,7 +67,7 @@ Four sub-fields inside `retrieval` force externalized, validator-checkable evide
 
 ## `citation_string` is informational
 
-`citation_string` is a portability hint and a grep target; it is not load-bearing. The authoritative rendering of an inline citation comes from `source.authors` + `source.year` resolved per the project's `style.md` in `[formatting mode]` (CLAUDE.md §7). Setting `citation_string` to an APA-7 string at logging time is fine and recommended for portability across projects with different styles, but downstream rendering does not depend on it. `[formatting mode]` does not read this field during normal operation.
+`citation_string` is a portability hint and a grep target; it is not load-bearing. The authoritative rendering of an inline citation comes from `source.authors` + `source.year` resolved per the project's `config/style.md` in `[formatting mode]` (CLAUDE.md §7). Setting `citation_string` to an APA-7 string at logging time is fine and recommended for portability across projects with different styles, but downstream rendering does not depend on it. `[formatting mode]` does not read this field during normal operation.
 
 ## Reference-work shape for `exact_quote`
 
@@ -172,7 +172,7 @@ When academic-researcher dispatches multiple source-finders in parallel, each fi
 
 - Shard path format: `.claude/citations/working.<finder-id>.json`, where `<finder-id>` is a short unique token assigned by the parent at dispatch time (e.g., `sf1`, `sf2`, `sf-animacy`).
 - Finders only write to their assigned shard path. They never append to the main log directly.
-- After all finders in a batch return, academic-researcher merges shards into the main log (`<draft>.citations.json` or `.claude/citations/working.citations.json`) in one pass.
+- After all finders in a batch return, academic-researcher merges shards into the main log (`sources/<draft>.citations.json` or `sources/working.citations.json`) in one pass.
 
 Merge protocol for academic-researcher. Do not start the merge until every finder in the batch has returned.
 

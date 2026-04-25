@@ -163,9 +163,9 @@ def _print_section(name: str, results: list[CheckResult], use_color: bool, verbo
 
 
 def check_invariants() -> list[CheckResult]:
-    """Run the manifest-structural invariants I1-I10 (I2 and I10 dormant until
-    their prerequisites land; see validators/invariants.py module docstring).
-    Each invariant surfaces as its own CheckResult row."""
+    """Run the manifest-structural invariants I1-I11 against the bundled
+    template + shipped mode bodies. Each invariant surfaces as its own
+    CheckResult row; see validators/invariants.py for per-rule semantics."""
     results = []
     for rule_id, findings in invariants_validator.run_all_invariants():
         if not findings:
@@ -187,7 +187,7 @@ def run(ctx: Context, project: str | None = None, invariants: bool = False) -> i
     if invariants:
         results = check_invariants()
         if not ctx.quiet:
-            _print_section("Invariants (I1-I10)", results, use_color, ctx.verbose)
+            _print_section("Invariants (I1-I11)", results, use_color, ctx.verbose)
             failed = [r for r in results if r.status == "fail"]
             passed = [r for r in results if r.status == "pass"]
             print(f"\n{len(failed)} failed, {len(passed)} passed.")

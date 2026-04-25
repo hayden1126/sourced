@@ -44,9 +44,9 @@ sourced/
     └── parity/                 # 5 styles × 4 paste targets = 20 goldens (the long-lived render parity suite).
 ```
 
-`sourced global-install` mirrors bundled data from `src/sourced/data/` into `~/.claude/`. `sourced install` from inside a project renders `<project>/CLAUDE.md`, `<project>/voice.md`, `<project>/style.md` (and optionally `<project>/<name>.brief.md`). `sourced check` verifies prereqs (`pdftotext`, `pdfinfo`, `pdftoppm`, `pandoc` ≥ 3.1, `python3`) plus `~/.claude/` health plus per-voice iron-rule integrity; missing tools surface with install hints rather than auto-installing (see [docs/INSTALL.md](./docs/INSTALL.md#prerequisite-check)).
+`sourced global-install` mirrors bundled data from `src/sourced/data/` into `~/.claude/`. `sourced install` from inside a project renders `<project>/CLAUDE.md`, `<project>/config/voice.md`, `<project>/config/style.md` (and optionally `<project>/config/<name>.brief.md`). `sourced check` verifies prereqs (`pdftotext`, `pdfinfo`, `pdftoppm`, `pandoc` ≥ 3.1, `python3`) plus `~/.claude/` health plus per-voice iron-rule integrity; missing tools surface with install hints rather than auto-installing (see [docs/INSTALL.md](./docs/INSTALL.md#prerequisite-check)).
 
-Shipped skills under `src/sourced/data/skills/<name>/` mirror into `~/.claude/skills/<name>/` on every install; Claude Code auto-discovers them across all projects. Style asset directories under `src/sourced/data/templates/styles/<name>/` mirror into `~/.claude/style/<name>/` so `[formatting mode]` can pick up CSL files, reference.docx, on-demand reference tables (e.g., `classical-abbreviations.md`), and other per-style binaries without a separate fetch. The on-demand reference pattern lets a style offload rarely-used lookups (per-author classical abbreviations) without paying per-format-pass load cost; `style.md` stays lean and the reference file is Read only when a citation triggers it.
+Shipped skills under `src/sourced/data/skills/<name>/` mirror into `~/.claude/skills/<name>/` on every install; Claude Code auto-discovers them across all projects. Style asset directories under `src/sourced/data/templates/styles/<name>/` mirror into `~/.claude/style/<name>/` so `[formatting mode]` can pick up CSL files, reference.docx, on-demand reference tables (e.g., `classical-abbreviations.md`), and other per-style binaries without a separate fetch. The on-demand reference pattern lets a style offload rarely-used lookups (per-author classical abbreviations) without paying per-format-pass load cost; `config/style.md` stays lean and the reference file is Read only when a citation triggers it.
 
 ## Python package
 
@@ -86,7 +86,7 @@ Reference design: [`docs/superpowers/specs/2026-04-21-sourced-cli-decomposition-
 | `[plan mode]` | Formulate research question, argument, source needs. Requires intake brief or explicit skip. | `[outlining mode]` |
 | `[outlining mode]` | Paragraph-level structure with claims + citation IDs. Purely generative, no audits. | `[refining mode]` (handoff gate) |
 | `[refining mode]` | Stress-test the outline. Citation / structure / synthesis-integrity (§4) audit before prose exists. | `[writing mode]` (sign-off gate) |
-| `[writing mode]` | Convert refined outline into prose. Apply `voice.md`, §10 generation signatures, paraphrase default, Pandoc citation IDs. | `[editing mode]` |
+| `[writing mode]` | Convert refined outline into prose. Apply `config/voice.md`, §10 generation signatures, paraphrase default, Pandoc citation IDs. | `[editing mode]` |
 | `[annotated-bib mode]` | Per-entry annotation (4-beat: summary / relevance / location / evaluation) and draft compile. Grounded only in log fields; §3 verification inherited. Annotated-bib projects only; replaces `[outlining]` / `[refining]` / `[writing]`. | `[editing mode]` |
 | `[editing mode]` | Eight-pass audit: ID validation → §4 citation → partial-entry recheck → grammar → proofreading → AI-tell (§10) → quote-density → voice (§9). Handoff gate blocks on unresolved voice-audit hits. In annotated-bib projects, pass 7 (quote-density) and the §9 flow-rules part of pass 8 are skipped. | `[formatting mode]` (handoff gate) |
 | `[finetuning mode]` | Bounded local substitution (word to paragraph): produce 3–5 alternatives with declared tradeoff axes; never applies a single-option change without explicit {{USER}} selection. {{USER}}-only entry via explicit or implicit trigger. | Returns to prior mode on completion. |
@@ -105,11 +105,11 @@ Reference design: [`docs/superpowers/specs/2026-04-21-sourced-cli-decomposition-
 ## Per-project files
 
 - `<project>/CLAUDE.md` — agent operating rules (rendered from `templates/CLAUDE.md`).
-- `<project>/voice.md` — voice rules (rendered from `~/.claude/voice/<name>.md`).
-- `<project>/style.md` — citation + document-layout rules (rendered from `~/.claude/style/<name>.md`).
-- `<project>/<name>.brief.md` — intake brief for a specific paper (optional; `sourced install --brief <name>` or `sourced new <name>`).
+- `<project>/config/voice.md` — voice rules (rendered from `~/.claude/voice/<name>.md`).
+- `<project>/config/style.md` — citation + document-layout rules (rendered from `~/.claude/style/<name>.md`).
+- `<project>/config/<name>.brief.md` — intake brief for a specific paper (optional; `sourced install --brief <name>` or `sourced new <name>`).
 - `<project>/<draft>.md` — source prose with Pandoc citation IDs.
-- `<project>/<draft>.citations.json` — citation log for the draft (schema: `citations/schema.md`).
+- `<project>/sources/<draft>.citations.json` — citation log for the draft (schema: `citations/schema.md`).
 - `<project>/<draft>.<target>.md` — formatted output written by `[formatting mode]` (e.g., `<draft>.gdocs.md`).
 - `<project>/.sourced-project-type` — project-type marker written by `sourced install` when `--type` is non-default (currently only `annotated-bib`); contains the type name on a single line. Absence means essay (legacy-safe default).
 
@@ -133,7 +133,7 @@ Step 3 above (rendering) delegates to `pandoc --citeproc` reading the style's ve
 
 1. **Skeletons** (`src/sourced/data/templates/voices/{academic,casual,technical,journalistic,narrative,hybrid}.md`) — section structure + `## Iron rules` section. Each is a register-specific (or, for `hybrid.md`, register-neutral) calibration template. Copied verbatim into the voice library on global install.
 2. **Voice library** (`~/.claude/voice/<name>.md`) — per-author calibrated voice files. The 6 shipped voices (`academic`, `casual`, `technical`, `journalistic`, `narrative`, `hybrid`) ARE the skeletons; derived voices are generated by `voice-extractor` from a writing-samples corpus and mirror the matching skeleton's section structure (selected by register classification — see `docs/VOICES.md`).
-3. **Project voice** (`<project>/voice.md`) — rendered from the chosen library voice on `sourced install --voice <name>` or `sourced switch voice <name>`, with `{{USER}}` substituted.
+3. **Project voice** (`<project>/config/voice.md`) — rendered from the chosen library voice on `sourced install --voice <name>` or `sourced switch voice <name>`, with `{{USER}}` substituted.
 
 **Skeleton-per-register (6 skeletons).** As of 2026-04-19, the voice library ships 6 register-specific skeletons (`academic`, `casual`, `technical`, `journalistic`, `narrative`, `hybrid`) instead of a single `academic.md`. Voice-extractor selects the skeleton based on corpus classification: a dominant-register corpus (≥ 85%) uses that register's skeleton; a blended corpus (< 85%) uses `hybrid.md`, which is authored with register-neutral non-iron prose and explicit anti-bias instructions. Each skeleton organizes rules under 4 orthogonal axes — `## Iron rules`, `## Tone`, `## Structure`, `## Dimension` — so a voice can be calibrated along each axis independently. See `docs/VOICES.md` for the full register map and routing logic.
 
@@ -143,7 +143,7 @@ Generation signatures (AI-writing tells that apply regardless of voice) live in 
 
 ## Style system
 
-`src/sourced/data/templates/styles/<name>.md` ships citation + layout rules per academic style. Currently shipped: APA 7, Chicago 17 author-date, Chicago 17 notes-bibliography, IEEE, MLA 9 — all on the slim schema (framework-specific metadata + document layout only; CSL owns rendering). `[formatting mode]` is the only mode that reads `style.md`; all other modes emit style-agnostic Pandoc IDs.
+`src/sourced/data/templates/styles/<name>.md` ships citation + layout rules per academic style. Currently shipped: APA 7, Chicago 17 author-date, Chicago 17 notes-bibliography, IEEE, MLA 9 — all on the slim schema (framework-specific metadata + document layout only; CSL owns rendering). `[formatting mode]` is the only mode that reads `config/style.md`; all other modes emit style-agnostic Pandoc IDs.
 
 ## Invariants
 
