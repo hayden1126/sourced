@@ -193,10 +193,10 @@ Global files (installed once, shared across projects) and per-project files (ren
 | `~/.claude/style/<name>/<asset>` | per-style asset dir (CSL file, reference.docx, on-demand reference tables like `classical-abbreviations.md`) |
 | `~/.claude/skills/<name>/` | skill library; Claude Code auto-discovers skills globally (currently ships `browser-reader-extract`) |
 | `<project>/CLAUDE.md` | per-project; contains the inlined academic-researcher rules |
-| `<project>/voice.md` | per-project; the active voice for this project |
-| `<project>/style.md` | per-project; the active citation style for this project |
-| `<project>/<draft>.brief.md` | per-project, next to the draft |
-| `<project>/<draft>.citations.json` | per-project, next to the draft |
+| `<project>/config/voice.md` | per-project; the active voice for this project |
+| `<project>/config/style.md` | per-project; the active citation style for this project |
+| `<project>/config/<draft>.brief.md` | per-project; sibling to voice/style under config/ |
+| `<project>/sources/<draft>.citations.json` | per-project; under sources/ next to other source artifacts |
 | `<project>/<draft>.<target>.md` | formatted output written by `[formatting mode]` (e.g., `<draft>.gdocs.md`, `<draft>.docx.md`) |
 | `<project>/<draft>.docx` | submission binary when `[formatting mode for word]` runs pandoc on the intermediate |
 | `<project>/<draft>.bib.json` | CSL-JSON bibliography emitted for `word` target against collapsed source-level IDs |
