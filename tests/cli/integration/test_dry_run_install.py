@@ -16,6 +16,12 @@ def test_install_dry_run_writes_no_files(tmp_home, tmp_project, clean_ansi):
     assert "DRY RUN" in result.stdout
     assert not (tmp_project / "CLAUDE.md").exists()
     assert not (tmp_project / "config" / "voice.md").exists()
+    # Dry-run must not create the phase-4 subdirs either (regression guard for
+    # the install.py mkdir-before-dry-run-guard bug fixed in this PR).
+    assert not (tmp_project / "config").exists()
+    assert not (tmp_project / "sources").exists()
+    assert not (tmp_project / "samples").exists()
+    assert not (tmp_project / "failures").exists()
 
 
 def test_install_dry_run_runs_validators(tmp_home, tmp_project, clean_ansi):

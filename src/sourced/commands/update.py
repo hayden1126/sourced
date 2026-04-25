@@ -1,4 +1,4 @@
-"""sourced update — refresh managed block of CLAUDE.md + voice.md + style.md.
+"""sourced update — refresh managed block of CLAUDE.md + config/voice.md + config/style.md.
 
 Phase-2 upgrade: preserves `<!-- sourced:user-addition start/end -->` regions
 inside the managed block, migrates phase-1 projects to the new layout, and
