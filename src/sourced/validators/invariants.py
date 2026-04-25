@@ -1,4 +1,4 @@
-"""Structural invariants I1-I10 over the bundled template + shipped mode bodies.
+"""Structural invariants I1-I11 over the bundled template + shipped mode bodies.
 
 Invariants are defined in the phase-2 design spec §8 (`docs/superpowers/specs/
 2026-04-23-claude-md-manifest-extraction-design.md`). Each invariant function

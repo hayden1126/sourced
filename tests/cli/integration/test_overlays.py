@@ -103,4 +103,4 @@ def test_check_invariants_passes_on_shipped_overlays(tmp_home, clean_ansi):
     assert "I10" in result.stdout
     header_line = next(l for l in result.stdout.splitlines() if "Invariants" in l)
     # Header lists the active range; no dormant invariants remain.
-    assert "I1-I10" in header_line
+    assert "I1-I11" in header_line
