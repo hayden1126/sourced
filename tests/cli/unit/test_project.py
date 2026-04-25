@@ -488,6 +488,48 @@ def test_migrate_phase3_preserves_unmarked_voice(tmp_project):
     assert any("not moved" in n for n in notes)
 
 
+def test_migrate_phase3_preserves_unmarked_style(tmp_project):
+    (tmp_project / "style.md").write_text("# Hand-authored style, no marker\n")
+
+    notes = migrate_phase3_to_phase4(tmp_project)
+
+    assert (tmp_project / "style.md").exists()  # not moved
+    assert not (tmp_project / "config" / "style.md").exists()
+    assert any("not moved" in n for n in notes)
+
+
+def test_migrate_phase3_recovers_orphan_voice_bak(tmp_project):
+    """Bak siblings move on re-run even if primary already migrated.
+
+    Models the partial-crash scenario where step 1 renamed voice.md but
+    crashed before moving voice.md.sourced.bak.
+    """
+    (tmp_project / "config").mkdir()
+    (tmp_project / "config" / "voice.md").write_text("<!-- sourced:voice=academic -->\nrules\n")
+    (tmp_project / "voice.md.sourced.bak").write_text("orphan bak")
+
+    migrate_phase3_to_phase4(tmp_project)
+
+    assert (tmp_project / "config" / "voice.md.sourced.bak").read_text() == "orphan bak"
+    assert not (tmp_project / "voice.md.sourced.bak").exists()
+
+
+def test_migrate_phase3_handles_working_brief_collision(tmp_project):
+    """If a root-level working.brief.md and a .claude/briefs/working.brief.md
+    both exist, step 3 moves the root copy first; step 5 must NOT overwrite."""
+    (tmp_project / "working.brief.md").write_text("from root")
+    briefs = tmp_project / ".claude" / "briefs"
+    briefs.mkdir(parents=True)
+    (briefs / "working.brief.md").write_text("from .claude/briefs")
+
+    notes = migrate_phase3_to_phase4(tmp_project)
+
+    assert (tmp_project / "config" / "working.brief.md").read_text() == "from root"
+    # .claude/briefs/working.brief.md NOT moved (would have overwritten)
+    assert (briefs / "working.brief.md").read_text() == "from .claude/briefs"
+    assert any("NOT moved — resolve manually" in n for n in notes)
+
+
 # ----- phase-3 → phase-4 migration: working-artifact migration -----
 
 def test_migrate_phase3_moves_working_brief(tmp_project):
