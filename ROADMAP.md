@@ -284,7 +284,7 @@ Today `sourced` is a Python CLI for file mirroring + validation; the cognitive w
 The original "rename install.sh to sourced" entry described the right idea at the wrong substrate level; the Python CLI ships that capability with subcommands, validation, dry-run, and color UX, and the Single-binary entry covers the eventual `curl | sh` distribution path.
 
 ### Per-project directory restructure
-**Priority:** later · **Effort:** M · **Status:** open.
+**Priority:** later · **Effort:** M · **Status:** shipped 2026-04-24.
 
 Group project files into semantic subdirectories to reduce top-level clutter as a project accumulates drafts, sources, and samples. Proposed layout:
 
