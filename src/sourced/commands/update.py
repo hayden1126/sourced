@@ -16,6 +16,8 @@ from ..project import (
     merge_managed_block,
     detect_phase1_layout,
     migrate_phase1_to_phase2,
+    detect_phase3_layout,
+    migrate_phase3_to_phase4,
     deploy_docs_tree,
     deploy_overlays,
     read_project_type,
@@ -43,6 +45,8 @@ def run(ctx: Context, *, project: str | None = None, force: bool = False) -> int
 
     # Phase-1 detection: monolithic CLAUDE.md with no docs/modes/ sibling.
     is_phase1 = detect_phase1_layout(target)
+    # Phase-3 detection: voice.md at root without config/voice.md.
+    is_phase3 = detect_phase3_layout(target)
 
     warnings: list[str] = []
     migration_notes: list[str] = []
@@ -67,6 +71,11 @@ def run(ctx: Context, *, project: str | None = None, force: bool = False) -> int
         merged_managed, warnings = merge_managed_block(old_managed, fresh_managed)
         new_claude = replace_managed_block(old_text, merged_managed)
 
+    # Phase-3 → phase-4 early migration (must run before voice/style path reads).
+    # Dry-run: skip the actual migration; the announcement is in the dry-run block below.
+    if is_phase3 and not ctx.dry_run:
+        migration_notes.extend(migrate_phase3_to_phase4(target))
+
     # Voice / style refresh from currently-installed library (phase-4: in config/).
     voice_path = target / "config" / "voice.md"
     style_path = target / "config" / "style.md"
@@ -81,6 +90,8 @@ def run(ctx: Context, *, project: str | None = None, force: bool = False) -> int
             if is_phase1:
                 print(f"  would migrate phase-1 CLAUDE.md → CLAUDE.md.phase1.bak at {path_str(str(target), use_color)}")
                 print(f"  would deploy docs/ tree under {path_str(str(target / 'docs'), use_color)}")
+            if is_phase3:
+                print(f"  would migrate phase-3 layout to phase-4 subdirs at {path_str(str(target), use_color)}")
             print(f"  would refresh {path_str(str(claude_md_path), use_color)}")
             if new_voice:
                 print(f"  would refresh {path_str(str(voice_path), use_color)}")
