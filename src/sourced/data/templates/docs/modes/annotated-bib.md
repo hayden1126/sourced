@@ -13,7 +13,7 @@ Annotated-bib mode turns a merged citation log into a formatted annotated biblio
 **Do not enter when:**
 - The project type is not `annotated-bib`. Attempting entry from an essay-type project is a gate violation (manifest §7.4 forbidden transitions); use `[writing mode]` there.
 - The merged log is not ready — outstanding source-finder shards, pending validation failures, or {{USER}} has not confirmed the log is complete. Return to `[research mode]`.
-- `voice.md`, `style.md`, or the brief at `<name>.brief.md` is missing. Stop and ask {{USER}} to run `sourced update` or `sourced switch voice/style <name>` as appropriate; do not annotate with guessed rules.
+- `config/voice.md`, `config/style.md`, or the brief at `config/<name>.brief.md` is missing. Stop and ask {{USER}} to run `sourced update` or `sourced switch voice/style <name>` as appropriate; do not annotate with guessed rules.
 
 ## Iron Law
 
@@ -32,13 +32,13 @@ An annotation beat that cannot be grounded in the log entry's fields is either f
 
 1. **Announce entry.** First output of the turn: `Switching to [annotated-bib mode].`
 
-2. **Read `voice.md` in full.** The iron rules govern annotation prose. Do not operate from memory. If `voice.md` is missing, stop and ask {{USER}} to run `sourced switch voice <name>`.
+2. **Read `config/voice.md` in full.** The iron rules govern annotation prose. Do not operate from memory. If `config/voice.md` is missing, stop and ask {{USER}} to run `sourced switch voice <name>`.
 
-3. **Read `style.md` in full.** Required for Phase 2 ordering and file-naming conventions. If missing, stop and ask {{USER}} to run `sourced switch style <name>`.
+3. **Read `config/style.md` in full.** Required for Phase 2 ordering and file-naming conventions. If missing, stop and ask {{USER}} to run `sourced switch style <name>`.
 
-4. **Read the brief at `<name>.brief.md`.** The brief's *Topic* statement and *Scope statement* sub-sections (in-scope / out-of-scope / boundary cases) are the only context used to assess relevance in the annotation's relevance beat. If the brief is missing, stop and ask {{USER}} — do not proceed without it.
+4. **Read the brief at `config/<name>.brief.md`.** The brief's *Topic* statement and *Scope statement* sub-sections (in-scope / out-of-scope / boundary cases) are the only context used to assess relevance in the annotation's relevance beat. If the brief is missing, stop and ask {{USER}} — do not proceed without it.
 
-5. **Load the citation log** (`<draft>.citations.json`). Identify every entry with `verification_status: "verified"` or `"partial"`. These are the in-scope entries for Phase 1.
+5. **Load the citation log** (`sources/<draft>.citations.json`). Identify every entry with `verification_status: "verified"` or `"partial"`. These are the in-scope entries for Phase 1.
 
 ### Phase 1: per-entry annotation
 
@@ -56,7 +56,7 @@ For each in-scope log entry, in turn:
 
 7. **Apply constraints:**
    - **§10 applies absolutely.** The never-list is absolute on annotation prose. The density budget is per-annotation, not cumulative across the bib.
-   - **Voice iron rules apply.** `voice.md ## Iron rules` govern every annotation. §9 sentence connectedness, paragraph flow, information pacing, and building-arguments rules do NOT apply — annotations are per-entry blocks, not multi-paragraph prose. The boundary mirrors `[editing mode]`'s pass 8 reduction in annotated-bib projects.
+   - **Voice iron rules apply.** `config/voice.md ## Iron rules` govern every annotation. §9 sentence connectedness, paragraph flow, information pacing, and building-arguments rules do NOT apply — annotations are per-entry blocks, not multi-paragraph prose. The boundary mirrors `[editing mode]`'s pass 8 reduction in annotated-bib projects.
    - **Style-agnostic.** Do not render author-year strings (`(Smith, 2010)`) or bracket numbers inside annotation prose. Cross-references to other entries use `[@id]`; `[formatting mode]` resolves them per the active style at rendering time.
    - **Partial-entry constraint.** For `verification_status: "partial"` entries, the relevance and evaluation beats must stay inside the `exact_quote` span. Any beat that cannot stay within the span is dropped with a flag to {{USER}} naming the constraint.
    - **No fabrication.** Never invent page numbers, section references, or quoted phrases. When a required beat cannot be grounded in the log entry's fields, stop and surface the gap to {{USER}} with the insufficient field named.
@@ -105,7 +105,7 @@ If you catch yourself thinking any of the following, stop:
 - *"The partial-entry constraint is too strict for this beat — I'll extend slightly past `exact_quote`."* — No. The constraint is absolute. Drop the beat and flag it.
 - *"I'll draft the compile before all annotations are done — I can fill in the remaining few after."* — No. Phase 2 requires Phase 1 complete. The Iron Law is not a suggested sequence.
 - *"The relevance beat is obvious — one sentence like 'this source is relevant to the topic' is fine."* — No. Generic relevance is a failure mode. Name the specific in-scope bullet or boundary case.
-- *"I don't need to re-read `voice.md` — I've applied the iron rules before."* — Re-read on every entry. Memory of prior sessions drifts; the file is the authority.
+- *"I don't need to re-read `config/voice.md` — I've applied the iron rules before."* — Re-read on every entry. Memory of prior sessions drifts; the file is the authority.
 - *"The `surrounding_context` field has useful material I can quote in the location beat."* — No. `surrounding_context` is verification-only. Quote only from `exact_quote`, and at most one short phrase.
 - *"I'm doing this in an essay project but the user asked for it."* — That's a gate violation. Surface it and redirect to `[writing mode]`.
 - *"Evaluation dimension X isn't supported by fields — I'll silently swap to dimension Y."* — No. Step 6d (pick different dimension or omit with flag) requires the substitution be surfaced to {{USER}}. Silent swap changes what the annotation claims about the source; it must be flagged.
@@ -130,7 +130,7 @@ If you catch yourself thinking any of the following, stop:
 
 ```
 ENTRY:     Switching to [annotated-bib mode].
-           Read voice.md (iron rules only). Read style.md. Read <name>.brief.md.
+           Read config/voice.md (iron rules only). Read config/style.md. Read config/<name>.brief.md.
            Load citation log. Identify in-scope entries (verified + partial).
 
 PHASE 1 (per entry, in turn):
@@ -142,7 +142,7 @@ PHASE 1 (per entry, in turn):
     d. Evaluation (~10%)           — one strength + one limit, from fields only
   Constraints:
     §10 absolute (per-annotation budget)
-    voice.md iron rules apply; §9 (connectedness, flow, pacing) does NOT apply
+    config/voice.md iron rules apply; §9 (connectedness, flow, pacing) does NOT apply
     style-agnostic: [@id] not (Author, Year)
     partial entries: relevance + evaluation within exact_quote span only
     no fabrication: gap → flag to {{USER}} with field name

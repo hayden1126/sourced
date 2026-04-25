@@ -16,7 +16,7 @@ Writing is not a rigid mode per spec §13.1; sub-mode transitions within writing
 
 **Do not enter when:**
 - The refined outline has not been approved. The gate `refining → writing` requires the §4 audit list with zero unresolved `flagged` rows plus explicit outline approval from {{USER}} (manifest §7.4). Silence is not approval.
-- `voice.md` is missing. Stop and ask {{USER}} to run `sourced switch voice <name>`. Do not guess voice rules.
+- `config/voice.md` is missing. Stop and ask {{USER}} to run `sourced switch voice <name>`. Do not guess voice rules.
 - `[UNSOURCED]` tokens or unresolved `[VERIFY: …]` tokens appear in the outline where they carry load-bearing claims. Resolve via [research mode] first.
 - The voice file lacks a `## Worked paragraphs` section or a `## Cut patterns` section — these are load-bearing inputs to `prose-drafter` dispatches. Stop and ask {{USER}} to re-run `voice-extractor` with the current skeleton (which ships these sections) or to hand-add the sections to an older derived voice.
 
@@ -34,7 +34,7 @@ In Phase 1 you produce a structured prose-plan for the section being drafted. Th
 ┌────────────────────────────────────────────────────────────┐
 │  PLAN FIELDS ARE TAGS AND ONE-CLAUSE VALUES — NOT PROSE.   │
 │  IF YOU CATCH YOURSELF WRITING A SENTENCE, STOP AND TAG.   │
-│  SENTENCE-ROLE VOCABULARY IS SHARED WITH voice.md AND      │
+│  SENTENCE-ROLE VOCABULARY IS SHARED WITH config/voice.md AND│
 │  prose-drafter: USE THE SAME TAG NAMES ACROSS ALL THREE.   │
 └────────────────────────────────────────────────────────────┘
 ```
@@ -43,13 +43,13 @@ In Phase 1 you produce a structured prose-plan for the section being drafted. Th
 
 1. **Announce entry.** First output of the turn: `Switching to [writing mode].` Name the section in one clause after the announcement: "writing section 2" / "drafting the phonological-refutation section."
 
-2. **Read `voice.md` in full.** All voice rules apply strictly at write time — not only Paragraph Flow. Do not work from memory of prior sessions. If `voice.md` is missing, halt and ask {{USER}} to run `sourced switch voice <name>`.
+2. **Read `config/voice.md` in full.** All voice rules apply strictly at write time — not only Paragraph Flow. Do not work from memory of prior sessions. If `config/voice.md` is missing, halt and ask {{USER}} to run `sourced switch voice <name>`.
 
 3. **Read `docs/modes/writing.md §Never-list` (this section, below) in full.** On first entry per session, re-read it even if you believe you know it. The restructure-don't-retokenize rule and cross-sentence retokenization check are load-bearing and easy to misapply from memory.
 
-4. **Load the citation log** (`<draft>.citations.json`). Every claim you draft will need an ID. If the log is absent for a section with citations in the outline, stop and ask {{USER}}.
+4. **Load the citation log** (`sources/<draft>.citations.json`). Every claim you draft will need an ID. If the log is absent for a section with citations in the outline, stop and ask {{USER}}.
 
-5. **Declare the section's register mode.** Read `voice.md ## Sub-register taxonomy` (or equivalent). Pick one of the labels (`academic-report`, `prospectus`, `personal-essay`, etc.) based on the brief and the section's role. If the brief does not specify, default to `academic-report` for essay projects and flag the default in the plan's `Register Mode` field. The register mode filters which `voice.md` rules apply in Phase 2.
+5. **Declare the section's register mode.** Read `config/voice.md ## Sub-register taxonomy` (or equivalent). Pick one of the labels (`academic-report`, `prospectus`, `personal-essay`, etc.) based on the brief and the section's role. If the brief does not specify, default to `academic-report` for essay projects and flag the default in the plan's `Register Mode` field. The register mode filters which `config/voice.md` rules apply in Phase 2.
 
 6. **Write the section plan** — one `### Section plan` block per section being drafted. The plan has these fields:
 
@@ -66,7 +66,7 @@ In Phase 1 you produce a structured prose-plan for the section being drafted. Th
      - Opener shape: <state-claim-flat | bridge-from-prior | name-counterpoint | introduce-example | reference-back>
      - Development pattern: <claim → evidence → interpretation | three-example walk | scholar-then-synthesis | set-up-then-refute | ...>
      - Sentence-role sequence: S1=<role>; S2=<role>[, @<id>]; S3=<role>[, @<id>]; S4=<role>
-       (Sentence count: 3-5; role vocabulary from voice.md ## Worked paragraphs annotations.)
+       (Sentence count: 3-5; role vocabulary from config/voice.md ## Worked paragraphs annotations.)
      - Citation placement: <id list from outline, mapped to sentence positions per the sentence-role sequence>
      - Handoff: <verbatim from refined outline — how this paragraph bridges to the next>
      - Closure-type: transitional | synthesis | question-out
@@ -106,15 +106,15 @@ In Phase 2 you dispatch one `prose-drafter` subagent per section, inlining every
 
 #### Phase 2 steps
 
-8. **Filter voice rules by register.** From `voice.md`, extract the rule sections whose register tag matches the section's declared `Register Mode` or is unmarked (register-independent). Drop rules tagged for other registers. This is the single most important filtering step — a personal-essay Stance rule applied to an academic-report dispatch is the `first-person-commitment-in-academic-report` cut pattern.
+8. **Filter voice rules by register.** From `config/voice.md`, extract the rule sections whose register tag matches the section's declared `Register Mode` or is unmarked (register-independent). Drop rules tagged for other registers. This is the single most important filtering step — a personal-essay Stance rule applied to an academic-report dispatch is the `first-person-commitment-in-academic-report` cut pattern.
 
-9. **Select worked-paragraph exhibits.** From `voice.md ## Worked paragraphs`, pick 1–2 exhibits whose register-tag matches `Register Mode`. If no exhibit exists for the register, pass the closest match and flag it in the dispatch (the drafter will cope but note the gap).
+9. **Select worked-paragraph exhibits.** From `config/voice.md ## Worked paragraphs`, pick 1–2 exhibits whose register-tag matches `Register Mode`. If no exhibit exists for the register, pass the closest match and flag it in the dispatch (the drafter will cope but note the gap).
 
-10. **Bundle cut patterns.** From `voice.md ## Cut patterns`, inline every pattern block. Cut patterns are register-independent in most cases; if a pattern carries a `[register: ...]` tag, include only when the tag matches `Register Mode`.
+10. **Bundle cut patterns.** From `config/voice.md ## Cut patterns`, inline every pattern block. Cut patterns are register-independent in most cases; if a pattern carries a `[register: ...]` tag, include only when the tag matches `Register Mode`.
 
-11. **Load the never-list.** Extract the full `## Never-list` section from this file (writing.md) plus any `## §10 exemptions` bullets from `voice.md`. Inline both in the dispatch.
+11. **Load the never-list.** Extract the full `## Never-list` section from this file (writing.md) plus any `## §10 exemptions` bullets from `config/voice.md`. Inline both in the dispatch.
 
-12. **Gather citation entries.** From the citation log (`<draft>.citations.json`), pull the entry for every `@id` referenced in the section plan's Citation placement fields. Inline the full entry (`id`, `source.authors`, `source.title`, `source.year`, `source.url`, `exact_quote`, `surrounding_context`, `retrieved_at`, `draft_reference`).
+12. **Gather citation entries.** From the citation log (`sources/<draft>.citations.json`), pull the entry for every `@id` referenced in the section plan's Citation placement fields. Inline the full entry (`id`, `source.authors`, `source.title`, `source.year`, `source.url`, `exact_quote`, `surrounding_context`, `retrieved_at`, `draft_reference`).
 
 13. **Stage the prose context.** Provide:
     - `prev_section_last_sentence` — the last sentence of the section before this one (from the draft file, if already written) or `omit` if first section.
@@ -133,16 +133,16 @@ In Phase 2 you dispatch one `prose-drafter` subagent per section, inlining every
     <full Phase 1 plan block, verbatim>
 
     voice_rules:
-    <register-filtered rule sections from voice.md, with **Rule.** and **Exemplars:** preserved>
+    <register-filtered rule sections from config/voice.md, with **Rule.** and **Exemplars:** preserved>
 
     worked_paragraphs:
-    <matching exhibits from voice.md ## Worked paragraphs, verbatim with annotation blocks>
+    <matching exhibits from config/voice.md ## Worked paragraphs, verbatim with annotation blocks>
 
     cut_patterns:
-    <matching patterns from voice.md ## Cut patterns, verbatim>
+    <matching patterns from config/voice.md ## Cut patterns, verbatim>
 
     never_list:
-    <full ## Never-list prose from docs/modes/writing.md, plus voice.md ## §10 exemptions bullets>
+    <full ## Never-list prose from docs/modes/writing.md, plus config/voice.md ## §10 exemptions bullets>
 
     citation_entries:
     <JSON array of full log entries for every @id in the plan>
@@ -195,7 +195,7 @@ Applied to drafter's returned prose, post-dispatch. Each check fires independent
 - **§4 synthesis integrity.** Each paraphrase preserves `exact_quote` scope. Attribution preserved. Inference marked. Multi-source claims checked.
 - **Pandoc IDs.** Every citation wrapped as `[@id]` / `@id` / `[@id, p. N]`. No rendered author-year strings.
 - **Stale-byline.** Any `@id` in narrative position whose log entry's `retrieved_at` predates this conversation → fire §3 self-correction trigger.
-- **Cut patterns.** Scan against every pattern in `voice.md ## Cut patterns`. Shipped patterns (aphoristic-closure, compression-stranded-verb, abstract-nominalization-cascade, reduced-relative-stacking, first-person-commitment-in-academic-report, citation-atomization) + any mined from `failures_dir` at extraction time.
+- **Cut patterns.** Scan against every pattern in `config/voice.md ## Cut patterns`. Shipped patterns (aphoristic-closure, compression-stranded-verb, abstract-nominalization-cascade, reduced-relative-stacking, first-person-commitment-in-academic-report, citation-atomization) + any mined from `failures_dir` at extraction time.
 
 Check failures → fix in-parent (for small, local issues) or re-dispatch with revised plan (for structural issues). Re-dispatch budget: 2 per section before escalating to {{USER}}.
 
@@ -206,8 +206,8 @@ Check failures → fix in-parent (for small, local issues) or re-dispatch with r
 - *"I'll draft inline instead of dispatching."* — The isolation is the design point. Parent context carries planning state, cross-session memory, conversation rhythm; drafting inside that context reproduces the §10 patterns the never-list names. Dispatch.
 - *"The drafter's self-audit says clean; I don't need to re-check."* — The drafter may be honest and still wrong. Self-audit is a hint; the parent's per-sentence audit is the authority.
 - *"This cut-pattern hit is minor; I'll leave it."* — No. A cut pattern in the draft is evidence the dispatch bundle was under-specified or the plan was wrong. Fix in-parent or re-dispatch; don't ship.
-- *"voice.md has no `## Worked paragraphs` section — I'll just skip that field in the dispatch."* — No. The skeleton ships with that section; if it's missing, the voice is an older derived file that needs re-extraction. Halt and ask {{USER}}.
-- *"voice.md's Phase 1 plan format feels redundant with the outline."* — The outline says what claims; the plan says what shapes. Different objects. The outline is the structural plan; the prose-plan is the rhetorical plan.
+- *"`config/voice.md` has no `## Worked paragraphs` section — I'll just skip that field in the dispatch."* — No. The skeleton ships with that section; if it's missing, the voice is an older derived file that needs re-extraction. Halt and ask {{USER}}.
+- *"`config/voice.md`'s Phase 1 plan format feels redundant with the outline."* — The outline says what claims; the plan says what shapes. Different objects. The outline is the structural plan; the prose-plan is the rhetorical plan.
 - *"The drafter returned prose with a hit on §10 `aphoristic-closures` and the closure-type was set to `synthesis` in the plan — the drafter ignored the plan."* — That's a flag for re-dispatch or in-parent fix, not a reason to change the plan. The plan is right; the drafter needs to conform.
 - *"I want to make a structural change to the section — I'll just do it in Phase 2."* — No. Structural changes go back through `[refining mode]`. Writing does not restructure; it drafts what refining approved.
 
@@ -220,8 +220,8 @@ Check failures → fix in-parent (for small, local issues) or re-dispatch with r
 | "I'll draft in parent and dispatch only for long sections." | Inconsistent application; the parent can't develop the discipline needed for reliable per-sentence audit if sometimes it drafts, sometimes it audits. Dispatch consistently. |
 | "The plan's sentence-role sequence feels over-specified." | The sequence is what makes the drafter's self-audit usable. Without a role per sentence, audit is subjective; with it, the parent can mechanically compare. |
 | "closure-type: synthesis is the same thing as transitional." | It isn't. Synthesis closes the paragraph's argumentative arc (earned summary); transitional opens the next paragraph's topic (a bridge). The drafter treats them differently. |
-| "My voice.md doesn't have register tags — I'll just ignore the register_mode field." | The register is still load-bearing for choosing exhibits and cut patterns. If voice.md is un-tagged, the voice file may be pre-phase-3 — consider re-extracting. In the meantime, declare a register anyway and apply the best-match rules manually. |
-| "I hit a §10 conflict with a voice rule; I'll note it as a drafter flag and move on." | Resolve it. §10 > voice.md prose (manifest §7.6). If the voice rule needs to win, a `## §10 exemptions` bullet is required. Absence of a bullet is not permission. |
+| "My `config/voice.md` doesn't have register tags — I'll just ignore the register_mode field." | The register is still load-bearing for choosing exhibits and cut patterns. If `config/voice.md` is un-tagged, the voice file may be pre-phase-3 — consider re-extracting. In the meantime, declare a register anyway and apply the best-match rules manually. |
+| "I hit a §10 conflict with a voice rule; I'll note it as a drafter flag and move on." | Resolve it. §10 > `config/voice.md` prose (manifest §7.6). If the voice rule needs to win, a `## §10 exemptions` bullet is required. Absence of a bullet is not permission. |
 
 ## Quick Reference
 
@@ -229,7 +229,7 @@ Check failures → fix in-parent (for small, local issues) or re-dispatch with r
 ENTRY:   Switching to [writing mode]. drafting <section>.
 
 PHASE 1: PLAN
-  Step 0: Read voice.md (full). Read §Never-list (full). Load citation log.
+  Step 0: Read config/voice.md (full). Read §Never-list (full). Load citation log.
   Step 1: Declare Register Mode.
   Step 2: Write ### Section plan:
             - Rhetorical arc (1 sentence)
@@ -244,7 +244,7 @@ PHASE 2: DRAFT
   Step 4: Filter voice rules by register mode.
   Step 5: Select worked_paragraphs exhibits by register mode.
   Step 6: Bundle cut_patterns.
-  Step 7: Load never_list (+ §10 exemptions from voice.md).
+  Step 7: Load never_list (+ §10 exemptions from config/voice.md).
   Step 8: Gather citation_entries (full log entries for every @id in plan).
   Step 9: Stage prose_context (prev sec last sentence, next sec opener).
   Step 10: Dispatch prose-drafter subagent. (Agent tool; granularity=section.)
@@ -275,7 +275,7 @@ EXIT:    {{USER}}-initiated only → Switching to [editing mode].
 
 ## Never-list
 
-**Canonical source of truth for §10 pattern prose.** [editing mode] pass 6 reads this section directly. `prose-drafter` dispatches include this section verbatim. Each entry carries `[id: <canonical-id>]` for `sourced check` I3 parsing and for `voice.md`'s `## §10 exemptions` mechanism. The canonical ID list in manifest §7.6 is the mechanical validation source of truth; the prose here is the operational source of truth.
+**Canonical source of truth for §10 pattern prose.** [editing mode] pass 6 reads this section directly. `prose-drafter` dispatches include this section verbatim. Each entry carries `[id: <canonical-id>]` for `sourced check` I3 parsing and for `config/voice.md`'s `## §10 exemptions` mechanism. The canonical ID list in manifest §7.6 is the mechanical validation source of truth; the prose here is the operational source of truth.
 
 These patterns are not claims about bad prose in general. A human author may use any of them with control. The concern is reproduction: when this agent pads, transitions, or performs analytical depth, these are the shapes it reaches for by default. A reader familiar with AI output clocks them as machine rhythm even when a human author would deploy the same pattern cleanly.
 
@@ -346,13 +346,13 @@ Splitting X and Y across a sentence boundary does not escape the `not-x-but-y` p
 
 ### Exemptions
 
-A `## §10 exemptions` bullet in `voice.md` naming a canonical ID from the list above is the only override mechanism. Silence is not permission. Inline prose in `voice.md` arguing for a pattern without a matching exemption bullet has no runtime effect at write time or edit time (manifest §7.6). Unknown IDs fail `sourced check` install-time validation.
+A `## §10 exemptions` bullet in `config/voice.md` naming a canonical ID from the list above is the only override mechanism. Silence is not permission. Inline prose in `config/voice.md` arguing for a pattern without a matching exemption bullet has no runtime effect at write time or edit time (manifest §7.6). Unknown IDs fail `sourced check` install-time validation.
 
 **Scope of an exemption.** An exemption suspends one never-list rule for this voice's writer prose. Each ID is independent. An exemption does not extend to prose generated on {{USER}}'s behalf that is not this voice's output ([red team mode] counter-phrasings, framework meta-commentary). The direct-quotations carve-out (root CLAUDE.md §10) is independent of exemptions.
 
-**Runtime.** On entry to [writing mode] and [editing mode], scan `voice.md`'s `## §10 exemptions` section. If `voice.md` is missing, halt (see When to Use).
+**Runtime.** On entry to [writing mode] and [editing mode], scan `config/voice.md`'s `## §10 exemptions` section. If `config/voice.md` is missing, halt (see When to Use).
 
-**Conflict surfacing.** If `voice.md` and §10 conflict without a matching exemption bullet, surface the conflict on first occurrence rather than resolving silently (manifest §7.6).
+**Conflict surfacing.** If `config/voice.md` and §10 conflict without a matching exemption bullet, surface the conflict on first occurrence rather than resolving silently (manifest §7.6).
 
 ### Framework-meta carve-out
 
@@ -385,15 +385,15 @@ When a paragraph trips either flag, identify which quotes pass items (a)–(d) a
 
 ## Voice
 
-`voice.md` rules apply **strictly and in full** at write time — at Phase 1 (the plan's Voice-alignment notes reference specific rules by name) and at Phase 2 (the dispatch inlines register-filtered rule sections). [outlining mode] applies Paragraph Flow only; [writing mode] applies every section of `voice.md`. Do not elide sections.
+`config/voice.md` rules apply **strictly and in full** at write time — at Phase 1 (the plan's Voice-alignment notes reference specific rules by name) and at Phase 2 (the dispatch inlines register-filtered rule sections). [outlining mode] applies Paragraph Flow only; [writing mode] applies every section of `config/voice.md`. Do not elide sections.
 
-**Read `voice.md` in full on every entry.** Memory from a prior session drifts. The file is the canonical source for this project's voice; different projects carry different voices.
+**Read `config/voice.md` in full on every entry.** Memory from a prior session drifts. The file is the canonical source for this project's voice; different projects carry different voices.
 
-**If `voice.md` is missing,** stop and ask {{USER}} to run `sourced switch voice <name>`. Do not guess rules and proceed.
+**If `config/voice.md` is missing,** stop and ask {{USER}} to run `sourced switch voice <name>`. Do not guess rules and proceed.
 
-**Phase-3 sections.** Modern `voice.md` files carry `## Sub-register taxonomy`, `## Worked paragraphs`, and `## Cut patterns` sections in addition to the traditional Tone/Structure/Dimension sections. If your project's `voice.md` lacks any of these, it was rendered from a pre-phase-3 skeleton or a derived voice that predates the contract change. Re-run `voice-extractor` against the original samples to produce a phase-3-shaped voice file, or hand-add the missing sections if re-extraction is not practical. `prose-drafter` dispatches require `worked_paragraphs` and `cut_patterns` inputs.
+**Phase-3 sections.** Modern `config/voice.md` files carry `## Sub-register taxonomy`, `## Worked paragraphs`, and `## Cut patterns` sections in addition to the traditional Tone/Structure/Dimension sections. If your project's `config/voice.md` lacks any of these, it was rendered from a pre-phase-3 skeleton or a derived voice that predates the contract change. Re-run `voice-extractor` against the original samples to produce a phase-3-shaped voice file, or hand-add the missing sections if re-extraction is not practical. `prose-drafter` dispatches require `worked_paragraphs` and `cut_patterns` inputs.
 
-**Interaction with §10.** §10 > voice.md prose (manifest §7.6, precedence rule 2). A voice rule that conflicts with a §10 pattern has no runtime effect unless `voice.md` carries a `## §10 exemptions` bullet naming the canonical ID. Inline voice prose — even prose that says "em dashes are acceptable in this voice" — is not an exemption unless it appears as a bullet under `## §10 exemptions` with a canonical ID. Conflict surfacing: if voice.md and §10 conflict without an exemption, surface the conflict on first occurrence.
+**Interaction with §10.** §10 > `config/voice.md` prose (manifest §7.6, precedence rule 2). A voice rule that conflicts with a §10 pattern has no runtime effect unless `config/voice.md` carries a `## §10 exemptions` bullet naming the canonical ID. Inline voice prose — even prose that says "em dashes are acceptable in this voice" — is not an exemption unless it appears as a bullet under `## §10 exemptions` with a canonical ID. Conflict surfacing: if `config/voice.md` and §10 conflict without an exemption, surface the conflict on first occurrence.
 
 **At write time, voice rules are generative**, not just corrective: draft sentences toward the voice, not against §10. The edit-time voice audit (editing.md pass 8) is corrective; the write-time discipline is to build sentences that already fit both. `prose-drafter` inherits this discipline via the inlined rule sections + cut patterns; the parent's post-dispatch per-sentence audit is the safety net.
 
@@ -466,6 +466,6 @@ The block-quote convention is style-agnostic at source-prose level. [formatting 
 - `docs/modes/refining.md` — predecessor; the §4 audit list this mode requires at entry.
 - `docs/modes/editing.md` — successor; Pass 0 revision audits drafts against plans; pass 6 reads `docs/modes/writing.md#never-list`; pass 7 reads `docs/modes/writing.md §Paraphrase default`.
 - `docs/modes/research.md` — target for stale-byline and unsourced-claim auto-triggers fired during writing.
-- `voice.md` — voice rules loaded at step 2; `## §10 exemptions` bullets read at step 3; `## Worked paragraphs`, `## Cut patterns`, `## Sub-register taxonomy` consumed by Phase 2 dispatch.
+- `config/voice.md` — voice rules loaded at step 2; `## §10 exemptions` bullets read at step 3; `## Worked paragraphs`, `## Cut patterns`, `## Sub-register taxonomy` consumed by Phase 2 dispatch.
 - `~/.claude/agents/prose-drafter.md` — the subagent dispatched in Phase 2; its input contract is the dispatch shape in step 14.
 - `~/.claude/citations/schema.md §Staleness` — `retrieved_at` staleness threshold used in the stale-byline check.

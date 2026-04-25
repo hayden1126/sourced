@@ -46,7 +46,7 @@
   
   - **Length per entry:** <150–250 words typical; specify if rubric demands otherwise>
   - **Required beats:** <check any that apply: summary | relevance-to-topic | location-of-key-quotes | evaluation. Default: all four.>
-  - **Voice:** <annotation prose applies voice.md's iron rules + §10 Never list + exploratory-vs-verdict tone only; paragraph flow, pacing, and sentence connectedness do not apply to per-entry blocks. Note any per-project deviations here; otherwise leave as "standard annotation voice".>
+  - **Voice:** <annotation prose applies `config/voice.md`'s iron rules + §10 Never list + exploratory-vs-verdict tone only; paragraph flow, pacing, and sentence connectedness do not apply to per-entry blocks. Note any per-project deviations here; otherwise leave as "standard annotation voice".>
   
   ## Deadline
   
@@ -266,8 +266,8 @@
   
   Before starting any paper workflow, collect or confirm an **intake brief**. The brief is a Markdown file that persists across sessions:
   
-  - For work tied to a specific draft: `<draft-name>.brief.md` sits next to the draft (e.g., `cheyenne_essay.md` sits next to `cheyenne_essay.brief.md` and `cheyenne_essay.citations.json`).
-  - Before a draft file exists: `.claude/briefs/working.brief.md`. Migrate when a draft is created.
+  - For work tied to a specific draft: `config/<draft-name>.brief.md` sits next to the draft (e.g., `cheyenne_essay.md` sits next to `config/cheyenne_essay.brief.md` and `sources/cheyenne_essay.citations.json`).
+  - Before a draft file exists: `config/working.brief.md`. Migrate when a draft is created.
   
   **Strongly suggested before [plan mode].** If TestUser kicks off planning or research without a brief, the first thing you do is propose filling one out or confirming the existing brief is still current. Do not enter [plan mode] without at least a partial brief unless TestUser explicitly skips (see below).
   
@@ -402,14 +402,14 @@
   - **Scope-delta list.** Entries of the form `{trigger_observed, original_scope, proposed_scope_change, load_bearing?}`. Emitted by §6 scope-growth soft-stop in any mode. Empty iff no drift observed in the triggering turn. A triggered self-check that doesn't produce the list has not run.
   - **Inline-quote-threshold list.** Per flagged span: `{paragraph_ref, quote_word_count, threshold, @id (if attached)}`. Emitted by `[formatting mode]` pre-flight step 2. Empty list required on zero hits. Gate: formatting pre-flight.
   - **Revision report.** Emitted by `[editing mode]` Pass 0: one row per sub-check (0a purpose/main-claim, 0b sub-claim support, 0c outline correspondence at paragraph level, 0d transition evaluation, 0e paragraph one-job), each recording `pass` or `flagged: <reason>`. Plus an optional `0-plan: <pass | flagged | n/a>` row for prose-plan correspondence when a plan exists. Gate: `editing → formatting`.
-  - **Voice audit surface-scan report.** Lists §10 never-list hits (Pass 6), voice.md cut-pattern hits (Pass 7), quote-density flags (Pass 8), and voice-audit flags (Pass 9) with line references. Emitted by `[editing mode]` handoff before formatting. Gate: `editing → formatting`.
+  - **Voice audit surface-scan report.** Lists §10 never-list hits (Pass 6), config/voice.md cut-pattern hits (Pass 7), quote-density flags (Pass 8), and voice-audit flags (Pass 9) with line references. Emitted by `[editing mode]` handoff before formatting. Gate: `editing → formatting`.
   
   ### 7.6 Precedence and canonical §10 IDs
   
   Precedence rules, in order. Later items are subordinate to earlier items. Rank in this list IS the precedence; do not infer ordering from prose elsewhere.
   
   1. **§4 verbatim > §10 inside quoted spans.** Punctuation, word-order, and patterns inside a direct quote are preserved as the source prints them. §10 applies to the writer's framing sentence, not the quote. Governing rule: §4 *Quote verbatim* + §10 *Direct quotations*.
-  2. **§10 > voice.md prose.** Inline prose in `voice.md` arguing for a §10 pattern without a matching `## §10 exemptions` bullet has no runtime effect. Silence is not permission. The only override mechanism is a `## §10 exemptions` bullet naming a canonical ID from the list below.
+  2. **§10 > voice.md prose.** Inline prose in `config/voice.md` arguing for a §10 pattern without a matching `## §10 exemptions` bullet has no runtime effect. Silence is not permission. The only override mechanism is a `## §10 exemptions` bullet naming a canonical ID from the list below.
   3. **Manifest > mode body.** If a mode body contradicts this manifest (triggers, gates, forcing artifacts, precedence), the manifest wins. Surface the contradiction and do not proceed. Mode bodies describe procedure; the manifest defines semantics.
   
   **Canonical §10 IDs (source of truth).** The IDs below are the only values `sourced check` accepts in a `## §10 exemptions` bullet. Unknown IDs fail install-time validation.
@@ -424,7 +424,7 @@
   
   Full pattern prose, density list, and restructure guidance: `docs/modes/writing.md` §Never-list. Read on entry to [writing mode] and [editing mode].
   
-  **Conflict surfacing.** If `voice.md` and §10 conflict without an exemption, surface the conflict on first occurrence rather than resolving silently.
+  **Conflict surfacing.** If `config/voice.md` and §10 conflict without an exemption, surface the conflict on first occurrence rather than resolving silently.
   
   ### 7.7 Inline mode bodies
   
@@ -467,7 +467,7 @@
   
   ### Moment 1: Logging (always-on schema)
   
-  For every in-text citation, append an entry. The log is a JSON array stored at `<draft-filename>.citations.json` adjacent to the draft; before a draft file exists, work in `.claude/citations/working.citations.json` and migrate when the draft is created. Each citation instance is its own entry (same source cited three times = three entries), so every citation is auditable on its own.
+  For every in-text citation, append an entry. The log is a JSON array stored at `sources/<draft-filename>.citations.json`; before a draft file exists, work in `sources/working.citations.json` and migrate when the draft is created. Each citation instance is its own entry (same source cited three times = three entries), so every citation is auditable on its own.
   
   Rules (semantic, not structural):
   
@@ -490,9 +490,9 @@
   
   ## 9. Voice
   
-  Voice rules live in `voice.md`, in this project's root next to this CLAUDE.md. Every rule in `voice.md` is load-bearing for per-author calibration; category-level prohibitions that apply regardless of voice live in §10. If `voice.md` is missing, stop and ask TestUser to run `sourced switch voice <name>` rather than proceeding with guessed rules.
+  Voice rules live in `config/voice.md`. Every rule in `config/voice.md` is load-bearing for per-author calibration; category-level prohibitions that apply regardless of voice live in §10. If `config/voice.md` is missing, stop and ask TestUser to run `sourced switch voice <name>` rather than proceeding with guessed rules.
   
-  Voice application procedure — when to read `voice.md`, which rules apply at outline vs write vs edit time, how voice interacts with §10 (including the `## §10 exemptions` mechanism): `docs/modes/writing.md` §Voice and `docs/modes/editing.md` §Voice audit (pass 8). Read on mode entry.
+  Voice application procedure — when to read `config/voice.md`, which rules apply at outline vs write vs edit time, how voice interacts with §10 (including the `## §10 exemptions` mechanism): `docs/modes/writing.md` §Voice and `docs/modes/editing.md` §Voice audit (pass 8). Read on mode entry.
   
   **Adding a new library voice from writing samples.** Dispatch the `voice-extractor` subagent via the Agent tool. Full dispatch template, iron-rule caller-side check procedure, and post-dispatch steps: `docs/voice-extractor.md`. Read that file before dispatching; the subagent runs in isolated context and the dispatch has several load-bearing parameters. Voice-extractor is **not a mode** and does **not** auto-trigger; it fires only on explicit TestUser request.
   
@@ -514,13 +514,13 @@
   
   ## 11. Style
   
-  Citation, references, and document-formatting rules live in `style.md`, in this project's root next to this CLAUDE.md and voice.md. Read that file in full on entry to `[formatting mode]`. Other modes do not need to read it — they emit Pandoc citation IDs (§8 Moment 2), which are style-agnostic.
+  Citation, references, and document-formatting rules live in `config/style.md`. Read that file in full on entry to `[formatting mode]`. Other modes do not need to read it — they emit Pandoc citation IDs (§8 Moment 2), which are style-agnostic.
   
-  If `style.md` is missing, stop and ask TestUser to run `sourced switch style <name>` rather than proceeding with guessed rules. The default for TestUser's work is `apa7`.
+  If `config/style.md` is missing, stop and ask TestUser to run `sourced switch style <name>` rather than proceeding with guessed rules. The default for TestUser's work is `apa7`.
   
-  `style.md` is structured so a model can look up a single rule without rereading the file. The structure is fixed: §Style identity, §Document layout, §Paste target expression rules, §Special tokens. New styles ship as templates under the sourced package's `styles/<name>.md`.
+  `config/style.md` is structured so a model can look up a single rule without rereading the file. The structure is fixed: §Style identity, §Document layout, §Paste target expression rules, §Special tokens. New styles ship as templates under the sourced package's `styles/<name>.md`.
   
-  `style.md` is project-local. Different projects can carry different styles. The style is fixed at install time and does not change mid-project; switching mid-project requires re-running `sourced switch style <new>` and re-formatting.
+  `config/style.md` is project-local. Different projects can carry different styles. The style is fixed at install time and does not change mid-project; switching mid-project requires re-running `sourced switch style <new>` and re-formatting.
   
   Full formatting procedure — pandoc invocation shape, per-target output routing, CSL handling, post-pandoc transforms (command-pipe vs agent-walk), citeproc warning classification, paste-time instructions: `docs/modes/formatting.md`. Read on mode entry.
   

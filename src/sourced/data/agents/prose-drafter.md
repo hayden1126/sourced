@@ -28,10 +28,10 @@ The dispatcher inlines these in your prompt as a single well-structured block. E
   - Voice-alignment notes (register-specific rules to prioritize, cut patterns to avoid).
   - Per-paragraph blocks with: Claim, Role, Opener shape, Development pattern, Sentence-role sequence, Citation placement, Handoff, Closure-type.
   - Cross-paragraph connective tissue specs (handoff connectives between adjacent paragraphs).
-- **`voice_rules`** — the active rule sections from the project's `voice.md`, filtered by `register_mode`. Each rule block carries `**Rule.**` prose and `**Exemplars:**` bullets.
+- **`voice_rules`** — the active rule sections from the project's `config/voice.md`, filtered by `register_mode`. Each rule block carries `**Rule.**` prose and `**Exemplars:**` bullets.
 - **`worked_paragraphs`** — 1–2 paragraph-scale exhibits from `voice.md ## Worked paragraphs` that match `register_mode`. Each exhibit has the verbatim paragraph plus its per-sentence annotation block.
 - **`cut_patterns`** — relevant entries from `voice.md ## Cut patterns`. These are named failure modes to avoid. Each entry gives pattern signature, why it reads as AI, the fix, and a before/after.
-- **`never_list`** — full prose of `docs/modes/writing.md ## Never-list` from the host project, including Restructure-don't-retokenize and Cross-sentence retokenization rules. Also any `## §10 exemptions` bullets from the project's `voice.md`, naming canonical IDs suspended for this voice.
+- **`never_list`** — full prose of `docs/modes/writing.md ## Never-list` from the host project, including Restructure-don't-retokenize and Cross-sentence retokenization rules. Also any `## §10 exemptions` bullets from the project's `config/voice.md`, naming canonical IDs suspended for this voice.
 - **`citation_entries`** — for every Pandoc ID that appears in the section plan's Citation placement fields, the corresponding citation log entry's full record: `id`, `source.authors`, `source.title`, `source.year`, `source.url`, `exact_quote`, `surrounding_context`, `retrieved_at`, `draft_reference`. You draft with these inlined; you do not re-fetch sources.
 - **`prose_context`** — two adjacent-section bridge fields:
   - `prev_section_last_sentence` — the last sentence of the section before this one (or `omit` if this is the first section).
@@ -194,6 +194,6 @@ If a failure genuinely doesn't fit, pick the closest category and explain in the
 ## See also (referenced by the parent, not you)
 
 - `docs/modes/writing.md` — Phase 1 (plan generation) + Phase 2 (dispatch coordination + per-sentence audit of your returned prose).
-- `voice.md` — the project's calibrated voice; `## Worked paragraphs`, `## Cut patterns`, and rule sections are inlined in your dispatch as `voice_rules`, `worked_paragraphs`, `cut_patterns`.
+- `config/voice.md` — the project's calibrated voice; `## Worked paragraphs`, `## Cut patterns`, and rule sections are inlined in your dispatch as `voice_rules`, `worked_paragraphs`, `cut_patterns`.
 - `docs/modes/writing.md ## Never-list` — inlined as `never_list`.
 - `~/.claude/citations/schema.md` — schema for `citation_entries`; you consume the entries but do not edit them.
