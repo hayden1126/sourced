@@ -7,6 +7,8 @@ returns list[Finding]; callers decide how to surface.
 Scope: I1 + I3-I9 shipped in commit 3. I2 activated in commit 4 (overlay scope).
 I10 (cache-discipline auditing) activated in this follow-up via AST inspection
 of `_pipeline.render_claude_md` and the cache-discipline primitives in §5.
+I11 added in phase 4: forbid flat-path references in shipped templates so the
+phase-3 → phase-4 layout boundary doesn't leak through user-rendered files.
 """
 from __future__ import annotations
 import ast
