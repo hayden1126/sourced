@@ -8,6 +8,7 @@ from sourced.project import (
     MIGRATED_ADDITIONS_HEADING,
     detect_phase1_layout, deploy_docs_tree, migrate_phase1_to_phase2,
     PHASE1_BAK_NAME,
+    detect_phase3_layout, migrate_phase3_to_phase4,
 )
 from sourced.errors import ProjectError
 
@@ -434,3 +435,108 @@ def test_migrate_phase1_preserves_existing_bak(tmp_project):
     # Old bak untouched.
     assert (tmp_project / PHASE1_BAK_NAME).read_text() == existing_bak
     assert any("already exists" in n for n in notes)
+
+
+# ----- phase-3 → phase-4 migration detection -----
+
+def test_detect_phase3_layout_true_when_voice_at_root(tmp_project):
+    (tmp_project / "voice.md").write_text("<!-- sourced:voice=academic -->\n")
+    assert detect_phase3_layout(tmp_project) is True
+
+
+def test_detect_phase3_layout_false_when_config_voice_exists(tmp_project):
+    (tmp_project / "voice.md").write_text("<!-- sourced:voice=academic -->\n")
+    (tmp_project / "config").mkdir()
+    (tmp_project / "config" / "voice.md").write_text("<!-- sourced:voice=academic -->\n")
+    assert detect_phase3_layout(tmp_project) is False
+
+
+def test_detect_phase3_layout_false_when_no_voice(tmp_project):
+    assert detect_phase3_layout(tmp_project) is False
+
+
+# ----- phase-3 → phase-4 migration: core file moves -----
+
+def test_migrate_phase3_to_phase4_moves_core_files(tmp_project):
+    (tmp_project / "voice.md").write_text("<!-- sourced:voice=academic -->\nrules\n")
+    (tmp_project / "voice.md.sourced.bak").write_text("bak")
+    (tmp_project / "style.md").write_text("<!-- sourced:style=apa7 -->\nrules\n")
+    (tmp_project / "report.brief.md").write_text("brief")
+    (tmp_project / "report.citations.json").write_text("[]")
+
+    notes = migrate_phase3_to_phase4(tmp_project)
+
+    assert (tmp_project / "config" / "voice.md").read_text().startswith("<!-- sourced:voice=academic -->")
+    assert (tmp_project / "config" / "voice.md.sourced.bak").read_text() == "bak"
+    assert (tmp_project / "config" / "style.md").exists()
+    assert (tmp_project / "config" / "report.brief.md").exists()
+    assert (tmp_project / "sources" / "report.citations.json").exists()
+    assert not (tmp_project / "voice.md").exists()
+    assert not (tmp_project / "style.md").exists()
+    assert len(notes) >= 4  # at least one note per moved file
+
+
+# ----- phase-3 → phase-4 migration: unmarked-voice preservation -----
+
+def test_migrate_phase3_preserves_unmarked_voice(tmp_project):
+    (tmp_project / "voice.md").write_text("# Hand-authored voice, no marker\n")
+
+    notes = migrate_phase3_to_phase4(tmp_project)
+
+    assert (tmp_project / "voice.md").exists()  # not moved
+    assert not (tmp_project / "config" / "voice.md").exists()
+    assert any("not moved" in n for n in notes)
+
+
+# ----- phase-3 → phase-4 migration: working-artifact migration -----
+
+def test_migrate_phase3_moves_working_brief(tmp_project):
+    briefs = tmp_project / ".claude" / "briefs"
+    briefs.mkdir(parents=True)
+    (briefs / "working.brief.md").write_text("working brief")
+
+    migrate_phase3_to_phase4(tmp_project)
+
+    assert (tmp_project / "config" / "working.brief.md").read_text() == "working brief"
+    assert not briefs.exists()  # empty dir removed
+
+
+def test_migrate_phase3_moves_working_log_preserves_shards_dir(tmp_project):
+    citations = tmp_project / ".claude" / "citations"
+    citations.mkdir(parents=True)
+    (citations / "working.citations.json").write_text("[]")
+    (citations / "working.finder-a.json").write_text("[]")  # shard — stays
+
+    migrate_phase3_to_phase4(tmp_project)
+
+    assert (tmp_project / "sources" / "working.citations.json").exists()
+    assert citations.exists()  # NOT removed — shards live here
+    assert (citations / "working.finder-a.json").exists()
+
+
+# ----- phase-3 → phase-4 migration: idempotence -----
+
+def test_migrate_phase3_idempotent(tmp_project):
+    (tmp_project / "voice.md").write_text("<!-- sourced:voice=academic -->\n")
+
+    notes_1 = migrate_phase3_to_phase4(tmp_project)
+    notes_2 = migrate_phase3_to_phase4(tmp_project)  # re-run
+
+    assert (tmp_project / "config" / "voice.md").exists()
+    assert not (tmp_project / "voice.md").exists()
+    # Second run is a no-op on source side; hint lines may repeat but files unchanged
+    _ = notes_1, notes_2  # both runs succeed without raising
+
+
+# ----- phase-3 → phase-4 migration: candidate-hint emission -----
+
+def test_migrate_phase3_emits_candidate_hints(tmp_project):
+    (tmp_project / "Smith2020.pdf").write_bytes(b"%PDF")
+    (tmp_project / "my_writing").mkdir()
+    (tmp_project / "failures_dir").mkdir()
+
+    notes = migrate_phase3_to_phase4(tmp_project)
+
+    assert any("candidate source file" in n for n in notes)
+    assert any("my_writing" in n for n in notes)
+    assert any("failures_dir" in n for n in notes)
