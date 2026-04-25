@@ -155,7 +155,7 @@ If uncertain whether a call crosses the threshold, err on the side of asking. An
 
 Before starting any paper workflow, collect or confirm an **intake brief**. The brief is a Markdown file that persists across sessions:
 
-- For work tied to a specific draft: `config/<draft-name>.brief.md` sits next to the draft (e.g., `cheyenne_essay.md` sits next to `config/cheyenne_essay.brief.md` and `sources/cheyenne_essay.citations.json`).
+- For work tied to a specific draft: `config/<draft-name>.brief.md` holds the intake brief paired by name with the draft at root (e.g., `cheyenne_essay.md` at root pairs with `config/cheyenne_essay.brief.md` and `sources/cheyenne_essay.citations.json`).
 - Before a draft file exists: `config/working.brief.md`. Migrate when a draft is created.
 
 **Strongly suggested before [plan mode].** If {{USER}} kicks off planning or research without a brief, the first thing you do is propose filling one out or confirming the existing brief is still current. Do not enter [plan mode] without at least a partial brief unless {{USER}} explicitly skips (see below).
@@ -298,7 +298,7 @@ A gate that requires an artifact has not been satisfied unless the artifact is e
 Precedence rules, in order. Later items are subordinate to earlier items. Rank in this list IS the precedence; do not infer ordering from prose elsewhere.
 
 1. **§4 verbatim > §10 inside quoted spans.** Punctuation, word-order, and patterns inside a direct quote are preserved as the source prints them. §10 applies to the writer's framing sentence, not the quote. Governing rule: §4 *Quote verbatim* + §10 *Direct quotations*.
-2. **§10 > voice.md prose.** Inline prose in `config/voice.md` arguing for a §10 pattern without a matching `## §10 exemptions` bullet has no runtime effect. Silence is not permission. The only override mechanism is a `## §10 exemptions` bullet naming a canonical ID from the list below.
+2. **§10 > config/voice.md prose.** Inline prose in `config/voice.md` arguing for a §10 pattern without a matching `## §10 exemptions` bullet has no runtime effect. Silence is not permission. The only override mechanism is a `## §10 exemptions` bullet naming a canonical ID from the list below.
 3. **Manifest > mode body.** If a mode body contradicts this manifest (triggers, gates, forcing artifacts, precedence), the manifest wins. Surface the contradiction and do not proceed. Mode bodies describe procedure; the manifest defines semantics.
 
 **Canonical §10 IDs (source of truth).** The IDs below are the only values `sourced check` accepts in a `## §10 exemptions` bullet. Unknown IDs fail install-time validation.
