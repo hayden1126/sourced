@@ -2,7 +2,7 @@
 
 [← Back to README](../README.md)
 
-Citation and document-layout rules live in a per-project `style.md` rendered from a named style in the style library. Style is per-project; different projects can carry different styles, and the style on any project can be switched later.
+Citation and document-layout rules live in a per-project `config/style.md` rendered from a named style in the style library. Style is per-project; different projects can carry different styles, and the style on any project can be switched later.
 
 ## Shipped styles
 
@@ -19,8 +19,8 @@ Each renders citations from Pandoc-style IDs (`[@id]`, `@id`, `[@id, p. N]`) in 
 ## Pick a style at install
 
 ```bash
-/path/to/sourced/install.sh --style apa7           # default
-/path/to/sourced/install.sh --style chicago17-ad
+sourced install --style apa7           # default
+sourced install --style chicago17-ad
 ```
 
 `--style` is validated before any project file is written. An invalid name errors out cleanly; no half-installed project.
@@ -49,13 +49,13 @@ All four targets are rendered by `pandoc --citeproc` reading the style's vendore
 - **`word`** — pandoc emits `.docx` directly, optionally styled by a reference.docx bundled per style.
 - **`latex`** — pandoc emits a standalone `.tex` via a per-style pandoc template at `templates/styles/<name>/template.tex`. User compiles with `pdflatex` / `xelatex` / `lualatex`; `sourced` does not own compilation. See [`docs/INSTALL.md`](./INSTALL.md#optional-tex-live-for-the-latex-paste-target) for TeX Live package guidance (minimum vs. full, IEEE-specific `texlive-publishers` requirement).
 
-## How `[formatting mode]` uses `style.md`
+## How `[formatting mode]` uses `config/style.md`
 
-`[formatting mode]` is the only mode that reads `style.md`. All other modes emit style-agnostic Pandoc IDs, so source prose is decoupled from style choice. Switching styles is cheap: `install.sh --style <new>` then re-run formatting.
+`[formatting mode]` is the only mode that reads `config/style.md`. All other modes emit style-agnostic Pandoc IDs, so source prose is decoupled from style choice. Switching styles is cheap: `sourced switch style <new>` then re-run formatting.
 
 The formatting procedure (abbreviated; see CLAUDE.md §7 for the full version):
 
-1. Read `style.md` + the citation log. Verify CSL file exists on disk.
+1. Read `config/style.md` + the citation log. Verify CSL file exists on disk.
 2. Pre-flight. Halt on `[VERIFY: ...]`, `[UNSOURCED]`, rendered citation strings, unresolved IDs, stale `retrieved_at`, or inline direct quotes exceeding the style's block-quote threshold.
 3. Pre-pandoc pass: collapse per-instance citation IDs into a derived `<draft>.pandoc.md`. Source prose unchanged.
 4. Emit CSL-JSON bibliography from the log to `<draft>.bib.json` per `citations/csl-json-emitter.md`.
@@ -73,7 +73,7 @@ Copy a shipped style as the template and edit:
 ```bash
 cp ~/.claude/style/apa7.md ~/.claude/style/mystyle.md
 # edit ~/.claude/style/mystyle.md
-/path/to/sourced/install.sh --style mystyle
+sourced switch style mystyle
 ```
 
 The section structure is fixed and load-bearing — `[formatting mode]` looks up rules by section name. Renaming or dropping sections breaks rendering. Adding a new paste target requires a new subsection under §Paste target expression rules naming the target and specifying expression rules for every layout category the style defines.
@@ -83,7 +83,7 @@ Shipped styles at `~/.claude/style/<shipped-name>.md` are refreshed on every ins
 ## Switching styles on an existing project
 
 ```bash
-/path/to/sourced/install.sh --update --style chicago17-ad
+sourced switch style chicago17-ad
 ```
 
-This replaces `style.md` with the new style and records the choice in the style marker on line 1 of the file. Re-run formatting on any drafts to pick up the new rendering; source prose is unchanged.
+This replaces `config/style.md` with the new style and records the choice in the style marker on line 1 of the file. Re-run formatting on any drafts to pick up the new rendering; source prose is unchanged.
