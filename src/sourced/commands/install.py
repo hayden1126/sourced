@@ -35,10 +35,9 @@ def run(
     style_md = _pipeline.render_style(style, user, ctx)
     brief_md = _pipeline.render_brief(brief, user, project_type, ctx) if brief else None
 
+    # Compute paths without touching the filesystem; mkdir is deferred until
+    # after the --dry-run early-return so dry-run is side-effect-free.
     config = target / "config"
-    config.mkdir(exist_ok=True)
-    for subdir in ("sources", "samples", "failures"):
-        (target / subdir).mkdir(exist_ok=True)
 
     targets: list[tuple[Path, str]] = [
         (target / "CLAUDE.md", claude_md),
@@ -64,6 +63,11 @@ def run(
                 action = "would overwrite" if p.exists() else "would write"
                 print(f"  {action} {path_str(str(p), use_color)}")
         return 0
+
+    # Phase-4 layout: create subdirs only when actually writing.
+    config.mkdir(exist_ok=True)
+    for subdir in ("sources", "samples", "failures"):
+        (target / subdir).mkdir(exist_ok=True)
 
     # Migration-day .sourced.bak fallback for any existing file.
     for p, _ in targets:
