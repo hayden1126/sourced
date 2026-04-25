@@ -31,7 +31,7 @@ This is a **rigid** mode. The nine-pass order is load-bearing; the handoff to `[
 └───────────────────────────────────────────────────────────────┘
 ```
 
-Editing emits three forcing artifacts at handoff: the **revision report** (Pass 0: purpose/thesis, sub-claim support, outline correspondence, transitions, paragraph one-job); the **§4 audit list** (one row per citation audited, pass/`flagged: <reason>` per §4 items 1, 2, 4, 5, 6); and the **voice audit surface-scan report** (§10 never-list hits + voice.md cut-pattern hits + density-list overruns with line references). A handoff turn that does not emit all three has not run the mode. A `[formatting mode]` entry without these artifacts is a gate violation (manifest §7.4). "I ran the audits mentally" is not the same as emitting the lists; the lists **are** the audits. Per-pass lists (proper-noun consistency, paste-artifact, punctuation mechanics) are required in their respective passes; a pass that doesn't produce its list has not run.
+Editing emits three forcing artifacts at handoff: the **revision report** (Pass 0: purpose/thesis, sub-claim support, outline correspondence, transitions, paragraph one-job); the **§4 audit list** (one row per citation audited, pass/`flagged: <reason>` per §4 items 1, 2, 4, 5, 6); and the **voice audit surface-scan report** (§10 never-list hits + `config/voice.md` cut-pattern hits + density-list overruns with line references). A handoff turn that does not emit all three has not run the mode. A `[formatting mode]` entry without these artifacts is a gate violation (manifest §7.4). "I ran the audits mentally" is not the same as emitting the lists; the lists **are** the audits. Per-pass lists (proper-noun consistency, paste-artifact, punctuation mechanics) are required in their respective passes; a pass that doesn't produce its list has not run.
 
 ## Steps
 
@@ -39,9 +39,9 @@ Editing emits three forcing artifacts at handoff: the **revision report** (Pass 
 
 1. **Announce entry.** First output of the turn: `Switching to [editing mode].` Name the section in one clause after the announcement: "editing section 2" / "editing the literature review" / "editing the full draft".
 
-2. **Read `voice.md` in full.** The voice audit (pass 9) and cut-pattern check (pass 7) operate against the specific rules there; do not run it from memory. If `voice.md` is missing, stop and ask {{USER}} to run `sourced switch voice <name>` rather than guessing rules. Phase-3 voice files also carry `## Worked paragraphs` and `## Cut patterns` sections used by Pass 0 (plan-correspondence check) and Pass 7 (cut-pattern audit). If those sections are missing, flag that the voice file is pre-phase-3 and continue; the passes degrade gracefully (Pass 7 runs against shipped-canonical patterns only).
+2. **Read `config/voice.md` in full.** The voice audit (pass 9) and cut-pattern check (pass 7) operate against the specific rules there; do not run it from memory. If `config/voice.md` is missing, stop and ask {{USER}} to run `sourced switch voice <name>` rather than guessing rules. Phase-3 voice files also carry `## Worked paragraphs` and `## Cut patterns` sections used by Pass 0 (plan-correspondence check) and Pass 7 (cut-pattern audit). If those sections are missing, flag that the voice file is pre-phase-3 and continue; the passes degrade gracefully (Pass 7 runs against shipped-canonical patterns only).
 
-3. **Load the draft's citation log** (`<draft>.citations.json` adjacent to the draft). Passes 1, 2, 3 cross-reference by id; the log is the source of truth. If the log is missing for a draft with citations, stop and ask {{USER}} — do not reconstruct from memory or from draft text.
+3. **Load the draft's citation log** (`sources/<draft>.citations.json`). Passes 1, 2, 3 cross-reference by id; the log is the source of truth. If the log is missing for a draft with citations, stop and ask {{USER}} — do not reconstruct from memory or from draft text.
 
 ### Structural deviation (before the pass list)
 
@@ -59,13 +59,13 @@ Each pass operates on the section being edited. Passes that produce forced-field
 
 6. **Pass 0 — Revision.** Argument-level coherence audit before prose-level passes. The failure mode this pass exists to prevent is silent argument drift: prose that flows at the sentence level but does not serve the thesis, carry its sub-claims, or stay within the outline's planned scope. Pass 0 emits a **revision report** with five sub-checks; each sub-check produces at least one line in the report (even `no hits`).
 
-    - **0a. Purpose and main-claim check.** Read the brief (`<draft>.brief.md`) for the stated thesis and scope. Read the draft's opening section. Confirm the draft opens on that thesis (or an explicit near-paraphrase) and that every subsequent section contributes to supporting, extending, or qualifying it. Flag: draft opens on a different claim, thesis is not stated until paragraph 3+, or a section does not trace to the thesis. Emit as `0a: <pass | flagged: <reason>>`.
+    - **0a. Purpose and main-claim check.** Read the brief (`config/<draft>.brief.md`) for the stated thesis and scope. Read the draft's opening section. Confirm the draft opens on that thesis (or an explicit near-paraphrase) and that every subsequent section contributes to supporting, extending, or qualifying it. Flag: draft opens on a different claim, thesis is not stated until paragraph 3+, or a section does not trace to the thesis. Emit as `0a: <pass | flagged: <reason>>`.
 
     - **0b. Sub-claim support check.** For every major sub-claim the draft asserts (usually one per section, sometimes one per paragraph in dense sections), confirm: (i) the sub-claim is explicit, not gestural; (ii) supporting evidence is present and in the same section (or in a section explicitly referenced); (iii) the relationship between evidence and sub-claim is stated, not left for the reader to infer. Flag: a sub-claim without evidence, a sub-claim stated only implicitly, or a paragraph whose evidence fits a different sub-claim than the paragraph asserts. Emit as `0b: <pass | flagged: <reason>>`, one row per sub-claim.
 
     - **0c. Outline correspondence.** Separate from step 4's structural-deviation check (which fires on outline-level drift). This sub-check runs at paragraph level: for every paragraph in the draft, confirm the paragraph's claim matches the claim attached to its outline slot. Paragraph-level drift within an unchanged outline structure is the target (e.g., outline says this paragraph argues X, draft's prose drifts into arguing Y). Flag: claim-level drift detected. Emit as `0c: <pass | flagged: <paragraph ref>: outline claim <X>, prose claim <Y>>`, one row per drift.
 
-    - **0d. Transition evaluation at each paragraph boundary.** For every paragraph-to-paragraph transition in the section, name the relationship (contrast, amplification, sequence, pivot, exemplification) and confirm the transition is carried by a connective or handoff. A "cold" opener on paragraph N+1 (no connective, no reference back, no concept the prior paragraph positioned) is a `voice.md > Paragraph Flow` violation at argument scale, not sentence scale. Flag: cold opener, transition whose relationship is not earned, or a handoff that promises a pivot the next paragraph doesn't deliver. Emit as `0d: <pass | flagged: P<N>→P<N+1>: <reason>>`.
+    - **0d. Transition evaluation at each paragraph boundary.** For every paragraph-to-paragraph transition in the section, name the relationship (contrast, amplification, sequence, pivot, exemplification) and confirm the transition is carried by a connective or handoff. A "cold" opener on paragraph N+1 (no connective, no reference back, no concept the prior paragraph positioned) is a `config/voice.md > Paragraph Flow` violation at argument scale, not sentence scale. Flag: cold opener, transition whose relationship is not earned, or a handoff that promises a pivot the next paragraph doesn't deliver. Emit as `0d: <pass | flagged: P<N>→P<N+1>: <reason>>`.
 
     - **0e. Paragraph one-job and topic-sentence check.** For every paragraph, confirm: (i) it has one argumentative job (the paragraph plan's "Claim" field, or a clearly-identifiable focal claim if no plan exists); (ii) the topic is introduced early (first or second sentence), not revealed at the end; (iii) the organizational strategy (claim → evidence → interpretation, or an identifiable alternative) is identifiable. Flag: paragraph doing two jobs, buried topic sentence, or an organizational pattern that the reader cannot reconstruct. Emit as `0e: <pass | flagged: P<N>: <reason>>`.
 
@@ -131,14 +131,14 @@ Each pass operates on the section being edited. Passes that produce forced-field
 
     - **Never list.** Fail on sight. Apply **Restructure, don't retokenize** per writing.md: identify the sentence shape the pattern produces (mid-clause interruption, balanced pivot, rhetorical escalation, ornamental triad, aphoristic closure) and rebuild around a different shape. Swapping punctuation while preserving the shape fails the audit and leaves the AI rhythm intact. A period between X and Y does not count as structural change for `not-x-but-y`; neither does a single bridging sentence (see writing.md cross-sentence-retokenization rule). An `aphoristic-closures` hit requires restructure to `closure-type: transitional`, `synthesis`, or `question-out`; retokenizing the shape (commas to periods, reordering) does not fix it.
     - **Density list.** Per-draft budget check: "In this way," "we come to see," "for X… for Y…" parallel constructions, stacked participials — each acceptable once per essay, AI-ish when stacked. Flag any term appearing three or more times or any two sibling stacked.
-    - **Exemptions.** If `voice.md` carries a `## §10 exemptions` bullet with a canonical ID from manifest §7.6 (`em-dashes`, `not-x-but-y`, `ornamental-triads`, `throat-clearing-openers`, `demonstrative-openers`, `ornamental-compounds`, `aphoristic-closures`), suspend that rule for {{USER}}-voice prose only. §10 still applies to prose generated on {{USER}}'s behalf that is not this voice's output (`[red team mode]` counter-phrasings, framework meta-commentary). The direct-quotations carve-out (manifest §7.6, root CLAUDE.md §10) remains independent — §10 patterns inside a double-quoted span or block quote are skipped regardless of exemption state.
+    - **Exemptions.** If `config/voice.md` carries a `## §10 exemptions` bullet with a canonical ID from manifest §7.6 (`em-dashes`, `not-x-but-y`, `ornamental-triads`, `throat-clearing-openers`, `demonstrative-openers`, `ornamental-compounds`, `aphoristic-closures`), suspend that rule for {{USER}}-voice prose only. §10 still applies to prose generated on {{USER}}'s behalf that is not this voice's output (`[red team mode]` counter-phrasings, framework meta-commentary). The direct-quotations carve-out (manifest §7.6, root CLAUDE.md §10) remains independent — §10 patterns inside a double-quoted span or block quote are skipped regardless of exemption state.
 
-    Conflict surfacing: if `voice.md` and §10 conflict without an exemption bullet for the matching canonical ID, surface the conflict on first occurrence rather than resolving silently (manifest §7.6).
+    Conflict surfacing: if `config/voice.md` and §10 conflict without an exemption bullet for the matching canonical ID, surface the conflict on first occurrence rather than resolving silently (manifest §7.6).
 
-13. **Pass 7 — Cut-pattern audit.** Read `voice.md ## Cut patterns` in full; for each pattern block listed there, scan the draft for signature matches. Cut patterns are voice-specific named failure modes (some shipped-canonical, some mined from `failures_dir` at extraction time) — they supplement §10 with patterns specific to this voice's observed AI drift. Pattern categories:
+13. **Pass 7 — Cut-pattern audit.** Read `config/voice.md ## Cut patterns` in full; for each pattern block listed there, scan the draft for signature matches. Cut patterns are voice-specific named failure modes (some shipped-canonical, some mined from `failures_dir` at extraction time) — they supplement §10 with patterns specific to this voice's observed AI drift. Pattern categories:
 
     - **Shipped canonical patterns** (inherited from the voice skeleton): `aphoristic-closure` (overlaps with §10 canonical ID; §10 wins for canonical processing but Pass 7 also reports it for voice-scoped tracking), `compression-stranded-verb`, `abstract-nominalization-cascade`, `reduced-relative-stacking`, `first-person-commitment-in-academic-report`, `citation-atomization`.
-    - **Author-specific patterns** (mined from AI-vs-edit pair diffs): any `### <pattern-id>` block in `voice.md ## Cut patterns` beyond the shipped canonical set.
+    - **Author-specific patterns** (mined from AI-vs-edit pair diffs): any `### <pattern-id>` block in `config/voice.md ## Cut patterns` beyond the shipped canonical set.
 
     For each hit, emit `{pattern_id, line, span, severity: always-fix | needs-judgment}`. `always-fix` applies to shipped canonical patterns (these are framework-decided); `needs-judgment` applies to author-specific patterns with fewer than 3 instances in the failure corpus (probabilistic rather than deterministic).
 
@@ -146,7 +146,7 @@ Each pass operates on the section being edited. Passes that produce forced-field
 
 14. **Pass 8 — Quote-density.** Mirror of `[writing mode]`'s paraphrase default. For each paragraph in the section, count direct-quote words against total words; if direct-quote words exceed ~15% of the paragraph, flag for paraphrase. Also flag any two adjacent sentences where both carry a direct quote. A paragraph over quota is a signal that the writer reached for direct quotation where paraphrase would compress and let the prose voice carry. Convert non-load-bearing quotes to paraphrase per `[writing mode]`'s 4-item test (wording-as-object-of-analysis, qualifier-would-be-lost, authority-rests-on-formulation, will-push-against-wording — full procedure in `docs/modes/writing.md` §Paraphrase default), then re-run the §4 audit against the paraphrased prose using `exact_quote` and `surrounding_context` as ground truth.
 
-15. **Pass 9 — Voice audit.** For each paragraph in the section, apply `voice.md`'s connectedness and flow rules as a discrete pass (separate from the citation, grammar, AI-tell, cut-pattern, and quote-density audits):
+15. **Pass 9 — Voice audit.** For each paragraph in the section, apply `config/voice.md`'s connectedness and flow rules as a discrete pass (separate from the citation, grammar, AI-tell, cut-pattern, and quote-density audits):
     - Sentence connectedness (handoff connectives between sentences).
     - Paragraph flow (transition to the next paragraph, not a closing verdict).
     - Information pacing (elaboration sentences between claim-dense ones).
@@ -160,7 +160,7 @@ Each pass operates on the section being edited. Passes that produce forced-field
 
 ### Handoff to formatting
 
-16. **Voice audit surface-scan.** Before asking {{USER}} to advance, run a final surface scan over the edited draft for §10 never-list hits, voice.md cut-pattern hits, and density-list overruns (em dashes, "not X but Y" variants, stacked "In this way" / "we come to see" beyond the per-essay budget, quote-density flags, sentence-initial AI adverbs, aphoristic closures, compression-stranded verbs, abstract-nominalization cascades, register-drift flags). **Emit the voice audit surface-scan report** — a list of hits with line references and per-hit context.
+16. **Voice audit surface-scan.** Before asking {{USER}} to advance, run a final surface scan over the edited draft for §10 never-list hits, config/voice.md cut-pattern hits, and density-list overruns (em dashes, "not X but Y" variants, stacked "In this way" / "we come to see" beyond the per-essay budget, quote-density flags, sentence-initial AI adverbs, aphoristic closures, compression-stranded verbs, abstract-nominalization cascades, register-drift flags). **Emit the voice audit surface-scan report** — a list of hits with line references and per-hit context.
 
 17. **Blocker discipline on hits.** If the report is non-empty, do not silently ship. Present it as a blocker: `Voice audit found N hits at lines X, Y, Z: [list with context]. Address before format, or mark as intentional?` Force engagement; force a reason. Silence is not an override; `mark as intentional` from {{USER}} is the only override path, and the acknowledgment is logged in the handoff.
 
@@ -174,7 +174,7 @@ In annotated-bib projects (project type `annotated-bib`), the nine-pass audit ap
 
 - **Pass 0 (Revision) is reduced.** Run 0a (main-claim per annotation, typically one sentence), 0b (sub-claim support — only if the annotation has multiple claims), and 0c (outline correspondence — confirm annotation matches its assigned slot in the annotated-bib plan). Skip 0d (transitions — annotations don't handoff) and 0e (paragraph one-job — annotations ARE paragraphs with one job by definition). Skip `0-plan` unless the project uses prose plans per annotation.
 - **Pass 8 (Quote-density) does not apply.** Quote density is a paragraph-level metric; annotations are per-entry blocks with hard word budgets (150–250 per the annotation shape in `~/.claude/citations/schema.md` §Annotation), and reaching for direct quotation inside an annotation is already constrained by `[annotated-bib mode]` phase 1's "at most one short phrase from `exact_quote`" rule. Skip pass 8 entirely; do not emit an empty quote-density list.
-- **Pass 9 (Voice audit) is reduced.** Apply `voice.md ## Iron rules` and the exploratory-vs-verdict tone check per annotation. Do not apply sentence connectedness, paragraph flow, information pacing, or building-arguments rules — all of them assume multi-paragraph prose that annotations don't produce.
+- **Pass 9 (Voice audit) is reduced.** Apply `config/voice.md ## Iron rules` and the exploratory-vs-verdict tone check per annotation. Do not apply sentence connectedness, paragraph flow, information pacing, or building-arguments rules — all of them assume multi-paragraph prose that annotations don't produce.
 
 Passes 1–7 apply unchanged. §4 synthesis (item 6) only fires when an annotation cross-references another entry via `[@id]`.
 
@@ -205,7 +205,7 @@ Pre-empt the excuses. Each row is an excuse you might generate and the correct r
 | "Refining already audited the citations; running §4 again is redundant." | Refining audits the outline against the log (claim-level drift). Editing audits the prose against the log (sentence-level drift). The two catch different failure modes. Run both — that's why the mode system separates them. |
 | "Pass 0 is impressionistic; hard to emit a structured list." | Each of 0a–0e has a specific question with a binary answer (pass vs flagged) plus a one-line reason on flag. The structure is no softer than §4's. If it feels impressionistic, you are asking the wrong question — re-read the pass description. |
 | "Pass 5's lists feel bureaucratic for a clean section." | Bureaucracy is the wrong framing. The lists are cheap to emit when empty; they are the only way to distinguish "passed" from "skipped." Future audits rely on the shape, not the absence of hits. |
-| "The §10 em-dash is part of {{USER}}'s voice — I won't flag it." | Check `voice.md` for a `## §10 exemptions` bullet with `em-dashes` as the canonical ID. If present, suspend the rule for {{USER}}-voice prose. If absent, the em-dash is a hit regardless of how familiar the pattern feels — silence is not permission (manifest §7.6). |
+| "The §10 em-dash is part of {{USER}}'s voice — I won't flag it." | Check `config/voice.md` for a `## §10 exemptions` bullet with `em-dashes` as the canonical ID. If present, suspend the rule for {{USER}}-voice prose. If absent, the em-dash is a hit regardless of how familiar the pattern feels — silence is not permission (manifest §7.6). |
 | "The §4 audit flagged one citation; I'll revise the prose and skip emitting the flagged row." | No. The flagged row is part of the audit trail — it records that the audit fired, what the finding was, and that the resolution happened. Silent fixes defeat the artifact's purpose. Keep the row, mark it `flagged → resolved: <action>`. |
 | "The voice-audit surface scan overlaps with passes 6 and 7 — I'll just cite the pass 6/7 results." | The surface scan is the handoff artifact for manifest §7.4's editing → formatting gate. Passes 6 and 7 are the mid-pipeline audits; the surface scan is the artifact at the boundary. Different consumers. Emit both. |
 | "I detected structural deviation but {{USER}} is in a hurry — I'll patch at prose level and flag it after." | Patching at prose level creates the exact cost the refining/editing boundary exists to prevent. `Switching back to [refining mode]` is the correct move regardless of time pressure. |
@@ -220,7 +220,7 @@ Pre-empt the excuses. Each row is an excuse you might generate and the correct r
 | "The prose changed punctuation from the source's em-dash to a comma inside a block quote — that's fine because it's a readability fix." | Silent punctuation change inside a quoted span is a §4 *Quote verbatim* violation regardless of motive. Use the bracketed editorial note per §4's no-ellipsis-trickery discipline, or restore the em-dash. |
 | "The section has zero citations — I can skip passes 1–3." | Confirm the claim first (sections with zero citations are rare; often a citation was silently dropped). If genuinely citation-free, passes 1–3 emit empty lists (`no hits`). Empty is a valid emission; skipping is not. |
 | "One pass feels unnecessary given what I just ran — I'll fold it into the next pass." | Collapsing passes is the exact failure the ordered list exists to prevent. Each pass has a distinct audit semantics; collapsing produces silent cross-contamination. Run them separately. |
-| "I'll run passes 6, 7, and 9 from memory of `voice.md` — I read it an hour ago." | Re-read `voice.md` at step 2 on every entry. Memory from an earlier session (or even an earlier pass on a different section) drifts; the file is the authority. |
+| "I'll run passes 6, 7, and 9 from memory of `config/voice.md` — I read it an hour ago." | Re-read `config/voice.md` at step 2 on every entry. Memory from an earlier session (or even an earlier pass on a different section) drifts; the file is the authority. |
 | "`[refining mode]` already ran the §4 audit and emitted its list — editing can skip pass 2." | No. Refining audits the outline against the log; editing audits the prose against the log. Different input artifacts. Run pass 2 against the prose. |
 | "I hit a structural-deviation trigger at pass 5 — I'll finish the remaining passes and switch back to refining at the end." | No. Structural deviation triggers an immediate `Switching back to [refining mode]`. Continuing passes 6–9 on a structurally-deviated section wastes audit effort. Switch now. |
 | "The voice audit surface scan report is empty, so I'll skip emitting it." | Empty is a valid emission; skipping is not. The handoff gate requires the report's presence, not its non-emptiness. |
@@ -232,7 +232,7 @@ Pre-empt the excuses. Each row is an excuse you might generate and the correct r
 ```
 ENTRY:   Switching to [editing mode]. editing <section>.
 
-STEP 0:  Read voice.md (full, including ## Worked paragraphs + ## Cut patterns).
+STEP 0:  Read config/voice.md (full, including ## Worked paragraphs + ## Cut patterns).
          Load citation log.
 
 STEP 1:  Detect structural deviation from refined outline.
@@ -248,12 +248,12 @@ PASSES (in order; each pass emits its list):
   4. Grammar.               Flag: ambiguity (unambiguity is the target).
   5. Proofreading.          Lists: proper-noun / paste-artifact / punctuation.
   6. AI-tell (§10).         Read docs/modes/writing.md#never-list. Restructure.
-                            Honor voice.md ## §10 exemptions (canonical IDs only).
-  7. Cut-pattern audit.     Read voice.md ## Cut patterns. Signature-match per pattern.
+                            Honor config/voice.md ## §10 exemptions (canonical IDs only).
+  7. Cut-pattern audit.     Read config/voice.md ## Cut patterns. Signature-match per pattern.
                             Shipped-canonical: always-fix. Author-specific: needs-judgment.
   8. Quote-density.         Flag: paragraphs > ~15% direct-quote, adjacent-quote sentences.
                             (Skip in annotated-bib projects.)
-  9. Voice audit.           Apply voice.md rules discretely. Preserve {{USER}}'s voice.
+  9. Voice audit.           Apply config/voice.md rules discretely. Preserve {{USER}}'s voice.
                             Register-match check (rules' [register:] tags vs section register).
                             (Reduced in annotated-bib projects.)
 
@@ -312,4 +312,4 @@ FORCING ARTIFACTS (required at handoff):
 - `docs/modes/formatting.md` — target of editing → formatting handoff; consumes all three forcing artifacts.
 - `~/.claude/citations/schema.md` §Staleness — `retrieved_at` staleness threshold used at pass 2.
 - `~/.claude/citations/schema.md` §Annotation — annotation shape referenced by the annotated-bib variant.
-- `voice.md` — voice rules loaded at step 0 and applied in passes 6, 7, and 9; `## Worked paragraphs` consumed by `0-plan` check; `## Cut patterns` consumed by pass 7.
+- `config/voice.md` — voice rules loaded at step 0 and applied in passes 6, 7, and 9; `## Worked paragraphs` consumed by `0-plan` check; `## Cut patterns` consumed by pass 7.

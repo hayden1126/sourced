@@ -7,14 +7,16 @@
 Read the subagent definition at `~/.claude/agents/voice-extractor.md` if you have not already. Then dispatch via the Agent tool with the template below as the `prompt` argument. Fill every placeholder. If an optional field is not applicable, write `omit` rather than removing the line; the subagent parses the structure.
 
 ```
-samples_dir: <absolute path to a directory containing the writing samples>
+samples_dir: <absolute path to a directory containing the writing samples, or "omit" to default to <project>/samples/>
 voice_name: <name for the new library voice; must match [a-z0-9_-]+>
 register: <academic | technical | casual | journalistic | narrative, or "omit" to let the subagent classify>
 multi_register: <split | primary | segmented; default "split">
-failures_dir: <absolute path to a directory of AI-vs-edit pairs, or "omit">
+failures_dir: <absolute path to a directory of AI-vs-edit pairs, or "omit" to default to <project>/failures/ if non-empty>
 overwrite: <true | false; default false. True permits overwriting an existing ~/.claude/voice/<voice_name>.md>
 skeleton_path: <absolute path to the skeleton voice to mirror, or "omit" — voice-extractor will resolve the skeleton from the register (e.g., academic → ~/.claude/voice/academic.md; mixed-classifier-output → ~/.claude/voice/hybrid.md)>
 ```
+
+When `samples_dir: omit` appears in a dispatch, the dispatcher resolves it to `<project>/samples/` (the phase-4 default) and passes the absolute path to the subagent. Same for `failures_dir: omit` → `<project>/failures/` if non-empty (otherwise treated as not provided, no failure mining). The subagent itself only ever sees absolute paths; this defaulting is dispatcher-side per spec §7.
 
 The subagent reads the samples directory and a skeleton voice file selected by register classifier (per-register corpora where one register crosses the ≥ 85% threshold resolve to that register's skeleton at `~/.claude/voice/<register>.md`; blended corpora where no single register dominates resolve per the `multi_register` setting). It mirrors the skeleton's section structure and writes a new library file at `~/.claude/voice/<voice_name>.md` with `{{USER}}` tokens preserved for install-time substitution.
 
@@ -77,7 +79,7 @@ If voice-extractor is run again with `overwrite: true`, both consumers transpare
 
 ## See also
 
-- `CLAUDE.md §9` — voice rules; when `voice.md` is read by each mode.
+- `CLAUDE.md §9` — voice rules; when `config/voice.md` is read by each mode.
 - `CLAUDE.md §10` and `CLAUDE.md §7.6` — §10 canonical IDs; how voice.md's `## §10 exemptions` section overrides the never-list.
 - `docs/modes/writing.md` §Voice and §Phase 2 dispatch — voice application + `prose-drafter` invocation.
 - `docs/modes/editing.md` §Voice audit (Pass 8) and §Cut-pattern audit (Pass 7) — voice-derived audits on the draft.
