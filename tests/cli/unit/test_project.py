@@ -455,6 +455,13 @@ def test_detect_phase3_layout_false_when_no_voice(tmp_project):
     assert detect_phase3_layout(tmp_project) is False
 
 
+def test_detect_phase3_layout_false_when_voice_lacks_marker(tmp_project):
+    """F31: a root voice.md without the sourced:voice marker is hand-authored,
+    not a phase-3 sourced project. detect must not announce migration for it."""
+    (tmp_project / "voice.md").write_text("hand-authored notes, no sourced marker\n")
+    assert detect_phase3_layout(tmp_project) is False
+
+
 # ----- phase-3 → phase-4 migration: core file moves -----
 
 def test_migrate_phase3_to_phase4_moves_core_files(tmp_project):
