@@ -397,6 +397,24 @@ def test_i11_exempts_file_tree_diagram():
     assert _i11_line_exempt("│   └── voice.md")
 
 
+def test_i11_detects_bare_style_md():
+    """Symmetric coverage with voice.md — bare style.md triggers a pattern."""
+    from sourced.validators.invariants import FLAT_PATH_RULES, _i11_line_exempt
+    import re as _re
+    line = "Read `style.md` in full on every entry."
+    assert not _i11_line_exempt(line)
+    matches = [r for r, _, _ in FLAT_PATH_RULES if _re.search(r, line)]
+    assert matches, "expected style.md pattern to match"
+
+
+def test_i11_allows_config_style_prefix():
+    from sourced.validators.invariants import FLAT_PATH_RULES
+    import re as _re
+    line = "Read `config/style.md` in full on every entry."
+    matches = [r for r, _, _ in FLAT_PATH_RULES if _re.search(r, line)]
+    assert not matches
+
+
 def test_i11_full_check_passes_on_shipped_templates():
     """After phase-4 template rewrites land, I11 is green on shipped bundle."""
     from sourced.validators.invariants import check_i11_no_flat_paths

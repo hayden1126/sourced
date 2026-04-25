@@ -785,6 +785,8 @@ I11_SCAN_TARGETS: dict[str, tuple[str, ...]] = {
 
 # Each tuple is (regex_pattern, rule_label, fix_hint).
 # Patterns use negative lookbehind to allow the correctly-prefixed form.
+# This list is the authoritative registry of phase-4 path contracts:
+# update it (add/remove patterns) when a future phase migrates a new path.
 FLAT_PATH_RULES: tuple[tuple[str, str, str], ...] = (
     (r"(?<!/)\bvoice\.md\b", "flat voice.md reference", "prefix with `config/`"),
     (r"(?<!/)\bstyle\.md\b", "flat style.md reference", "prefix with `config/`"),
@@ -819,8 +821,6 @@ def check_i11_no_flat_paths(claude_md: str) -> list[Finding]:
     Lines matching FLAT_PATH_RULES emit an error finding, unless the line
     is exempted by _i11_line_exempt().
     """
-    import re as _re
-
     findings: list[Finding] = []
     for subpath, globs in I11_SCAN_TARGETS.items():
         try:
@@ -837,7 +837,7 @@ def check_i11_no_flat_paths(claude_md: str) -> list[Finding]:
                             if _i11_line_exempt(line):
                                 continue
                             for regex, rule_label, fix in FLAT_PATH_RULES:
-                                if _re.search(regex, line):
+                                if re.search(regex, line):
                                     findings.append(Finding(
                                         rule="I11",
                                         location=f"{rel}:{lineno}",
