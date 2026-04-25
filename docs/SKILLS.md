@@ -2,7 +2,7 @@
 
 [← Back to README](../README.md)
 
-Skills are self-contained helpers Claude Code auto-discovers from `~/.claude/skills/<name>/`. Each shipped skill is a directory with a `SKILL.md` (instructions the model reads on activation) plus any scripts or assets. `install.sh` mirrors `sourced/skills/<name>/` into `~/.claude/skills/<name>/` on every run, so shipping a skill via sourced makes it available across every project and session under the home directory.
+Skills are self-contained helpers Claude Code auto-discovers from `~/.claude/skills/<name>/`. Each shipped skill is a directory with a `SKILL.md` (instructions the model reads on activation) plus any scripts or assets. `sourced global-install` mirrors `src/sourced/data/skills/<name>/` into `~/.claude/skills/<name>/` on every run, so shipping a skill via sourced makes it available across every project and session under the home directory.
 
 ## When a skill vs. when CLAUDE.md?
 
@@ -26,7 +26,7 @@ Wrong shape for a skill:
 
 **What it does.** Connects `puppeteer-core` to a user-launched Chrome instance with `--remote-debugging-port=9222`, finds the open book tab, auto-detects the content iframe (via `[id^="page-"]` page-anchor presence), and extracts the currently-visible spine item as text with `[p. N]` markers inserted at each page boundary. Page markers preserve Roman front matter (i, ii, xii) and Arabic page numbers. Range filtering (`--range 5-20`) and page-list filtering (`--pages i,ii,1,5`) supported.
 
-**Prerequisites.** Node 18+ and `puppeteer-core`. `install.sh` does not install Node; on first use of the skill, run `npm install` inside `~/.claude/skills/browser-reader-extract/` to fetch `puppeteer-core`. Writers who never need browser-reader extraction pay zero setup cost.
+**Prerequisites.** Node 18+ and `puppeteer-core`. `sourced` does not install Node; on first use of the skill, run `npm install` inside `~/.claude/skills/browser-reader-extract/` to fetch `puppeteer-core`. Writers who never need browser-reader extraction pay zero setup cost.
 
 **Platform coverage.** OverDrive Read ships as the proven extractor (`overdrive.mjs`). The same pattern extends to other readers (Kindle Cloud Reader, Scribd, etc.) via auto-detection or a `--iframe-pattern` override; the SKILL.md's *Adding a new reader* section walks through identifying tab URL, content iframe, and page-anchor selector for a new platform.
 
@@ -38,7 +38,7 @@ See `~/.claude/skills/browser-reader-extract/SKILL.md` for the full setup and op
 
 ## Authoring a new skill
 
-A skill is a directory under `sourced/skills/<name>/` with at minimum a `SKILL.md`. The model discovers the skill via its frontmatter when Claude Code loads `~/.claude/skills/`:
+A skill is a directory under `src/sourced/data/skills/<name>/` with at minimum a `SKILL.md`. The model discovers the skill via its frontmatter when Claude Code loads `~/.claude/skills/`:
 
 ```markdown
 ---
@@ -61,6 +61,6 @@ description: Use when <trigger condition>. <One-sentence summary of what it does
 <what the skill does not do>
 ```
 
-Add any scripts, config files, or asset directories alongside `SKILL.md`. `install.sh`'s skill-mirror step (`sourced/skills/<name>/` → `~/.claude/skills/<name>/`) preserves a local `node_modules/` tree on update so npm-installed deps survive `install.sh --global-only` re-renders.
+Add any scripts, config files, or asset directories alongside `SKILL.md`. `sourced global-install`'s skill-mirror step (`src/sourced/data/skills/<name>/` → `~/.claude/skills/<name>/`) preserves a local `node_modules/` tree on update so npm-installed deps survive subsequent `sourced global-install` re-renders.
 
-For skills depending on external CLIs (like `pandoc` or `pdftotext`), consider whether the dependency belongs in `install.sh`'s `check_prerequisites` (if needed by the core framework) or only surfaced at skill-activation time (if specific to this skill). Node is currently skill-specific, so `install.sh` does not check for it.
+For skills depending on external CLIs (like `pandoc` or `pdftotext`), consider whether the dependency belongs in `sourced check`'s prerequisite check (if needed by the core framework) or only surfaced at skill-activation time (if specific to this skill). Node is currently skill-specific, so `sourced check` does not check for it.
