@@ -468,8 +468,15 @@ def deploy_overlays(project_root: Path, project_type: ProjectType) -> list[Path]
 
 
 def detect_phase3_layout(root: Path) -> bool:
-    """Phase-3 layout: voice.md at root + no config/voice.md."""
-    return (root / "voice.md").exists() and not (root / "config" / "voice.md").exists()
+    """Phase-3 layout: voice.md at root with a sourced:voice marker, no config/voice.md.
+
+    Hand-authored voice.md files without the marker are not phase-3 sourced
+    projects and should not trigger migration announcements (F31).
+    """
+    v = root / "voice.md"
+    if not v.exists() or (root / "config" / "voice.md").exists():
+        return False
+    return read_voice_marker(v) is not None
 
 
 def migrate_phase3_to_phase4(root: Path) -> list[str]:
