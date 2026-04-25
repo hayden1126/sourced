@@ -64,3 +64,20 @@ def test_update_phase3_dry_run_announces_migration(tmp_home, tmp_project, clean_
     # Files NOT moved (dry-run is side-effect-free)
     assert (tmp_project / "voice.md").exists()
     assert not (tmp_project / "config" / "voice.md").exists()
+
+
+def test_update_phase3_force_skips_migration(tmp_home, tmp_project, clean_ansi):
+    """`sourced update --force` is a re-render escape hatch and must NOT
+    trigger the phase-3 → phase-4 migration. Files stay at root for force-runs."""
+    _bootstrap_phase3(tmp_home, tmp_project)
+
+    subprocess.run(
+        [sys.executable, "-m", "sourced", "update", "--force",
+         "--project", str(tmp_project)],
+        capture_output=True, text=True, check=True,
+    )
+    # Force re-renders CLAUDE.md but leaves layout alone — files stay at root
+    assert (tmp_project / "voice.md").exists()
+    assert (tmp_project / "style.md").exists()
+    assert not (tmp_project / "config" / "voice.md").exists()
+    assert not (tmp_project / "config" / "style.md").exists()
