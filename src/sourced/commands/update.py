@@ -78,9 +78,16 @@ def run(ctx: Context, *, project: str | None = None, force: bool = False) -> int
     if is_phase3 and not force and not ctx.dry_run:
         migration_notes.extend(migrate_phase3_to_phase4(target))
 
-    # Voice / style refresh from currently-installed library (phase-4: in config/).
-    voice_path = target / "config" / "voice.md"
-    style_path = target / "config" / "style.md"
+    # Voice / style refresh from currently-installed library.
+    # Phase-4 layout: config/. Phase-3 + --force: layout stays flat (migration
+    # was skipped), so voice/style still live at root and `--force` would
+    # otherwise silently no-op the refresh — read from root in that case.
+    if is_phase3 and force:
+        voice_path = target / "voice.md"
+        style_path = target / "style.md"
+    else:
+        voice_path = target / "config" / "voice.md"
+        style_path = target / "config" / "style.md"
     voice_name = read_voice_marker(voice_path)
     style_name = read_style_marker(style_path)
     new_voice = _pipeline.render_voice(voice_name, user, ctx) if voice_name else None

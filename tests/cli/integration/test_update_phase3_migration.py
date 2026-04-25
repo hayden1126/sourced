@@ -81,3 +81,27 @@ def test_update_phase3_force_skips_migration(tmp_home, tmp_project, clean_ansi):
     assert (tmp_project / "style.md").exists()
     assert not (tmp_project / "config" / "voice.md").exists()
     assert not (tmp_project / "config" / "style.md").exists()
+
+
+def test_update_phase3_force_refreshes_root_voice_and_style(tmp_home, tmp_project, clean_ansi):
+    """`sourced update --force` on a phase-3 project must refresh voice/style
+    at root (not silently no-op because the code reads from config/)."""
+    _bootstrap_phase3(tmp_home, tmp_project)
+
+    # Truncate the root files to just their markers — re-render must fill them in.
+    voice = tmp_project / "voice.md"
+    style = tmp_project / "style.md"
+    voice.write_text("<!-- sourced:voice=academic -->\n")
+    style.write_text("<!-- sourced:style=apa7 -->\n")
+
+    subprocess.run(
+        [sys.executable, "-m", "sourced", "update", "--force",
+         "--project", str(tmp_project)],
+        capture_output=True, text=True, check=True,
+    )
+
+    # Both files should now be fully re-rendered (markers preserved + body restored).
+    assert voice.read_text().startswith("<!-- sourced:voice=academic -->")
+    assert len(voice.read_text()) > 100, "voice.md was not refreshed"
+    assert style.read_text().startswith("<!-- sourced:style=apa7 -->")
+    assert len(style.read_text()) > 100, "style.md was not refreshed"
