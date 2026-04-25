@@ -37,7 +37,7 @@ def test_install_type_annotated_uses_annotated_brief(tmp_home, tmp_project, clea
          "--type", "annotated-bib", "--brief", "my_bib"],
         capture_output=True, text=True, check=True,
     )
-    brief = tmp_project / "my_bib.brief.md"
+    brief = tmp_project / "config" / "my_bib.brief.md"
     assert brief.exists()
     # Annotated bib brief is structurally different from essay brief; check for a
     # known annotated-bib field (e.g. "Annotation shape" or "Source-count target").

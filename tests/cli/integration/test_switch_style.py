@@ -22,4 +22,4 @@ def test_switch_style_updates_marker(tmp_home, tmp_project, clean_ansi):
         capture_output=True, text=True,
     )
     assert result.returncode == 0, result.stderr
-    assert "<!-- sourced:style=mla9 -->" in (tmp_project / "style.md").read_text()
+    assert "<!-- sourced:style=mla9 -->" in (tmp_project / "config" / "style.md").read_text()

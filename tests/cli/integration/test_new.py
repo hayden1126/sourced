@@ -20,10 +20,10 @@ def test_new_creates_dir_and_files(tmp_home, tmp_path, clean_ansi):
     assert result.returncode == 0, result.stderr
     assert new_dir.is_dir()
     assert (new_dir / "CLAUDE.md").exists()
-    assert (new_dir / "voice.md").exists()
-    assert (new_dir / "style.md").exists()
-    # Brief defaults to project name
-    assert (new_dir / "my-paper.brief.md").exists()
+    assert (new_dir / "config" / "voice.md").exists()
+    assert (new_dir / "config" / "style.md").exists()
+    # Brief defaults to project name — lands in config/
+    assert (new_dir / "config" / "my-paper.brief.md").exists()
 
 
 def test_new_with_explicit_brief_name(tmp_home, tmp_path, clean_ansi):
@@ -33,7 +33,7 @@ def test_new_with_explicit_brief_name(tmp_home, tmp_path, clean_ansi):
         cwd=tmp_path, capture_output=True, text=True,
     )
     assert result.returncode == 0, result.stderr
-    assert (tmp_path / "my-paper" / "alt_name.brief.md").exists()
+    assert (tmp_path / "my-paper" / "config" / "alt_name.brief.md").exists()
 
 
 def test_new_errors_if_dir_exists_without_force(tmp_home, tmp_path, clean_ansi):
