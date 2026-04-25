@@ -73,7 +73,9 @@ def run(ctx: Context, *, project: str | None = None, force: bool = False) -> int
 
     # Phase-3 → phase-4 early migration (must run before voice/style path reads).
     # Dry-run: skip the actual migration; the announcement is in the dry-run block below.
-    if is_phase3 and not ctx.dry_run:
+    # `--force` is the "re-render from scratch" escape hatch; it skips the
+    # state-lifting migration path the same way phase-1 wire-up at line 112 does.
+    if is_phase3 and not force and not ctx.dry_run:
         migration_notes.extend(migrate_phase3_to_phase4(target))
 
     # Voice / style refresh from currently-installed library (phase-4: in config/).
@@ -90,8 +92,10 @@ def run(ctx: Context, *, project: str | None = None, force: bool = False) -> int
             if is_phase1:
                 print(f"  would migrate phase-1 CLAUDE.md → CLAUDE.md.phase1.bak at {path_str(str(target), use_color)}")
                 print(f"  would deploy docs/ tree under {path_str(str(target / 'docs'), use_color)}")
-            if is_phase3:
+            if is_phase3 and not force:
                 print(f"  would migrate phase-3 layout to phase-4 subdirs at {path_str(str(target), use_color)}")
+                print(f"  would refresh {path_str(str(target / 'config' / 'voice.md'), use_color)} (post-migration)")
+                print(f"  would refresh {path_str(str(target / 'config' / 'style.md'), use_color)} (post-migration)")
             print(f"  would refresh {path_str(str(claude_md_path), use_color)}")
             if new_voice:
                 print(f"  would refresh {path_str(str(voice_path), use_color)}")
@@ -109,7 +113,7 @@ def run(ctx: Context, *, project: str | None = None, force: bool = False) -> int
         write_bak_sibling(style_path)
 
     if is_phase1 and not force:
-        migration_notes = migrate_phase1_to_phase2(target, new_claude)
+        migration_notes.extend(migrate_phase1_to_phase2(target, new_claude))
     else:
         write_atomic(claude_md_path, new_claude)
         # Keep docs/ in sync with the bundle on every update (idempotent).
