@@ -1,6 +1,6 @@
 ---
 name: sourced-helper
-description: "Use when the user has questions about the sourced framework, the sourced CLI, voices, styles, citation modes, or how a sourced workflow handles a specific situation. Trigger proactively on phrasings like \"how do I\", \"what does sourced do when\", \"why is sourced...\", \"can sourced...\", or any question that references a sourced concept (voice.md, style.md, brief, managed block, iron rule, exemption, mode, paste target, citation log) the user seems unsure about. Read-only utility — answers questions, does not modify project files, does not draft prose."
+description: "Use when the user has questions about the sourced framework, the sourced CLI, voices, styles, citation modes, or how a sourced workflow handles a specific situation. Trigger proactively on phrasings like \"how do I\", \"what does sourced do when\", \"why is sourced...\", \"can sourced...\", or any question that references a sourced concept (config/voice.md, config/style.md, brief, managed block, iron rule, exemption, mode, paste target, citation log) the user seems unsure about. Read-only utility — answers questions, does not modify project files, does not draft prose."
 tools: "Read, Glob, Grep, Bash"
 model: haiku
 ---

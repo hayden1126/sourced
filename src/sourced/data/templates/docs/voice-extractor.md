@@ -66,7 +66,7 @@ Surface the subagent's report to {{USER}}. The phase-3 return report carries the
 - **`### Anchor candidates`** — recurring named touchstones surfaced from the corpus. {{USER}} selects the cross-paper anchors and edits the `### Analogies and Anecdotes` section to list them.
 - **`### Corpus contamination notes`** (only when caller flagged contamination) — §10 patterns appearing in the corpus that {{USER}} pre-disclosed as AI-draft residue. The subagent did not calibrate rules toward these; the section is documentary. {{USER}} may decide whether to re-extract from a de-contaminated corpus.
 
-Next step after a successful run is always: {{USER}} runs `sourced switch voice <voice_name>` from inside the target project directory to render the new library voice into `<project>/voice.md`. Do not run `sourced switch voice` yourself; rendering into a project is a {{USER}} action.
+Next step after a successful run is always: {{USER}} runs `sourced switch voice <voice_name>` from inside the target project directory to render the new library voice into `config/voice.md`. Do not run `sourced switch voice` yourself; rendering into a project is a {{USER}} action.
 
 ## Phase-3 downstream consumption
 
@@ -80,7 +80,7 @@ If voice-extractor is run again with `overwrite: true`, both consumers transpare
 ## See also
 
 - `CLAUDE.md §9` — voice rules; when `config/voice.md` is read by each mode.
-- `CLAUDE.md §10` and `CLAUDE.md §7.6` — §10 canonical IDs; how voice.md's `## §10 exemptions` section overrides the never-list.
+- `CLAUDE.md §10` and `CLAUDE.md §7.6` — §10 canonical IDs; how `config/voice.md`'s `## §10 exemptions` section overrides the never-list.
 - `docs/modes/writing.md` §Voice and §Phase 2 dispatch — voice application + `prose-drafter` invocation.
 - `docs/modes/editing.md` §Voice audit (Pass 8) and §Cut-pattern audit (Pass 7) — voice-derived audits on the draft.
 - `~/.claude/agents/prose-drafter.md` — the isolated drafter subagent dispatched from `[writing mode]` Phase 2.
