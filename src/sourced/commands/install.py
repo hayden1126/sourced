@@ -35,13 +35,18 @@ def run(
     style_md = _pipeline.render_style(style, user, ctx)
     brief_md = _pipeline.render_brief(brief, user, project_type, ctx) if brief else None
 
+    config = target / "config"
+    config.mkdir(exist_ok=True)
+    for subdir in ("sources", "samples", "failures"):
+        (target / subdir).mkdir(exist_ok=True)
+
     targets: list[tuple[Path, str]] = [
         (target / "CLAUDE.md", claude_md),
-        (target / "voice.md", voice_md),
-        (target / "style.md", style_md),
+        (config / "voice.md", voice_md),
+        (config / "style.md", style_md),
     ]
     if brief:
-        targets.append((target / f"{brief}.brief.md", brief_md))
+        targets.append((config / f"{brief}.brief.md", brief_md))
 
     # Existence check (unless --force)
     existing = [p for p, _ in targets if p.exists()]

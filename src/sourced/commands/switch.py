@@ -18,7 +18,7 @@ def run(ctx: Context, *, kind: str, name: str, project: str | None = None) -> in
     use_color = should_color(ctx.color, sys.stdout)
     target = Path(project).resolve() if project else Path.cwd()
     md_name = "voice.md" if kind == "voice" else "style.md"
-    md_path = target / md_name
+    md_path = target / "config" / md_name
 
     if not md_path.exists():
         raise ProjectError(

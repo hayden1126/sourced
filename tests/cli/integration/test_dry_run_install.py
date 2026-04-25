@@ -15,7 +15,7 @@ def test_install_dry_run_writes_no_files(tmp_home, tmp_project, clean_ansi):
     assert result.returncode == 0, result.stderr
     assert "DRY RUN" in result.stdout
     assert not (tmp_project / "CLAUDE.md").exists()
-    assert not (tmp_project / "voice.md").exists()
+    assert not (tmp_project / "config" / "voice.md").exists()
 
 
 def test_install_dry_run_runs_validators(tmp_home, tmp_project, clean_ansi):

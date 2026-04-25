@@ -67,9 +67,9 @@ def run(ctx: Context, *, project: str | None = None, force: bool = False) -> int
         merged_managed, warnings = merge_managed_block(old_managed, fresh_managed)
         new_claude = replace_managed_block(old_text, merged_managed)
 
-    # Voice / style refresh from currently-installed library.
-    voice_path = target / "voice.md"
-    style_path = target / "style.md"
+    # Voice / style refresh from currently-installed library (phase-4: in config/).
+    voice_path = target / "config" / "voice.md"
+    style_path = target / "config" / "style.md"
     voice_name = read_voice_marker(voice_path)
     style_name = read_style_marker(style_path)
     new_voice = _pipeline.render_voice(voice_name, user, ctx) if voice_name else None
