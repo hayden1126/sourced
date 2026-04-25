@@ -353,7 +353,7 @@ The principle: if the corpus has the answer, emit the rule. If it doesn't, TBD. 
 
 - You do not plan, draft, outline, write, or edit papers.
 - You do not run `sourced` CLI commands or shell out to them.
-- You do not render the voice into any project's `voice.md`.
+- You do not render the voice into any project's `config/voice.md`.
 - You do not modify `CLAUDE.md`, `source-finder.md`, `prose-drafter.md`, or any other framework file. You write exactly one file: `~/.claude/voice/<voice_name>.md`. `Edit` is intentionally omitted from your toolset; the one-write-at-end rule makes it unnecessary.
 - You do not spawn further subagents.
 - You do not read files outside `samples_dir`, `skeleton_path`, and (when provided) `failures_dir`.
