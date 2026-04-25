@@ -486,29 +486,31 @@ def migrate_phase3_to_phase4(root: Path) -> list[str]:
     for d in (config, sources, samples, failures):
         d.mkdir(exist_ok=True)
 
-    # (1) voice.md (marker-gated) + bak siblings
+    # (1) voice.md (marker-gated)
     v = root / "voice.md"
     if v.exists() and read_voice_marker(v) is not None:
         v.rename(config / "voice.md")
         notes.append("moved voice.md → config/voice.md")
-        for bak_name in ("voice.md.sourced.bak", "voice.md.phase1.bak"):
-            bak = root / bak_name
-            if bak.exists():
-                bak.rename(config / bak_name)
     elif v.exists():
         notes.append("voice.md at root lacks sourced:voice= marker; not moved (hand-authored?)")
 
-    # (2) style.md (marker-gated) + bak siblings
+    # voice.md bak sibling — independent of (1) so a partial-state recovery moves it too
+    voice_bak = root / "voice.md.sourced.bak"
+    if voice_bak.exists() and not (config / "voice.md.sourced.bak").exists():
+        voice_bak.rename(config / "voice.md.sourced.bak")
+
+    # (2) style.md (marker-gated)
     s = root / "style.md"
     if s.exists() and read_style_marker(s) is not None:
         s.rename(config / "style.md")
         notes.append("moved style.md → config/style.md")
-        for bak_name in ("style.md.sourced.bak",):
-            bak = root / bak_name
-            if bak.exists():
-                bak.rename(config / bak_name)
     elif s.exists():
         notes.append("style.md at root lacks sourced:style= marker; not moved (hand-authored?)")
+
+    # style.md bak sibling — independent of (2) so a partial-state recovery moves it too
+    style_bak = root / "style.md.sourced.bak"
+    if style_bak.exists() and not (config / "style.md.sourced.bak").exists():
+        style_bak.rename(config / "style.md.sourced.bak")
 
     # (3) *.brief.md at root → config/
     for brief in sorted(root.glob("*.brief.md")):
@@ -521,11 +523,20 @@ def migrate_phase3_to_phase4(root: Path) -> list[str]:
         notes.append(f"moved {log.name} → sources/{log.name}")
 
     # (5) .claude/briefs/working.brief.md → config/working.brief.md
+    # Guard against silent overwrite if step (3) already moved a root-level
+    # working.brief.md into config/ (rare but possible — user named brief "working").
     briefs_dir = root / ".claude" / "briefs"
     wb = briefs_dir / "working.brief.md"
     if wb.exists():
-        wb.rename(config / "working.brief.md")
-        notes.append("moved .claude/briefs/working.brief.md → config/working.brief.md")
+        dest = config / "working.brief.md"
+        if dest.exists():
+            notes.append(
+                "config/working.brief.md already exists (moved from root by step 3); "
+                ".claude/briefs/working.brief.md NOT moved — resolve manually."
+            )
+        else:
+            wb.rename(dest)
+            notes.append("moved .claude/briefs/working.brief.md → config/working.brief.md")
     if briefs_dir.exists() and not any(briefs_dir.iterdir()):
         briefs_dir.rmdir()
 
