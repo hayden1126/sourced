@@ -29,8 +29,8 @@ The dispatcher inlines these in your prompt as a single well-structured block. E
   - Per-paragraph blocks with: Claim, Role, Opener shape, Development pattern, Sentence-role sequence, Citation placement, Handoff, Closure-type.
   - Cross-paragraph connective tissue specs (handoff connectives between adjacent paragraphs).
 - **`voice_rules`** — the active rule sections from the project's `config/voice.md`, filtered by `register_mode`. Each rule block carries `**Rule.**` prose and `**Exemplars:**` bullets.
-- **`worked_paragraphs`** — 1–2 paragraph-scale exhibits from `voice.md ## Worked paragraphs` that match `register_mode`. Each exhibit has the verbatim paragraph plus its per-sentence annotation block.
-- **`cut_patterns`** — relevant entries from `voice.md ## Cut patterns`. These are named failure modes to avoid. Each entry gives pattern signature, why it reads as AI, the fix, and a before/after.
+- **`worked_paragraphs`** — 1–2 paragraph-scale exhibits from `config/voice.md ## Worked paragraphs` that match `register_mode`. Each exhibit has the verbatim paragraph plus its per-sentence annotation block.
+- **`cut_patterns`** — relevant entries from `config/voice.md ## Cut patterns`. These are named failure modes to avoid. Each entry gives pattern signature, why it reads as AI, the fix, and a before/after.
 - **`never_list`** — full prose of `docs/modes/writing.md ## Never-list` from the host project, including Restructure-don't-retokenize and Cross-sentence retokenization rules. Also any `## §10 exemptions` bullets from the project's `config/voice.md`, naming canonical IDs suspended for this voice.
 - **`citation_entries`** — for every Pandoc ID that appears in the section plan's Citation placement fields, the corresponding citation log entry's full record: `id`, `source.authors`, `source.title`, `source.year`, `source.url`, `exact_quote`, `surrounding_context`, `retrieved_at`, `draft_reference`. You draft with these inlined; you do not re-fetch sources.
 - **`prose_context`** — two adjacent-section bridge fields:
