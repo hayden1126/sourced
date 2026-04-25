@@ -8,8 +8,8 @@ Twelve cognitive modes, one announced per transition. Full definitions live in [
 
 Two project types select different mode graphs:
 
-- **Essay** (default). All eleven essay modes are reachable. Created with `install.sh --brief <name>` or `install.sh --brief <name> --type essay`.
-- **Annotated bibliography**. `[outlining]`, `[refining]`, `[writing]` are unreachable; `[annotated-bib]` replaces them. `[plan]`, `[research]`, and `[editing]` behave differently (facet decomposition, per-facet dispatch, reduced editing audit). Created with `install.sh --brief <name> --type annotated-bib`. A marker file `.sourced-project-type` at project root records the type; absence = essay.
+- **Essay** (default). All eleven essay modes are reachable. Created with `sourced new <name>` or `sourced new <name> --type essay`.
+- **Annotated bibliography**. `[outlining]`, `[refining]`, `[writing]` are unreachable; `[annotated-bib]` replaces them. `[plan]`, `[research]`, and `[editing]` behave differently (facet decomposition, per-facet dispatch, reduced editing audit). Created with `sourced new <name> --type annotated-bib`. A marker file `.sourced-project-type` at project root records the type; absence = essay.
 
 ## Modes at a glance
 
@@ -34,7 +34,7 @@ The agent is announcement-driven: every mode transition outputs `Switching to [X
 
 One end-to-end session, showing where modes announce and where the gates fire:
 
-1. `install.sh --brief cheyenne_essay` renders `CLAUDE.md`, `voice.md`, `style.md`, and an empty `cheyenne_essay.brief.md`.
+1. `sourced new cheyenne_essay` renders `CLAUDE.md`, `config/voice.md`, `config/style.md`, and an empty `config/cheyenne_essay.brief.md`.
 2. Open Claude Code. First turn is `[collaborative]` (no announcement on the first message). The agent proposes filling out the brief; you fill it.
 3. You say "start planning." Agent announces `Switching to [plan mode].`, reads the brief, re-states the autonomy level, proposes a research strategy, and waits.
 4. You approve. Agent auto-triggers `[research mode]`, dispatches `source-finder` subagents in parallel if three-plus sub-topics warrant it, runs the merge protocol, and returns with `Switching back to [plan mode].` plus a merged report of logged citations, gaps, and rejected sources.
@@ -43,7 +43,7 @@ One end-to-end session, showing where modes announce and where the gates fire:
 7. `[refining mode]` runs the §4 audit (scope, attribution, inference, cherry-pick, synthesis) against the log. **Gate:** you approve the refined outline.
 8. `[writing mode]` turns outline into prose, applying voice rules, §10 generation signatures, and the paraphrase default. The draft lands at `<draft>.md` with Pandoc citation IDs (`[@id]`, `@id`).
 9. `[editing mode]` runs the eight-pass audit. The handoff gate blocks on any unresolved §10 voice-audit hits; you must "address or mark intentional" before format. Silence ≠ override.
-10. `[formatting mode for <target>]` (e.g., `google-docs`, `plain-markdown`, `word`) renders `<draft>.md` into `<draft>.<target>.md`. Source prose is unchanged; the formatted sibling carries resolved `(Author Year, page)` citations and a References list per `style.md`. The `word` target (supported by all 5 shipped styles via pandoc+CSL) additionally runs pandoc + CSL and emits a `<draft>.docx` submission binary.
+10. `[formatting mode for <target>]` (e.g., `google-docs`, `plain-markdown`, `word`) renders `<draft>.md` into `<draft>.<target>.md`. Source prose is unchanged; the formatted sibling carries resolved `(Author Year, page)` citations and a References list per `config/style.md`. The `word` target (supported by all 5 shipped styles via pandoc+CSL) additionally runs pandoc + CSL and emits a `<draft>.docx` submission binary.
 
 At any point, `[red team]` and `[babble]` are available for stress-testing or unstructured thinking. `[non-academic]` escapes the framework for one turn.
 
@@ -68,4 +68,4 @@ At any point, `[red team]` and `[babble]` are available for stress-testing or un
 7. **Quote-density pass.** Direct-quote words over ~15% of a paragraph or two adjacent sentences both quoting → flag for paraphrase.
 8. **Voice audit (§9).** Connectedness, paragraph flow, pacing, concept setup, exploratory vs verdict tone. Voice does not override grammar-pass unambiguity flags.
 
-See [VOICES.md](./VOICES.md) for what `[writing]` and `[editing]` mean by "voice rules," and [STYLES.md](./STYLES.md) for what `[formatting]` does with `style.md` and paste targets.
+See [VOICES.md](./VOICES.md) for what `[writing]` and `[editing]` mean by "voice rules," and [STYLES.md](./STYLES.md) for what `[formatting]` does with `config/style.md` and paste targets.

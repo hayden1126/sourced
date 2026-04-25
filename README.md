@@ -78,9 +78,9 @@ sourced new my-paper --voice academic --style apa7
 
 After install, the project carries:
 - `CLAUDE.md` — the agent operating rules.
-- `voice.md` — the active voice (default: `academic`).
-- `style.md` — the active citation style (default: `apa7`).
-- `my_paper.brief.md` — empty intake brief for this paper (with `--brief`).
+- `config/voice.md` — the active voice (default: `academic`).
+- `config/style.md` — the active citation style (default: `apa7`).
+- `config/my_paper.brief.md` — empty intake brief for this paper (with `--brief`).
 
 Open Claude Code from inside the project directory and start a session. The agent opens in `[collaborative mode]` and will propose filling out the brief first.
 

@@ -467,6 +467,111 @@ def deploy_overlays(project_root: Path, project_type: ProjectType) -> list[Path]
     return written
 
 
+def detect_phase3_layout(root: Path) -> bool:
+    """Phase-3 layout: voice.md at root with a sourced:voice marker, no config/voice.md.
+
+    Hand-authored voice.md files without the marker are not phase-3 sourced
+    projects and should not trigger migration announcements (F31).
+    """
+    v = root / "voice.md"
+    if not v.exists() or (root / "config" / "voice.md").exists():
+        return False
+    return read_voice_marker(v) is not None
+
+
+def migrate_phase3_to_phase4(root: Path) -> list[str]:
+    """Move flat-layout files into phase-4 subdirs. Returns migration notes.
+
+    Each move is an atomic rename (same filesystem). Idempotent on re-run:
+    every step gates on source existence.
+    """
+    notes: list[str] = []
+    config = root / "config"
+    sources = root / "sources"
+    samples = root / "samples"
+    failures = root / "failures"
+    for d in (config, sources, samples, failures):
+        d.mkdir(exist_ok=True)
+
+    # (1) voice.md (marker-gated)
+    v = root / "voice.md"
+    if v.exists() and read_voice_marker(v) is not None:
+        v.rename(config / "voice.md")
+        notes.append("moved voice.md → config/voice.md")
+    elif v.exists():
+        notes.append("voice.md at root lacks sourced:voice= marker; not moved (hand-authored?)")
+
+    # voice.md bak sibling — independent of (1) so a partial-state recovery moves it too
+    voice_bak = root / "voice.md.sourced.bak"
+    if voice_bak.exists() and not (config / "voice.md.sourced.bak").exists():
+        voice_bak.rename(config / "voice.md.sourced.bak")
+
+    # (2) style.md (marker-gated)
+    s = root / "style.md"
+    if s.exists() and read_style_marker(s) is not None:
+        s.rename(config / "style.md")
+        notes.append("moved style.md → config/style.md")
+    elif s.exists():
+        notes.append("style.md at root lacks sourced:style= marker; not moved (hand-authored?)")
+
+    # style.md bak sibling — independent of (2) so a partial-state recovery moves it too
+    style_bak = root / "style.md.sourced.bak"
+    if style_bak.exists() and not (config / "style.md.sourced.bak").exists():
+        style_bak.rename(config / "style.md.sourced.bak")
+
+    # (3) *.brief.md at root → config/
+    for brief in sorted(root.glob("*.brief.md")):
+        brief.rename(config / brief.name)
+        notes.append(f"moved {brief.name} → config/{brief.name}")
+
+    # (4) *.citations.json at root → sources/
+    for log in sorted(root.glob("*.citations.json")):
+        log.rename(sources / log.name)
+        notes.append(f"moved {log.name} → sources/{log.name}")
+
+    # (5) .claude/briefs/working.brief.md → config/working.brief.md
+    # Guard against silent overwrite if step (3) already moved a root-level
+    # working.brief.md into config/ (rare but possible — user named brief "working").
+    briefs_dir = root / ".claude" / "briefs"
+    wb = briefs_dir / "working.brief.md"
+    if wb.exists():
+        dest = config / "working.brief.md"
+        if dest.exists():
+            notes.append(
+                "config/working.brief.md already exists (moved from root by step 3); "
+                ".claude/briefs/working.brief.md NOT moved — resolve manually."
+            )
+        else:
+            wb.rename(dest)
+            notes.append("moved .claude/briefs/working.brief.md → config/working.brief.md")
+    if briefs_dir.exists() and not any(briefs_dir.iterdir()):
+        briefs_dir.rmdir()
+
+    # (6) .claude/citations/working.citations.json → sources/working.citations.json
+    wl = root / ".claude" / "citations" / "working.citations.json"
+    if wl.exists():
+        wl.rename(sources / "working.citations.json")
+        notes.append("moved .claude/citations/working.citations.json → sources/working.citations.json")
+    # Do NOT remove .claude/citations/ — shards live there.
+
+    # (7) Hint lines (not moves)
+    pdfs = sorted(root.glob("*.pdf"))
+    txts = sorted(root.glob("*.txt"))
+    candidates = [p.name for p in pdfs + txts if "bak" not in p.name]
+    if candidates:
+        notes.append(
+            f"Found {len(candidates)} candidate source file(s) at root "
+            f"({', '.join(candidates[:5])}{'…' if len(candidates) > 5 else ''}). "
+            f"Move into sources/ if these back citations."
+        )
+    if (root / "my_writing").is_dir():
+        notes.append("Directory my_writing/ detected; voice-extractor now defaults samples_dir to samples/.")
+    if (root / "failures_dir").is_dir():
+        notes.append("Directory failures_dir/ detected; voice-extractor now defaults failures_dir to failures/.")
+
+    return notes
+
+
 def migrate_phase1_to_phase2(project_root: Path, fresh_claude_md: str) -> list[str]:
     """Atomic migration for a phase-1 project.
 

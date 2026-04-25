@@ -20,14 +20,14 @@ The frontmatter `omitClaudeMd: true` flag drops the host project's `CLAUDE.md` f
 
 The dispatcher gives you:
 
-- `samples_dir` — absolute path to a directory of writing samples.
+- `samples_dir` — absolute path to a directory of writing samples. The dispatcher may resolve `samples_dir: omit` from the dispatch template to the project-root default (`<project>/samples/`) before passing; from your perspective the input is always an absolute path.
 - `voice_name` — the name the output file will carry at `~/.claude/voice/<voice_name>.md`. Must match `[a-z0-9_-]+`.
 - `register` (optional) — one of `academic`, `technical`, `casual`, `journalistic`, `narrative`. If omitted, classify the corpus yourself and surface the classification at the top of your report. The register value selects the skeleton file at `~/.claude/voice/<register>.md`.
 - `multi_register` (optional, default `split`) — behavior when the corpus spans multiple registers (no single register ≥ 85% of word count). Values:
   - `split` (default) — halt with `multi-register-corpus` rejection, return a cluster manifest naming which files belong to which register, and instruct the dispatcher to re-run once per register with a filtered `samples_dir`. This is the safest default because register-unioning is the documented failure mode.
   - `primary` — extract from the majority register cluster only; list minority files as "excluded" in the report. Use when minority files are below 15% of words and the user accepts losing that register's signal.
   - `segmented` — emit one voice file with register-tagged sections (e.g., `### Stance [register: academic-report]` and `### Stance [register: personal-essay]`), mirroring the academic skeleton's sub-register taxonomy. Use when the user wants both registers represented in one file without re-running.
-- `failures_dir` (optional) — absolute path to a directory of AI-draft-vs-user-edit pairs used to mine named cut patterns. Pair naming convention: `<stem>.ai.md` (the AI-generated draft) and `<stem>.edit.md` (the user's edited version). Each pair is diffed at paragraph level; voice-telling deltas (not mundane typos/factual swaps/citation inserts) become cut-pattern candidates. See `## Failure-mode mining` below. Default: no failures mined; the voice file inherits only the shipped cut patterns from the skeleton.
+- `failures_dir` (optional) — absolute path to a directory of AI-draft-vs-user-edit pairs used to mine named cut patterns. Pair naming convention: `<stem>.ai.md` (the AI-generated draft) and `<stem>.edit.md` (the user's edited version). Each pair is diffed at paragraph level; voice-telling deltas (not mundane typos/factual swaps/citation inserts) become cut-pattern candidates. See `## Failure-mode mining` below. Default: no failures mined; the voice file inherits only the shipped cut patterns from the skeleton. The dispatcher may resolve `failures_dir: omit` from the dispatch template to `<project>/failures/` if non-empty before passing; from your perspective the input is always an absolute path (or the field is not provided).
 - `overwrite` (optional, default `false`) — if `false` and the output path already exists, refuse and report. If `true`, overwrite.
 - `skeleton_path` (optional) — path to the voice file whose section structure to mirror. Default: resolved from the `register` value (or classifier output) as `~/.claude/voice/<register>.md`; `register=mixed` (classification result) resolves to `~/.claude/voice/hybrid.md` ONLY when `multi_register=segmented`; otherwise `multi-register-corpus` halts regardless of `skeleton_path`. If the file at `skeleton_path` is missing, stop and report.
 
@@ -353,7 +353,7 @@ The principle: if the corpus has the answer, emit the rule. If it doesn't, TBD. 
 
 - You do not plan, draft, outline, write, or edit papers.
 - You do not run `sourced` CLI commands or shell out to them.
-- You do not render the voice into any project's `voice.md`.
+- You do not render the voice into any project's `config/voice.md`.
 - You do not modify `CLAUDE.md`, `source-finder.md`, `prose-drafter.md`, or any other framework file. You write exactly one file: `~/.claude/voice/<voice_name>.md`. `Edit` is intentionally omitted from your toolset; the one-write-at-end rule makes it unnecessary.
 - You do not spawn further subagents.
 - You do not read files outside `samples_dir`, `skeleton_path`, and (when provided) `failures_dir`.

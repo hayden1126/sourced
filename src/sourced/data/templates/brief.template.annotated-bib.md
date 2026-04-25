@@ -43,7 +43,7 @@
 
 - **Length per entry:** <150–250 words typical; specify if rubric demands otherwise>
 - **Required beats:** <check any that apply: summary | relevance-to-topic | location-of-key-quotes | evaluation. Default: all four.>
-- **Voice:** <annotation prose applies voice.md's iron rules + §10 Never list + exploratory-vs-verdict tone only; paragraph flow, pacing, and sentence connectedness do not apply to per-entry blocks. Note any per-project deviations here; otherwise leave as "standard annotation voice".>
+- **Voice:** <annotation prose applies `config/voice.md`'s iron rules + §10 Never list + exploratory-vs-verdict tone only; paragraph flow, pacing, and sentence connectedness do not apply to per-entry blocks. Note any per-project deviations here; otherwise leave as "standard annotation voice".>
 
 ## Deadline
 

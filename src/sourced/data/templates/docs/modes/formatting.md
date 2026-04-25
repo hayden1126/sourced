@@ -12,8 +12,8 @@ Formatting converts source prose carrying Pandoc citation IDs into a fully-rende
 
 **Do not enter when:**
 - The draft has not been through `[editing mode]` with a confirmed handoff. Formatting without the upstream gate is a gate violation.
-- No paste target has been named. If {{USER}} says "format this" without a target, ask: "Which paste target? Supported targets are listed in `style.md §Paste target expression rules`."
-- `style.md` is missing. Stop and ask {{USER}} to run `sourced switch style <name>` rather than guessing rules. Do not attempt to infer a style.
+- No paste target has been named. If {{USER}} says "format this" without a target, ask: "Which paste target? Supported targets are listed in `config/style.md §Paste target expression rules`."
+- `config/style.md` is missing. Stop and ask {{USER}} to run `sourced switch style <name>` rather than guessing rules. Do not attempt to infer a style.
 - The voice audit surface-scan report has not been emitted in the editing handoff turn. Per manifest §7.4, editing → formatting requires §4 audit list clean + voice audit surface-scan report emitted + paste target named; a handoff without the report is an incomplete gate. Ask {{USER}} to complete the editing handoff before entering formatting.
 
 **Announcement rule.** The first output of every formatting entry names the target: `Switching to [formatting mode for <target>].` (e.g., `Switching to [formatting mode for google-docs].`).
@@ -36,9 +36,9 @@ Skipping pre-flight ships a rendered document that may contain unresolved verifi
 
 1. **Announce entry.** First output of the turn: `Switching to [formatting mode for <target>].` Name the target verbatim. Then in one clause: "formatting `<draft>` for `<target>`".
 
-   Read `style.md` in full on every entry. Verify `§Style identity.CSL provenance.file` resolves to a CSL file at `~/.claude/style/<style>/<csl-filename>`. If the CSL file is missing, halt: "CSL file not found at `<path>`. Run `sourced switch style <name>` to reinstall." Do not proceed.
+   Read `config/style.md` in full on every entry. Verify `§Style identity.CSL provenance.file` resolves to a CSL file at `~/.claude/style/<style>/<csl-filename>`. If the CSL file is missing, halt: "CSL file not found at `<path>`. Run `sourced switch style <name>` to reinstall." Do not proceed.
 
-   Also load the citation log (`<draft>.citations.json`). The log is read-only except for staleness carve-outs in step 2.
+   Also load the citation log (`sources/<draft>.citations.json`). The log is read-only except for staleness carve-outs in step 2.
 
 ### Pre-flight (gate to terminal output)
 
@@ -60,9 +60,9 @@ Skipping pre-flight ships a rendered document that may contain unresolved verifi
 
    Offer shortcut options alongside the per-entry list: "re-fetch all" / "accept all" / mixed. Halt on any stale entry until {{USER}} resolves the full grouped report.
 
-   **Check 6 — Inline quote threshold.** Read `§Document layout.Block quotes` in the active `style.md`.
+   **Check 6 — Inline quote threshold.** Read `§Document layout.Block quotes` in the active `config/style.md`.
 
-   - If that subsection is absent OR declares `Threshold: none`, skip this check entirely. The style prescribes no threshold; any inline-quote shape is acceptable. When skipped under this absent-subsection rule, explicitly note in the step 8 report that "inline-quote threshold check skipped: style's `§Document layout.Block quotes` declares no threshold." No forcing artifact is produced for this check under the skip rule — that is the only permitted path to a missing list. When the subsection is present and declares a threshold, the list is always emitted (empty or non-empty); silence is not a substitute.
+   - If that subsection is absent OR declares `Threshold: none`, skip this check entirely. The style prescribes no threshold; any inline-quote shape is acceptable. When skipped under this absent-subsection rule, explicitly note in the step 8 report that "inline-quote threshold check skipped: `config/style.md`'s `§Document layout.Block quotes` declares no threshold." No forcing artifact is produced for this check under the skip rule — that is the only permitted path to a missing list. When the subsection is present and declares a threshold, the list is always emitted (empty or non-empty); silence is not a substitute.
    - Otherwise, read the declared threshold value (e.g., "40 words", "4 lines"). Walk source prose, identify all quotation-marked spans. For each, estimate word count. Flag every span that plausibly meets or exceeds the threshold.
 
    **Emit `### Inline quote threshold hits` as a forcing artifact**, regardless of hit count:
@@ -96,7 +96,7 @@ Skipping pre-flight ships a rendered document that may contain unresolved verifi
    pandoc <flags> --bibliography=<draft>.bib.json --csl=<csl-path> -o <output> <draft>.pandoc.md
    ```
 
-   `<flags>` comes from `style.md §Paste target expression rules.<target>.pandoc flags`. Per-target output path:
+   `<flags>` comes from `config/style.md §Paste target expression rules.<target>.pandoc flags`. Per-target output path:
 
    | Target | Output file |
    |--------|------------|
@@ -105,7 +105,7 @@ Skipping pre-flight ships a rendered document that may contain unresolved verifi
    | `plain-markdown` | `<draft>.plain.md` |
    | `latex` | `<draft>.tex` |
 
-   **word target:** Check `§Paste target expression rules.word.reference.docx:` bullet in style.md. If a path is declared AND the file exists at `~/.claude/style/<path>`, add `--reference-doc=<absolute-path>`. If declared but absent, proceed without the flag and record "reference.docx fallback: `<path>` not found; using pandoc default layout" as a tolerable warning for the step 8 report. If no path declared, no flag.
+   **word target:** Check `§Paste target expression rules.word.reference.docx:` bullet in `config/style.md`. If a path is declared AND the file exists at `~/.claude/style/<path>`, add `--reference-doc=<absolute-path>`. If declared but absent, proceed without the flag and record "reference.docx fallback: `<path>` not found; using pandoc default layout" as a tolerable warning for the step 8 report. If no path declared, no flag.
 
    **latex target:** Read `§Paste target expression rules.latex.template.tex:` bullet. The template is required (unlike reference.docx which has a fallback). Resolve the declared relative path to `~/.claude/style/<path>` and add `--template=<absolute-path>`. If declared but absent, halt: "template.tex missing: `<path>` — install is broken. Run `sourced switch style <name>`." No fallback.
 
@@ -136,14 +136,14 @@ Skipping pre-flight ships a rendered document that may contain unresolved verifi
 
 7. **Apply post-pandoc transforms and paste-time instructions.**
 
-   Read `§Paste target expression rules.<target>.Post-pandoc transforms` from the active style.md. Two transform shapes, identified by whether the declaration carries a backticked shell command:
+   Read `§Paste target expression rules.<target>.Post-pandoc transforms` from the active `config/style.md`. Two transform shapes, identified by whether the declaration carries a backticked shell command:
 
    - **Command pipe:** backticked shell command present. Execute as a shell pipe: read the output file on stdin, write transformed content on stdout, overwrite the file atomically. Pure text-layer edits; no citation-log context required.
    - **Agent walk:** no backticked command (typically a reference into `§Style identity.On-demand references`). Execute in the agent loop per the description. The classical-abbreviations rewrite for chicago17 is the reference example: walk the rendered output; for each bibliography entry and (for NB) each footnote body, read back to the CSL-JSON entry that produced it; if the entry's `author[].family` matches an author in the sidecar's allowlist, rewrite the rendered title per the sidecar's abbreviation column.
 
    Within a single target, run all command-pipe transforms first, then agent-walk transforms. The walker then operates on already-cleaned output.
 
-   Prepend paste-time instructions from `§Paste target expression rules.<target>.Paste-time instructions` to the output file. Each instruction is a single line prefixed with `<!-- paste-time: -->`.
+   Prepend paste-time instructions from `config/style.md §Paste target expression rules.<target>.Paste-time instructions` to the output file. Each instruction is a single line prefixed with `<!-- paste-time: -->`.
 
 ### Report
 
@@ -157,7 +157,7 @@ The full table lives in step 6 above. Quick lookup: blocking warnings (halt befo
 
 - **Edit prose.** Voice rules, claim revisions, citation re-attribution, block-quote conversion: all belong upstream in `[editing mode]` or earlier. Formatting does not rewrite prose.
 - **Add or modify citation log entries** (read-only). One carve-out: when {{USER}} chooses "re-fetch and re-verify" on a stale entry in step 2, update that entry's `retrieved_at` (and `source.authors` if the byline has changed) before rendering. Note the update in the step 8 report.
-- **Choose a style.** Style is fixed by `style.md`. Switching requires `sourced switch style <name>` and re-running formatting. Do not use `install.sh --style` — that command was retired in phase 1.
+- **Choose a style.** Style is fixed by `config/style.md`. Switching requires `sourced switch style <name>` and re-running formatting. Do not use `install.sh --style` — that command was retired in phase 1.
 - **Branch on Shape.** Shape is audit metadata in the slim schema; pandoc+CSL owns Shape-specific rendering. The procedure above is uniform across author-date, author-page, footnote, numeric-sequence, and numeric-alpha styles.
 
 ## Re-running Formatting
@@ -174,7 +174,7 @@ Re-running is cheap and idempotent. Style change: re-run on the same source afte
 - *"The pandoc warning says `missing field: DOI` — I'll just ignore it."* — Tolerable, not ignorable. Surface in the step 8 report.
 - *"The ambiguous-citation warning means pandoc still rendered something — output looks fine, I'll proceed."* — No. Ambiguous citation is blocking. Halt before writing output.
 - *"I'll modify the source prose to fix the inline quote threshold hit."* — No. Return to `[editing mode]`. Formatting does not rewrite prose.
-- *"style.md is cached from last session — I'll work from memory."* — Re-read `style.md` in full on every entry. Do not work from memory.
+- *"`config/style.md` is cached from last session — I'll work from memory."* — Re-read `config/style.md` in full on every entry. Do not work from memory.
 - *"{{USER}} seems ready, the editing looked clean — I'll skip the formal gate check."* — Enter only after a confirmed editing handoff with both forcing artifacts. "Looked clean" is not a gate.
 
 ## Rationalizations
@@ -185,16 +185,16 @@ Re-running is cheap and idempotent. Style change: re-run on the same source afte
 | "The stale `retrieved_at` is only a few days old — it's practically fresh." | Schema.md §Staleness sets the threshold. "Practically fresh" is your estimate, not the schema's. Surface the entry and let {{USER}} choose. |
 | "The block-quote threshold check is LLM-judgment, so I'll eyeball it and skip the list." | The list is the forcing artifact for the formatting pre-flight gate (manifest §7.5). Eyeballing without emitting the list means the gate has not been satisfied, regardless of what you saw. |
 | "Reference.docx is missing but the Word output is fine with the default layout." | Proceed without the flag (that's the documented fallback), but record the fallback warning in the step 8 report. Silent omission hides install state from {{USER}}. |
-| "Switching styles mid-session is easier than re-running — I'll just pick the right CSL and keep going." | Style is fixed by `style.md`. Mid-session style substitution produces output that diverges from the declared style on every future re-run. Use `sourced switch style <name>` and re-run. |
+| "Switching styles mid-session is easier than re-running — I'll just pick the right CSL and keep going." | Style is fixed by `config/style.md`. Mid-session style substitution produces output that diverges from the declared style on every future re-run. Use `sourced switch style <name>` and re-run. |
 | "The emitter produced tolerable warnings — not worth cluttering the report." | Tolerable warnings go in the report. They are tolerable in the sense that they do not halt; they are not tolerable in the sense of being silently dropped. |
 | "The user already reviewed the prose in editing — pre-flight checks 1 and 2 are ceremonial." | Editing and formatting operate on different copies of the prose. A `[VERIFY: ...]` token introduced between editing and formatting — or present in a section editing didn't touch — would be missed. Pre-flight is not redundant with editing; it is the formatting gate. |
-| "I can infer the style from the citation log's reference strings." | Citation log entries carry Pandoc IDs, not rendered reference strings. Style is not inferable from the log; read `style.md`. |
+| "I can infer the style from the citation log's reference strings." | Citation log entries carry Pandoc IDs, not rendered reference strings. Style is not inferable from the log; read `config/style.md`. |
 
 ## Quick Reference
 
 ```
 ENTRY:   Switching to [formatting mode for <target>].
-         Read style.md in full. Verify CSL file on disk. Load citation log.
+         Read config/style.md in full. Verify CSL file on disk. Load citation log.
 
 PRE-FLIGHT (halt on any failure):
   1. [VERIFY: ...] tokens   → halt; list all.
@@ -202,7 +202,7 @@ PRE-FLIGHT (halt on any failure):
   3. Rendered citations     → halt; list all; ask convert or return to editing.
   4. Unresolved IDs         → halt; surface by line.
   5. Stale retrieved_at     → collect ALL stale entries first; grouped report; per-entry choices.
-  6. Inline quote threshold → read threshold from style.md §Document layout.Block quotes.
+  6. Inline quote threshold → read threshold from config/style.md §Document layout.Block quotes.
                               Emit ### Inline quote threshold hits table (required; empty table
                               on zero hits). Non-empty list halts.
 
@@ -250,11 +250,11 @@ FORCING ARTIFACT (pre-flight):
 - `CLAUDE.md §7.5` — forcing artifact definitions: inline-quote-threshold list.
 - `CLAUDE.md §7.6` — precedence rules; §4 verbatim governs block-quote handling inside formatting (delegate to pandoc+CSL; do not rewrite block-quoted spans).
 - `CLAUDE.md §8` — citation log three-moment model; Moment 3 is this mode.
-- `CLAUDE.md §11` — style pointer; `style.md` is the authority on CSL provenance, paste-target rules, and post-pandoc transforms.
+- `CLAUDE.md §11` — style pointer; `config/style.md` is the authority on CSL provenance, paste-target rules, and post-pandoc transforms.
 - `docs/modes/editing.md` — predecessor mode; emits the two forcing artifacts that gate editing → formatting.
 - `docs/modes/research.md` — target for stale-entry re-verify dispatches from step 2.
-- `style.md §Style identity.CSL provenance.file` — CSL file path; verified at step 1.
-- `style.md §Document layout.Block quotes` — threshold value read by pre-flight check 6.
-- `style.md §Paste target expression rules.<target>` — pandoc flags, per-target file path rules, lua-filter, post-pandoc transforms, paste-time instructions.
+- `config/style.md §Style identity.CSL provenance.file` — CSL file path; verified at step 1.
+- `config/style.md §Document layout.Block quotes` — threshold value read by pre-flight check 6.
+- `config/style.md §Paste target expression rules.<target>` — pandoc flags, per-target file path rules, lua-filter, post-pandoc transforms, paste-time instructions.
 - `~/.claude/citations/schema.md §Staleness` — staleness threshold applied in pre-flight check 5.
 - `~/.claude/citations/csl-json-emitter.md` — emitter specification followed in step 4.

@@ -19,7 +19,7 @@ Plan mode frames the research question, defines the argument's shape, and maps t
 
 1. **Announce entry.** First output of the turn: `Switching to [plan mode].`
 
-2. **Read the brief.** Load `<draft-name>.brief.md` or `.claude/briefs/working.brief.md` per §6. Restate the autonomy level in one sentence: `Brief sets autonomy to [level]; I will [behavior description].` If the brief omits the autonomy level, assume medium and say so. The restate is not optional — {{USER}} uses it to confirm the brief was read and the level is current.
+2. **Read the brief.** Load `config/<draft-name>.brief.md` or `config/working.brief.md` per §6. Restate the autonomy level in one sentence: `Brief sets autonomy to [level]; I will [behavior description].` If the brief omits the autonomy level, assume medium and say so. The restate is not optional — {{USER}} uses it to confirm the brief was read and the level is current.
 
 3. **For essay projects — question and argument frame.** State:
    - The working research question in one sentence.

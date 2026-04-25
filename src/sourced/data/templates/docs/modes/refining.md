@@ -38,7 +38,7 @@ Skipping the §4 audit list at refining means it will be run at editing on prose
 
 1. **Announce entry.** First output of the turn: `Switching to [refining mode].` Name the outline in one clause after the announcement: "refining the Cheyenne essay outline" / "refining the working outline".
 
-2. **Load the outline and citation log.** Read the outline file (or the outline section of the working document). Load the citation log (`<draft>.citations.json` or `.claude/citations/working.citations.json`). Both are required before the iterative loop begins; do not run the audit from memory.
+2. **Load the outline and citation log.** Read the outline file (or the outline section of the working document). Load the citation log (`sources/<draft>.citations.json` or `sources/working.citations.json`). Both are required before the iterative loop begins; do not run the audit from memory.
 
 3. **Re-read the brief.** In particular, re-read the autonomy level (manifest §6) and the research question from `[plan mode]`. The final check in the iterative loop (step 4, item 7) tests whether the outline is answering that question.
 
@@ -111,7 +111,7 @@ If you catch yourself thinking any of the following, stop and check:
 - *"The outline looked fine on a first read, I'll skip the iterative loop."* — First-read confidence is how drift survives. Run the loop until convergence; a single pass is not convergence.
 - *"{{USER}} signed off on the outline in `[outlining mode]`; that sign-off carries forward."* — The outlining sign-off gates entry to refining, not advance to writing. The refining sign-off is a separate gate on the refined outline.
 - *"Partial entries are fine; the constraint only says they can't be load-bearing."* — Recheck each one against the current outline. The "not load-bearing" clause is evaluated against the outline as it stands now, not at logging time. An entry that was peripheral at log time may now be load-bearing.
-- *"Voice feels off in this section — I'll flag it here."* — Voice rules do not apply at refining time. No `voice.md` read on entry to this mode. Voice is `[writing mode]` and `[editing mode]`'s domain; this mode is citation-and-structure only. Voice catches voice; this catches claim drift.
+- *"Voice feels off in this section — I'll flag it here."* — Voice rules do not apply at refining time. No `config/voice.md` read on entry to this mode. Voice is `[writing mode]` and `[editing mode]`'s domain; this mode is citation-and-structure only. Voice catches voice; this catches claim drift.
 - *"This structural cut will require rewriting a whole section — I'll flag it instead of cutting."* — Cut it. Flagging a cut and deferring it to editing means rewriting prose that exists. The entire reason this mode precedes writing is that structural cuts here are cheap.
 - *"The audit has no flagged rows, so I can advance without presenting the full sign-off package."* — No. The sign-off package includes the §4 audit list even when it is all-pass, plus the outline structure and citation map. {{USER}} needs to see the work, not just be told it passed.
 
@@ -173,7 +173,7 @@ FORCING ARTIFACT:  §4 audit list (required at sign-off; gates refining → writ
 
 ## What this mode does NOT do
 
-- **Apply voice rules.** Voice is `[writing mode]` and `[editing mode]`'s domain. `voice.md` is not read on entry to this mode. Voice observations noted during refining are surfaced as comments, not applied.
+- **Apply voice rules.** Voice is `[writing mode]` and `[editing mode]`'s domain. `config/voice.md` is not read on entry to this mode. Voice observations noted during refining are surfaced as comments, not applied.
 - **Draft prose.** Refining operates on the outline only. Drafting belongs in `[writing mode]`.
 - **Replace `[outlining mode]`.** Refining is not an outline-building step; it is an audit and stress-test of an outline that already exists and has been signed off by {{USER}}.
 - **Auto-advance to `[writing mode]`.** The sign-off gate requires explicit {{USER}} approval on the refined outline with the §4 audit list present. The mode cannot clear its own gate.
