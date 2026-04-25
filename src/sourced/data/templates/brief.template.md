@@ -6,7 +6,7 @@
 
 <verbatim prompt, rubric, or task description>
 
-## Topic / question / thesis
+## Topic / question / thesis [required]
 
 - **Topic:** <one sentence>
 - **Research question:** <one sentence>
@@ -16,12 +16,12 @@
 
 <{{USER}}'s prior reasoning, notes, partial drafts. Paste inline or link to a file.>
 
-## Length expectation
+## Length expectation [required]
 
 - **Target word count:** <number>
 - **Hard limit:** <number or "none">
 
-## Audience
+## Audience [required]
 
 <who grades, publishes, or reads this>
 
@@ -39,6 +39,10 @@
 - **Disciplines to stay within:** <scope bounds, or "none">
 - **Other constraints:** <anything else the agent should know>
 
-## Autonomy level
+## Autonomy level [required]
 
 <low | medium | high — see definitions in CLAUDE.md section 6>
+
+## Register mode
+
+<academic-report | prospectus | personal-essay | technical-reference | etc. — see `config/voice.md ## Sub-register taxonomy`. Optional; if blank, `[writing mode]` defaults to the voice's documented default and flags the inferred default in the prose plan.>
