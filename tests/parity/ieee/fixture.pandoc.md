@@ -12,5 +12,3 @@ A broader survey consolidated the three lines of evidence
 extended the empirical base with field measurements
 [@able-baker-chen-davies-2019]. Standards reporting added institutional
 context [@ieee-std-2020].
-
-# References

@@ -93,10 +93,12 @@ Skipping pre-flight ships a rendered document that may contain unresolved verifi
 5. **Invoke pandoc.** Base invocation shape:
 
    ```
-   pandoc <flags> --bibliography=<draft>.bib.json --csl=<csl-path> -o <output> <draft>.pandoc.md
+   pandoc <flags> --bibliography=<draft>.bib.json --csl=<csl-path> --metadata reference-section-title=<list-heading> -o <output> <draft>.pandoc.md
    ```
 
-   `<flags>` comes from `config/style.md §Paste target expression rules.<target>.pandoc flags`. Per-target output path:
+   `<flags>` comes from `config/style.md §Paste target expression rules.<target>.pandoc flags`. `<list-heading>` is the `- List heading:` value from `config/style.md §Style identity` (e.g., `References`, `Bibliography`, `Works Cited`); pandoc emits this heading itself ahead of the `::: {#refs}` fenced div, so source `.md` ends at the last body paragraph and never carries a hand-authored `# References` / `# Bibliography` / `# Works Cited` line. Multi-word headings need shell quoting at the call site (e.g., `--metadata "reference-section-title=Works Cited"`). A surviving hand-authored heading in source prose is a legacy-draft regression caught by `[editing mode]`'s pass-1 scan.
+
+   Per-target output path:
 
    | Target | Output file |
    |--------|------------|
@@ -211,7 +213,10 @@ STEP 3:  Copy to <draft>.pandoc.md. Collapse IDs (regex: <author>-<year>-\d{3} �
 
 STEP 4:  Emit CSL-JSON to <draft>.bib.json. Per emitter spec. Filter to referenced IDs only.
 
-STEP 5:  pandoc <flags> --bibliography=<draft>.bib.json --csl=<csl-path> -o <output> <draft>.pandoc.md
+STEP 5:  pandoc <flags> --bibliography=<draft>.bib.json --csl=<csl-path> \
+                --metadata reference-section-title=<list-heading> -o <output> <draft>.pandoc.md
+         <list-heading>: from config/style.md §Style identity (- List heading:). Quote multi-word
+                         values: --metadata "reference-section-title=Works Cited".
          word:          check reference.docx bullet; add flag if file exists; fallback warning if absent.
          latex:         template REQUIRED; halt if absent.
          google-docs / plain-markdown: lua-filter if declared; halt if declared but absent.

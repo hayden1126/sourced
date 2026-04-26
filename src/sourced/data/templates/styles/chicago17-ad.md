@@ -80,7 +80,7 @@ Threshold: 100 words (roughly five typed lines). Rendered as block quotes per Ch
   - "Apply hanging indent to References after pasting (Format > Align > Indentation options > Special > Hanging)."
   - "Apply double-spacing in Google Docs if the destination expects it (Format > Line & paragraph spacing > Double)."
 - Post-pandoc transforms:
-  1. Strip pandoc fenced-div markers (`sed -e '/^::: /d' -e '/^:::$/d'`); Google Docs' "Paste as markdown" renders the `:::` wrappers as literal text. The `-header_attributes` pandoc extension handles the heading-attribute counterpart (`# References {#references .unnumbered}`).
+  1. Strip pandoc fenced-div markers (`sed -e '/^::: /d' -e '/^:::$/d'`); Google Docs' "Paste as markdown" renders the `:::` wrappers as literal text. The `-header_attributes` pandoc extension handles the heading-attribute counterpart (`# References {#bibliography .unnumbered}` — pandoc emits `{#bibliography}` for any reference section title via `--metadata reference-section-title=`, regardless of the heading text).
   2. Classical-abbreviations rewrite (see §Style identity.On-demand references).
 
 ### plain-markdown

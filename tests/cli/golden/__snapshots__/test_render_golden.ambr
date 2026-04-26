@@ -611,7 +611,7 @@
   - Paste-time instructions:
     - "Apply hanging indent to References after pasting (Format > Align > Indentation options > Special > Hanging)."
     - "Apply double-spacing in Google Docs if the destination expects it (Format > Line & paragraph spacing > Double)."
-  - Post-pandoc transforms: strip pandoc fenced-div markers from the References block (`sed -e '/^::: /d' -e '/^:::$/d'`); Google Docs' "Paste as markdown" renders the `:::` wrappers as literal text. The `-header_attributes` pandoc extension handles the heading-attribute counterpart (`# References {#references .unnumbered}`).
+  - Post-pandoc transforms: strip pandoc fenced-div markers from the References block (`sed -e '/^::: /d' -e '/^:::$/d'`); Google Docs' "Paste as markdown" renders the `:::` wrappers as literal text. The `-header_attributes` pandoc extension handles the heading-attribute counterpart (`# References {#bibliography .unnumbered}` — pandoc emits `{#bibliography}` for any reference section title via `--metadata reference-section-title=`, regardless of the heading text).
   
   ### plain-markdown
   
@@ -724,7 +724,7 @@
     - "Apply hanging indent to References after pasting (Format > Align > Indentation options > Special > Hanging)."
     - "Apply double-spacing in Google Docs if the destination expects it (Format > Line & paragraph spacing > Double)."
   - Post-pandoc transforms:
-    1. Strip pandoc fenced-div markers (`sed -e '/^::: /d' -e '/^:::$/d'`); Google Docs' "Paste as markdown" renders the `:::` wrappers as literal text. The `-header_attributes` pandoc extension handles the heading-attribute counterpart (`# References {#references .unnumbered}`).
+    1. Strip pandoc fenced-div markers (`sed -e '/^::: /d' -e '/^:::$/d'`); Google Docs' "Paste as markdown" renders the `:::` wrappers as literal text. The `-header_attributes` pandoc extension handles the heading-attribute counterpart (`# References {#bibliography .unnumbered}` — pandoc emits `{#bibliography}` for any reference section title via `--metadata reference-section-title=`, regardless of the heading text).
     2. Classical-abbreviations rewrite (see §Style identity.On-demand references).
   
   ### plain-markdown
@@ -962,7 +962,7 @@
   - lua-filter: `smart-quotes.lua` — preserves ASCII apostrophes inside italic spans for linguistic glottal-stop notation while letting pandoc's `-smart` writer curl English apostrophes and quotes outside italics. `[formatting mode]` resolves the name to `~/.claude/filters/<name>` and adds `--lua-filter=<absolute-path>` to the pandoc invocation.
   - Paste-time instructions:
     - "Apply hanging indent to References after pasting (Format > Align > Indentation options > Special > Hanging)."
-  - Post-pandoc transforms: strip pandoc fenced-div markers from the References block (`sed -e '/^::: /d' -e '/^:::$/d'`); Google Docs' "Paste as markdown" renders the `:::` wrappers as literal text. The `-header_attributes` pandoc extension handles the heading-attribute counterpart (`# References {#references .unnumbered}`).
+  - Post-pandoc transforms: strip pandoc fenced-div markers from the References block (`sed -e '/^::: /d' -e '/^:::$/d'`); Google Docs' "Paste as markdown" renders the `:::` wrappers as literal text. The `-header_attributes` pandoc extension handles the heading-attribute counterpart (`# References {#bibliography .unnumbered}` — pandoc emits `{#bibliography}` for any reference section title via `--metadata reference-section-title=`, regardless of the heading text).
   
   ### plain-markdown
   
@@ -1070,7 +1070,7 @@
   - Paste-time instructions:
     - "Apply hanging indent to Works Cited after pasting (Format > Align > Indentation options > Special > Hanging)."
     - "MLA page-number header ('Smith 3') requires a custom Google Docs header; add via Insert > Headers > Header, then type surname + page number."
-  - Post-pandoc transforms: strip pandoc fenced-div markers from the Works Cited block (`sed -e '/^::: /d' -e '/^:::$/d'`); Google Docs' "Paste as markdown" renders the `:::` wrappers as literal text. The `-header_attributes` pandoc extension handles the heading-attribute counterpart (`# Works Cited {#works-cited .unnumbered}`).
+  - Post-pandoc transforms: strip pandoc fenced-div markers from the Works Cited block (`sed -e '/^::: /d' -e '/^:::$/d'`); Google Docs' "Paste as markdown" renders the `:::` wrappers as literal text. The `-header_attributes` pandoc extension handles the heading-attribute counterpart (`# Works Cited {#bibliography .unnumbered}` — pandoc emits `{#bibliography}` for any reference section title via `--metadata reference-section-title=`, regardless of the heading text).
   
   ### plain-markdown
   

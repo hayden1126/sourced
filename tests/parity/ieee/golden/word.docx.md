@@ -12,7 +12,7 @@ A broader survey consolidated the three lines of evidence \[1\], \[2\],
 field measurements \[4\]. Standards reporting added institutional
 context \[5\].
 
-# References {#references .unnumbered}
+# References {#bibliography .unnumbered}
 
 ::: {#refs .references .csl-bib-body}
 ::: {#ref-tang-2012 .csl-entry}
