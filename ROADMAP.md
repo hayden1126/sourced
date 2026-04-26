@@ -313,16 +313,59 @@ Migration. For one release: agents and install.sh read flat paths as fallback if
 No schema change; no new mode; no new gate. Purely organizational. Scope-wise, this is ergonomics (not one of the core values) — but it materially affects how usable sourced is once a real writer has run 3+ essays in one dir.
 
 ### Cross-project citation reuse
-**Priority:** later · **Effort:** L · **Status:** open.
+**Priority:** later · **Effort:** L · **Status:** open. **Likely subsumed** by *Verified-claims database* below — implement the smaller dedup-and-reuse version first only if it ships meaningfully ahead of the larger entry.
 
 One writer, many papers, overlapping sources. A cross-project citation library (verify once, use many) reduces re-verification cost. `[research mode]` would check the shared library first before dispatching source-finders.
 
 Schema extension: add `source_hash` (content-addressed or DOI-based) that dedupes across project log files. Staleness thresholds still apply per use; re-verification may still be needed for web sources.
 
+### Verified-claims database (PageIndex-style retrieval)
+**Priority:** maybe → next once *Cross-project citation reuse* lands · **Effort:** XL · **Status:** scoping. Supersedes *Cross-project citation reuse* on landing.
+
+Persistent, tree-indexed database of verified claims and citations across all of one writer's projects. Each entry is a node carrying provenance (which session verified, when), the §4 audit results, and a position in the source's tree-of-contents index. `[research mode]` consults the local database first; only dispatches `source-finder` subagents for online search when (a) entries are stale per `~/.claude/citations/schema.md §Staleness` or (b) topical coverage is insufficient. Amortizes §3/§4 verification cost across writing sessions — the most expensive operation today is full-text verification, not citation rendering, so a write-once-read-many substrate compounds quickly across a writer's body of work.
+
+[**PageIndex**](https://github.com/VectifyAI/PageIndex) (vectorless, reasoning-based RAG; one tree index per document; LLM walks the tree at retrieval time; no embeddings, no chunking parameters) is the leading candidate for the per-source index layer. Three reasons it fits sourced's discipline where vector RAG and entity-graph approaches don't:
+
+1. **Vectorless = auditable reasoning.** Retrieval is just an LLM tree-walk, the same shape `source-finder` already uses for relevance assessment. Vector similarity bypasses §4 with opaque scores; PageIndex's reasoning steps are inspectable.
+2. **Tree structure preserves §4 context.** Cherry-pick (item 5) requires `surrounding_context` adjacent to `exact_quote`. A tree position keeps surroundings structurally close — no re-fetch needed to evaluate context.
+3. **Reasoning-native = auditable retrieval contract.** Each tree-walk step can be logged in a per-claim `retrieval_trace` field, parallel to the existing `verification_trace`. The model's "why this node" reasoning becomes inspectable at audit time.
+
+GraphRAG ruled out: multi-step entity-extraction pipelines, brittle on long-tail terminology, no fetch-coverage guarantee — too many places where the pipeline can silently miss a relevant claim. The tradeoff is wrong direction for a verification-led system.
+
+**Open architecture questions** (need a brainstorming + design-spec session before any code):
+
+- **Storage location.** `~/.claude/library/` per-user vs. shared-team substrate vs. project-local extension of `sources/`?
+- **Schema.** Extend `sources/<draft>.citations.json` to carry tree-node refs (and sync log entries on first-use)? Or new format under `~/.claude/library/<source-hash>/{tree.json, claims.json}`? The two need to interoperate cleanly.
+- **Trust boundary.** Verified-once-trust-forever, or re-verify on every reuse against `§Staleness` rules? Different answers for stable DOIs vs. web sources. Likely tiered.
+- **Retrieval contract.** Silent (database substitutes for `source-finder` when coverage is sufficient) vs. surfaced ("Found N local entries covering claims X, Y, Z; want me to use them or re-verify online?"). Surfacing is the safer default; silent is the higher-leverage version once trust is calibrated.
+- **Migration path.** How do existing per-project `citations.json` logs flow into the database? Bulk import + tree-build at the end of each project, or live writes during `[research mode]`?
+- **Re-verification UX.** When does the writer get prompted vs. when is re-fetch automatic? Tied to autonomy level (§6) or always-confirm?
+
+**Strong scope-discipline note.** The database must extend §3/§4 verification, not bypass it. "Claim X has 5 supporting citations in the database" is different from "those citations are still valid for the current draft." Staleness gates remain. The tree index is a retrieval substrate, not a trust substrate — every reuse runs against the same audit checks. If implemented carelessly, this entry becomes the failure mode §3 was built to prevent.
+
+Touch points (provisional): `~/.claude/citations/schema.md` (claim-node and source-tree schema additions); `agents/source-finder.md` (database-first dispatch); `docs/modes/research.md` (database lookup ahead of online search); new `sourced library` subcommand (build/list/prune/inspect); CLI integration with PageIndex (or a vendored subset thereof).
+
+Related: `### Cross-project citation reuse` (above, smaller cousin — supersedes on landing); `### Direct-API offload for deterministic workflows` (database build/index workflows are candidates for direct-API automation).
+
 ### Teaching mode
 **Priority:** maybe · **Effort:** M · **Status:** open.
 
 Agent explains why it's making each decision for a student learning the academic-writing process. Current agent executes mode-gate discipline silently; a teaching variant would surface "I'm auto-triggering research mode because claim X needs a source" explanations at every mode entry. Opt-in verbosity.
+
+### Babble-as-ideation across plan / research / refining
+**Priority:** next · **Effort:** M · **Status:** open.
+
+Today `[babble mode]` is collaborative-only — useful for warm-up but disconnected from the research lifecycle. Real planning involves divergent-then-convergent cycles; sourced currently skips divergence everywhere except the §6 brief's open-ended fields. Three insertion points worth supporting:
+
+- **Pre-research (`babble → plan`).** "What angles, what hypotheses, what would falsify this?" Generates candidate framings before the brief converges on one.
+- **Mid-research (`babble → research`).** "What counter-positions exist? What's missing in the source set?" Probes for gaps while finders are still mappable to new sub-topics.
+- **Post-research (`babble → refining`).** "What synthesis comes out of this set of verified sources? What unexpected combinations?" Finds non-obvious linkages before the outline locks.
+
+Schema. Each babble exit produces a structured artifact rather than dissolving into the next mode's context — either `<draft>.ideation.md` (sibling file) or a `## Ideation log` section in the brief. Outputs carry hypotheses, counter-positions, synthesis sketches with brief reasoning, plus a session timestamp. Outputs are not §10-gated (per current babble carve-out for ideation-flagged prose) but become inputs to subsequent modes' planning. Accumulates across the project lifecycle so post-research babble can see what pre-research babble surfaced and which strands survived contact with the source set.
+
+Touch points. §7.4 transition table (new allowed transitions: `babble → plan`, `babble → research`, `babble → refining`); `docs/modes/babble.md` (currently inline in CLAUDE.md §7.7 — would externalize on this entry's first concrete body); plan/research/refining mode bodies' "See also" sections; brief template's optional `## Ideation log` section.
+
+No schema change to the citation log; no new gate. The artifact format is the only new schema, and it's writer-facing markdown rather than runtime-parsed JSON. Ergonomics-tier change with potential research-quality upside (divergent thinking before convergent framing reduces premature commitment to one angle).
 
 ### Claude Code Agent Teams integration
 **Priority:** maybe · **Effort:** M–L · **Status:** open.
