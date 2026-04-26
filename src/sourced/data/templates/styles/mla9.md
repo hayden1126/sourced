@@ -74,7 +74,7 @@ Threshold: 4 lines of prose, 3 lines of verse (MLA 9 §6.36). Verse quotations u
 - Paste-time instructions:
   - "Apply hanging indent to Works Cited after pasting (Format > Align > Indentation options > Special > Hanging)."
   - "MLA page-number header ('Smith 3') requires a custom Google Docs header; add via Insert > Headers > Header, then type surname + page number."
-- Post-pandoc transforms: strip pandoc fenced-div markers from the Works Cited block (`sed -e '/^::: /d' -e '/^:::$/d'`); Google Docs' "Paste as markdown" renders the `:::` wrappers as literal text. The `-header_attributes` pandoc extension handles the heading-attribute counterpart (`# Works Cited {#works-cited .unnumbered}`).
+- Post-pandoc transforms: strip pandoc fenced-div markers from the Works Cited block (`sed -e '/^::: /d' -e '/^:::$/d'`); Google Docs' "Paste as markdown" renders the `:::` wrappers as literal text. The `-header_attributes` pandoc extension handles the heading-attribute counterpart (`# Works Cited {#bibliography .unnumbered}` — pandoc emits `{#bibliography}` for any reference section title via `--metadata reference-section-title=`, regardless of the heading text).
 
 ### plain-markdown
 

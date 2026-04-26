@@ -12,5 +12,3 @@ A consolidated view across the three main lines of evidence is now available
 Institutional reporting on classroom multilingualism adds context from outside
 the academic literature [@mla-2021]. Undated industry commentary touches on
 similar themes [@perennial-nd].
-
-# References

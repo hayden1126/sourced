@@ -37,6 +37,22 @@ EXTRA_FLAGS=("$@")
 STYLE_NAME="$(basename "${STYLE_DIR}")"
 REPO_DIR="$(cd "${STYLE_DIR}/../../.." && pwd)"
 
+# Read `List heading:` from the shipped style.md (§Style identity block) so
+# pandoc emits the reference-list heading itself via
+# `--metadata reference-section-title=`. This replaces a hand-authored heading
+# in fixture.pandoc.md and matches the contract `[formatting mode]` ships in
+# real projects (see issue #15). Falls back to "References" if the field is
+# absent — a missing field is a style.md authoring bug surfaced by
+# `sourced check`, not _render.sh's problem.
+STYLE_MD="${REPO_DIR}/src/sourced/data/templates/styles/${STYLE_NAME}.md"
+LIST_HEADING="References"
+if [[ -f "${STYLE_MD}" ]]; then
+  parsed="$(awk -F': *' '/^- List heading:/ {print $2; exit}' "${STYLE_MD}" | tr -d '\r')"
+  if [[ -n "${parsed}" ]]; then
+    LIST_HEADING="${parsed}"
+  fi
+fi
+
 CSL_FILES=("${REPO_DIR}/src/sourced/data/templates/styles/${STYLE_NAME}"/*.csl)
 if [[ ! -f "${CSL_FILES[0]}" ]]; then
   echo "[${STYLE_NAME}] ${TARGET} SKIP (no CSL found in src/sourced/data/templates/styles/${STYLE_NAME}/)" >&2
@@ -63,6 +79,7 @@ if [[ "${TARGET}" == "latex" ]]; then
   pandoc --citeproc \
     --bibliography="${STYLE_DIR}/fixture.bib.json" \
     --csl="${CSL_FILE}" \
+    --metadata "reference-section-title=${LIST_HEADING}" \
     --standalone --template="${TEMPLATE}" \
     "${EXTRA_FLAGS[@]}" \
     -o "${RAW}" \
@@ -85,6 +102,7 @@ else
   pandoc --citeproc \
     --bibliography="${STYLE_DIR}/fixture.bib.json" \
     --csl="${CSL_FILE}" \
+    --metadata "reference-section-title=${LIST_HEADING}" \
     "${LUA_FILTER_FLAGS[@]}" \
     "${EXTRA_FLAGS[@]}" \
     -o "${ACTUAL}" \

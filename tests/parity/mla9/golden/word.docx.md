@@ -14,7 +14,7 @@ Institutional guidance on multi-author citation resolves common
 ambiguities (Modern Language Association). Undated industry commentary
 touches on adjacent practice (Perennial).
 
-# Works Cited {#works-cited .unnumbered}
+# Works Cited {#bibliography .unnumbered}
 
 ::: {#refs .references .csl-bib-body .hanging-indent line-spacing="2"}
 ::: {#ref-able-baker-chen-2019 .csl-entry}
