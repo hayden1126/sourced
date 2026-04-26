@@ -14,7 +14,7 @@ Institutional reporting on classroom multilingualism adds context from
 outside the academic literature (Modern Language Association 2021).
 Undated industry commentary touches on similar themes (Perennial, n.d.).
 
-# References {#references .unnumbered}
+# References {#bibliography .unnumbered}
 
 ::: {#refs .references .csl-bib-body .hanging-indent}
 ::: {#ref-able-baker-chen-2019 .csl-entry}

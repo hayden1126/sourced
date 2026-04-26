@@ -12,5 +12,3 @@ consolidated framing across the three strands is now available [@smith-2010;
 Institutional guidance on multi-author citation resolves common ambiguities
 [@mla-2021]. Undated industry commentary touches on adjacent practice
 [@perennial-nd].
-
-# Works Cited

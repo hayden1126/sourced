@@ -17,5 +17,3 @@ scriptoria,[@okafor-lindqvist-tanaka-rossi-2018] and Herrmann and Schulz
 returned to the question in a short follow-up note.[@herrmann-schulz-2021,
 p. 44] A more recent archival guide fills in the institutional
 background.[@bnf-guide-2022]
-
-# Bibliography
