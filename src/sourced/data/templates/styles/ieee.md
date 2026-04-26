@@ -78,7 +78,7 @@ Threshold: none. IEEE has no prescribed block-quote threshold; writers use edito
 - lua-filter: `smart-quotes.lua` — preserves ASCII apostrophes inside italic spans for linguistic glottal-stop notation while letting pandoc's `-smart` writer curl English apostrophes and quotes outside italics. `[formatting mode]` resolves the name to `~/.claude/filters/<name>` and adds `--lua-filter=<absolute-path>` to the pandoc invocation.
 - Paste-time instructions:
   - "Apply hanging indent to References after pasting (Format > Align > Indentation options > Special > Hanging)."
-- Post-pandoc transforms: strip pandoc fenced-div markers from the References block (`sed -e '/^::: /d' -e '/^:::$/d'`); Google Docs' "Paste as markdown" renders the `:::` wrappers as literal text. The `-header_attributes` pandoc extension handles the heading-attribute counterpart (`# References {#references .unnumbered}`).
+- Post-pandoc transforms: strip pandoc fenced-div markers from the References block (`sed -e '/^::: /d' -e '/^:::$/d'`); Google Docs' "Paste as markdown" renders the `:::` wrappers as literal text. The `-header_attributes` pandoc extension handles the heading-attribute counterpart (`# References {#bibliography .unnumbered}` — pandoc emits `{#bibliography}` for any reference section title via `--metadata reference-section-title=`, regardless of the heading text).
 
 ### plain-markdown
 
