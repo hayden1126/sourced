@@ -40,6 +40,14 @@ Plus one recent blocker-shape cleanup (already applied in `5b2a18b`):
 
 **Decision:** C-broad — full decomposition (CLI carries project-type marker handling, voice/style validation, prereq check; install.sh shrinks to bootstrap-only). ROADMAP entry will need to be expanded from current S sizing. `superpowers:brainstorming` session in flight (2026-04-21) to scope properly before any code lands.
 
+**Status: SHIPPED 2026-04-22 → 2026-04-25.** C-broad decision delivered across four phases:
+- Phase 1 (PRs #19-#23, merged 2026-04-22) — Python CLI port, `install.sh` deleted, six subcommands replace it.
+- Phase 2 (PR #24, merged 2026-04-24) — CLAUDE.md manifest extraction, `sourced check --invariants` rules I1-I10.
+- Phase 3 (PR #25, merged 2026-04-24) — voice pipeline, prose-drafter, register-aware extraction.
+- Phase 4 (PR #26, merged 2026-04-25) — per-project directory restructure, I11 invariant.
+
+T1's four sharp-edge findings (F27 pandoc parse, F28 awk sentinel, F29 head trim, F34 dotglob) are all retired with `install.sh`. Ongoing CLI hardening continues under ROADMAP §Python CLI Phase 5 (CI, doctor diagnostics, json output, completion, config migration).
+
 ---
 
 ## T2 — Duplication-without-include: template-fragment system, or accept?
