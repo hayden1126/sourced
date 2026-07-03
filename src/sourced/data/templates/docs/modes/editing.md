@@ -119,6 +119,8 @@ Each pass operates on the section being edited. Passes that produce forced-field
 
     The target is **unambiguity**, not rule compliance. Flag any sentence that parses two ways even if technically well-formed.
 
+    Emit the grammar list as a **forced field**: one `{line, clause, issue}` row per hit. Empty list (`no hits`) is a valid emission; a pass that doesn't emit its list has not run.
+
 11. **Pass 5 — Proofreading.** After grammar, before AI-tell. Produce each of the three lists below as a **forced field**; a pass that doesn't emit its lists has not run. Empty lists (`no hits`) are valid emissions.
 
     - **Proper-noun consistency list.** For every proper noun occurring more than once in the section, compare each occurrence to its first occurrence character-by-character. Emit `{proper_noun, line_first, line_current, chars_differing}` for every mismatch. When non-empty, restore from the citation log's `exact_quote` (authoritative) or ask {{USER}} for the correct form.
