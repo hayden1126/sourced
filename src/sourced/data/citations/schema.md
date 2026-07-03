@@ -51,7 +51,7 @@ Each in-text citation is one entry. Same source cited three times = three entrie
 
 If you assign an individual author whose name is not printed in or signed on the source itself (initials, editorial signature, "compiled by"), record the evidence in a new `author_evidence` field with the verbatim text and its location on the page (e.g., `"author_evidence": "signed 'WL' at end of page"`). Absence of this field on an entry with a named individual author asserts that the byline is printed verbatim somewhere on the source.
 
-`source.authors` is also the source of truth for author names rendered into prose. `[formatting mode]` (CLAUDE.md §7) reads `source.authors` to render every inline citation; if the byline is wrong here, every rendered citation that resolves through this entry is wrong. Verify it once at logging time and re-verify it any time the entry is touched in a later session (see `retrieved_at` below for the re-verification trigger).
+`source.authors` is also the source of truth for author names rendered into prose. `[formatting mode]` (CLAUDE.md §7) reads `source.authors` to render every inline citation; if the byline is wrong here, every rendered citation that resolves through this entry is wrong. Logging-time verification is recorded by the byline rules above (`author_evidence` when a name is not printed verbatim); re-verification in a later session is recorded by updating `retrieved_at` (see below for the trigger) and, when `[editing mode]` Pass 2 fires, overwriting `retrieval.verification_trace` from the re-opened source. An entry touched in a later session without a fresh `retrieved_at` is unverified regardless of what was checked silently.
 
 ## Verification fields
 

@@ -33,7 +33,7 @@ Outlining is generative, not evaluative. Attach citation ids to claims as you dr
 
 3. **Load the citation log.** Open `sources/<draft>.citations.json` (or `sources/working.citations.json` before a draft file exists). The outline attaches bare ids from this log to each paragraph's claim. If the log is missing, stop — directing {{USER}} to `[research mode]` is the correct move, not inventing placeholder ids.
 
-4. **Read the brief.** Confirm the thesis, scope, audience, and section structure (if the brief names one). These govern what sections exist and what the argument needs to accomplish.
+4. **Read the brief.** Open the outlining turn with a three-line restate sourced from the brief: thesis, scope, audience (each one line; `TBD` fields carry through as `TBD`). An outline emitted without the restate has not read the brief. Section structure (if the brief names one) governs what sections exist and what the argument needs to accomplish.
 
 5. **Build the outline — sections first, then paragraphs.** For each section, name its role in the argument (setup, argument, counterargument, synthesis, conclusion). Then, within each section, build paragraphs:
 
