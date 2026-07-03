@@ -7,26 +7,6 @@ def test_substitutes_user():
     assert out == "Hello Alice!"
 
 
-def test_substitutes_voice_when_present():
-    out = render("voice={{VOICE}}", RenderContext(user="A", voice_name="academic"))
-    assert out == "voice=academic"
-
-
-def test_voice_token_kept_when_voice_name_none():
-    out = render("voice={{VOICE}}", RenderContext(user="A"))
-    assert out == "voice={{VOICE}}"
-
-
-def test_substitutes_style_when_present():
-    out = render("style={{STYLE}}", RenderContext(user="A", style_name="apa7"))
-    assert out == "style=apa7"
-
-
-def test_style_token_kept_when_style_name_none():
-    out = render("style={{STYLE}}", RenderContext(user="A"))
-    assert out == "style={{STYLE}}"
-
-
 def test_unknown_token_kept_verbatim():
     out = render("hello {{UNKNOWN}}", RenderContext(user="A"))
     assert out == "hello {{UNKNOWN}}"

@@ -1,6 +1,7 @@
 """File-tree mirroring. shutil.copytree wrapper.
 
-dirs_exist_ok=True matches install.sh's intent: overwrite per-file, never delete.
+dirs_exist_ok=True: overwrite per-file, never delete. Orphan cleanup is a
+future `sourced doctor` concern, not mirroring's.
 copy_function=shutil.copy2 preserves mtimes (so npm install doesn't re-run
 on mirrored skill dirs).
 symlinks=True future-proofs: if a bundled tree ever contains symlinks they

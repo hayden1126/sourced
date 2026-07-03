@@ -29,7 +29,7 @@ The extractor script is conservative about which iframe it reads: it auto-detect
 
 - **Node 18 or newer** on the machine running the skill. The script uses ESM + top-level await.
 - **Chrome / Chromium** the user can launch with debugging flags.
-- **`puppeteer-core`** installed in this skill's directory. Not installed by `install.sh`; run `npm install` inside `~/.claude/skills/browser-reader-extract/` on first use. The model should check for `node_modules/` before running any extractor and run `npm install` there if missing.
+- **`puppeteer-core`** installed in this skill's directory. Not installed by `sourced global-install`; run `npm install` inside `~/.claude/skills/browser-reader-extract/` on first use. The model should check for `node_modules/` before running any extractor and run `npm install` there if missing.
 
 ## First-run setup
 
