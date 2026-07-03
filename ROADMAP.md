@@ -2,17 +2,18 @@
 
 Forward-looking ideas for extending sourced's coverage. Organized by theme and rough priority.
 
-**Scope discipline.** The project's core value prop is citation integrity + voice preservation + mode discipline + paraphrase-default authoring with decoupled style rendering. Items on this list extend those values; items ruled out as scope creep are flagged at the bottom so the boundary stays visible. New items should clear that bar.
+**Scope discipline.** [`VISION.md`](./VISION.md) defines the six non-negotiables and the bar new work must clear. Every open entry names what it serves; items ruled out as scope creep are flagged at the bottom so the boundary stays visible.
 
-This file is different from the local `issues.md` (gitignored, tracks active bugs/decisions) and from `ARCHITECTURE.md` (describes what exists today). `ROADMAP.md` is aspirational; no guarantee of delivery order.
+This file is different from [GitHub Issues](https://github.com/hayden1126/sourced/issues) (active bugs, parked decisions, observation items) and from `ARCHITECTURE.md` (describes what exists today). `ROADMAP.md` is aspirational; no guarantee of delivery order.
 
 ## Reading the entries
 
-Each entry carries three tags:
+Each open entry carries four tags:
 
 - **Priority**: `next` (well-understood, ready to pick up) · `later` (depends on signal from real use) · `maybe` (surface area worth evaluating).
 - **Effort**: `S` (< 1 day, mechanical) · `M` (1–3 days, new document type or mode) · `L` (1–2 weeks, structural change) · `XL` (multi-week, cross-cutting).
-- **Status**: `open` · `in progress` · `shipped` · `declined`. Shipped items stay for historical context.
+- **Status**: `open` · `in progress` · `scoping` · `declined`. Shipped work is compressed to a short note citing its PRs; the archived spec or plan carries the detail.
+- **Serves**: which VISION.md non-negotiable the entry extends, or `ergonomics` for workflow comfort that extends none.
 
 Items that require a schema change, new mode, or new gate are called out in the entry.
 
@@ -22,25 +23,12 @@ Items that require a schema change, new mode, or new gate are called out in the 
 
 Current shipped: `apa7`, `chicago17-ad`, `chicago17-nb`, `ieee`, `mla9` — all on the slim schema with vendored CSL files under `src/sourced/data/templates/styles/<name>/`. Each new style is a slim `src/sourced/data/templates/styles/<name>.md` file plus a `src/sourced/data/templates/styles/<name>/<csl>.csl` (optionally) a `reference-styled.docx` for the `word` target.
 
-### MLA 9
-**Priority:** next · **Effort:** M · **Status:** shipped (commit 3c870c6).
-
-Modern Language Association 9th edition. Rounds out humanities coverage (literature, languages, cultural studies). Uses in-text `(Author Page)` with no year, full publication details in a Works Cited list. Author-page proof-of-concept for the `shape: author-page` branch added in commit 2ff3ab5. CSL shipped: `modern-language-association.csl`.
-
-### Chicago 17 notes-bibliography
-**Priority:** next · **Effort:** M · **Status:** shipped (commit dbfa41f).
-
-Sibling to the already-shipped `chicago17-ad` (author-date). Notes-bibliography is the footnote-centric form preferred in history, theology, art history. Footnote proof-of-concept for the `shape: footnote` branch added in commit 2ff3ab5; exercises the §Footnote citations / §Bibliography section pair and the footnote-body array handling in CLAUDE.md §7 step 6. CSL shipped: `chicago-notes-bibliography-17th-edition.csl` (filename-pinned to the 17th-edition variant because the repo's unsuffixed file has migrated to CMOS 18).
-
-### IEEE
-**Priority:** next · **Effort:** M · **Status:** shipped (commit fba4a05).
-
-Electrical / computer engineering. Numeric-sequence proof-of-concept for the `shape: numeric-sequence` branch added in commit 2ff3ab5. Numbers assigned by first appearance through source prose; References sorted by assigned number. CSL shipped: `ieee.csl` (version 11.29.2023, tracks IEEE 2023 editorial guidelines).
+**Shipped styles (history).** MLA 9 (commit 3c870c6, author-page shape), Chicago 17 notes-bibliography (commit dbfa41f, footnote shape, CSL filename-pinned to the 17th-edition variant), IEEE (commit fba4a05, numeric-sequence shape). Each was the proof-of-concept for its `shape:` branch; the shape plumbing landed in commit 2ff3ab5.
 
 ### Tier-2 rollout (pinning table)
-**Priority:** later · **Effort:** S each · **Status:** open.
+**Priority:** later · **Effort:** S each · **Status:** open · **Serves:** decoupled rendering.
 
-Eight styles queued behind the core three (MLA 9, Chicago 17 NB, IEEE). Per [`docs/archive/specs/2026-04-19-csl-direct-consumption-design.md`](docs/archive/specs/2026-04-19-csl-direct-consumption-design.md) §11, each targets ~15 minutes of per-style work now that the slim schema has shipped — a slim `style.md`, a vendored CSL, and parity fixtures. This table pre-resolves the CSL filename + authority-URL lookups so rollout PRs stay mechanical; edition-pinning caveats flag where upstream drift (e.g., CMOS 17 → 18) requires a suffixed-filename pin rather than the plain variant.
+Eight styles queued behind the shipped five. Per [`docs/archive/specs/2026-04-19-csl-direct-consumption-design.md`](docs/archive/specs/2026-04-19-csl-direct-consumption-design.md) §11, each targets ~15 minutes of per-style work now that the slim schema has shipped — a slim `style.md`, a vendored CSL, and parity fixtures. This table pre-resolves the CSL filename + authority-URL lookups so rollout PRs stay mechanical; edition-pinning caveats flag where upstream drift (e.g., CMOS 17 → 18) requires a suffixed-filename pin rather than the plain variant.
 
 | Style | CSL filename | Authority URL | Edition pinning caveats |
 |---|---|---|---|
@@ -54,7 +42,7 @@ Eight styles queued behind the core three (MLA 9, Chicago 17 NB, IEEE). Per [`do
 | MHRA | `mhra-notes.csl` | https://www.mhra.org.uk/style | Pinned to "MHRA Style Guide 4th edition (notes)." No edition-suffixed variants upstream, so future 5th ed would drift in place. Alternates: `mhra-author-date.csl`, `mhra-notes-subsequent-ibid.csl`, `mhra-shortened-notes.csl`. |
 
 ### Bluebook
-**Priority:** maybe · **Effort:** XL · **Status:** open.
+**Priority:** maybe · **Effort:** XL · **Status:** open · **Serves:** decoupled rendering.
 
 Legal writing. Massive spec (case law, statutes, regulations), different citation structure entirely (`v.`, signals, short-form, supra, id.). Probably a standalone subproject rather than a shipped style; worth scoping before committing.
 
@@ -64,22 +52,20 @@ Legal writing. Massive spec (case law, statutes, regulations), different citatio
 
 Beyond "argumentative essay with sources." Each new type probably extends the mode system or adds a new target output.
 
-### Annotated bibliography
-**Priority:** next · **Effort:** M · **Status:** phase 1+2 shipped 2026-04-20; phase 3 (per-style paste-target variants) open.
+### Annotated bibliography — phase 3
+**Priority:** next · **Effort:** M · **Status:** phases 1+2 shipped 2026-04-20; phase 3 open · **Serves:** decoupled rendering.
 
-New `annotated-bib` project type with topic-driven research deliverable. User supplies a narrow topic; `[plan mode]` runs a topic specificity gate and facet decomposition; `[research mode]` dispatches source-finders per facet; `[annotated-bib mode]` (new) writes per-entry annotations (150–250 word four-beat: summary / relevance / location / evaluation) grounded only in log fields; `[editing mode]` runs a subset of its passes (skip quote-density, reduce voice audit to iron rules + exploratory/verdict). Design spec: [`docs/archive/specs/2026-04-20-annotated-bibliography-design.md`](docs/archive/specs/2026-04-20-annotated-bibliography-design.md).
-
-**Shipped 2026-04-20 (phases 1+2).** Schema extension (`citations/schema.md §Annotation`); new brief template (`src/sourced/data/templates/brief.template.annotated-bib.md`); `--type annotated-bib` install flag (bash-era; now `sourced install --type`) + `.sourced-project-type` marker; shipped `CLAUDE.md §7` project-type preamble + new mode + mode adaptations.
+Phases 1+2 shipped the `annotated-bib` project type end to end: schema extension (`citations/schema.md §Annotation`), brief template, `--type annotated-bib` install flag + `.sourced-project-type` marker, `[annotated-bib mode]` + mode adaptations. Design spec: [`docs/archive/specs/2026-04-20-annotated-bibliography-design.md`](docs/archive/specs/2026-04-20-annotated-bibliography-design.md).
 
 **Phase 3 open.** Per-style paste-target variants (`apa7-annotated-bib`, `chicago17-ad-annotated-bib`, etc.) that render per-entry bibliography entries followed by annotation blocks via `pandoc --citeproc` + CSL. Open design question: inject annotations via CSL `note` field mapping plus custom CSL-JSON emitter path, or post-pandoc merge of rendered bibliography + log's `annotation` field by id match. Upstream citation-style-language/styles has `apa-annotated-bibliography.csl` for APA; other styles may need vendored variants. LaTeX `template.tex` adjustments per style for annotation-block layout. Test fixtures per style. Originally sized S; resized M after design work surfaced the project-type fork cost.
 
 ### Grant proposal
-**Priority:** later · **Effort:** M · **Status:** open.
+**Priority:** later · **Effort:** M · **Status:** open · **Serves:** mode discipline.
 
 Different section structure (Specific Aims, Background / Significance, Approach, Budget Justification). `[plan mode]` needs grant-aware templates; mode gates map per-section rather than global. Funder-specific formatting (NIH vs. NSF vs. private foundations) probably ships as templates-on-templates.
 
 ### Thesis / dissertation
-**Priority:** later · **Effort:** L · **Status:** open.
+**Priority:** later · **Effort:** L · **Status:** open · **Serves:** citation integrity (shared-log verification at chapter scale).
 
 Multi-chapter, shared bibliography, cross-chapter citation management. Structural changes needed:
 
@@ -91,7 +77,7 @@ Multi-chapter, shared bibliography, cross-chapter citation management. Structura
 Natural extension for long-form academic work. Worth writing once a real dissertation project materializes.
 
 ### Literature review / systematic review (with PRISMA)
-**Priority:** later · **Effort:** L · **Status:** open.
+**Priority:** later · **Effort:** L · **Status:** open · **Serves:** citation integrity.
 
 Targets medical / social-science students who run systematic searches. Needs:
 
@@ -103,12 +89,12 @@ Targets medical / social-science students who run systematic searches. Needs:
 Schema extension: citation log entries carry `screening_decision` and `exclusion_reason` fields when part of a systematic review.
 
 ### Book review / review essay
-**Priority:** maybe · **Effort:** S · **Status:** open.
+**Priority:** maybe · **Effort:** S · **Status:** open · **Serves:** ergonomics.
 
 Text-engagement heavy, often long-form quotation with extended analysis. Differs from an argumentative paper: primary source is a single book, not a literature spread. Probably a brief-template variant more than a new mode.
 
 ### Conference paper / short-form academic
-**Priority:** maybe · **Effort:** S · **Status:** open.
+**Priority:** maybe · **Effort:** S · **Status:** open · **Serves:** ergonomics.
 
 Tight word limits, specific formatting per conference. Ships as a brief-template variant + per-conference style files.
 
@@ -119,21 +105,21 @@ Tight word limits, specific formatting per conference. Ships as a brief-template
 New modes that extend integrity discipline into adjacent workflows.
 
 ### Peer review mode
-**Priority:** next · **Effort:** M · **Status:** open.
+**Priority:** next · **Effort:** M · **Status:** open · **Serves:** synthesis integrity.
 
 Agent simulates a structured peer reviewer (not ad-hoc red-team). Produces a numbered review with categories: argument clarity, evidence adequacy, counterargument handling, methods rigor, writing quality. Could be a new mode (`[peer review mode]`) or a structured extension of `[red team mode]`.
 
 Differs from red-team: produces a durable output artifact (the review itself), runs against a complete draft rather than during the writing loop, uses a rubric rather than ad-hoc counterpoints. Good for self-review before submitting, or for reviewing someone else's paper.
 
 ### Revision mode
-**Priority:** later · **Effort:** M · **Status:** open.
+**Priority:** later · **Effort:** M · **Status:** open · **Serves:** synthesis integrity.
 
 Respond to editor / reviewer comments with citation-linked revisions. Given a reviewer comments file plus the draft, produce a response letter + revised draft with change tracking. Integrity concern shifts from "paraphrase matches source" to "revision addresses the comment without introducing new scope creep."
 
 Schema extension: revision-cycle log tracking which comment maps to which change.
 
 ### Primary-source research
-**Priority:** later · **Effort:** M · **Status:** open.
+**Priority:** later · **Effort:** M · **Status:** open · **Serves:** citation integrity.
 
 Archives, interviews, fieldwork, oral histories. Different verification rules than peer-reviewed literature: full-text access is often physical (archive visit), not digital. Schema extension: `source_type: "archival" | "interview" | "field" | "literature"` with type-specific verification protocols. `[research mode]` delegates to different verification flows per type.
 
@@ -141,15 +127,10 @@ Archives, interviews, fieldwork, oral histories. Different verification rules th
 
 ## Paste targets
 
-Current shipped: `google-docs`, `plain-markdown`, `word`, `latex` (all 5 styles — APA 7, Chicago 17 author-date, Chicago 17 notes-bibliography, IEEE, MLA 9 — render uniformly via `pandoc --citeproc` + vendored CSL after the 2026-04-19 CSL direct-consumption migration; `latex` added 2026-04-20).
-
-### LaTeX
-**Priority:** next · **Effort:** M · **Status:** shipped 2026-04-20.
-
-STEM / math / physics. Uses the existing pandoc + citeproc + CSL pipeline (no biblatex, no natbib) plus a per-style pandoc `template.tex` that sets document class, geometry, and the `CSLReferences` environment. `IEEEtran` for the IEEE style; `article` for APA, Chicago (both variants), and MLA. Engine-agnostic via `iftex` guard — compiles under `pdflatex`, `xelatex`, and `lualatex`. Shipped artifact is a standalone `.tex` file; user owns compilation. Figure/table handling stays at pandoc defaults; arXiv-ready packaging is a follow-up item.
+Current shipped: `google-docs`, `plain-markdown`, `word`, `latex`. All 5 styles render uniformly via `pandoc --citeproc` + vendored CSL after the 2026-04-19 CSL direct-consumption migration; `latex` shipped 2026-04-20 (PR #11: per-style pandoc `template.tex`, engine-agnostic via `iftex`, user owns compilation).
 
 ### Figure and table handling
-**Priority:** later · **Effort:** M · **Status:** open.
+**Priority:** later · **Effort:** M · **Status:** open · **Serves:** decoupled rendering.
 
 Currently all 4 paste targets pass markdown `![caption](path)` through pandoc's defaults: `\includegraphics{path}` for `latex`, embedded binary for `word`, the image path verbatim for `plain-markdown` and `google-docs`. No style file prescribes figure-specific rules; no parity fixture exercises a figure. First-class support would cover:
 
@@ -164,12 +145,12 @@ Schema likely unchanged (figures live in the prose, not the citation log). Main 
 Related: `arXiv-ready submission` (below) depends on this; figure-aware LaTeX output is the non-trivial piece of that follow-up.
 
 ### arXiv-ready submission
-**Priority:** later · **Effort:** M · **Status:** open.
+**Priority:** later · **Effort:** M · **Status:** open · **Serves:** decoupled rendering.
 
 Full arXiv submission format (LaTeX + figures + bibliography). Builds on the LaTeX target but adds arXiv-specific quirks (figure handling, bibliography inclusion, preprint metadata).
 
 ### Obsidian / Roam / Logseq
-**Priority:** maybe · **Effort:** M · **Status:** open.
+**Priority:** maybe · **Effort:** M · **Status:** open · **Serves:** ergonomics.
 
 Knowledge-base integration. Citation IDs resolve to wiki-links in the destination tool rather than rendered author-year strings. Targets writers who use a PKM system alongside their academic writing.
 
@@ -177,35 +158,35 @@ Knowledge-base integration. Citation IDs resolve to wiki-links in the destinatio
 
 ## Skills
 
-The `browser-reader-extract` pattern extends to several other extraction tasks. Each is a new directory under `skills/` with its own `SKILL.md`.
+The `browser-reader-extract` pattern extends to several other extraction tasks. Each is a new directory under `src/sourced/data/skills/` with its own `SKILL.md`.
 
 ### `extract-pdf-highlights`
-**Priority:** next · **Effort:** S · **Status:** open.
+**Priority:** next · **Effort:** S · **Status:** open · **Serves:** citation integrity.
 
 Pull the user's highlights and annotations from an annotated PDF into the citation log as paste-entry candidates. Solves the "I already read and annotated this" gap: writer has done the reading, wants the quotes + page numbers extracted into citation log entries without retyping. Prerequisite: `pdftotext` + annotation parsing.
 
 ### `extract-jstor`
-**Priority:** next · **Effort:** S · **Status:** open.
+**Priority:** next · **Effort:** S · **Status:** open · **Serves:** citation integrity.
 
 JSTOR-specific version of `browser-reader-extract` for paywalled-but-authorized academic articles. Similar Chrome remote-debug + puppeteer-core pattern, different iframe/selector specifics. Given JSTOR's market share in humanities/social-science scholarship, high leverage per line.
 
 ### `extract-arxiv-latex`
-**Priority:** later · **Effort:** S · **Status:** open.
+**Priority:** later · **Effort:** S · **Status:** open · **Serves:** citation integrity.
 
 Fetch arXiv LaTeX source rather than the rendered PDF. More reliable for math-heavy papers where PDF extraction loses formulas and code blocks. arXiv provides a public API; no browser automation needed.
 
 ### Additional browser readers
-**Priority:** later · **Effort:** S each · **Status:** open.
+**Priority:** later · **Effort:** S each · **Status:** open · **Serves:** citation integrity.
 
 Kindle Cloud Reader, Scribd, Archive.org's in-browser reader, HathiTrust. Each follows the pattern documented in `browser-reader-extract/SKILL.md`'s *Adding a new reader* section. Prioritize based on what real writers hit.
 
 ### `extract-transcript`
-**Priority:** later · **Effort:** M · **Status:** open.
+**Priority:** later · **Effort:** M · **Status:** open · **Serves:** citation integrity.
 
 Clean interview transcripts (Zoom output, Otter.ai export, YouTube auto-caption) into quote-ready form with timestamps. Ties into the primary-source research mode above. Handles speaker diarization, timestamp normalization, and quote-extraction formatting.
 
 ### `extract-scholar-citations`
-**Priority:** maybe · **Effort:** M · **Status:** open.
+**Priority:** maybe · **Effort:** M · **Status:** open · **Serves:** citation integrity.
 
 Harvest citations from a Google Scholar author page or search results with automatic verification pass against the §3 rules. Different failure mode than current: Scholar produces citation metadata that may not match the accessible full text. Verification still required; Scholar is a discovery tool, not a verification shortcut.
 
@@ -215,28 +196,29 @@ Harvest citations from a Google Scholar author page or search results with autom
 
 Cross-cutting features that touch multiple modes.
 
-### Python CLI (`sourced`) — install.sh decomposition
-**Priority:** next · **Effort:** L · **Status:** in progress (phase 1 started 2026-04-21).
+### Python CLI (`sourced`) — phase 5 tail
+**Priority:** next · **Effort:** S–M each · **Status:** phases 1–4 shipped (PRs #19–#26); phase 5 open · **Serves:** ergonomics.
 
-Phase 1: Python package at `src/sourced/`, pipx-installed from private git URL. Ports all install.sh responsibilities. Replaces install.sh entirely. Six subcommands (`install`, `global-install`, `new`, `update`, `switch`, `check`). Tier 1 + Tier 2 UX improvements.
+The CLI decomposition shipped in four phases between 2026-04-22 and 2026-04-25: phase 1 ported `install.sh` to the Python CLI (PRs #19–#23), phase 2 extracted the CLAUDE.md dispatch manifest + externalized mode bodies (PR #24), phase 3 shipped the voice pipeline (PR #25), phase 4 the per-project directory restructure (PR #26). Design specs: [`docs/archive/specs/2026-04-21-sourced-cli-decomposition-design.md`](./docs/archive/specs/2026-04-21-sourced-cli-decomposition-design.md), [`docs/archive/specs/2026-04-23-claude-md-manifest-extraction-design.md`](./docs/archive/specs/2026-04-23-claude-md-manifest-extraction-design.md).
 
-Design spec: [`docs/archive/specs/2026-04-21-sourced-cli-decomposition-design.md`](./docs/archive/specs/2026-04-21-sourced-cli-decomposition-design.md).
+**Phase 5 items still open** (GitHub Actions CI shipped 2026-07-03 in the cleanup pass):
 
-Phase 2: **shipped template `CLAUDE.md` manifest extraction** — slim the 34k-token monolith down to a ~10k-token always-on root plus on-demand mode bodies. Load-bearing change is extracting an LSP-style dispatch manifest (explicit + implicit + auto-fire triggers, mode-to-mode gates, forcing artifacts, precedence rules) into the top of root `CLAUDE.md`; full mode protocols move to `docs/modes/<name>.md` loaded via `Read` on mode entry. Five commits: (1a) manifest + 3 seed mode bodies (finetuning, research, editing) + adversarial pressure-testing; (1b) remaining 6 mode bodies; (2) `sourced update` preservation fix (structural diff + `user-addition` markers, solves managed-block clobbering bug); (3) `sourced check --invariants` rules I1–I11 (structural manifest invariants in `validators/invariants.py`; the earlier `facts.yml` seed registry was never wired and has been removed, its doc-mirror inventories preserved in issue #34) (I11 added in phase 4 to forbid flat-path references in shipped templates); (4) project-type drop-in overlays under `CLAUDE.d/`. D6.1 follow-up: `omit-claude-md` audit for read-only subagents after rule-inlining. Also in scope as independent items: GitHub Actions CI, `sourced doctor` deeper diagnostics (conda poisoning, PATH duplicates, orphan file detection per issues.md #14), `--format=json` structured output, shell completion (bash/zsh/fish), user-defaults config migration from `~/.claude/sourced.config` to `~/.config/sourced/config.toml`.
+- `sourced doctor` deeper diagnostics: conda poisoning, PATH duplicates, orphan-file detection in `~/.claude/`.
+- `--format=json` structured output.
+- Shell completion (bash/zsh/fish).
+- User-defaults config migration from `~/.claude/sourced.config` to `~/.config/sourced/config.toml`.
 
-Design spec: [`docs/archive/specs/2026-04-23-claude-md-manifest-extraction-design.md`](./docs/archive/specs/2026-04-23-claude-md-manifest-extraction-design.md).
-
-Phase 3 spike candidate (see spec OQ6): evaluate migrating `docs/modes/<name>.md` to shipped skills with `context: fork` semantics and a SessionStart-injected `using-sourced` meta-skill. Decision criteria: implicit-trigger reliability observed in phase-2 writer sessions; whether ~600 tokens of frontmatter overhead pays for itself in reduced drift.
+Phase 3 spike (mode bodies as skills, spec OQ6) is tracked in [issue #36](https://github.com/hayden1126/sourced/issues/36).
 
 ### Single-binary distribution (Go or Rust)
-**Priority:** later · **Effort:** L · **Status:** open. Depends on Python CLI phase 1+2.
+**Priority:** later · **Effort:** L · **Status:** open · **Serves:** ergonomics. Depends on the phase-5 tail settling.
 
 Rewrite the Python CLI as a statically-linked single binary (Go or Rust, pick per migration-time language maturity). Distribute via GitHub releases + Homebrew formula + `curl | sh` installer. Eliminates pipx + Python 3 as a user prereq — for non-dev writers who stumble on Python tooling, reduces install to a single shell command. Behavior-identical to Python CLI; just a distribution upgrade. Migration: ship Go binary alongside pipx for one release cycle, then document the binary as the primary path.
 
 ### Per-agent model selection via `sourced model`
-**Priority:** maybe · **Effort:** S · **Status:** open · **decision TBD.**
+**Priority:** maybe · **Effort:** S · **Status:** open · **decision TBD** · **Serves:** ergonomics.
 
-Each shipped agent (`source-finder`, `voice-extractor`, `sourced-helper`, future agents) currently has a hardcoded `model:` in its frontmatter. A `sourced model <agent> <model>` subcommand would let the user override the model per agent — e.g., switch `source-finder` from `sonnet` to `opus` for a more expensive but more thorough research run, or downgrade `sourced-helper` to `haiku` for cost.
+Each shipped agent (`source-finder`, `voice-extractor`, `sourced-helper`, `prose-drafter`) currently has a hardcoded `model:` in its frontmatter. A `sourced model <agent> <model>` subcommand would let the user override the model per agent — e.g., switch `source-finder` from `sonnet` to `opus` for a more expensive but more thorough research run, or downgrade `sourced-helper` to `haiku` for cost.
 
 **Architecture decision TBD.** Two candidate shapes:
 1. **Mutate the mirrored copy** at `~/.claude/agents/<name>.md`. Simple to ship; user choices get clobbered by `sourced global-install` unless the CLI learns to detect-and-preserve the mutation.
@@ -245,7 +227,7 @@ Each shipped agent (`source-finder`, `voice-extractor`, `sourced-helper`, future
 Option 2 is the favored read; needs spec work before commit.
 
 ### Scoped subagents (private to `sourced` commands)
-**Priority:** maybe · **Effort:** M · **Status:** open · **decision TBD.**
+**Priority:** maybe · **Effort:** M · **Status:** open · **decision TBD** · **Serves:** mode discipline.
 
 Some shipped agents (notably `voice-extractor`) shouldn't auto-trigger when Claude Code's agent dispatcher decides a "voice corpus extraction" sounds relevant to general academic-researcher work. They're meant to run only when explicitly invoked by a sourced subcommand (`sourced voice extract`, not yet shipped). Today every agent in `~/.claude/agents/` is fair game for the dispatcher.
 
@@ -257,9 +239,9 @@ Some shipped agents (notably `voice-extractor`) shouldn't auto-trigger when Clau
 Decision depends on whether the direct-API path lands first (option 1 falls out for free) or whether the aggressive-scoping route is good enough as a stopgap.
 
 ### `sourced-helper` agent — extensions
-**Priority:** maybe · **Effort:** S–M · **Status:** open · **decision TBD.** Depends on the basic agent (shipped in phase 1, PR 5).
+**Priority:** maybe · **Effort:** S–M · **Status:** open · **decision TBD** · **Serves:** ergonomics.
 
-Phase 1 ships `sourced-helper.md` — a `haiku` agent that knows the CLI surface, file layout, voices, styles, modes, and common gotchas, and answers questions read-only. Extensions worth scoping:
+Phase 1 shipped `sourced-helper.md` — a `haiku` agent that knows the CLI surface, file layout, voices, styles, modes, and common gotchas, and answers questions read-only. Extensions worth scoping:
 
 1. **`/sourced-help` slash-command skill** alongside the agent so users can summon it explicitly without relying on dispatcher heuristics.
 2. **Doc reflection.** The agent's system prompt is self-contained today; phase 2 could have it `Read` shipped docs (`docs/MODES.md`, `docs/VOICES.md`, etc.) on demand for deeper questions, similar to how `claude-code-guide` reads its own knowledge base.
@@ -268,7 +250,7 @@ Phase 1 ships `sourced-helper.md` — a `haiku` agent that knows the CLI surface
 Decision TBD per item; ship in order of observed friction.
 
 ### Direct-API offload for deterministic workflows
-**Priority:** maybe · **Effort:** L · **Status:** open · **decision TBD.**
+**Priority:** maybe · **Effort:** L · **Status:** open · **decision TBD** · **Serves:** ergonomics.
 
 Today `sourced` is a Python CLI for file mirroring + validation; the cognitive work happens inside Claude Code where `academic-researcher` dispatches subagents. Some workflows are well-defined enough to offload to direct Anthropic API calls inside the CLI — deterministic Python flow control, tuned prompts, cheaper models per step (`haiku` for boring extraction, `sonnet` for judgment, `opus` only when warranted). Candidates:
 
@@ -278,49 +260,18 @@ Today `sourced` is a Python CLI for file mirroring + validation; the cognitive w
 
 **Architecture decision TBD.** The hybrid is the leading read: keep Claude Code as the substrate for interactive writing/research, use direct API for narrow workflows where flow control matters more than dispatcher creativity. Tradeoff: each migrated workflow needs careful prompt engineering plus golden tests, and the codebase grows a runtime dependency on the `anthropic` SDK. Don't rebuild Claude Code wholesale — a separate platform is months of effort that competes with `sourced` rather than complementing it.
 
-### Installable `sourced` executable on `$PATH` (deprecated entry — see Python CLI above)
-**Status:** ~~open~~ → superseded 2026-04-22 by the Python CLI + Single-binary entries above.
-
-The original "rename install.sh to sourced" entry described the right idea at the wrong substrate level; the Python CLI ships that capability with subcommands, validation, dry-run, and color UX, and the Single-binary entry covers the eventual `curl | sh` distribution path.
-
 ### Per-project directory restructure
-**Priority:** later · **Effort:** M · **Status:** shipped 2026-04-24.
-
-Group project files into semantic subdirectories to reduce top-level clutter as a project accumulates drafts, sources, and samples. Proposed layout:
-
-```
-project-dir/
-├── CLAUDE.md              # stays at root — Claude Code reads from project root
-├── config/
-│   ├── voice.md
-│   ├── style.md
-│   └── <name>.brief.md
-├── sources/
-│   ├── <draft>.citations.json
-│   └── *.pdf, *.txt, *.md    # user-uploaded primary/secondary sources
-├── samples/               # writing samples for voice-extractor input
-│   └── *.md, *.pdf, *.txt
-├── .claude/citations/     # unchanged: shard files during parallel dispatch
-└── <draft>.md + <draft>.*.md  # drafts and formatted outputs stay at root
-```
-
-Constraints. `CLAUDE.md` must stay at project root (Claude Code convention). `.claude/citations/` stays hidden for dispatch-shard infrastructure; the writer-facing main log moves into `sources/`. Drafts and formatted outputs stay at root because `[writing mode]` and `[formatting mode]` emit sibling files and users expect to find them next to each other.
-
-Touch points. `templates/CLAUDE.md §7` references `./voice.md`, `./style.md`, and `<draft>.citations.json` as flat paths across every mode that reads them; all need updating. `agents/source-finder.md`, `citations/schema.md`, and the `voice-extractor` agent pick up sample-dir conventions. `install.sh` creates the subdirs and writes to new target paths. Per-style `style.md` files reference the citation log location in their pandoc recipes.
-
-Migration. For one release: agents and install.sh read flat paths as fallback if subdir paths are absent, so existing projects keep working. Next release: deprecate the fallback, print a `sourced migrate` hint that moves files into place.
-
-No schema change; no new mode; no new gate. Purely organizational. Scope-wise, this is ergonomics (not one of the core values) — but it materially affects how usable sourced is once a real writer has run 3+ essays in one dir.
+**Status:** shipped 2026-04-24 via PR #26. Projects group into `config/`, `sources/`, `samples/`, `failures/` with auto-migration on `sourced update` and invariant I11 guarding against flat-path regressions. Design spec: [`docs/archive/specs/2026-04-24-per-project-directory-restructure-design.md`](./docs/archive/specs/2026-04-24-per-project-directory-restructure-design.md).
 
 ### Cross-project citation reuse
-**Priority:** later · **Effort:** L · **Status:** open. **Likely subsumed** by *Verified-claims database* below — implement the smaller dedup-and-reuse version first only if it ships meaningfully ahead of the larger entry.
+**Priority:** later · **Effort:** L · **Status:** open · **Serves:** citation integrity. **Likely subsumed** by *Verified-claims database* below — implement the smaller dedup-and-reuse version first only if it ships meaningfully ahead of the larger entry.
 
 One writer, many papers, overlapping sources. A cross-project citation library (verify once, use many) reduces re-verification cost. `[research mode]` would check the shared library first before dispatching source-finders.
 
 Schema extension: add `source_hash` (content-addressed or DOI-based) that dedupes across project log files. Staleness thresholds still apply per use; re-verification may still be needed for web sources.
 
 ### Verified-claims database (PageIndex-style retrieval)
-**Priority:** maybe → next once *Cross-project citation reuse* lands · **Effort:** XL · **Status:** scoping. Supersedes *Cross-project citation reuse* on landing.
+**Priority:** maybe → next once *Cross-project citation reuse* lands · **Effort:** XL · **Status:** scoping · **Serves:** citation integrity. Supersedes *Cross-project citation reuse* on landing.
 
 Persistent, tree-indexed database of verified claims and citations across all of one writer's projects. Each entry is a node carrying provenance (which session verified, when), the §4 audit results, and a position in the source's tree-of-contents index. `[research mode]` consults the local database first; only dispatches `source-finder` subagents for online search when (a) entries are stale per `~/.claude/citations/schema.md §Staleness` or (b) topical coverage is insufficient. Amortizes §3/§4 verification cost across writing sessions — the most expensive operation today is full-text verification, not citation rendering, so a write-once-read-many substrate compounds quickly across a writer's body of work.
 
@@ -348,12 +299,12 @@ Touch points (provisional): `~/.claude/citations/schema.md` (claim-node and sour
 Related: `### Cross-project citation reuse` (above, smaller cousin — supersedes on landing); `### Direct-API offload for deterministic workflows` (database build/index workflows are candidates for direct-API automation).
 
 ### Teaching mode
-**Priority:** maybe · **Effort:** M · **Status:** open.
+**Priority:** maybe · **Effort:** M · **Status:** open · **Serves:** ergonomics.
 
 Agent explains why it's making each decision for a student learning the academic-writing process. Current agent executes mode-gate discipline silently; a teaching variant would surface "I'm auto-triggering research mode because claim X needs a source" explanations at every mode entry. Opt-in verbosity.
 
 ### Babble-as-ideation across plan / research / refining
-**Priority:** next · **Effort:** M · **Status:** open.
+**Priority:** next · **Effort:** M · **Status:** open · **Serves:** ergonomics (with research-quality upside: divergence before convergence reduces premature commitment to one angle).
 
 Today `[babble mode]` is collaborative-only — useful for warm-up but disconnected from the research lifecycle. Real planning involves divergent-then-convergent cycles; sourced currently skips divergence everywhere except the §6 brief's open-ended fields. Three insertion points worth supporting:
 
@@ -365,30 +316,30 @@ Schema. Each babble exit produces a structured artifact rather than dissolving i
 
 Touch points. §7.4 transition table (new allowed transitions: `babble → plan`, `babble → research`, `babble → refining`); `docs/modes/babble.md` (currently inline in CLAUDE.md §7.7 — would externalize on this entry's first concrete body); plan/research/refining mode bodies' "See also" sections; brief template's optional `## Ideation log` section.
 
-No schema change to the citation log; no new gate. The artifact format is the only new schema, and it's writer-facing markdown rather than runtime-parsed JSON. Ergonomics-tier change with potential research-quality upside (divergent thinking before convergent framing reduces premature commitment to one angle).
+No schema change to the citation log; no new gate. The artifact format is the only new schema, and it's writer-facing markdown rather than runtime-parsed JSON.
 
 ### Claude Code Agent Teams integration
-**Priority:** maybe · **Effort:** M–L · **Status:** open.
+**Priority:** maybe · **Effort:** M–L · **Status:** open · **Serves:** mode discipline.
 
 Claude Code's Agent Teams feature (`TeamCreate` / `TeamDelete` / `SendMessage` tool family) lets subagents coordinate as a structured team — shared context or explicit handoffs rather than one-shot dispatch-and-consolidate. Current `sourced` subagents (`source-finder`, `voice-extractor`) are one-shot utilities; the main agent dispatches, receives a report, and does the merging itself.
 
 Three plausible integration angles worth scoping before committing to a design:
 
 1. **Parallel source-finders with a coordinator.** `[research mode]` already dispatches multiple finders in parallel, but each returns an independent report and the main thread consolidates. A team-based version adds a coordinator that dedupes candidate sources across finders and surfaces disagreements (two finders flag the same source with different reliability assessments). Moves merge-logic out of the main agent.
-2. **Editing-critic team for `[editing mode]`.** `issues.md #5` has been parked on whether refining/editing should use specialist subagents. Agent Teams would naturally implement the critic pattern there: grammar critic, voice-tells critic, citation-integrity critic, paraphrase critic, each reading the same draft, with reports flowing to the main agent for the actual prose revision.
+2. **Editing-critic team for `[editing mode]`.** [Issue #29](https://github.com/hayden1126/sourced/issues/29) has been parked on whether refining/editing should use specialist subagents. Agent Teams would naturally implement the critic pattern there: grammar critic, voice-tells critic, citation-integrity critic, paraphrase critic, each reading the same draft, with reports flowing to the main agent for the actual prose revision.
 3. **Peer-review mode as a team.** The `### Peer review mode` ROADMAP item envisions a rubric-driven reviewer. A team could split by rubric axis (argument clarity, evidence adequacy, counterargument handling, methods rigor, writing quality), each axis owned by a specialist team member with a structured report.
 
 **Investigation-first.** The `Team*` tool schemas have not been loaded or tested yet (they are gated behind `ToolSearch` as deferred tools). Scope the API surface before any design — specifically: what state is shared across team members, what handoff semantics exist, whether teams persist across turns, and whether the per-session token economics work given that `source-finder` already burns tokens fast. If the integration story is weak, stay with one-shot subagents.
 
-Related: `issues.md #5` (editing-critic subagents, parked); `### Peer review mode` above (team candidate); `### Revision mode` (team candidate).
+Related: [issue #29](https://github.com/hayden1126/sourced/issues/29) (editing-critic subagents, parked); `### Peer review mode` above (team candidate); `### Revision mode` (team candidate).
 
 ### Voice-merging for co-authored papers
-**Priority:** maybe · **Effort:** L · **Status:** open.
+**Priority:** maybe · **Effort:** L · **Status:** open · **Serves:** voice preservation.
 
 Papers with multiple authors sometimes need blended voices: author A writes section 1, author B writes section 2, both voices coexist. Current voice system is per-project-single-voice. Options: section-level voice assignment in the brief, or a "blended" voice type that doesn't strictly enforce either author's rules. Unclear whether real co-authors actually want this vs. simply alternating paragraph-by-paragraph.
 
 ### Translation workflow
-**Priority:** maybe · **Effort:** L · **Status:** open.
+**Priority:** maybe · **Effort:** L · **Status:** open · **Serves:** synthesis integrity.
 
 Quoting from non-English sources with verbatim original + translation + translator attribution. Current §4 verbatim-quotation rule doesn't distinguish between "verbatim in the source language" and "verbatim in the paraphrased translation." Schema extension: add `original_language`, `translation`, `translator` fields. `[formatting mode]` handles display conventions per style (APA vs. Chicago differ on bracket notation for translations).
 
@@ -396,7 +347,7 @@ Quoting from non-English sources with verbatim original + translation + translat
 
 ## Scope boundaries (declined, with rationale)
 
-Flagged so the line stays visible. If any of these become urgent for a real writer, reopen for discussion.
+Flagged so the line stays visible; [`VISION.md §What sourced is not`](./VISION.md#what-sourced-is-not) carries the one-line versions. If any of these become urgent for a real writer, reopen for discussion.
 
 ### Zotero / Mendeley sync
 **Rationale:** Users with reference managers already have one. sourced's citation log is first-class; sync would be bidirectional complexity that duplicates Zotero's own model. A one-way export (sourced → .bib or .ris) is reasonable; full sync is scope creep.
@@ -411,7 +362,7 @@ Flagged so the line stays visible. If any of these become urgent for a real writ
 **Rationale:** sourced is single-writer by design. Real-time editing is a fundamentally different model. Collaboration patterns sourced CAN support: send drafts to advisor with comment-round-trip (revision mode, above); shared citation log across a research group (cross-project citation reuse, above); peer review mode (above). These cover the collaboration cases without the real-time engineering.
 
 ### Grammar / style checker beyond §10 AI-tells and §9 voice
-**Rationale:** Grammarly, LanguageTool, etc. do this well. sourced's grammar pass (editing mode pass 4) targets ambiguity and AI-specific failure modes, not general writing polish. Users wanting deeper grammar help should run a dedicated tool alongside.
+**Rationale:** Grammarly, LanguageTool, etc. do this well. sourced's grammar pass targets ambiguity and AI-specific failure modes, not general writing polish. Users wanting deeper grammar help should run a dedicated tool alongside.
 
 ### Plagiarism detection
 **Rationale:** The §4 verbatim-quotation + paraphrase-default rules are designed to prevent the drift patterns that produce plagiarism in the first place. Post-hoc detection (comparing draft against a corpus) is a different problem solved by Turnitin and similar. sourced's discipline is preventive.
@@ -424,11 +375,11 @@ Add an entry under the appropriate theme. Use this template:
 
 ```markdown
 ### <Feature name>
-**Priority:** <next | later | maybe> · **Effort:** <S | M | L | XL> · **Status:** open.
+**Priority:** <next | later | maybe> · **Effort:** <S | M | L | XL> · **Status:** open · **Serves:** <citation integrity | synthesis integrity | voice preservation | paraphrase default | decoupled rendering | mode discipline | ergonomics>.
 
-<2–4 sentences: what problem it solves, what use case it opens, how it extends the core value prop.>
+<2–4 sentences: what problem it solves, what use case it opens, how it extends the value it names.>
 
 <If a schema change, new mode, or new gate is needed, call it out explicitly. Point at the closest existing mechanism.>
 ```
 
-Scope discipline matters more than priority: an item that doesn't extend citation integrity / voice preservation / mode discipline / decoupled rendering probably belongs in a scope-boundary note rather than the open list.
+Scope discipline matters more than priority: an item that extends none of the six values and isn't honest ergonomics belongs in a scope-boundary note rather than the open list. The bar is defined in [`VISION.md §The bar for new work`](./VISION.md#the-bar-for-new-work).

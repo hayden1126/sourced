@@ -97,6 +97,7 @@ For deeper troubleshooting (pipx gotchas, conda interference, port-22-blocked ne
 
 ## Documentation
 
+- [`VISION.md`](./VISION.md) — why the project exists: the six non-negotiables, what sourced is not, and the bar new work must clear.
 - [`ARCHITECTURE.md`](./ARCHITECTURE.md) — surface-area map: files, modes, subagents, invariants, extension points.
 - [`ROADMAP.md`](./ROADMAP.md) — forward-looking feature ideas organized by theme and priority, plus declared scope boundaries.
 - [`docs/INSTALL.md`](./docs/INSTALL.md) — full install, updating, flags reference, renaming yourself.
@@ -107,7 +108,7 @@ For deeper troubleshooting (pipx gotchas, conda interference, port-22-blocked ne
 
 ## License
 
-None specified. Private repo for now.
+Private repo; no license granted. Direction and scope live in [`VISION.md`](./VISION.md).
 
 ## Migration from earlier versions
 
