@@ -154,7 +154,7 @@ If a writer legitimately uses a pattern on CLAUDE.md §10's Never list (em-dashe
 | `demonstrative-openers` | Demonstrative-noun paragraph openers with a weak antecedent. |
 | `ornamental-compounds` | Hyphenated conceptual compounds that appear once and disappear. |
 
-The IDs are extracted from `templates/CLAUDE.md` §10 at install time, so adding or renaming an ID in that file flows through to validation with no extra registration step.
+The IDs are extracted from `src/sourced/data/templates/CLAUDE.md` §10 at install time, so adding or renaming an ID in that file flows through to validation with no extra registration step.
 
 **How to declare an exemption.** Open the library voice file at `~/.claude/voice/<name>.md`. Find the `## §10 exemptions` section. Add one bullet per exempted rule; each bullet starts with a canonical ID, followed by a separator (colon, en-dash, or hyphen) and a one-line rationale grounded in corpus evidence:
 

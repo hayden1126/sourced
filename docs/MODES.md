@@ -2,7 +2,7 @@
 
 [← Back to README](../README.md)
 
-Twelve cognitive modes, one announced per transition. Full definitions live in [`templates/CLAUDE.md`](../templates/CLAUDE.md) §7; this page is the reference card plus a walkthrough of the typical workflow.
+Twelve cognitive modes, one announced per transition. Full definitions live in [`src/sourced/data/templates/CLAUDE.md`](../src/sourced/data/templates/CLAUDE.md) §7; this page is the reference card plus a walkthrough of the typical workflow.
 
 ## Project types
 

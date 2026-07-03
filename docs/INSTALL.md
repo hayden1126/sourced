@@ -232,16 +232,16 @@ sourced/
 │   └── STYLES.md
 ├── src/
 │   └── sourced/
-│       ├── cli.py               # Click entrypoint; subcommand registration
+│       ├── cli.py               # argparse root; subcommand registration + dispatch
 │       ├── commands/            # one module per subcommand (install, update, check, …)
-│       ├── validators/          # pre-flight checks (prereqs, sentinel regex, …)
-│       ├── render.py            # Jinja2 template rendering
+│       ├── validators/          # stateless validators (CSL title, iron rules, exemptions, invariants)
+│       ├── render.py            # {{USER}} substitution + bundled-data resolution (importlib.resources)
 │       ├── project.py           # per-project state (voice, style, type markers)
 │       ├── mirror.py            # ~/.claude/ mirroring logic
 │       ├── config.py            # sourced.config read/write
-│       ├── context.py           # shared Click context object
+│       ├── context.py           # runtime-state dataclass (dry-run, verbose, quiet, color, strict)
 │       ├── errors.py            # structured error types
-│       ├── ui.py                # Rich-based output helpers
+│       ├── ui.py                # ANSI color/print helpers
 │       └── data/
 │           ├── agents/
 │           │   ├── source-finder.md
