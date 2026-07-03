@@ -93,17 +93,18 @@ Source-finders read the existing log for context, verify each candidate against 
 ### Handling subagent-render-failed
 
 8. **Retry from main thread.** Before treating a `subagent-render-failed` rejection as a gap, retry the fetch from the main thread: main-thread `Read` has richer PDF handling than subagents.
-9. **On render success**, apply the full §3 protocol (render success satisfies §3(b) but NOT §3(a) — you still have to confirm reliability). Log directly (as an academic-researcher entry, `provisional_reference: null`, `draft_reference` set immediately to the invoking mode's current location).
+9. **On render success**, apply the full §3 protocol (render success satisfies §3(b) but NOT §3(a) — you still have to confirm reliability and record it in `source.reliability_basis`, per `~/.claude/citations/schema.md` §Reliability basis). Log directly (as an academic-researcher entry, `provisional_reference: null`, `draft_reference` set immediately to the invoking mode's current location).
 10. **Only after your own retry fails**, treat as a gap and surface to {{USER}}.
 
 ### Main-thread direct logging discipline
 
-When you log on the main thread (paste-in from {{USER}}, retry after subagent-render-failed, any main-thread read), the **four retrieval forcing fields are mandatory**, same as for dispatched source-finders (`~/.claude/agents/source-finder.md` step 5):
+When you log on the main thread (paste-in from {{USER}}, retry after subagent-render-failed, any main-thread read), the **four retrieval forcing fields plus `source.reliability_basis` are mandatory**, same as for dispatched source-finders (`~/.claude/agents/source-finder.md` steps 3 and 5):
 
 - `printed_page_observed`
 - `tool_page_index`
 - `verification_trace`
 - `per_entity_locators` (when `exact_quote` enumerates multiple entities)
+- `source.reliability_basis` (verified entries; {{USER}}-pasted `partial` entries are exempt)
 
 `location` must equal `printed_page_observed` for paginated sources (or the corresponding value for section-/chapter-/timestamp-keyed sources, per `~/.claude/citations/schema.md` §Verification fields). `pdf_page_offset` records the offset once per source. Reference-work sources (dictionaries, wordlists) use the list-shape in `~/.claude/citations/schema.md` §Reference-work shape; per-item locators carry verification in place of `verification_trace`.
 
@@ -150,14 +151,14 @@ If you catch yourself thinking any of the following, stop and check:
 
 | Excuse | Reality |
 |--------|---------|
-| "The publisher is reputable, so the source is §3(a)-reliable without checking author credentials." | Publisher reputation admits the venue, not the claim. §3(a) also requires the author has relevant credentials for the specific claim. Check both. |
+| "The publisher is reputable, so the source is §3(a)-reliable without checking author credentials." | Publisher reputation admits the venue, not the claim. §3(a) also requires the author has relevant credentials for the specific claim. Check both and record them in `source.reliability_basis`. |
 | "I read this source two sessions ago; I remember the gist." | The gist is not a citation. If `retrieved_at` predates this session, re-verify the byline and re-read the relevant passage before citing. "Remembering the gist" is the most common fabrication path. |
 | "The abstract says the paper establishes X — good enough for a background citation." | Background citations are citations. §3(b) full-text applies regardless of citation weight. Abstracts are not full text. |
 | "The source is paywalled but I found a preprint on the author's site — that's the same source." | Maybe, maybe not. Preprint and published version can differ materially (revised conclusions, added/removed sections, different page numbering). Verify the version you read matches the version you're citing. Note both if you're citing the preprint. |
 | "The subagent's shard has an entry that fails schema validation on one field — I'll hand-fix the field and merge." | Do not hand-edit a shard to make it pass. Follow the failed-shard protocol in schema.md. Hand-fixing hides what the subagent actually produced and defeats the validation discipline. |
 | "The dispatch template's `Sources to avoid` field is overkill for this topic — I'll omit it." | Omitting a field is silent. Write `none`. An omitted field means the finder guesses; a `none` means the constraint is deliberately absent. |
 | "{{USER}} pasted a passage — I can log it without the four retrieval fields because it's not a subagent entry." | The main-thread direct logging discipline requires the same four retrieval forcing fields as subagent dispatch. `printed_page_observed`, `tool_page_index`, `verification_trace`, `per_entity_locators` (when applicable). No carve-out for main-thread. |
-| "Render succeeded on retry, that satisfies §3 so I'll log." | Render success satisfies §3(b) — you have the full text. It does not satisfy §3(a) — you still have to confirm reliability (venue, author credentials, field-appropriate recency). Log only after both pass. |
+| "Render succeeded on retry, that satisfies §3 so I'll log." | Render success satisfies §3(b) — you have the full text. It does not satisfy §3(a) — you still have to confirm reliability (venue, author credentials, field-appropriate recency). Log only after both pass and `source.reliability_basis` records the (a) half. |
 | "The announcement `Switching to [research mode] (invoked from [<prior mode>])` is verbose — I'll just say `Switching to [research mode].`" | The `(invoked from [X])` clause IS the round-trip state capture. Dropping it means when you return, you have to guess the prior mode from working memory. Include it every time on auto-trigger. |
 | "The auto-trigger fired but the verification will be quick — I'll do it inline without the mode switch." | Inline verification without the switch defeats the point of the mode. {{USER}} needs to see the switch in both directions; the announcement is a control point. Switch. |
 | "{{USER}} said 'just verify this quickly' — that's permission to skip the dispatch procedure." | Verify quickly means verify; it doesn't mean skip §3. If single-topic, do it on the main thread per steps 8–10 (main-thread Read + full §3 protocol). If multi-topic, dispatch. "Quickly" doesn't lower the verification bar. |
@@ -185,7 +186,7 @@ ENTRY:
                   Switching to [research mode] (invoked from [<prior mode>]).
 
 VERIFY every candidate via §3:
-  (a) Reliability — peer review / credentialed author / appropriate recency
+  (a) Reliability — peer review / credentialed author / appropriate recency → recorded in source.reliability_basis
   (b) Full-text   — readable PDF or rendered HTML, not abstract / paywall / citation-of
 
 DISPATCH (3+ sub-topics):
@@ -194,11 +195,12 @@ DISPATCH (3+ sub-topics):
   Inline full schema.md contents
 
 LOG (main thread direct):
-  Four retrieval forcing fields required:
+  Forcing fields required:
     - printed_page_observed
     - tool_page_index
     - verification_trace
     - per_entity_locators (when exact_quote has multiple entities)
+    - source.reliability_basis (verified entries)
   location = printed_page_observed (paginated sources)
 
 MERGE: per schema.md protocol. Hand-fix forbidden.
@@ -239,5 +241,5 @@ EXIT (announce return):
 - `CLAUDE.md §7.3` — implicit/auto-fire trigger definitions (source of truth).
 - `CLAUDE.md §7.4` — mode-to-mode gate table.
 - `CLAUDE.md §8.1` — citation log schema (Moment 1).
-- `~/.claude/citations/schema.md` — full entry structure, enum values, ID format, staleness rules, merge protocol, verification fields, reference-work shape.
-- `~/.claude/agents/source-finder.md` — subagent definition; the four retrieval forcing fields originate at its step 5.
+- `~/.claude/citations/schema.md` — full entry structure, enum values, ID format, staleness rules, merge protocol, verification fields, reliability basis, reference-work shape.
+- `~/.claude/agents/source-finder.md` — subagent definition; the four retrieval forcing fields originate at its step 5; the reliability basis originates at its step 3.
