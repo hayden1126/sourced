@@ -1,7 +1,7 @@
 # `sourced` CLI: install.sh decomposition into a Python package
 
 - **Date:** 2026-04-21
-- **Status:** Design approved 2026-04-21. Implementation plan pending (next: `superpowers:writing-plans`).
+- **Status:** Shipped in four phases: PRs #19-#23 (phase 1, 2026-04-22), #24 (phase 2, manifest extraction), #25 (phase 3, voice pipeline), #26 (phase 4, directory restructure, 2026-04-25). Remaining phase-5 items (doctor diagnostics, `--format=json`, shell completion, config migration) tracked in ROADMAP §Python CLI; CI shipped 2026-07-03.
 - **Scope:** Replace the 792-line `install.sh` with a Python CLI distributed via `pipx install` from the private GitHub repo. Phase 1 ships parity + Tier 1 + Tier 2 UX improvements. Phase 2 (separate plan, deferred) ships CI, structured output, and deeper diagnostics. C-Go static binary is a separate ROADMAP item, later.
 - **Out of scope (this design):** New modes, new validators, schema changes, `~/.claude/` layout changes, template content edits beyond what install.sh already does. The Go/Rust binary port. Public PyPI distribution. Windows-native (WSL is fine).
 

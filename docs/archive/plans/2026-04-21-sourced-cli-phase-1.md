@@ -1,5 +1,7 @@
 # `sourced` CLI Phase 1 Implementation Plan
 
+**Status:** Shipped 2026-04-22 via PRs #19-#23 (`install.sh` retired).
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Replace 792-line `install.sh` with a Python CLI (`sourced`) installed via `pipx` from the private GitHub repo, with parity behavior plus Tier 1 + Tier 2 UX improvements.
@@ -8,7 +10,7 @@
 
 **Tech Stack:** Python 3.10+, Hatchling 1.24+ (build backend), hatch-vcs 0.4+ (version-from-git-tag), pipx (distribution), pytest (tests), syrupy (golden snapshots), argparse (zero external argparse deps), `importlib.resources` (bundled-data access), `shutil.copytree` (mirror), `tempfile.NamedTemporaryFile` (atomic writes), `re.MULTILINE` (sentinel parsing).
 
-**Spec:** `docs/superpowers/specs/2026-04-21-sourced-cli-decomposition-design.md` (canonical reference for every architectural decision in this plan).
+**Spec:** `docs/archive/specs/2026-04-21-sourced-cli-decomposition-design.md` (canonical reference for every architectural decision in this plan).
 
 ---
 

@@ -1,5 +1,7 @@
 # References Heading Style-Driven Implementation Plan
 
+**Status:** Shipped 2026-04-25 via PR #27 (closed issue #15 of the pre-GitHub local tracker).
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Eliminate the silent ship-bug where switching styles mid-draft renders the new bibliography under a stale hand-authored `# References` / `# Bibliography` / `# Works Cited` heading. Make the heading style-driven via pandoc's `--metadata reference-section-title=` flag, sourced from each style.md's already-declared `List heading:` field.

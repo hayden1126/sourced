@@ -1,5 +1,7 @@
 # Per-project directory restructure — Implementation Plan
 
+**Status:** Shipped 2026-04-24 via PR #26.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Group project files into `config/`, `sources/`, `samples/`, `failures/` subdirectories with auto-migration on `sourced update`, eliminating top-level clutter as writers accumulate drafts and source material.
@@ -8,7 +10,7 @@
 
 **Tech Stack:** Python 3.11+, pytest, syrupy (snapshot testing), pathlib, re/regex.
 
-**Spec:** `docs/superpowers/specs/2026-04-24-per-project-directory-restructure-design.md`. All task decisions cross-reference spec sections (D1–D8, §§3–13).
+**Spec:** `docs/archive/specs/2026-04-24-per-project-directory-restructure-design.md`. All task decisions cross-reference spec sections (D1–D8, §§3–13).
 
 **Branch:** `phase4-directory-restructure` (already off `origin/main` at 24e9845, spec commit 26e5f5c).
 

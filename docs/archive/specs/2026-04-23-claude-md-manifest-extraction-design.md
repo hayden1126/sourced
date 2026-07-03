@@ -1,6 +1,6 @@
 # CLAUDE.md manifest extraction: slim the shipped template without breaking triggers
 
-**Status:** draft · **Date:** 2026-04-23 · **Target:** Phase 2 of the `sourced` CLI line · **Author:** {{USER}} + agent (see conversation thread `cli-phase2-planning`)
+**Status:** Shipped 2026-04-24 via PR #24 (dispatch manifest + 9 externalized mode bodies + update-preservation fix + invariants I1-I10; I11 added in phase 4, PR #26). Open threads: §12 OQ6 phase-3 skills spike (issue #36); phase-5 CLI items (ROADMAP §Python CLI). · **Date:** 2026-04-23 · **Target:** Phase 2 of the `sourced` CLI line · **Author:** {{USER}} + agent (see conversation thread `cli-phase2-planning`)
 
 ---
 
