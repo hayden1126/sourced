@@ -2,34 +2,37 @@
 
 > Living state. Update at the end of every working block so a fresh session can resume from here after `/clear`.
 
-Last updated: 2026-07-03 (third block of the day)
+Last updated: 2026-07-03 (fourth block of the day)
 Branch / worktree: main
 
 ## Done
 
-- 2026-07-03 (block 3) reliability_basis, issue #45, commit range `8e1daf3..b8abcce` (PR #48, merged, CI green; handoff PR #49 merged; issue #45 closed):
-  - `source.reliability_basis` added to the citation-log schema (new §Reliability basis section): `venue_type` (closed 9-value enum, no other/unknown, peer-review status folded into the venue class), `venue_basis` (one named checkable venue fact; generic vouching hard-fails), `author_credentials` (verbatim credential + where observed; escape literals "group author: <standing>" / "none stated"). Recency deliberately unrecorded (its inputs are already logged; a forced "recency ok" is a ritual counter).
-  - Scope: required on every verified entry, list-shape included, {{USER}}-pasted partial exempt. Per-source, set-once; legacy entries backfilled on next source re-open, never from memory.
-  - Enforcement: four new merge hard-fail bullets, lookup-only fix-in-place, spot-check extension (verifies the recorded facts exist; sufficiency stays Hayden's call), three forced merge-report surfacing lines. Deliberately NOT in CLAUDE.md §7.5 and no new Python invariant (retrieval.* precedent).
-  - Producers in lockstep: source-finder step 3, research.md main-thread discipline (five forcing fields now), CLAUDE.md §3(a) names the artifact (golden snapshot regenerated same commit), emitter not-emitted list, VISION.md records #45 closed, ARCHITECTURE.md field enumeration (drift caught at handoff).
-  - Also on main directly: `8e1daf3` (one-line STATUS cleanup, pushed).
-- 2026-07-03 (block 2) mental-verb audit, issue #32, commit range `0fbae06..6f5e135` (PR #46, merged, CI green): audit record at `docs/archive/audits/2026-07-03-mental-verb-audit.md` (all 450 hits dispositioned), seven mode-body/schema conversions, two CLAUDE.md conversions + snapshot regen. Issue #32 closed; follow-up #45 opened (now implemented, see block 3).
-- 2026-07-03 (block 1) cleanup pass, `74c7f19..9efa9e0` (PRs #37-#43, all merged): test unification under bare `pytest`, GitHub Actions CI, doc fixes, docs/superpowers archived, dead code removed, ARCHITECTURE/MODES/INSTALL refresh, VISION.md + ROADMAP re-triage. Tracking migrated to GitHub Issues #29-#36.
+- 2026-07-03 (block 4) issue batch + quick fixes, commit range `66f06dd..3006c80` (PRs #55, #56, #57, all merged, CI green; issues #50, #52, #54 closed):
+  - Issues #50-#54 filed. #51 is the big one: voice extraction v2 design spike (fidelity measure, representation, stylometry, coverage; in-repo vs standalone-tool fork is the spike's OUTPUT). It carries Hayden's core diagnosis, added after filing: the failure is decomposition, not shallowness (rules and atomized exemplars are marginals; voice lives in the joint distribution; cut patterns only subtract). #53 (source.type escape hatch) is observe-labeled: act when a real bibliography emits a wrong type.
+  - PR #55 (issue #50): voice-extractor intake honesty. Per-file skip manifest in preflight, `### Sample stats`, and inside `under-sample` rejections, with a conversion pointer when skips dominate; floor runs on the matched set and reads 3-file consistently (was self-contradicting 3-vs-5); report format gained `### Excluded files` and `### Corpus contamination notes` (the dispatch doc referenced both; the agent never defined them); stale workflow step numbers fixed. Agents are single-source, no goldens touched.
+  - PR #56 (issue #54): CI actions bumped to checkout@v7, setup-python@v6, ruff-action@v4.0.0. Gotcha: upstream ships no moving v4 tag for ruff-action, so the exact pin is deliberate; bump to a major alias when one appears. Node 20 deprecation warning gone.
+  - PR #57 (issue #52): docs/VOICES.md truth-up to phase-3 behavior (multi_register split-halt semantics, `### Multi-register routing` report section at the real 85% threshold, 8 H2 sections / 3 rule axes, sibling `## §10 exemptions`, aphoristic-closures added to the canonical ID table, iron-rule step numbers). Same commit: all six skeletons' dangling `§ Multi-register corpora` refs now point at `§ Multi-register routing`; 6 goldens regenerated per convention.
+  - Handoff drift pass: ARCHITECTURE.md voice-system paragraph and README.md voice-preservation line updated from the old "4 axes" framing to 8 sections / 3 rule axes + multi_register routing.
+  - Outside the repo, same block: `~/.claude` global surface restored (it was missing entirely, config included). `sourced.config` copied from `~/.claude-old` (user=Hayden), `sourced global-install` mirrored 23 files, and the 4 custom voices (hayden_essay, hayden_personal, hayden-essay-2, leo-cc-essay) were copied from `~/.claude-old/voice/`.
+- 2026-07-03 (block 3) reliability_basis, issue #45, commit range `8e1daf3..b8abcce` (PR #48 merged, handoff PR #49 merged, issue closed): `source.reliability_basis` (venue_type closed 9-value enum, venue_basis named checkable fact, author_credentials verbatim) required on every verified entry; four merge hard-fail bullets; producers in lockstep (source-finder, research.md, CLAUDE.md §3(a), emitter, VISION, ARCHITECTURE).
+- 2026-07-03 (block 2) mental-verb audit, issue #32, commit range `0fbae06..6f5e135` (PR #46 merged): audit record at `docs/archive/audits/2026-07-03-mental-verb-audit.md`, nine conversions, snapshot regen. Follow-up #45 implemented in block 3.
+- 2026-07-03 (block 1) cleanup pass, `74c7f19..9efa9e0` (PRs #37-#43 merged): bare `pytest` unification, GitHub Actions CI, docs restructure, dead code removed, tracking migrated to GitHub Issues.
 
 ## In flight
 
-- Nothing half-done. Clean boundary: PRs #48 and #49 merged (main at `68a55e1`), issue #45 closed, branches deleted, tree green (pytest 260, invariants 11/11 re-run on merged main).
+- Nothing half-done. Clean boundary: main at `3006c80`, tree clean, all PRs merged, branches deleted, suite green.
 - Next concrete step: pick the next thread (see Blocked below).
 
 ## Blocked / decisions needed
 
-- Next-thread choice after #48 merges is Hayden's call: the ROADMAP `next` set (CLI phase-5 tail: doctor / --format=json / completion / config migration; annotated-bib phase 3; peer review mode; babble-as-ideation; extract-pdf-highlights; extract-jstor), or a real paper session, which would now exercise both the #46 forced emissions and the new reliability_basis + merge-report lines, and generate the signal parked/observe issues #29, #30, #31, #33 are waiting on.
+- Next-thread choice is Hayden's call, three live options: (1) a real paper session, which now exercises the #46 forced emissions, the reliability_basis merge lines, AND generates fresh flow-failure evidence for #51 while feeding the observe issues #29, #30, #31, #33; (2) the ROADMAP `next` set (CLI phase-5 tail, annotated-bib phase 3, peer review mode, babble-as-ideation, extract-pdf-highlights, extract-jstor); (3) the #51 spike itself (design doc deciding in-repo vs standalone voice extraction).
 
 ## Notes for next session
 
-- Verification target unchanged: `pytest` (260 tests; parity needs pandoc 3.1.3 on PATH, warns on drift, skips without pandoc), `ruff check src tests`, `python3 -m sourced check --invariants` (11/11). All green locally on the feature branch at handoff.
-- Design record for reliability_basis: PR #48 description + schema §Reliability basis itself. Ratified choices: 3 sub-fields over 2 (venue_basis is the anti-predatory prong), closed enum over an "other" bucket, verified-only scope.
-- Bundle prose style: new text carries no em dashes (matches the #46 commits), even though older bundle text has them. Keep that for future bundle edits.
-- Golden snapshot (`tests/cli/golden/__snapshots__/test_render_golden.ambr`) mirrors CLAUDE.md, briefs, voices, styles only; mode bodies, agents, and citations/schema.md are single-source. CLAUDE.md edits regen via `pytest tests/cli/golden/ --snapshot-update`, folded into the same commit.
-- Canonical-source policy holds: bundle under `src/sourced/data/` owns protocol text; repo docs link, never restate (ARCHITECTURE.md's citation field enumeration is the one sanctioned summary; it gained the reliability_basis bullet in PR #48). docs/archive/ is exempt.
-- CI actions still carry the Node 20 deprecation warning (checkout@v4, setup-python@v5, ruff-action@v3); bump action majors when it starts failing.
+- Verification target unchanged: `pytest` (260 tests; parity needs pandoc 3.1.3 on PATH), `ruff check src tests`, `python3 -m sourced check --invariants` (11/11). All green on merged main at `3006c80`.
+- CI actions are current: checkout@v7, setup-python@v6, ruff-action@v4.0.0 (exact pin; no moving v4 major tag upstream yet).
+- Golden snapshot policy unchanged: skeletons/voices/styles/CLAUDE.md are snapshotted, mode bodies and agents are single-source. Skeleton edits regen via `pytest tests/cli/golden/ --snapshot-update`, folded into the same commit (held in #57).
+- `~/writing` is the evidence base for #50/#51: stale and slightly broken by Hayden's description, but its `config/voice.md` (hayden_essay, phase-3 render) is real extraction output, and its `hayden_personal` sibling reference resolves again now that the voice library is restored.
+- Issue #51 is the deep thread: the decomposition diagnosis and the representation question (rules hold constraints, whole passages drive generation; scaled worked paragraphs or corpus retrieval at draft time). The spike's question 3 (needs real code?) leans yes since passage retrieval is mechanical.
+- Bundle and repo-doc prose: no em dashes in new text (held through #55/#57); older text keeps them until touched.
+- Canonical-source policy holds: bundle owns protocol text; VOICES.md and ARCHITECTURE.md describe and link (both re-verified against the agent this block).
