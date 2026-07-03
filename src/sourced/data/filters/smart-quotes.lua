@@ -29,8 +29,8 @@ doesn't mean "All-Father"*`), the `'` in `doesn't` also reverts to ASCII.
 Workaround: pre-bake U+2019 into the citation log's `source.title` field
 for mixed-language titles. See citations/schema.md §Typography.
 
-Shipped at templates/filters/smart-quotes.lua; installed to
-~/.claude/filters/smart-quotes.lua by install.sh. Invoked as a pandoc
+Shipped at src/sourced/data/filters/smart-quotes.lua; installed to
+~/.claude/filters/smart-quotes.lua by `sourced global-install`. Invoked as a pandoc
 `--lua-filter=` flag from each style.md's google-docs and plain-markdown
 pandoc-flags lines. `word` and `latex` targets do not use this filter —
 their writers render Quoted nodes natively.
