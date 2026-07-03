@@ -12,7 +12,7 @@ Casual writing is not a single register. This voice covers three sub-registers; 
 - **`commentary`** — opinion take on something current or specific, named stance, argument-forward. Examples: Substack-style posts taking a position, opinion blog posts, conversational responses to ongoing discourse.
 - **`process-post`** — "how I built X / what I learned from Y" walkthrough, first-person setup + concrete steps + reflection. Examples: technical-adjacent how-to posts, recipe-style narratives, project retrospectives.
 
-When the corpus spans multiple sub-registers, `voice-extractor` produces one voice file per sub-register rather than unioning them; see `data/agents/voice-extractor.md § Multi-register corpora`. Unioning is the documented failure mode (a `commentary` sharper-stance rule imported into `personal-essay` reflective prose produces over-emphatic essays).
+When the corpus spans multiple sub-registers, `voice-extractor` produces one voice file per sub-register rather than unioning them; see `data/agents/voice-extractor.md § Multi-register routing`. Unioning is the documented failure mode (a `commentary` sharper-stance rule imported into `personal-essay` reflective prose produces over-emphatic essays).
 
 **Determining sub-register at write time.** `[writing mode]` Phase 1 declares the sub-register for the section in the prose-plan's Register Mode field. The declaration filters which rules below apply. If the brief does not specify, assume `personal-essay` (the casual default) and flag the assumption in the prose-plan.
 

@@ -2,7 +2,7 @@
 
 Voice calibration for blended-register corpora. Encodes the UNDERLYING rules (connectedness, pacing, concept setup, iron prohibitions) without committing to a register's specific framing. Use as the base skeleton when the writing-samples corpus spans registers (e.g., school essays that are structurally academic but tonally casual; blog posts that mix reflective and journalistic patterns).
 
-`voice-extractor` selects `hybrid.md` automatically when the classifier finds no single register above 85% of the corpus AND `multi_register=segmented`. Other `multi_register` settings (`split`, `primary`) route differently — see `data/agents/voice-extractor.md § Multi-register corpora`.
+`voice-extractor` selects `hybrid.md` automatically when the classifier finds no single register above 85% of the corpus AND `multi_register=segmented`. Other `multi_register` settings (`split`, `primary`) route differently — see `data/agents/voice-extractor.md § Multi-register routing`.
 
 For a register-specific calibration (academic papers, casual blog posts, technical documentation, journalistic pieces, narrative reflection), start from the matching shipped skeleton instead. Applies in `[outlining mode]` (Paragraph Flow at outline time), `[writing mode]` (Phase 1 plan + Phase 2 `prose-drafter` dispatch), and `[editing mode]` (Pass 0 Revision + Pass 8 voice audit).
 

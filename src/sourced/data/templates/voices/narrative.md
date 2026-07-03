@@ -12,7 +12,7 @@ Narrative writing is not a single register. This voice covers three sub-register
 - **`reflective`** — past-tense looking back; abstract movement; meaning-making in the foreground; scene used as illustration. Examples: meditation essays, retrospective reflections, mid-life reckonings.
 - **`argumentative-personal`** — first-person essay with thesis; scene + reflection alternation in service of an argument; closer to academic personal-essay than memoir. Examples: New York Times Modern Love columns, polished college-application essays, thesis-driven personal essays.
 
-When the corpus spans multiple sub-registers, `voice-extractor` produces one voice file per sub-register rather than unioning them; see `data/agents/voice-extractor.md § Multi-register corpora`. Unioning is the documented failure mode (a `scene-driven` sensory-density rule imported into `argumentative-personal` produces over-described prose where every paragraph stops to describe a room before resuming the argument).
+When the corpus spans multiple sub-registers, `voice-extractor` produces one voice file per sub-register rather than unioning them; see `data/agents/voice-extractor.md § Multi-register routing`. Unioning is the documented failure mode (a `scene-driven` sensory-density rule imported into `argumentative-personal` produces over-described prose where every paragraph stops to describe a room before resuming the argument).
 
 **Determining sub-register at write time.** `[writing mode]` Phase 1 declares the sub-register for the section in the prose-plan's Register Mode field. The declaration filters which rules below apply. If the brief does not specify, assume `reflective` (the narrative middle-baseline) and flag the assumption in the prose-plan.
 

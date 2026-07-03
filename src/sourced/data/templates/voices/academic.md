@@ -12,7 +12,7 @@ Academic writing is not a single register. This voice covers three sub-registers
 - **`prospectus`** — compressed academic-report, usually 3–4 pages. Claim-forward opening (no narrative lure), argument-first development, forward-looking closing ("In the poster I will..."). No first-person stance; first-person appears only in process statements about the paper itself.
 - **`personal-essay`** — first-person argumentative with question-driven structure. May delay thesis across multiple paragraphs for a narrative lure. Examples: admissions essays, reflection pieces.
 
-When the corpus spans multiple sub-registers, `voice-extractor` produces one voice file per sub-register rather than unioning them; see `data/agents/voice-extractor.md § Multi-register corpora`. Unioning is the documented failure mode (a `personal-essay` first-person commitment rule imported into an `academic-report` produces awkward prose).
+When the corpus spans multiple sub-registers, `voice-extractor` produces one voice file per sub-register rather than unioning them; see `data/agents/voice-extractor.md § Multi-register routing`. Unioning is the documented failure mode (a `personal-essay` first-person commitment rule imported into an `academic-report` produces awkward prose).
 
 **Determining sub-register at write time.** `[writing mode]` Phase 1 declares the sub-register for the section in the prose-plan's Register Mode field. The declaration filters which rules below apply. If the brief does not specify, assume `academic-report` and flag the assumption in the prose-plan.
 
