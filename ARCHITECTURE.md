@@ -2,6 +2,8 @@
 
 Orientation for someone reading the repo. Read `README.md` for installation; read `src/sourced/data/templates/CLAUDE.md` for the agent's full operating rules. The Python CLI that orchestrates installation lives at `src/sourced/`. This file sketches the surface area and how the pieces connect.
 
+Design history lives in `docs/archive/{specs,plans}/`, each file carrying a `Status: Shipped <date> (PR #N)` banner. In-flight specs and plans, when they exist, live at `docs/specs/` and `docs/plans/` (created on demand) and move to the archive with a banner when the work lands.
+
 ## File layout
 
 ```
@@ -71,7 +73,7 @@ Pipeline shape (per spec §5.3):
 6. `_maybe_raise(findings, ctx)` — halt on errors / strict warnings.
 7. Dry-run guard, then `write_atomic` (tempfile + rename) or `mirror_tree`.
 
-Reference design: [`docs/superpowers/specs/2026-04-21-sourced-cli-decomposition-design.md`](./docs/superpowers/specs/2026-04-21-sourced-cli-decomposition-design.md). Will move to `docs/archive/specs/` once phase 1 ships.
+Reference design: [`docs/archive/specs/2026-04-21-sourced-cli-decomposition-design.md`](./docs/archive/specs/2026-04-21-sourced-cli-decomposition-design.md).
 
 ## The primary agent
 
