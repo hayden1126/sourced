@@ -19,7 +19,7 @@ One unique source → one CSL-JSON object. Deduplicate across multiple log entri
 | `source.doi_or_url` | `DOI` or `URL` | If the value starts with `https://doi.org/` or `http://dx.doi.org/`, strip the prefix and store as `DOI`. Else if the value is a non-empty URL, store as `URL`. If the field is empty, omit both. |
 | *(derived)* | `type` | Inferred per §Source-type inference below. |
 
-Fields not listed above (`exact_quote`, `surrounding_context`, `context_description`, `claim_supported`, `citation_string`, `provisional_reference`, `draft_reference`, `verification_status`, `retrieval`, `retrieved_at`, `added_at`) are **not** emitted — they are logging metadata, not bibliographic data.
+Fields not listed above (`exact_quote`, `surrounding_context`, `context_description`, `claim_supported`, `citation_string`, `provisional_reference`, `draft_reference`, `verification_status`, `retrieval`, `retrieved_at`, `added_at`) and the `source.reliability_basis` sub-object are **not** emitted — they are logging metadata, not bibliographic data.
 
 ## Source-type inference
 
