@@ -28,7 +28,7 @@ def test_update_migrates_phase3_to_phase4(tmp_home, tmp_project, clean_ansi):
     """Running update on a phase-3 layout project migrates it to phase-4 subdirs."""
     _bootstrap_phase3(tmp_home, tmp_project)
 
-    result = subprocess.run(
+    subprocess.run(
         [sys.executable, "-m", "sourced", "update", "--project", str(tmp_project)],
         capture_output=True, text=True, check=True,
     )

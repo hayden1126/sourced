@@ -80,7 +80,7 @@ def test_update_preserves_writer_authored_local_overlays(tmp_home, tmp_project, 
     local = tmp_project / "CLAUDE.d" / "10-local-custom.md"
     local.write_text("# Local writer overlay\nhand-authored content\n", encoding="utf-8")
 
-    result = subprocess.run(
+    subprocess.run(
         [sys.executable, "-m", "sourced", "update", "--project", str(tmp_project)],
         capture_output=True, text=True, check=True,
     )
@@ -101,6 +101,6 @@ def test_check_invariants_passes_on_shipped_overlays(tmp_home, clean_ansi):
     assert "I2" in result.stdout
     # I10 also reports explicitly after the cache-discipline follow-up landed.
     assert "I10" in result.stdout
-    header_line = next(l for l in result.stdout.splitlines() if "Invariants" in l)
+    header_line = next(line for line in result.stdout.splitlines() if "Invariants" in line)
     # Header lists the active range; no dormant invariants remain.
     assert "I1-I11" in header_line

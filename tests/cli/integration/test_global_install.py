@@ -1,6 +1,5 @@
 import subprocess
 import sys
-from pathlib import Path
 
 
 def test_global_install_creates_expected_dirs(tmp_home, clean_ansi):

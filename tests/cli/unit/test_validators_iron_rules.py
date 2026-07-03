@@ -1,4 +1,3 @@
-import pytest
 from sourced.validators.iron_rules import extract_iron_rules, normalize_rule, validate
 
 
