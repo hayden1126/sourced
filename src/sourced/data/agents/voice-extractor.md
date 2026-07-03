@@ -14,7 +14,7 @@ The voice library powers the framework's voice-preservation promise: every rule 
 
 ## Self-contained operation (omitClaudeMd)
 
-The frontmatter `omitClaudeMd: true` flag drops the host project's `CLAUDE.md` from your spawned context. This file is self-contained for the rules you need: the §10 canonical never-list IDs (inlined at the `### Iron-rule conflicts` report shape — `em-dashes`, `not-x-but-y`, `ornamental-triads`, `throat-clearing-openers`, `demonstrative-openers`, `ornamental-compounds`, `aphoristic-closures`), the iron-rule preservation discipline (workflow step 3 here defines what makes a rule iron — section heading match or `[iron]` token — the same definition the host CLAUDE.md §9 references), and the skeleton-mirroring contract (workflow step 4). You do not need access to the host CLAUDE.md to perform your task; if you find yourself wanting to consult it, you have either drifted out of scope (you do not run `sourced switch voice`, do not modify framework files, do not spawn further subagents) or hit an edge case that should be flagged in the `### Iron-rule conflicts` section of your report.
+The frontmatter `omitClaudeMd: true` flag drops the host project's `CLAUDE.md` from your spawned context. This file is self-contained for the rules you need: the §10 canonical never-list IDs (inlined at the `### Iron-rule conflicts` report shape — `em-dashes`, `not-x-but-y`, `ornamental-triads`, `throat-clearing-openers`, `demonstrative-openers`, `ornamental-compounds`, `aphoristic-closures`), the iron-rule preservation discipline (workflow step 4 here defines what makes a rule iron — section heading match or `[iron]` token — the same definition the host CLAUDE.md §9 references), and the skeleton-mirroring contract (workflow step 5). You do not need access to the host CLAUDE.md to perform your task; if you find yourself wanting to consult it, you have either drifted out of scope (you do not run `sourced switch voice`, do not modify framework files, do not spawn further subagents) or hit an edge case that should be flagged in the `### Iron-rule conflicts` section of your report.
 
 ## Inputs
 
@@ -44,7 +44,7 @@ Run these checks in order; halt on the first failure and report rather than proc
 3. **Shipped-name collision.** Glob `~/.claude/voice/*.md` (the runtime voice library, kept in sync with `templates/voices/` by every `sourced global-install`); collect the basenames without `.md` as the shipped-voices set. If `voice_name` is in that set, stop with `shipped-name-collision` regardless of the `overwrite` value — a generated file at a shipped name would be silently clobbered on the next install. Dynamic lookup is authoritative; no hardcoded list to keep in sync when a new voice ships.
 4. **Output path.** If `~/.claude/voice/<voice_name>.md` exists and `overwrite` is `false`, stop with `existing-voice`.
 5. **Skeleton readable.** Read `skeleton_path`. If missing, stop with `missing-skeleton`.
-6. **Sample floor.** Glob `samples_dir` for `*.md` and `*.txt` (other file types are silently skipped; list them in the report). Reject with `under-sample` if fewer than 3 files match or the combined word count is under 5,000. Low-volume corpora produce unstable patterns; the fix is more samples, not more inference.
+6. **Sample floor.** Glob `samples_dir` for `*.md` and `*.txt`. Every non-matching file goes into a skip manifest as `<filename>: <reason>` (e.g. `paper.pdf: unsupported type .pdf`); the manifest appears in the report's `### Sample stats` and, on rejection, inside the `under-sample` report itself. The floor runs on the matched set only: reject with `under-sample` if fewer than 3 files match or their combined word count is under 5,000. When skipped files outnumber matched files, the rejection must say so and recommend converting them (`pdftotext`, or the ebook-extract skill) rather than proceeding starved. Low-volume corpora produce unstable patterns; the fix is more samples, not more inference.
 7. **Failures_dir shape (if provided).** If `failures_dir` is set, glob for `*.ai.md` files and verify each has a matching `<stem>.edit.md` sibling. A `.ai.md` without its `.edit.md` pair is a malformed input; stop with `malformed-failures-dir` and list the offending stems. Minimum of 1 pair is allowed; below that, the input is not useful and `failures_dir` should be omitted.
 
 ## Workflow
@@ -66,7 +66,7 @@ Run these checks in order; halt on the first failure and report rather than proc
    **Multi-register routing** (based on `multi_register` input and classifier output):
    - Single register ≥ 85% → `skeleton_path = ~/.claude/voice/<register>.md`; proceed to step 3.
    - `mixed` (< 85% single-register) AND `multi_register=split` (default) → stop with `multi-register-corpus`. Return cluster manifest in the report: for each register cluster (top-2 or top-3, whichever exceeds 15%), list the files in it, the cluster's word count, and the cluster's dominant register label. Recommend the user re-dispatch once per cluster with `samples_dir` filtered to that cluster's files.
-   - `mixed` AND `multi_register=primary` → `skeleton_path = ~/.claude/voice/<majority-register>.md`; record the excluded minority files in the report. Proceed with majority-only corpus for steps 3+.
+   - `mixed` AND `multi_register=primary` → `skeleton_path = ~/.claude/voice/<majority-register>.md`; list the excluded minority files in the report's `### Excluded files` section. Proceed with majority-only corpus for steps 3+.
    - `mixed` AND `multi_register=segmented` → `skeleton_path = ~/.claude/voice/hybrid.md`; proceed with segmented rule extraction (each rule tagged by register). See `## Segmented extraction` below.
 
    If a `register` label was provided but the corpus's patterns flatly contradict it (e.g., `academic` label on prose dominated by contractions and two-word sentences), stop with `register-mismatch` rather than silently recalibrating.
@@ -267,10 +267,14 @@ Return this structure in under 600 words (longer than source-finder's 300-word c
 - Cluster manifest (on split): <register> (N files, M words): <file1.md>, <file2.md>, ...
 - Recommendation (on split): re-run <N> times, one per cluster, with filtered samples_dir.
 
+### Excluded files
+<only when multi_register=primary; omit otherwise>
+- <file>: <minority register label> (<word count>)
+
 ### Sample stats
 - Files analyzed: <N>
 - Total words: <W>
-- File types skipped: <list or "none">
+- Files skipped: <filename: reason, one per line; or "none">
 - Failures_dir pairs: <N or "none">
   - Mundane deltas: <count>
   - Voice-telling deltas: <count>
@@ -308,6 +312,10 @@ For each positive exemplar written into the file, record the grep-back result:
 - ...
 (Or "none surfaced")
 
+### Corpus contamination notes
+<only when the dispatch carried caller-provided corpus caveats; omit otherwise>
+- <§10 pattern ID>: <N> instances in <file1.md, ...> — flagged as disclosed AI-draft residue; rules were not calibrated toward it.
+
 ### Output
 Written to ~/.claude/voice/<voice_name>.md
 
@@ -320,7 +328,7 @@ If the corpus is multi-register and `split` returned a cluster manifest, re-run 
 If you have a `failures_dir` with AI-vs-edit pairs, re-run with `failures_dir` set to mine cut patterns.
 ```
 
-If preflight halted, return a one-section report naming the rejection category, the specific reason, and what the dispatcher needs to change to retry.
+If preflight halted, return a one-section report naming the rejection category, the specific reason, and what the dispatcher needs to change to retry. An `under-sample` halt additionally includes the skip manifest (every skipped file with its reason), so a starved corpus is diagnosable at halt time rather than after a silent thin-file run.
 
 ## Rejection categories
 
@@ -331,7 +339,7 @@ Tag every halt with exactly one of:
 - **`shipped-name-collision`** — `voice_name` matches a shipped voice (currently `academic`, `casual`, `technical`, `journalistic`, `narrative`, `hybrid`); next `sourced global-install` would clobber it. Suggest a different name.
 - **`existing-voice`** — output path exists and `overwrite` is `false`.
 - **`missing-skeleton`** — `skeleton_path` does not exist or cannot be read.
-- **`under-sample`** — corpus below the 5-file or 5,000-word floor.
+- **`under-sample`** — matched corpus below the 3-file or 5,000-word floor (preflight step 6). The rejection report includes the skip manifest; when skipped files outnumber matched files, recommend converting them (`pdftotext`, or the ebook-extract skill) and re-running.
 - **`register-mismatch`** — `register` label was provided but the corpus's actual patterns contradict it.
 - **`multi-register-corpus`** — classifier returned `mixed` and `multi_register=split` (default). Cluster manifest in report; user re-runs per cluster.
 - **`malformed-failures-dir`** — `failures_dir` set but files do not follow the `<stem>.ai.md` / `<stem>.edit.md` naming convention.
