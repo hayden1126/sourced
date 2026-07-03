@@ -24,7 +24,7 @@ Six values define the project. Everything sourced ships must extend at least one
 
 ## Enforcement principle
 
-Rules are forced artifacts, not mental verbs. A rule that asks the model to "verify," "confirm," or "re-check" can be satisfied by silent assent, and silent assent is how fabrications ship. Every check must produce something inspectable: a log field, a list, a validator result, a report row. If a rule cannot name its artifact, it is not yet a rule. The 2026-07-03 audit ([docs/archive/audits/2026-07-03-mental-verb-audit.md](docs/archive/audits/2026-07-03-mental-verb-audit.md)) converted the bundle; issue [#45](https://github.com/hayden1126/sourced/issues/45) tracks the one remaining conversion.
+Rules are forced artifacts, not mental verbs. A rule that asks the model to "verify," "confirm," or "re-check" can be satisfied by silent assent, and silent assent is how fabrications ship. Every check must produce something inspectable: a log field, a list, a validator result, a report row. If a rule cannot name its artifact, it is not yet a rule. The 2026-07-03 audit ([docs/archive/audits/2026-07-03-mental-verb-audit.md](docs/archive/audits/2026-07-03-mental-verb-audit.md)) converted the bundle; issue [#45](https://github.com/hayden1126/sourced/issues/45) closed the last gap by forcing the §3(a) reliability judgment into `source.reliability_basis`.
 
 ## What sourced is not
 
