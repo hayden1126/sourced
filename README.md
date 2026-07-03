@@ -4,7 +4,7 @@ A Claude Code setup for writing academic papers with the model in the loop. Buil
 
 For students and researchers who want Claude-generated scholarship they can defend without rewriting it line by line.
 
-The primary agent (academic-researcher) lives in each project's `CLAUDE.md`. Two subagents live globally in `~/.claude/agents/`: source-finder (parallel source research, dispatched during `[research mode]`) and voice-extractor (one-shot voice calibration from a corpus of writing samples).
+The primary agent (academic-researcher) lives in each project's `CLAUDE.md`. Four subagents live globally in `~/.claude/agents/`: source-finder (parallel source research, dispatched during `[research mode]`), voice-extractor (one-shot voice calibration from a corpus of writing samples), prose-drafter (isolated section drafting during `[writing mode]`), and sourced-helper (read-only Q&A about the framework itself).
 
 ## What it does differently
 
