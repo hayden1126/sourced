@@ -1,4 +1,3 @@
-import pytest
 from sourced.validators.exemptions import (
     extract_voice_exemptions,
     extract_canonical_ids,

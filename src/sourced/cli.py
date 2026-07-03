@@ -11,7 +11,7 @@ from typing import NoReturn
 
 from . import __version__
 from .context import Context
-from .errors import SourcedError, UsageError
+from .errors import SourcedError
 from .ui import print_error, print_unexpected, should_color
 
 

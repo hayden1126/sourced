@@ -3,7 +3,7 @@ from __future__ import annotations
 import sys
 
 from ..context import Context
-from ..ui import bold, ok, should_color
+from ..ui import bold, should_color
 from . import _pipeline
 
 
