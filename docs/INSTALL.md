@@ -154,10 +154,11 @@ pipx uninstall sourced && pipx install -e .
 
 Tests:
 ```bash
-pytest tests/cli/                          # unit + integration + parity (during dev) + golden
-pytest tests/emitter/ tests/parity/        # existing; unchanged
-bash tests/parity/run-all.sh               # 20 style × paste-target goldens
+pytest                       # everything: unit + integration + golden + parity + emitter well-formedness
+pytest -m "not parity"       # skip the 20 pandoc goldens (for machines without pandoc)
 ```
+
+Parity goldens are pinned to the pandoc version in `tests/parity/PANDOC_VERSION`; see `tests/parity/README.md`.
 
 ## Migration from the legacy installer
 

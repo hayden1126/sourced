@@ -16,23 +16,24 @@ Each `tests/parity/<style>/` contains:
   - `golden/plain-markdown.md`
   - `golden/google-docs.md`
   - `golden/word.docx.md` — the intermediate markdown pandoc emits for the word target, before docx binarization. Storing `.docx` binaries in git is hostile to review; compare the markdown intermediate instead.
-- `run.sh` — invokes pandoc per target, writes output under `actual/`, diffs against `golden/`.
+
+`test_parity.py` parametrizes every style × target pair (20 tests) and delegates to `_render.sh`, which invokes pandoc, writes output under `actual/`, and diffs against `golden/`.
 
 ## Running
 
-To run one style:
 ```bash
-cd tests/parity/<style>/
-./run.sh
+pytest tests/parity/               # all 20 style × target pairs
+pytest tests/parity/ -k mla9       # one style
+pytest -m "not parity"             # everything else, on a machine without pandoc
 ```
 
-To run all styles:
-```bash
-cd tests/parity/
-./run-all.sh
-```
+Tests skip when pandoc is absent.
 
-Requires pandoc 3.1+ on PATH.
+## Pandoc version pin
+
+Goldens are byte-compared pandoc output, so they are pinned to the exact pandoc version in `PANDOC_VERSION`. CI installs that version; locally, `test_parity.py` warns on mismatch so golden diffs can be told apart from pandoc drift.
+
+Upgrading the pin is a deliberate, standalone PR: install the new pandoc, regenerate all 20 goldens, update `PANDOC_VERSION`, and review the diffs. Policy details in issue #35.
 
 ## Acceptance
 
