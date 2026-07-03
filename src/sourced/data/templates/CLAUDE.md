@@ -180,7 +180,7 @@ The autonomy level modifies the thresholds in section 5. It does not replace sec
 - **Medium (default).** Ask on load-bearing decisions as defined in section 5 (scope, structure, source choice among alternatives, deletions of substantive content). Decide small calls autonomously: polish, obvious prose fixes, merging redundant sentences, APA formatting, weak-adverb cuts. This is the baseline if the brief doesn't specify.
 - **High.** Decide autonomously on source choice among alternatives, paragraph-level structural tweaks, and cuts up to one paragraph of agent-drafted content. Still pause on anything in section 5's "Ask before" list (scope, thesis, section-level structure, {{USER}}'s own prose), plus two high-autonomy-specific triggers: a claim that can't be sourced and needs reframing or cutting, or new research that conflicts with an earlier input from {{USER}} in the brief. High autonomy means "stop asking about middle-size calls," not "rewrite the thesis without asking." Use when {{USER}} explicitly delegates and wants forward motion over checkpoints.
 
-Re-read the autonomy level at the top of every [plan mode] entry, before every [refining mode] sign-off, and before any action that would trigger a section 5 "ask" at medium level. The level is load-bearing: if the brief doesn't specify, assume medium and say so ("brief doesn't set autonomy, assuming medium") rather than guessing.
+State the autonomy level in one clause at each of three firing points: the [plan mode] entry restate (`docs/modes/plan.md` step 2), the [refining mode] sign-off package, and any section 5 "ask" (the ask names the level it is applied under, e.g. "at medium autonomy this needs your call"). A firing point that does not state the level has not consulted it. The level is load-bearing: if the brief doesn't specify, assume medium and say so ("brief doesn't set autonomy, assuming medium") rather than guessing.
 
 ### Updating the brief
 
@@ -373,7 +373,7 @@ Rules (semantic, not structural):
   | academic-researcher (direct, no finder) | `null` | set immediately to section or paragraph where the citation lands |
 
   `provisional_reference` is source-finder provenance and is never rewritten once set. `draft_reference` is the live placement and may be updated as the citation moves between section-level and paragraph-level (see `~/.claude/citations/schema.md` for granularity rule).
-- Before editing any existing draft, load the citation log and cross-check prose against each entry. See `docs/modes/editing.md` for the full protocol. Paraphrase drift and byline drift are caught here, not during review.
+- Before editing any existing draft, load the citation log and cross-check prose against each entry; the cross-check is `[editing mode]` Pass 2 and emits its row list per `docs/modes/editing.md`. Paraphrase drift and byline drift are caught here, not during review.
 
 **Moments 2 and 3 (in-prose IDs, rendering).** Syntax, special tokens (`[VERIFY: ...]`, `[UNSOURCED]`), block-quote conventions, and the full formatting pipeline (pandoc invocation, CSL handling, post-pandoc transforms, citeproc warning classification) live in the respective mode bodies: `docs/modes/writing.md`, `docs/modes/editing.md`, `docs/modes/formatting.md`. Read on mode entry.
 
