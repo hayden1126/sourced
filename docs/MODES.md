@@ -2,7 +2,7 @@
 
 [← Back to README](../README.md)
 
-Twelve cognitive modes, one announced per transition. Full definitions live in [`src/sourced/data/templates/CLAUDE.md`](../src/sourced/data/templates/CLAUDE.md) §7; this page is the reference card plus a walkthrough of the typical workflow.
+Twelve cognitive modes, one announced per transition. The dispatch manifest (registry, triggers, gates, forcing artifacts, precedence) lives in the shipped [`CLAUDE.md`](../src/sourced/data/templates/CLAUDE.md) §7; full mode protocols are the shipped [`docs/modes/<name>.md`](../src/sourced/data/templates/docs/modes/) bodies, deployed into each project and read on mode entry. This page is the reference card plus a walkthrough of the typical workflow.
 
 ## Project types
 
@@ -55,17 +55,8 @@ At any point, `[red team]` and `[babble]` are available for stress-testing or un
 - **Editing → Formatting.** Agent runs a final §10 surface scan; any hits surface as blockers ("address before format, or mark as intentional?"). Silence ≠ override.
 - **Research round-trip.** When a mode auto-triggers research, the agent announces entry to `[research mode]`, runs, and announces return to the prior mode.
 
-## The editing mode eight passes
+## The editing mode passes
 
-`[editing mode]` runs these in fixed order. Sequence is load-bearing: citation resolution precedes the audit that depends on IDs; mechanics precede cadence.
-
-1. **ID validation.** Every `[@id]` resolves against the citation log; rendered author-year strings flagged as legacy regressions.
-2. **§4 citation audit.** Scope, attribution, byline, inference, cherry-pick per claim; synthesis per multi-citation claim.
-3. **Partial-entry recheck.** Citations with `verification_status: "partial"` re-checked against the pasted passage.
-4. **Grammar pass.** Tense/mood consistency, attributing verbs before quotes, pronoun antecedents, restrictive/non-restrictive, dangling participles, parallel structure. Target is unambiguity, not rule compliance.
-5. **Proofreading pass.** Mechanics the grammar pass doesn't cover: proper-noun consistency against first occurrence, paste-artifact detection (mojibake, stray combining marks, smart-quote curl inversions), punctuation mechanics (dash/hyphen/en-dash, quote-curl direction). Each list is a forced field; a pass that produces no lists has not run.
-6. **AI-tell pass (§10).** Never-list patterns flagged on sight; density-list patterns checked against per-essay budgets. Restructure sentence shape, don't retokenize.
-7. **Quote-density pass.** Direct-quote words over ~15% of a paragraph or two adjacent sentences both quoting → flag for paraphrase.
-8. **Voice audit (§9).** Connectedness, paragraph flow, pacing, concept setup, exploratory vs verdict tone. Voice does not override grammar-pass unambiguity flags.
+`[editing mode]` runs a fixed-order pass sequence: citation mechanics first (ID validation, the §4 audit, partial-entry recheck), then language mechanics (grammar, proofreading), then cadence (AI-tells, quote density, voice). The order is load-bearing, and several passes emit forced lists the formatting handoff gate checks. The canonical pass definitions live in the shipped [`docs/modes/editing.md`](../src/sourced/data/templates/docs/modes/editing.md) body; do not rely on summaries of it, including this one.
 
 See [VOICES.md](./VOICES.md) for what `[writing]` and `[editing]` mean by "voice rules," and [STYLES.md](./STYLES.md) for what `[formatting]` does with `config/style.md` and paste targets.

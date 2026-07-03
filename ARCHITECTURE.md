@@ -2,6 +2,8 @@
 
 Orientation for someone reading the repo. Read `README.md` for installation; read `src/sourced/data/templates/CLAUDE.md` for the agent's full operating rules. The Python CLI that orchestrates installation lives at `src/sourced/`. This file sketches the surface area and how the pieces connect.
 
+Canonical-source policy: the shipped bundle under `src/sourced/data/` is the source of truth for agent behavior (the CLAUDE.md dispatch manifest, the `docs/modes/` bodies, voices, styles, agents). Repo docs summarize and link; they do not restate protocol text. Each concept has one in-depth topic guide: workflow and gates in `docs/MODES.md`, voice and iron rules in `docs/VOICES.md`, rendering in `docs/STYLES.md`, setup in `docs/INSTALL.md`, skills in `docs/SKILLS.md`. This file is the map.
+
 Design history lives in `docs/archive/{specs,plans}/`, each file carrying a `Status: Shipped <date> (PR #N)` banner. In-flight specs and plans, when they exist, live at `docs/specs/` and `docs/plans/` (created on demand) and move to the archive with a banner when the work lands.
 
 ## File layout
@@ -18,7 +20,7 @@ sourced/
 │       ├── cli.py              # argparse root + dispatch + error→exit-code mapping.
 │       ├── __main__.py         # python -m sourced entry point.
 │       ├── commands/           # One file per subcommand: install, global_install, new, update, switch, check + _pipeline.
-│       ├── validators/         # Stateless: csl (pre-render), iron_rules + exemptions (post-render). Return list[Finding], never raise.
+│       ├── validators/         # Stateless: csl (pre-render), iron_rules + exemptions (post-render), invariants (I1-I11, `check --invariants`). Return list[Finding], never raise.
 │       ├── render.py           # Pure {{USER}} substitution + bundled-data Path resolution via importlib.resources.
 │       ├── project.py          # Per-project sentinels, markers, .sourced.bak rollback.
 │       ├── mirror.py           # shutil.copytree wrapper for ~/.claude/ population.
@@ -32,7 +34,9 @@ sourced/
 │           ├── skills/         # Skill library (e.g. browser-reader-extract).
 │           ├── filters/        # Pandoc Lua filters (promoted from templates/filters in PR 3).
 │           └── templates/
-│               ├── CLAUDE.md   # Primary agent operating instructions.
+│               ├── CLAUDE.md   # Primary agent operating instructions: always-on dispatch manifest (§7).
+│               ├── CLAUDE.d/   # Project-type overlay drop-ins (systemd style) + README.
+│               ├── docs/       # Shipped per-project docs: modes/<name>.md bodies (9) + voice-extractor.md.
 │               ├── brief.template.md, brief.template.annotated-bib.md
 │               ├── styles/     # 5 shipped slim styles + per-style asset dirs (CSL, template.tex, …).
 │               └── voices/     # 6 shipped voice skeletons (academic, casual, hybrid, journalistic, narrative, technical).
@@ -45,7 +49,7 @@ sourced/
     └── parity/                 # 5 styles × 4 paste targets = 20 goldens (the long-lived render parity suite).
 ```
 
-`sourced global-install` mirrors bundled data from `src/sourced/data/` into `~/.claude/`. `sourced install` from inside a project renders `<project>/CLAUDE.md`, `<project>/config/voice.md`, `<project>/config/style.md` (and optionally `<project>/config/<name>.brief.md`). `sourced check` verifies prereqs (`pdftotext`, `pdfinfo`, `pdftoppm`, `pandoc` ≥ 3.1, `python3`) plus `~/.claude/` health plus per-voice iron-rule integrity; missing tools surface with install hints rather than auto-installing (see [docs/INSTALL.md](./docs/INSTALL.md#prerequisite-check)).
+`sourced global-install` mirrors bundled data from `src/sourced/data/` into `~/.claude/`. `sourced install` from inside a project renders `<project>/CLAUDE.md`, `<project>/config/voice.md`, `<project>/config/style.md` (and optionally `<project>/config/<name>.brief.md`), creates the `sources/`, `samples/`, and `failures/` subdirs, and deploys the shipped `docs/` tree (mode bodies) plus `CLAUDE.d/` overlays into the project. `sourced check` verifies prereqs (`pdftotext`, `pdfinfo`, `pdftoppm`, `pandoc` ≥ 3.1, `python3`) plus `~/.claude/` health plus per-voice iron-rule integrity; missing tools surface with install hints rather than auto-installing (see [docs/INSTALL.md](./docs/INSTALL.md#prerequisite-check)).
 
 Shipped skills under `src/sourced/data/skills/<name>/` mirror into `~/.claude/skills/<name>/` on every install; Claude Code auto-discovers them across all projects. Style asset directories under `src/sourced/data/templates/styles/<name>/` mirror into `~/.claude/style/<name>/` so `[formatting mode]` can pick up CSL files, reference.docx, on-demand reference tables (e.g., `classical-abbreviations.md`), and other per-style binaries without a separate fetch. The on-demand reference pattern lets a style offload rarely-used lookups (per-author classical abbreviations) without paying per-format-pass load cost; `config/style.md` stays lean and the reference file is Read only when a citation triggers it.
 
@@ -81,6 +85,8 @@ Reference design: [`docs/archive/specs/2026-04-21-sourced-cli-decomposition-desi
 
 ## Modes
 
+The canonical registry is the dispatch manifest in the shipped CLAUDE.md §7.1: triggers in §7.2-7.3, gates in §7.4, forcing artifacts in §7.5, precedence in §7.6. Full mode protocols live in the shipped `docs/modes/<name>.md` bodies (installed into each project, read on mode entry); three small modes (collaborative, red-team, babble) stay inline in §7.7. The table below is an orientation map, not the authority.
+
 | Mode | Purpose | Gates into |
 |------|---------|------------|
 | `[collaborative mode]` | Default. Exploratory riffing, sparring, thinking aloud. | Any mode. |
@@ -89,7 +95,7 @@ Reference design: [`docs/archive/specs/2026-04-21-sourced-cli-decomposition-desi
 | `[refining mode]` | Stress-test the outline. Citation / structure / synthesis-integrity (§4) audit before prose exists. | `[writing mode]` (sign-off gate) |
 | `[writing mode]` | Convert refined outline into prose. Apply `config/voice.md`, §10 generation signatures, paraphrase default, Pandoc citation IDs. | `[editing mode]` |
 | `[annotated-bib mode]` | Per-entry annotation (4-beat: summary / relevance / location / evaluation) and draft compile. Grounded only in log fields; §3 verification inherited. Annotated-bib projects only; replaces `[outlining]` / `[refining]` / `[writing]`. | `[editing mode]` |
-| `[editing mode]` | Eight-pass audit: ID validation → §4 citation → partial-entry recheck → grammar → proofreading → AI-tell (§10) → quote-density → voice (§9). Handoff gate blocks on unresolved voice-audit hits. In annotated-bib projects, pass 7 (quote-density) and the §9 flow-rules part of pass 8 are skipped. | `[formatting mode]` (handoff gate) |
+| `[editing mode]` | Multi-pass audit on prose, citation mechanics first, then language, then cadence (full pass sequence: shipped `docs/modes/editing.md`). Handoff gate blocks on unresolved voice-audit hits. | `[formatting mode]` (handoff gate) |
 | `[finetuning mode]` | Bounded local substitution (word to paragraph): produce 3–5 alternatives with declared tradeoff axes; never applies a single-option change without explicit {{USER}} selection. {{USER}}-only entry via explicit or implicit trigger. | Returns to prior mode on completion. |
 | `[formatting mode]` | Render source prose into style-specific output for a named paste target (`word`, `google-docs`, `plain-markdown`, `latex` — all rendered via pandoc+CSL). Terminal stage; source prose never modified. | Done. |
 | `[research mode]` | Source vetting and logging. Auto-triggers from other modes when a claim needs a source. Dispatches `source-finder` subagents in parallel for 3+ sub-topics. | Returns to prior mode on completion. |
@@ -102,6 +108,8 @@ Reference design: [`docs/archive/specs/2026-04-21-sourced-cli-decomposition-desi
 |----------|---------------|---------|-----------|
 | `source-finder` | academic-researcher during `[research mode]` | Vet and log sources for one sub-topic; return a structured report (`### Logged / ### Rejected / ### Gaps / ### Alternative framings`). | Yes — 3+ per dispatch batch. Each writes to its own shard; parent merges with ID-collision resolution. |
 | `voice-extractor` | academic-researcher (from `[collaborative mode]` only, on explicit user request) | Read a writing-samples corpus, mirror the skeleton voice file's section structure, emit a per-author voice library file at `~/.claude/voice/<name>.md`. Iron rules preserved verbatim. | No. One-shot utility. |
+| `prose-drafter` | academic-researcher during `[writing mode]` | Draft one section from a prose plan in isolated context (no conversation bleed); return prose plus a self-audit. Never user-triggered. | No. One section per dispatch. |
+| `sourced-helper` | Claude Code dispatcher, on framework questions ("how do I switch styles?") | Read-only Q&A about the CLI surface, file layout, voices, styles, and modes. `haiku`-backed for cost. | No. |
 
 ## Per-project files
 
@@ -112,6 +120,10 @@ Reference design: [`docs/archive/specs/2026-04-21-sourced-cli-decomposition-desi
 - `<project>/<draft>.md` — source prose with Pandoc citation IDs.
 - `<project>/sources/<draft>.citations.json` — citation log for the draft (schema: `citations/schema.md`).
 - `<project>/<draft>.<target>.md` — formatted output written by `[formatting mode]` (e.g., `<draft>.gdocs.md`).
+- `<project>/docs/modes/<name>.md` — mode bodies deployed by `sourced install`/`update`; the agent reads one on each mode entry.
+- `<project>/CLAUDE.d/` — project-type overlay drop-ins (README + type-specific manifest patches).
+- `<project>/samples/` — writing samples for voice-extractor input.
+- `<project>/failures/` — captured failure artifacts for later analysis.
 - `<project>/.sourced-project-type` — project-type marker written by `sourced install` when `--type` is non-default (currently only `annotated-bib`); contains the type name on a single line. Absence means essay (legacy-safe default).
 
 ## Citation handling: three moments
@@ -136,11 +148,7 @@ Step 3 above (rendering) delegates to `pandoc --citeproc` reading the style's ve
 2. **Voice library** (`~/.claude/voice/<name>.md`) — per-author calibrated voice files. The 6 shipped voices (`academic`, `casual`, `technical`, `journalistic`, `narrative`, `hybrid`) ARE the skeletons; derived voices are generated by `voice-extractor` from a writing-samples corpus and mirror the matching skeleton's section structure (selected by register classification — see `docs/VOICES.md`).
 3. **Project voice** (`<project>/config/voice.md`) — rendered from the chosen library voice on `sourced install --voice <name>` or `sourced switch voice <name>`, with `{{USER}}` substituted.
 
-**Skeleton-per-register (6 skeletons).** As of 2026-04-19, the voice library ships 6 register-specific skeletons (`academic`, `casual`, `technical`, `journalistic`, `narrative`, `hybrid`) instead of a single `academic.md`. Voice-extractor selects the skeleton based on corpus classification: a dominant-register corpus (≥ 85%) uses that register's skeleton; a blended corpus (< 85%) uses `hybrid.md`, which is authored with register-neutral non-iron prose and explicit anti-bias instructions. Each skeleton organizes rules under 4 orthogonal axes — `## Iron rules`, `## Tone`, `## Structure`, `## Dimension` — so a voice can be calibrated along each axis independently. See `docs/VOICES.md` for the full register map and routing logic.
-
-**Iron rules** (content under `## Iron rules` / `## AI-tells` / `## Generation signatures` section headings in a voice skeleton, plus any line containing the `[iron]` token) pass through verbatim at every layer. `voice-extractor` refuses to downgrade iron rules to TBD; the sourced CLI refuses to install a voice file where any iron rule is missing.
-
-Generation signatures (AI-writing tells that apply regardless of voice) live in CLAUDE.md §10, not in individual voice files. Each bullet on §10's Never list carries a stable `[id: <name>]` marker. A voice library file may exempt a specific rule by listing the matching ID under its `## §10 exemptions` section; the sourced CLI validates the section against the ID set extracted live from `src/sourced/data/templates/CLAUDE.md` and aborts on any unknown ID. Silence is not permission: a voice file that omits the section or leaves the bullet list empty inherits §10 in full.
+Each skeleton is register-specific (or register-neutral for `hybrid.md`) and organizes rules under 4 orthogonal axes: `## Iron rules`, `## Tone`, `## Structure`, `## Dimension`. Voice-extractor routes a corpus to the matching skeleton by register classification. Iron rules pass through every layer verbatim; generation signatures (AI-tells that apply regardless of voice) live in the shipped CLAUDE.md §10 with stable IDs, exemptible per voice via a validated `## §10 exemptions` section. Full register map, routing logic, iron-rule mechanics, and exemption syntax: [`docs/VOICES.md`](./docs/VOICES.md).
 
 ## Style system
 
@@ -160,15 +168,9 @@ Generation signatures (AI-writing tells that apply regardless of voice) live in 
 - **New voice from scratch.** Copy any of the 6 shipped skeletons (e.g., `src/sourced/data/templates/voices/academic.md` for an academic-register voice; `src/sourced/data/templates/voices/casual.md` for casual; `src/sourced/data/templates/voices/hybrid.md` for register-neutral) → `~/.claude/voice/<name>.md`, edit per-section rules, preserve the `## Iron rules` section verbatim, then `sourced install --voice <name>` or `sourced switch voice <name>` from a project.
 - **New voice from corpus.** Ask the agent to generate a voice from a writing-samples directory; it dispatches `voice-extractor` in `[collaborative mode]` and surfaces the report. Fill in `TBD` sections by hand, then `sourced install --voice <name>` or `sourced switch voice <name>`.
 - **New style.** Copy any of the five shipped slim styles (`apa7.md`, `chicago17-ad.md`, `chicago17-nb.md`, `ieee.md`, `mla9.md`) as a starting template, vendor the matching CSL file under `src/sourced/data/templates/styles/<name>/`, edit per-style metadata + document layout, then `sourced install --style <name>` or `sourced switch style <name>`.
-- **New mode.** Add a `### [mode name]` subsection to `src/sourced/data/templates/CLAUDE.md` §7 (entry rules, workflow, handoff). Register it in the mode-switching table. Any auto-trigger rules need explicit announce-on-entry and announce-on-return semantics.
+- **New mode.** Add a registry row to the §7.1 dispatch manifest in `src/sourced/data/templates/CLAUDE.md` (body path, project types, auto-enter conditions), wire explicit triggers in §7.2 and gates in §7.4, then author the body at `src/sourced/data/templates/docs/modes/<name>.md` (procedure, red flags, exit checks). Auto-trigger rules need announce-on-entry and announce-on-return semantics. `sourced check --invariants` enforces manifest-to-body consistency.
 - **New subagent.** Add `src/sourced/data/agents/<name>.md` with frontmatter (`name`, `description`, `tools`, `model`) plus a dispatch template. Reference it from the relevant mode section in CLAUDE.md.
 
 ## Defense-in-depth for iron rules
 
-Iron rules (voice-skeleton rules that must pass through derived voices unchanged) are checked in three places:
-
-1. **Inside `voice-extractor`** — step 3 identifies iron rules from the skeleton; step 5 branch preserves them verbatim; step 8 self-check before writing.
-2. **Caller-side in `academic-researcher`** — after `voice-extractor` returns, CLAUDE.md §9 instructs the caller to substring-check each iron rule against the produced file before surfacing the report.
-3. **Install-time in the sourced CLI** — `iron_rules` validator in `commands/_pipeline.render_voice` + `commands/check.check_voice_iron_rules` normalizes both skeleton and candidate, substring-matches, and aborts install on any missing rule.
-
-One layer failing doesn't ship a broken voice. All three would have to miss.
+Iron rules are checked in three independent places: inside `voice-extractor` at generation time, caller-side in `academic-researcher` after the subagent returns, and install-time in the CLI's `iron_rules` validator. One layer failing doesn't ship a broken voice; all three would have to miss. Layer-by-layer detail: [`docs/VOICES.md`](./docs/VOICES.md).

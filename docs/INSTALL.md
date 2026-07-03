@@ -186,23 +186,29 @@ Global files (installed once, shared across projects) and per-project files (ren
 |------|-------|
 | `~/.claude/agents/source-finder.md` | global subagent (parallel source research) |
 | `~/.claude/agents/voice-extractor.md` | global subagent (one-shot voice calibration from samples) |
+| `~/.claude/agents/prose-drafter.md` | global subagent (isolated section drafting during `[writing mode]`) |
+| `~/.claude/agents/sourced-helper.md` | global subagent (read-only framework Q&A) |
 | `~/.claude/citations/schema.md` | global citation log schema |
+| `~/.claude/filters/` | pandoc Lua filters (smart-quotes) |
 | `~/.claude/templates/brief.template.md` | global brief template (essay) |
 | `~/.claude/templates/brief.template.annotated-bib.md` | global brief template (annotated bibliography) |
 | `~/.claude/voice/<name>.md` | voice library (shipped + custom voices available for project selection) |
 | `~/.claude/style/<name>.md` | style library (shipped + custom styles) |
 | `~/.claude/style/<name>/<asset>` | per-style asset dir (CSL file, reference.docx, on-demand reference tables like `classical-abbreviations.md`) |
 | `~/.claude/skills/<name>/` | skill library; Claude Code auto-discovers skills globally (currently ships `browser-reader-extract`) |
-| `<project>/CLAUDE.md` | per-project; contains the inlined academic-researcher rules |
+| `<project>/CLAUDE.md` | per-project; the academic-researcher dispatch manifest (managed block) |
+| `<project>/docs/modes/<name>.md` | per-project; mode bodies read on mode entry (deployed by install/update) |
+| `<project>/CLAUDE.d/` | per-project; project-type overlay drop-ins |
 | `<project>/config/voice.md` | per-project; the active voice for this project |
 | `<project>/config/style.md` | per-project; the active citation style for this project |
 | `<project>/config/<draft>.brief.md` | per-project; sibling to voice/style under config/ |
-| `<project>/sources/<draft>.citations.json` | per-project; under sources/ next to other source artifacts |
+| `<project>/sources/<draft>.citations.json` | per-project; under sources/ next to other source artifacts (`sources/working.citations.json` before a draft exists) |
+| `<project>/samples/` | per-project; writing samples for voice-extractor input |
+| `<project>/failures/` | per-project; captured failure artifacts |
 | `<project>/<draft>.<target>.md` | formatted output written by `[formatting mode]` (e.g., `<draft>.gdocs.md`, `<draft>.docx.md`) |
 | `<project>/<draft>.docx` | submission binary when `[formatting mode for word]` runs pandoc on the intermediate |
 | `<project>/<draft>.bib.json` | CSL-JSON bibliography emitted for `word` target against collapsed source-level IDs |
-| `<project>/.claude/citations/working.citations.json` | per-project, pre-draft |
-| `<project>/.claude/citations/working.<finder-id>.json` | per-project, source-finder shards |
+| `<project>/.claude/citations/working.<finder-id>.json` | per-project; source-finder dispatch shards (merged by the parent) |
 
 ## pipx gotchas
 
@@ -245,9 +251,12 @@ sourced/
 │       └── data/
 │           ├── agents/
 │           │   ├── source-finder.md
-│           │   └── voice-extractor.md
+│           │   ├── voice-extractor.md
+│           │   ├── prose-drafter.md
+│           │   └── sourced-helper.md
 │           ├── citations/
-│           │   └── schema.md
+│           │   ├── schema.md
+│           │   └── csl-json-emitter.md
 │           ├── filters/         # Pandoc Lua filters (promoted from templates/filters/)
 │           ├── skills/
 │           │   └── browser-reader-extract/
@@ -256,6 +265,10 @@ sourced/
 │           │       └── overdrive.mjs
 │           └── templates/
 │               ├── CLAUDE.md
+│               ├── CLAUDE.d/            # project-type overlay drop-ins + README
+│               ├── docs/
+│               │   ├── modes/           # 9 externalized mode bodies (plan, research, …)
+│               │   └── voice-extractor.md
 │               ├── brief.template.md
 │               ├── brief.template.annotated-bib.md
 │               ├── styles/
@@ -296,5 +309,7 @@ sourced/
     │   └── golden/
     ├── emitter/
     └── parity/
-        └── run-all.sh
+        ├── test_parity.py
+        ├── PANDOC_VERSION
+        └── _render.sh
 ```
