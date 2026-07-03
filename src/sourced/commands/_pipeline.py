@@ -66,9 +66,9 @@ def install_global(ctx: Context, *, force: bool = False) -> dict:
                 mirror_tree(Path(src), dest, dry_run=False)
                 counts["mirrored"] += sum(1 for _ in dest.rglob("*") if _.is_file())
 
-    # Brief templates to ~/.claude/templates/ (install.sh-parity: only the two
-    # brief templates land here; voices and styles go to their canonical
-    # ~/.claude/voice/ and ~/.claude/style/ locations below).
+    # Brief templates to ~/.claude/templates/ (only the two brief templates
+    # land here; voices and styles go to their canonical ~/.claude/voice/
+    # and ~/.claude/style/ locations below).
     templates_dest = CLAUDE_HOME / "templates"
     if not ctx.dry_run:
         templates_dest.mkdir(parents=True, exist_ok=True)
@@ -82,8 +82,7 @@ def install_global(ctx: Context, *, force: bool = False) -> dict:
                 counts["mirrored"] += 1
 
     # Voice library: bundled templates/voices/*.md → ~/.claude/voice/<name>.md
-    # Note: install.sh treats these as templates the per-project step substitutes
-    # against; the library copy is unrendered.
+    # The library copy is unrendered; per-project install substitutes against it.
     voice_dest = CLAUDE_HOME / "voice"
     style_dest = CLAUDE_HOME / "style"
     if not ctx.dry_run:

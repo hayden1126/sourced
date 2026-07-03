@@ -32,22 +32,13 @@ def bundled_path(subpath: str) -> contextlib.AbstractContextManager[Path]:
 
 @dataclass(frozen=True)
 class RenderContext:
-    """Substitution variables for render(). Pass voice_name/style_name as None
-    when the template doesn't opt into them; the matching token stays verbatim.
-    """
+    """Substitution variables for render(). Unknown tokens stay verbatim."""
     user: str
-    voice_name: str | None = None
-    style_name: str | None = None
 
 
 def render(template: str, ctx: RenderContext) -> str:
     """Apply substitutions. Pure: no I/O, no side effects."""
-    out = template.replace("{{USER}}", ctx.user)
-    if ctx.voice_name is not None:
-        out = out.replace("{{VOICE}}", ctx.voice_name)
-    if ctx.style_name is not None:
-        out = out.replace("{{STYLE}}", ctx.style_name)
-    return out
+    return template.replace("{{USER}}", ctx.user)
 
 
 def write_atomic(path: Path, content: str) -> None:
