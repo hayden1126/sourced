@@ -3,11 +3,11 @@
 > Living state. Update at the end of every working block so a fresh session can resume from here after `/clear`.
 
 Last updated: 2026-07-03 (third block of the day)
-Branch / worktree: main (feature branch `reliability-basis` pushed, PR #48 open)
+Branch / worktree: main
 
 ## Done
 
-- 2026-07-03 (block 3) reliability_basis, issue #45, commit range `8e1daf3..b8abcce` on branch `reliability-basis` (PR #48, OPEN at handoff, lint green, test matrix was pending):
+- 2026-07-03 (block 3) reliability_basis, issue #45, commit range `8e1daf3..b8abcce` (PR #48, merged, CI green; handoff PR #49 merged; issue #45 closed):
   - `source.reliability_basis` added to the citation-log schema (new §Reliability basis section): `venue_type` (closed 9-value enum, no other/unknown, peer-review status folded into the venue class), `venue_basis` (one named checkable venue fact; generic vouching hard-fails), `author_credentials` (verbatim credential + where observed; escape literals "group author: <standing>" / "none stated"). Recency deliberately unrecorded (its inputs are already logged; a forced "recency ok" is a ritual counter).
   - Scope: required on every verified entry, list-shape included, {{USER}}-pasted partial exempt. Per-source, set-once; legacy entries backfilled on next source re-open, never from memory.
   - Enforcement: four new merge hard-fail bullets, lookup-only fix-in-place, spot-check extension (verifies the recorded facts exist; sufficiency stays Hayden's call), three forced merge-report surfacing lines. Deliberately NOT in CLAUDE.md §7.5 and no new Python invariant (retrieval.* precedent).
@@ -18,7 +18,8 @@ Branch / worktree: main (feature branch `reliability-basis` pushed, PR #48 open)
 
 ## In flight
 
-- PR #48 (`reliability-basis`) open at handoff: lint passed, py3.10/3.13 test jobs were still pending. Next concrete step: confirm CI green, merge PR #48 (body says "Closes #45", so the issue closes on merge), then delete branches `reliability-basis` and `handoff-reliability-basis` once merged (deletion needs Hayden's OK; `/clean_gone` handles the [gone] ones after remote deletion).
+- Nothing half-done. Clean boundary: PRs #48 and #49 merged (main at `68a55e1`), issue #45 closed, branches deleted, tree green (pytest 260, invariants 11/11 re-run on merged main).
+- Next concrete step: pick the next thread (see Blocked below).
 
 ## Blocked / decisions needed
 
