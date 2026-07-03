@@ -28,7 +28,7 @@ When the corpus crosses sub-register boundaries (academic-report + personal-essa
 - **`primary`.** Skeleton resolves to the majority sub-register's file; the minority files are excluded from rule calibration but listed in the report's `### Excluded files` section. Use when {{USER}} explicitly wants one voice file from a known-mixed corpus and accepts that minority-register patterns are dropped.
 - **`segmented`.** Skeleton resolves to `~/.claude/voice/hybrid.md`; rules are tagged by sub-register inline (`[register: academic-report]`, `[register: personal-essay]`). Use when the corpus is genuinely cross-register and {{USER}} wants a single hybrid voice file. Segmented coverage of each sub-register is reported in `### Segmented coverage`.
 
-The phase-3 academic skeleton additionally carries a `## Sub-register taxonomy` section that names the in-register sub-registers (academic-report, prospectus, personal-essay). When the produced voice scopes-out a sub-register (e.g., `multi_register=primary` excluded personal-essay), the sub-register's `### Exhibit N` is left as `TBD — sub-register out of scope for this extraction` and rules tagged with that sub-register are dropped from exemplar attachment.
+The phase-3 academic skeleton additionally carries a `## Sub-register taxonomy` section that names the in-register sub-registers (academic-report, prospectus, personal-essay). When the produced voice scopes-out a sub-register (e.g., `multi_register=primary` excluded personal-essay), the sub-register's exhibit under the voice file's `## Worked paragraphs` section is left as `TBD — sub-register out of scope for this extraction` and rules tagged with that sub-register are dropped from exemplar attachment. The excluded files themselves are listed in the report's `### Excluded files` section.
 
 ### `failures_dir` (phase-3 cut-pattern mining)
 
@@ -61,6 +61,7 @@ Procedure:
 
 Surface the subagent's report to {{USER}}. The phase-3 return report carries these sections requiring {{USER}}'s hand:
 
+- **`### Sample stats` skip manifest** — every file the extractor could not use, one per line with its reason (only `.md` and `.txt` are read). When skipped files outnumber matched files, the corpus is thinner than the directory suggests; {{USER}} decides whether to convert the skipped files (`pdftotext`, or the ebook-extract skill) and re-run with `overwrite: true`. An `under-sample` rejection carries the same manifest.
 - **`### Sections left TBD`** — sections the corpus didn't settle (Anchors with topically-narrow corpus; sub-register exhibits scoped out by `multi_register`; thin-coverage exemplar blocks). {{USER}} fills or deletes; do not silently pre-fill.
 - **`### Iron-rule conflicts`** — corpus evidence against a preserved §10 rule. Informational; {{USER}} promotes to `## §10 exemptions` by hand if appropriate. Do not act on these without {{USER}} input. The phase-3 subagent counts instances and surfaces 2+ -instance candidates with lifted exemplars.
 - **`### Anchor candidates`** — recurring named touchstones surfaced from the corpus. {{USER}} selects the cross-paper anchors and edits the `### Analogies and Anecdotes` section to list them.
