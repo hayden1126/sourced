@@ -1115,7 +1115,7 @@
   - **`prospectus`** — compressed academic-report, usually 3–4 pages. Claim-forward opening (no narrative lure), argument-first development, forward-looking closing ("In the poster I will..."). No first-person stance; first-person appears only in process statements about the paper itself.
   - **`personal-essay`** — first-person argumentative with question-driven structure. May delay thesis across multiple paragraphs for a narrative lure. Examples: admissions essays, reflection pieces.
   
-  When the corpus spans multiple sub-registers, `voice-extractor` produces one voice file per sub-register rather than unioning them; see `data/agents/voice-extractor.md § Multi-register corpora`. Unioning is the documented failure mode (a `personal-essay` first-person commitment rule imported into an `academic-report` produces awkward prose).
+  When the corpus spans multiple sub-registers, `voice-extractor` produces one voice file per sub-register rather than unioning them; see `data/agents/voice-extractor.md § Multi-register routing`. Unioning is the documented failure mode (a `personal-essay` first-person commitment rule imported into an `academic-report` produces awkward prose).
   
   **Determining sub-register at write time.** `[writing mode]` Phase 1 declares the sub-register for the section in the prose-plan's Register Mode field. The declaration filters which rules below apply. If the brief does not specify, assume `academic-report` and flag the assumption in the prose-plan.
   
@@ -1481,7 +1481,7 @@
   - **`commentary`** — opinion take on something current or specific, named stance, argument-forward. Examples: Substack-style posts taking a position, opinion blog posts, conversational responses to ongoing discourse.
   - **`process-post`** — "how I built X / what I learned from Y" walkthrough, first-person setup + concrete steps + reflection. Examples: technical-adjacent how-to posts, recipe-style narratives, project retrospectives.
   
-  When the corpus spans multiple sub-registers, `voice-extractor` produces one voice file per sub-register rather than unioning them; see `data/agents/voice-extractor.md § Multi-register corpora`. Unioning is the documented failure mode (a `commentary` sharper-stance rule imported into `personal-essay` reflective prose produces over-emphatic essays).
+  When the corpus spans multiple sub-registers, `voice-extractor` produces one voice file per sub-register rather than unioning them; see `data/agents/voice-extractor.md § Multi-register routing`. Unioning is the documented failure mode (a `commentary` sharper-stance rule imported into `personal-essay` reflective prose produces over-emphatic essays).
   
   **Determining sub-register at write time.** `[writing mode]` Phase 1 declares the sub-register for the section in the prose-plan's Register Mode field. The declaration filters which rules below apply. If the brief does not specify, assume `personal-essay` (the casual default) and flag the assumption in the prose-plan.
   
@@ -1731,7 +1731,7 @@
   
   Voice calibration for blended-register corpora. Encodes the UNDERLYING rules (connectedness, pacing, concept setup, iron prohibitions) without committing to a register's specific framing. Use as the base skeleton when the writing-samples corpus spans registers (e.g., school essays that are structurally academic but tonally casual; blog posts that mix reflective and journalistic patterns).
   
-  `voice-extractor` selects `hybrid.md` automatically when the classifier finds no single register above 85% of the corpus AND `multi_register=segmented`. Other `multi_register` settings (`split`, `primary`) route differently — see `data/agents/voice-extractor.md § Multi-register corpora`.
+  `voice-extractor` selects `hybrid.md` automatically when the classifier finds no single register above 85% of the corpus AND `multi_register=segmented`. Other `multi_register` settings (`split`, `primary`) route differently — see `data/agents/voice-extractor.md § Multi-register routing`.
   
   For a register-specific calibration (academic papers, casual blog posts, technical documentation, journalistic pieces, narrative reflection), start from the matching shipped skeleton instead. Applies in `[outlining mode]` (Paragraph Flow at outline time), `[writing mode]` (Phase 1 plan + Phase 2 `prose-drafter` dispatch), and `[editing mode]` (Pass 0 Revision + Pass 8 voice audit).
   
@@ -1974,7 +1974,7 @@
   - **`feature`** — narrative reporting; scene-setting allowed; named subjects with quoted dialogue; first-person occasionally if the writer is in the story. Examples: longform features, profiles, reported essays.
   - **`commentary`** — opinion column; named stance; first-person standard; argument-forward with anticipated counterarguments. Examples: op-eds, opinion columns, editorial-page pieces.
   
-  When the corpus spans multiple sub-registers, `voice-extractor` produces one voice file per sub-register rather than unioning them; see `data/agents/voice-extractor.md § Multi-register corpora`. Unioning is the documented failure mode (a `commentary` first-person stance rule imported into `news-report` produces editorialized reporting that fails the basic attribution discipline of the genre).
+  When the corpus spans multiple sub-registers, `voice-extractor` produces one voice file per sub-register rather than unioning them; see `data/agents/voice-extractor.md § Multi-register routing`. Unioning is the documented failure mode (a `commentary` first-person stance rule imported into `news-report` produces editorialized reporting that fails the basic attribution discipline of the genre).
   
   **Determining sub-register at write time.** `[writing mode]` Phase 1 declares the sub-register for the section in the prose-plan's Register Mode field. The declaration filters which rules below apply. If the brief does not specify, assume `news-report` (the journalistic default — strictest baseline) and flag the assumption in the prose-plan.
   
@@ -2258,7 +2258,7 @@
   - **`reflective`** — past-tense looking back; abstract movement; meaning-making in the foreground; scene used as illustration. Examples: meditation essays, retrospective reflections, mid-life reckonings.
   - **`argumentative-personal`** — first-person essay with thesis; scene + reflection alternation in service of an argument; closer to academic personal-essay than memoir. Examples: New York Times Modern Love columns, polished college-application essays, thesis-driven personal essays.
   
-  When the corpus spans multiple sub-registers, `voice-extractor` produces one voice file per sub-register rather than unioning them; see `data/agents/voice-extractor.md § Multi-register corpora`. Unioning is the documented failure mode (a `scene-driven` sensory-density rule imported into `argumentative-personal` produces over-described prose where every paragraph stops to describe a room before resuming the argument).
+  When the corpus spans multiple sub-registers, `voice-extractor` produces one voice file per sub-register rather than unioning them; see `data/agents/voice-extractor.md § Multi-register routing`. Unioning is the documented failure mode (a `scene-driven` sensory-density rule imported into `argumentative-personal` produces over-described prose where every paragraph stops to describe a room before resuming the argument).
   
   **Determining sub-register at write time.** `[writing mode]` Phase 1 declares the sub-register for the section in the prose-plan's Register Mode field. The declaration filters which rules below apply. If the brief does not specify, assume `reflective` (the narrative middle-baseline) and flag the assumption in the prose-plan.
   
@@ -2523,7 +2523,7 @@
   - **`tutorial`** — step-by-step walkthroughs aimed at a specific learning outcome. Second-person ("you call connect, then..."); contextual asides allowed; concrete examples per step. Examples: getting-started guides, "your first X" posts, codelabs.
   - **`design-rationale`** — RFCs, design docs, postmortems, ADRs. Discursive prose with named tradeoffs; first-person plural ("we chose B because...") allowed for team-authored docs; counterargument-naming required. Examples: architecture decision records, postmortems, RFC documents.
   
-  When the corpus spans multiple sub-registers, `voice-extractor` produces one voice file per sub-register rather than unioning them; see `data/agents/voice-extractor.md § Multi-register corpora`. Unioning is the documented failure mode (a `tutorial` second-person rule imported into `reference` produces inconsistent prose where some entries address the reader and others state behavior).
+  When the corpus spans multiple sub-registers, `voice-extractor` produces one voice file per sub-register rather than unioning them; see `data/agents/voice-extractor.md § Multi-register routing`. Unioning is the documented failure mode (a `tutorial` second-person rule imported into `reference` produces inconsistent prose where some entries address the reader and others state behavior).
   
   **Determining sub-register at write time.** `[writing mode]` Phase 1 declares the sub-register for the section in the prose-plan's Register Mode field. The declaration filters which rules below apply. If the brief does not specify, assume `reference` (the technical default — strictest baseline) and flag the assumption in the prose-plan.
   
