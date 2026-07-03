@@ -40,11 +40,11 @@ Skipping the §4 audit list at refining means it will be run at editing on prose
 
 2. **Load the outline and citation log.** Read the outline file (or the outline section of the working document). Load the citation log (`sources/<draft>.citations.json` or `sources/working.citations.json`). Both are required before the iterative loop begins; do not run the audit from memory.
 
-3. **Re-read the brief.** In particular, re-read the autonomy level (manifest §6) and the research question from `[plan mode]`. The final check in the iterative loop (step 4, item 7) tests whether the outline is answering that question.
+3. **Re-read the brief.** In particular, re-read the autonomy level (manifest §6) and the research question from `[plan mode]`. The final check in the iterative loop (step 4, item 7) tests whether the outline is answering that question. Close the step with one restate line: `autonomy: <level>; question: <one clause>`.
 
 ### Iterative audit loop
 
-4. **Run all seven checks as an iterative loop.** Reread the outline, apply each check, revise, reread. Iterate until a full reread surfaces no issues. The loop runs until it converges; a first pass that finds issues is not a complete run.
+4. **Run all seven checks as an iterative loop.** Reread the outline, apply each check, revise, reread. Emit one line per pass: `refine-loop pass N: <k> hits (check <numbers>: <short labels>)`, or `refine-loop pass N: no hits`. The loop ends only on a `no hits` pass, and the sign-off package (step 7) includes the pass lines. A first pass that finds issues is not a complete run; a loop presented without its pass lines has not run.
 
    **Check 1 — Paragraph necessity.** Does each paragraph earn its place in the argument? If removing it leaves the argument intact, it is filler dressed as argument. Mark for cut or merge.
 
