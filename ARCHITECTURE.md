@@ -43,7 +43,7 @@ sourced/
 │               └── voices/     # 6 shipped voice skeletons (academic, casual, hybrid, journalistic, narrative, technical).
 └── tests/
     ├── cli/                    # Python CLI tests:
-    │   ├── unit/               # Per-module unit tests (167 tests).
+    │   ├── unit/               # Per-module unit tests (163 tests).
     │   ├── integration/        # Subprocess-driven end-to-end tests (58 tests).
     │   └── golden/             # syrupy snapshots for 14 shipped templates.
     ├── emitter/                # CSL-JSON emitter reference fixtures + well-formedness tests.

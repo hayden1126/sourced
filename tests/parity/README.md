@@ -16,6 +16,7 @@ Each `tests/parity/<style>/` contains:
   - `golden/plain-markdown.md`
   - `golden/google-docs.md`
   - `golden/word.docx.md` — the intermediate markdown pandoc emits for the word target, before docx binarization. Storing `.docx` binaries in git is hostile to review; compare the markdown intermediate instead.
+  - `golden/latex.tex` — document body only (between `\begin{document}` and `\end{document}`), so preamble edits don't cascade into golden diffs.
 
 `test_parity.py` parametrizes every style × target pair (20 tests) and delegates to `_render.sh`, which invokes pandoc, writes output under `actual/`, and diffs against `golden/`.
 
