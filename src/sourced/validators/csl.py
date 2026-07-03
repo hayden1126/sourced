@@ -6,7 +6,6 @@ element. This validator confirms they agree — silent edition drift (e.g.,
 upstream CSL repository updates Chicago 17 → 18) gets caught here.
 """
 from __future__ import annotations
-import re
 from pathlib import Path
 from xml.etree import ElementTree as ET
 

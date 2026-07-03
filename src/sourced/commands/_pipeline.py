@@ -16,17 +16,14 @@ Pipeline shape (per spec §5.3):
   7. write_atomic OR mirror_tree
 """
 from __future__ import annotations
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Literal
 
 from ..context import Context
 from ..config import load_user_name, save_user_name
 from ..errors import ValidationError, ProjectError
-from ..render import RenderContext, read_template, bundled_path, render, write_atomic
+from ..render import RenderContext, read_template, bundled_path, render
 from ..mirror import mirror_tree
 from ..validators import Finding
-from ..validators import csl as csl_validator
 from ..validators import iron_rules as iron_rules_validator
 from ..validators import exemptions as exemptions_validator
 
