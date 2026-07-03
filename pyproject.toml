@@ -26,3 +26,7 @@ packages = ["src/sourced"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+addopts = "-ra"
+markers = [
+  "parity: pandoc+CSL golden parity (requires pandoc; version pinned in tests/parity/PANDOC_VERSION)",
+]
