@@ -45,7 +45,7 @@ In Phase 1 you produce a structured prose-plan for the section being drafted. Th
 
 2. **Read `config/voice.md` in full.** All voice rules apply strictly at write time — not only Paragraph Flow. Do not work from memory of prior sessions. If `config/voice.md` is missing, halt and ask {{USER}} to run `sourced switch voice <name>`.
 
-3. **Read `docs/modes/writing.md §Never-list` (this section, below) in full.** On first entry per session, re-read it even if you believe you know it. The restructure-don't-retokenize rule and cross-sentence retokenization check are load-bearing and easy to misapply from memory.
+3. **Read `docs/modes/writing.md §Never-list` (this section, below) in full.** On first entry per session, re-read it even if you believe you know it. The restructure-don't-retokenize rule and cross-sentence retokenization check are load-bearing and easy to misapply from memory. On every entry, close the step with a load line: `never-list: <N> entries, first <id>, last <id>`, copied from the file just read. A count or ID that disagrees with the file is a failed load; re-read before drafting.
 
 4. **Load the citation log** (`sources/<draft>.citations.json`). Every claim you draft will need an ID. If the log is absent for a section with citations in the outline, stop and ask {{USER}}.
 
@@ -187,7 +187,7 @@ Otherwise, section. Paragraph dispatches lose some paragraph-to-paragraph rhythm
 
 ### Per-sentence audit checklist
 
-Applied to drafter's returned prose, post-dispatch. Each check fires independently.
+Applied to drafter's returned prose, post-dispatch. Each check fires independently. After running the checklist on a section, emit `parent-audit: <k> hits (<check names>)` or `parent-audit: no hits`; each fix or re-dispatch below traces to a named hit. A section accepted without a parent-audit line has not been audited.
 
 - **Voice.** Every `**Rule.**` in the filtered `voice_rules` applies to every sentence. Look for sentences that violate a rule despite the drafter's self-audit claiming compliance.
 - **§10 never-list.** Scan every paragraph for entries in the never-list. Apply `Restructure, don't retokenize`. A period between X and Y (Cross-sentence retokenization) doesn't escape `not-x-but-y`. An aphoristic closure is a `aphoristic-closures` hit regardless of whether the drafter flagged it.
