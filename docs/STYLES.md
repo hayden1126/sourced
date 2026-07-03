@@ -47,7 +47,7 @@ All four targets are rendered by `pandoc --citeproc` reading the style's vendore
 - **`google-docs`** — markdown output tuned for Google Docs paste (smart quotes, en-dashes preserved). Features not expressible at paste time (hanging indents, custom headers) surface as a one-line instruction at the top of the output.
 - **`plain-markdown`** — faithful markdown pass-through.
 - **`word`** — pandoc emits `.docx` directly, optionally styled by a reference.docx bundled per style.
-- **`latex`** — pandoc emits a standalone `.tex` via a per-style pandoc template at `templates/styles/<name>/template.tex`. User compiles with `pdflatex` / `xelatex` / `lualatex`; `sourced` does not own compilation. See [`docs/INSTALL.md`](./INSTALL.md#optional-tex-live-for-the-latex-paste-target) for TeX Live package guidance (minimum vs. full, IEEE-specific `texlive-publishers` requirement).
+- **`latex`** — pandoc emits a standalone `.tex` via a per-style pandoc template at `src/sourced/data/templates/styles/<name>/template.tex`. User compiles with `pdflatex` / `xelatex` / `lualatex`; `sourced` does not own compilation. See [`docs/INSTALL.md`](./INSTALL.md#optional-tex-live-for-the-latex-paste-target) for TeX Live package guidance (minimum vs. full, IEEE-specific `texlive-publishers` requirement).
 
 ## How `[formatting mode]` uses `config/style.md`
 

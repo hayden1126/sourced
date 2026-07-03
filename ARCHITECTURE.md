@@ -25,7 +25,7 @@ sourced/
 │       ├── errors.py           # SourcedError hierarchy + exit-code mapping.
 │       ├── ui.py               # Color/print helpers; should_color tty-gates auto.
 │       └── data/               # Bundled, read-only at runtime; mirrored to ~/.claude/ by global-install.
-│           ├── agents/         # Subagent definitions: source-finder, voice-extractor, sourced-helper.
+│           ├── agents/         # Subagent definitions: source-finder, voice-extractor, sourced-helper, prose-drafter.
 │           ├── citations/      # Citation log schema + CSL-JSON emitter spec.
 │           ├── skills/         # Skill library (e.g. browser-reader-extract).
 │           ├── filters/        # Pandoc Lua filters (promoted from templates/filters in PR 3).
@@ -36,11 +36,10 @@ sourced/
 │               └── voices/     # 6 shipped voice skeletons (academic, casual, hybrid, journalistic, narrative, technical).
 └── tests/
     ├── cli/                    # Python CLI tests:
-    │   ├── unit/               # Per-module unit tests (90+ tests).
-    │   ├── integration/        # Subprocess-driven end-to-end tests (39+ tests).
-    │   ├── golden/             # syrupy snapshots for 14 shipped templates.
-    │   └── parity/             # bash-installer parity tests; deleted in Task 5.8.
-    ├── emitter/                # CSL-JSON emitter fixtures + unit tests.
+    │   ├── unit/               # Per-module unit tests (167 tests).
+    │   ├── integration/        # Subprocess-driven end-to-end tests (58 tests).
+    │   └── golden/             # syrupy snapshots for 14 shipped templates.
+    ├── emitter/                # CSL-JSON emitter reference fixtures + well-formedness tests.
     └── parity/                 # 5 styles × 4 paste targets = 20 goldens (the long-lived render parity suite).
 ```
 
@@ -104,7 +103,7 @@ Reference design: [`docs/superpowers/specs/2026-04-21-sourced-cli-decomposition-
 
 ## Per-project files
 
-- `<project>/CLAUDE.md` — agent operating rules (rendered from `templates/CLAUDE.md`).
+- `<project>/CLAUDE.md` — agent operating rules (rendered from `src/sourced/data/templates/CLAUDE.md`).
 - `<project>/config/voice.md` — voice rules (rendered from `~/.claude/voice/<name>.md`).
 - `<project>/config/style.md` — citation + document-layout rules (rendered from `~/.claude/style/<name>.md`).
 - `<project>/config/<name>.brief.md` — intake brief for a specific paper (optional; `sourced install --brief <name>` or `sourced new <name>`).

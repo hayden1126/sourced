@@ -20,7 +20,7 @@ Items that require a schema change, new mode, or new gate are called out in the 
 
 ## Citation styles
 
-Current shipped: `apa7`, `chicago17-ad`, `chicago17-nb`, `ieee`, `mla9` — all on the slim schema with vendored CSL files under `templates/styles/<name>/`. Each new style is a slim `templates/styles/<name>.md` file plus a `templates/styles/<name>/<csl>.csl` (optionally) a `reference-styled.docx` for the `word` target.
+Current shipped: `apa7`, `chicago17-ad`, `chicago17-nb`, `ieee`, `mla9` — all on the slim schema with vendored CSL files under `src/sourced/data/templates/styles/<name>/`. Each new style is a slim `src/sourced/data/templates/styles/<name>.md` file plus a `src/sourced/data/templates/styles/<name>/<csl>.csl` (optionally) a `reference-styled.docx` for the `word` target.
 
 ### MLA 9
 **Priority:** next · **Effort:** M · **Status:** shipped (commit 3c870c6).
@@ -67,9 +67,9 @@ Beyond "argumentative essay with sources." Each new type probably extends the mo
 ### Annotated bibliography
 **Priority:** next · **Effort:** M · **Status:** phase 1+2 shipped 2026-04-20; phase 3 (per-style paste-target variants) open.
 
-New `annotated-bib` project type with topic-driven research deliverable. User supplies a narrow topic; `[plan mode]` runs a topic specificity gate and facet decomposition; `[research mode]` dispatches source-finders per facet; `[annotated-bib mode]` (new) writes per-entry annotations (150–250 word four-beat: summary / relevance / location / evaluation) grounded only in log fields; `[editing mode]` runs a subset of its passes (skip quote-density, reduce voice audit to iron rules + exploratory/verdict). Design spec: [`docs/specs/2026-04-20-annotated-bibliography-design.md`](docs/specs/2026-04-20-annotated-bibliography-design.md).
+New `annotated-bib` project type with topic-driven research deliverable. User supplies a narrow topic; `[plan mode]` runs a topic specificity gate and facet decomposition; `[research mode]` dispatches source-finders per facet; `[annotated-bib mode]` (new) writes per-entry annotations (150–250 word four-beat: summary / relevance / location / evaluation) grounded only in log fields; `[editing mode]` runs a subset of its passes (skip quote-density, reduce voice audit to iron rules + exploratory/verdict). Design spec: [`docs/archive/specs/2026-04-20-annotated-bibliography-design.md`](docs/archive/specs/2026-04-20-annotated-bibliography-design.md).
 
-**Shipped 2026-04-20 (phases 1+2).** Schema extension (`citations/schema.md §Annotation`); new brief template (`templates/brief.template.annotated-bib.md`); `install.sh --type annotated-bib` flag + `.sourced-project-type` marker; `templates/CLAUDE.md §7` project-type preamble + new mode + mode adaptations.
+**Shipped 2026-04-20 (phases 1+2).** Schema extension (`citations/schema.md §Annotation`); new brief template (`src/sourced/data/templates/brief.template.annotated-bib.md`); `--type annotated-bib` install flag (bash-era; now `sourced install --type`) + `.sourced-project-type` marker; shipped `CLAUDE.md §7` project-type preamble + new mode + mode adaptations.
 
 **Phase 3 open.** Per-style paste-target variants (`apa7-annotated-bib`, `chicago17-ad-annotated-bib`, etc.) that render per-entry bibliography entries followed by annotation blocks via `pandoc --citeproc` + CSL. Open design question: inject annotations via CSL `note` field mapping plus custom CSL-JSON emitter path, or post-pandoc merge of rendered bibliography + log's `annotation` field by id match. Upstream citation-style-language/styles has `apa-annotated-bibliography.csl` for APA; other styles may need vendored variants. LaTeX `template.tex` adjustments per style for annotation-block layout. Test fixtures per style. Originally sized S; resized M after design work surfaced the project-type fork cost.
 
@@ -343,7 +343,7 @@ GraphRAG ruled out: multi-step entity-extraction pipelines, brittle on long-tail
 
 **Strong scope-discipline note.** The database must extend §3/§4 verification, not bypass it. "Claim X has 5 supporting citations in the database" is different from "those citations are still valid for the current draft." Staleness gates remain. The tree index is a retrieval substrate, not a trust substrate — every reuse runs against the same audit checks. If implemented carelessly, this entry becomes the failure mode §3 was built to prevent.
 
-Touch points (provisional): `~/.claude/citations/schema.md` (claim-node and source-tree schema additions); `agents/source-finder.md` (database-first dispatch); `docs/modes/research.md` (database lookup ahead of online search); new `sourced library` subcommand (build/list/prune/inspect); CLI integration with PageIndex (or a vendored subset thereof).
+Touch points (provisional): `~/.claude/citations/schema.md` (claim-node and source-tree schema additions); `src/sourced/data/agents/source-finder.md` (database-first dispatch); the shipped `docs/modes/research.md` mode body (database lookup ahead of online search); new `sourced library` subcommand (build/list/prune/inspect); CLI integration with PageIndex (or a vendored subset thereof).
 
 Related: `### Cross-project citation reuse` (above, smaller cousin — supersedes on landing); `### Direct-API offload for deterministic workflows` (database build/index workflows are candidates for direct-API automation).
 
