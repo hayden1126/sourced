@@ -1,6 +1,6 @@
 # Per-project directory restructure: group project files into `config/`, `sources/`, `samples/`, `failures/`
 
-**Status:** SHIPPED 2026-04-24 · **Date:** 2026-04-24 · **Target:** Phase 4 of the `sourced` CLI line · **Author:** {{USER}} + agent (see conversation thread `phase4-directory-restructure`)
+**Status:** Shipped 2026-04-24 via PR #26 · **Date:** 2026-04-24 · **Target:** Phase 4 of the `sourced` CLI line · **Author:** {{USER}} + agent (see conversation thread `phase4-directory-restructure`)
 
 ---
 

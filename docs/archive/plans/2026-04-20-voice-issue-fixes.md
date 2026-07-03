@@ -1,5 +1,7 @@
 # Voice-issue fixes (Issues 1–4) Implementation Plan
 
+**Status:** Shipped 2026-04-20/21 (finetuning mode, §10 cross-sentence rules, and citation-log verification fields are all in the shipped bundle). Follow-up mental-verb audit: issue #32.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Apply framework fixes for the four issues in `voice_issue.md` — §10 cross-sentence blind spot, citation-log integrity, `[editing mode]` phase gaps, and new `[finetuning mode]` — with PE-revised wording that uses externalized fields instead of mental-verb checks.

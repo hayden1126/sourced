@@ -1,5 +1,7 @@
 # `sourced` CLI Phase 1 Implementation Plan
 
+**Status:** Shipped 2026-04-22 via PRs #19-#23 (`install.sh` retired).
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Replace 792-line `install.sh` with a Python CLI (`sourced`) installed via `pipx` from the private GitHub repo, with parity behavior plus Tier 1 + Tier 2 UX improvements.

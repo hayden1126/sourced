@@ -1,5 +1,7 @@
 # Per-project directory restructure — Implementation Plan
 
+**Status:** Shipped 2026-04-24 via PR #26.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Group project files into `config/`, `sources/`, `samples/`, `failures/` subdirectories with auto-migration on `sourced update`, eliminating top-level clutter as writers accumulate drafts and source material.

@@ -220,11 +220,11 @@ Cross-cutting features that touch multiple modes.
 
 Phase 1: Python package at `src/sourced/`, pipx-installed from private git URL. Ports all install.sh responsibilities. Replaces install.sh entirely. Six subcommands (`install`, `global-install`, `new`, `update`, `switch`, `check`). Tier 1 + Tier 2 UX improvements.
 
-Design spec: [`docs/superpowers/specs/2026-04-21-sourced-cli-decomposition-design.md`](./docs/superpowers/specs/2026-04-21-sourced-cli-decomposition-design.md).
+Design spec: [`docs/archive/specs/2026-04-21-sourced-cli-decomposition-design.md`](./docs/archive/specs/2026-04-21-sourced-cli-decomposition-design.md).
 
 Phase 2: **shipped template `CLAUDE.md` manifest extraction** — slim the 34k-token monolith down to a ~10k-token always-on root plus on-demand mode bodies. Load-bearing change is extracting an LSP-style dispatch manifest (explicit + implicit + auto-fire triggers, mode-to-mode gates, forcing artifacts, precedence rules) into the top of root `CLAUDE.md`; full mode protocols move to `docs/modes/<name>.md` loaded via `Read` on mode entry. Five commits: (1a) manifest + 3 seed mode bodies (finetuning, research, editing) + adversarial pressure-testing; (1b) remaining 6 mode bodies; (2) `sourced update` preservation fix (structural diff + `user-addition` markers, solves managed-block clobbering bug); (3) `sourced check --invariants` rules I1–I11 wiring `facts.yml` (I11 added in phase 4 to forbid flat-path references in shipped templates); (4) project-type drop-in overlays under `CLAUDE.d/`. D6.1 follow-up: `omit-claude-md` audit for read-only subagents after rule-inlining. Also in scope as independent items: GitHub Actions CI, `sourced doctor` deeper diagnostics (conda poisoning, PATH duplicates, orphan file detection per issues.md #14), `--format=json` structured output, shell completion (bash/zsh/fish), user-defaults config migration from `~/.claude/sourced.config` to `~/.config/sourced/config.toml`.
 
-Design spec: [`docs/superpowers/specs/2026-04-23-claude-md-manifest-extraction-design.md`](./docs/superpowers/specs/2026-04-23-claude-md-manifest-extraction-design.md).
+Design spec: [`docs/archive/specs/2026-04-23-claude-md-manifest-extraction-design.md`](./docs/archive/specs/2026-04-23-claude-md-manifest-extraction-design.md).
 
 Phase 3 spike candidate (see spec OQ6): evaluate migrating `docs/modes/<name>.md` to shipped skills with `context: fork` semantics and a SessionStart-injected `using-sourced` meta-skill. Decision criteria: implicit-trigger reliability observed in phase-2 writer sessions; whether ~600 tokens of frontmatter overhead pays for itself in reduced drift.
 
