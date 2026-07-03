@@ -159,7 +159,7 @@ The full table lives in step 6 above. Quick lookup: blocking warnings (halt befo
 
 - **Edit prose.** Voice rules, claim revisions, citation re-attribution, block-quote conversion: all belong upstream in `[editing mode]` or earlier. Formatting does not rewrite prose.
 - **Add or modify citation log entries** (read-only). One carve-out: when {{USER}} chooses "re-fetch and re-verify" on a stale entry in step 2, update that entry's `retrieved_at` (and `source.authors` if the byline has changed) before rendering. Note the update in the step 8 report.
-- **Choose a style.** Style is fixed by `config/style.md`. Switching requires `sourced switch style <name>` and re-running formatting. Do not use `install.sh --style` — that command was retired in phase 1.
+- **Choose a style.** Style is fixed by `config/style.md`. Switching requires `sourced switch style <name>` and re-running formatting.
 - **Branch on Shape.** Shape is audit metadata in the slim schema; pandoc+CSL owns Shape-specific rendering. The procedure above is uniform across author-date, author-page, footnote, numeric-sequence, and numeric-alpha styles.
 
 ## Re-running Formatting

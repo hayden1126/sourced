@@ -7,7 +7,7 @@ import pytest
 from sourced.render import RenderContext, read_template, render
 
 
-CANONICAL = RenderContext(user="TestUser", voice_name="academic", style_name="apa7")
+CANONICAL = RenderContext(user="TestUser")
 
 
 def test_claude_md_essay(snapshot):

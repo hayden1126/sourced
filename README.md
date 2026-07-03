@@ -113,8 +113,6 @@ None specified. Private repo for now.
 
 **From `install.sh`-based installs:** the bash installer is retired. `pipx install` the new CLI per the install section above, then `sourced global-install` (idempotent — overwrites the bash-era files in `~/.claude/`). Projects installed via `install.sh` keep working; run `sourced update` from inside each one to refresh its managed block.
 
-The `install.sh` script remains available at the `legacy/install-sh-final` git tag for one week after phase-1 launch, in case rollback is needed.
-
 **From even earlier:** if you installed a version that placed `academic-researcher.md` at `~/.claude/agents/academic-researcher.md`, `sourced global-install` will not remove it — but the agent content now lives in each project's `CLAUDE.md`, so the standalone agent file is dead weight. Delete it manually if you want a clean tree.
 
 Projects installed before CLAUDE.md §10 (*Generation signatures to rewrite*) existed can pull the new rules via `sourced update` from within the project directory; the managed block refreshes while preserving any non-managed content you've added outside the sentinels.
