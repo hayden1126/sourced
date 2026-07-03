@@ -12,7 +12,7 @@ Journalistic writing is not a single register. This voice covers three sub-regis
 - **`feature`** — narrative reporting; scene-setting allowed; named subjects with quoted dialogue; first-person occasionally if the writer is in the story. Examples: longform features, profiles, reported essays.
 - **`commentary`** — opinion column; named stance; first-person standard; argument-forward with anticipated counterarguments. Examples: op-eds, opinion columns, editorial-page pieces.
 
-When the corpus spans multiple sub-registers, `voice-extractor` produces one voice file per sub-register rather than unioning them; see `data/agents/voice-extractor.md § Multi-register corpora`. Unioning is the documented failure mode (a `commentary` first-person stance rule imported into `news-report` produces editorialized reporting that fails the basic attribution discipline of the genre).
+When the corpus spans multiple sub-registers, `voice-extractor` produces one voice file per sub-register rather than unioning them; see `data/agents/voice-extractor.md § Multi-register routing`. Unioning is the documented failure mode (a `commentary` first-person stance rule imported into `news-report` produces editorialized reporting that fails the basic attribution discipline of the genre).
 
 **Determining sub-register at write time.** `[writing mode]` Phase 1 declares the sub-register for the section in the prose-plan's Register Mode field. The declaration filters which rules below apply. If the brief does not specify, assume `news-report` (the journalistic default — strictest baseline) and flag the assumption in the prose-plan.
 

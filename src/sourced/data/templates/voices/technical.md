@@ -12,7 +12,7 @@ Technical writing is not a single register. This voice covers three sub-register
 - **`tutorial`** — step-by-step walkthroughs aimed at a specific learning outcome. Second-person ("you call connect, then..."); contextual asides allowed; concrete examples per step. Examples: getting-started guides, "your first X" posts, codelabs.
 - **`design-rationale`** — RFCs, design docs, postmortems, ADRs. Discursive prose with named tradeoffs; first-person plural ("we chose B because...") allowed for team-authored docs; counterargument-naming required. Examples: architecture decision records, postmortems, RFC documents.
 
-When the corpus spans multiple sub-registers, `voice-extractor` produces one voice file per sub-register rather than unioning them; see `data/agents/voice-extractor.md § Multi-register corpora`. Unioning is the documented failure mode (a `tutorial` second-person rule imported into `reference` produces inconsistent prose where some entries address the reader and others state behavior).
+When the corpus spans multiple sub-registers, `voice-extractor` produces one voice file per sub-register rather than unioning them; see `data/agents/voice-extractor.md § Multi-register routing`. Unioning is the documented failure mode (a `tutorial` second-person rule imported into `reference` produces inconsistent prose where some entries address the reader and others state behavior).
 
 **Determining sub-register at write time.** `[writing mode]` Phase 1 declares the sub-register for the section in the prose-plan's Register Mode field. The declaration filters which rules below apply. If the brief does not specify, assume `reference` (the technical default — strictest baseline) and flag the assumption in the prose-plan.
 

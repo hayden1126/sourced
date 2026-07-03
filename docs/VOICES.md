@@ -19,31 +19,39 @@ Sourced ships 6 register-specific voice skeletons under `~/.claude/voice/`. Each
 | `narrative.md` | narrative | personal essays, reflection pieces, college application essays, memoir |
 | `hybrid.md` | register-neutral | blended corpora that don't cleanly fit one register |
 
-Each skeleton has identical section structure (same 4 top-level headers; same subsection names). What varies is the non-iron prose within each section — each is calibrated to its register's defaults.
+Each skeleton has identical section structure (same 8 top-level headers; same subsection names). What varies is the non-iron prose within each section: each is calibrated to its register's defaults.
 
-## Section structure: 4 orthogonal axes
+## Section structure: 8 sections, 3 rule axes
 
-Each skeleton organizes its rules under 4 top-level headers:
+Each skeleton organizes its content under 8 top-level headers:
 
-- **`## Iron rules`** — global prohibitions (CLAUDE.md §10 Never list + any line tagged `[iron]`). Never calibrated from corpus. `## §10 exemptions` nests as a subsection here for per-voice carve-outs.
-- **`## Tone`** — what the voice sounds like: register, stance, sentence rhythm, vocabulary, audience orientation (we/you/third-person).
-- **`## Structure`** — how the prose is organized: connectedness, pacing, concept setup, argument-building, paragraph length.
-- **`## Dimension`** — unique author habits that vary independent of register: analogies / anchors, punctuation quirks, formatting conventions.
+- **`## Sub-register taxonomy`**: names the in-register sub-registers that rules can be tagged with (the academic skeleton names academic-report, prospectus, personal-essay). Downstream modes filter rules by these tags.
+- **`## Worked paragraphs`**: verbatim multi-sentence exhibits with per-sentence role annotations. `[writing mode]` models paragraph-scale sentence-role sequences on them.
+- **`## Tone`**: what the voice sounds like: register, stance, sentence rhythm, vocabulary, audience orientation (we/you/third-person).
+- **`## Structure`**: how the prose is organized: connectedness, pacing, concept setup, argument-building, paragraph length.
+- **`## Dimension`**: unique author habits that vary independent of register: analogies / anchors, punctuation quirks, formatting conventions.
+- **`## Cut patterns`**: named AI-draft failure modes with before/after fixes. Six canonical patterns ship with the skeleton; failures-dir mining appends author-specific ones.
+- **`## Iron rules`**: global prohibitions (CLAUDE.md §10 Never list + any line tagged `[iron]`). Never calibrated from corpus.
+- **`## §10 exemptions`**: per-voice carve-outs from §10, a sibling H2 section (not nested under Iron rules). See "Exempting a §10 pattern" below.
 
-The 4 axes are orthogonal: a writer can be tonally casual + structurally academic + dimensionally narrative all at once. Voice-extractor calibrates each axis from corpus evidence per-section.
+The three rule axes (Tone, Structure, Dimension) are orthogonal: a writer can be tonally casual + structurally academic + dimensionally narrative all at once. Voice-extractor calibrates each axis from corpus evidence per-section.
 
-## Skeleton selection: auto-route by classifier
+## Skeleton selection: classifier + `multi_register`
 
 When you invoke `voice-extractor` with a writing-samples corpus, it classifies the corpus and picks a skeleton:
 
 1. If you pass `register: <label>`, that skeleton is used directly. Halts only if the corpus flatly contradicts the label (`register-mismatch`).
 2. If you omit `register`, the classifier runs:
    - **≥ 85% single register** → that register's skeleton is used.
-   - **< 85% on any single register** (blended corpus) → `hybrid.md` is used.
+   - **< 85% on any single register** (blended corpus) → the `multi_register` dispatch input decides.
 
-No `mixed-register` halt. Blended corpora auto-route to hybrid without user intervention.
+`multi_register` has three values (full semantics in the dispatch doc, `docs/voice-extractor.md` in a rendered project):
 
-The classifier surfaces the full breakdown in the report's `### Register drift` section when the dominant register is < 95% clean, so you can re-run with a specific register if the auto-route looks wrong.
+- **`split` (default)**: halt with the `multi-register-corpus` rejection and a cluster manifest naming which files belong to which register. You re-dispatch once per cluster, producing one voice file per register. This is the safest route: unioning multi-register evidence into one voice file is the documented failure mode.
+- **`primary`**: extract from the majority cluster only. Minority files are dropped from calibration and listed in the report's `### Excluded files` section.
+- **`segmented`**: one voice file mirrored from `hybrid.md`, with rules tagged by register inline.
+
+Whenever the classifier returns `mixed`, the report carries a `### Multi-register routing` section with the full breakdown, so you can see which registers contributed and re-run accordingly.
 
 ## Hybrid.md's contract
 
@@ -51,7 +59,7 @@ The classifier surfaces the full breakdown in the report's `### Register drift` 
 
 **Why it matters:** a corpus that's structurally academic but tonally casual (school essays are the canonical example) would, under a single-skeleton system defaulting to academic, get flattened to academic register throughout. Hybrid.md preserves the blend: each section extracts its rule from THIS corpus, not from a pre-chosen register's template.
 
-**When hybrid.md fires:** any corpus where no single register crosses 85%. Classifier surfaces the breakdown so you can see which registers contributed.
+**When hybrid.md fires:** only when a blended corpus is dispatched with `multi_register=segmented` (or an explicit `skeleton_path` override). Under the default `split`, a blended corpus halts with a cluster manifest instead; hybrid is the deliberate single-file route, not an automatic fallback.
 
 ## Pick a voice at install
 
@@ -80,7 +88,7 @@ The skeleton's section structure is canonical: every section appears in every de
 
 Hand-authoring a voice file is slow. If you have a corpus of the writer's prose (past papers, essays, reports, blog posts — whatever is representative), the `voice-extractor` subagent produces a calibrated first draft of the library file.
 
-**Requirements.** At least 3 files and 5,000 words combined, in `.md` or `.txt`. Other file types (PDF, `.docx`, `.rtf`) are silently skipped and listed in the report. More samples produce more stable patterns; the 3-file / 5,000-word floor is a hard minimum, not a target. 15,000–30,000 words across 10+ files is where the output gets genuinely useful.
+**Requirements.** At least 3 files and 5,000 words combined, in `.md` or `.txt`. Other file types (PDF, `.docx`, `.rtf`) are not read; each skipped file appears with its reason in the report's skip manifest, and inside an `under-sample` rejection when the floor fails. If PDFs hold the bulk of your corpus, convert them first (`pdftotext`) rather than running on the thin remainder. More samples produce more stable patterns; the 3-file / 5,000-word floor is a hard minimum, not a target. 15,000-30,000 words across 10+ files is where the output gets genuinely useful.
 
 **Usage.** Open Claude Code in any project that already has a rendered `CLAUDE.md`. The agent reads `CLAUDE.md` §9 at startup and knows how to dispatch the subagent. Ask in natural language:
 
@@ -90,16 +98,17 @@ The agent will announce a switch to `[collaborative mode]` if needed, dispatch `
 
 **What the subagent does:**
 
-- Mirrors the section structure of a skeleton voice selected by the register classifier: a dominant-register corpus (≥ 85%) routes to its matching shipped skeleton (`academic`, `casual`, `technical`, `journalistic`, `narrative`); a blended corpus routes to `hybrid.md` (register-neutral). No single default.
+- Mirrors the section structure of a skeleton voice selected by the register classifier: a dominant-register corpus (≥ 85%) routes to its matching shipped skeleton (`academic`, `casual`, `technical`, `journalistic`, `narrative`); a blended corpus is handled per the `multi_register` input (default `split` halts with a cluster manifest; see "Skeleton selection" above). No single default.
 - Fills each section from patterns found in the samples, with verbatim exemplars attributed to their source file in HTML comments.
+- Mines named cut patterns from an optional `failures_dir` of AI-draft-vs-your-edit pairs (`<stem>.ai.md` / `<stem>.edit.md`, diffed at paragraph level). A pattern enters the voice file only when it shows up in 2+ distinct pairs; single-instance candidates go to the report for your review.
 - Leaves sections `TBD —` where the samples don't settle the question. Never fabricates rules or exemplars.
 - Preserves iron rules verbatim (see below).
 - Surfaces recurring named references as "anchor candidates" in the report. The Anchors block in the output file is always TBD by design; anchors are a judgment call only you can make.
-- Classifies the corpus register if you don't pass one. Routes to the matching skeleton when a single register reaches ≥ 85% of the corpus; routes to `hybrid.md` (register-neutral) when no single register dominates. Refuses with `register-mismatch` only when the label you passed flatly contradicts what the samples show.
+- Classifies the corpus register if you don't pass one. Routes to the matching skeleton when a single register reaches ≥ 85% of the corpus; hands blended corpora to the `multi_register` routing above (default `split` halts with a cluster manifest). Refuses with `register-mismatch` only when the label you passed flatly contradicts what the samples show.
 
 **After the subagent returns:**
 
-1. Read the report — especially `### Sections filled` (low-confidence sections deserve a look), `### Sections left TBD`, `### Iron-rule conflicts`, `### Anchor candidates`, and `### Exemplar audit` (spot-check a few quotes against their source files).
+1. Read the report — especially `### Sections filled` (low-confidence sections deserve a look), `### Sections left TBD`, the `### Sample stats` skip manifest (files the extractor could not read), `### Iron-rule conflicts`, `### Anchor candidates`, and `### Exemplar audit` (spot-check a few quotes against their source files).
 2. Open `~/.claude/voice/<voice_name>.md` in an editor. Search for `TBD —` markers. Each one needs either a hand-written rule (drawing on the report's guidance) or deletion. At minimum, fill in the Anchors block from the `### Anchor candidates` list, or delete it if none fit.
 3. Once no TBDs remain, render the voice into a project:
 
@@ -110,8 +119,10 @@ sourced switch voice mycustom
 
 **Re-running:**
 
-- **Corpus was too thin.** Add samples, re-run with `overwrite: true`. Without `overwrite`, the subagent refuses to clobber an existing library file.
+- **Corpus was too thin.** Add samples (or convert skipped files named in the manifest), re-run with `overwrite: true`. Without `overwrite`, the subagent refuses to clobber an existing library file.
 - **Register was inferred and came out wrong.** Re-run with the correct `register:` label (`academic | technical | casual | journalistic | narrative`).
+- **Corpus was multi-register and `split` halted.** Re-dispatch once per cluster from the manifest, with `samples_dir` filtered to that cluster's files.
+- **You have AI-draft-vs-edit pairs.** Re-run with `failures_dir` set to mine author-specific cut patterns (pairs named `<stem>.ai.md` / `<stem>.edit.md`).
 - **Want a different skeleton.** Pass `skeleton_path: <absolute path>` pointing at another voice in `~/.claude/voice/`.
 
 **Scope.** Voice-extractor is a one-shot setup utility. It runs only when you ask, never auto-triggers during writing or research, and never runs in parallel with itself. It does not modify your project's `CLAUDE.md`, `config/voice.md`, or anything under the project directory — it writes exactly one file, `~/.claude/voice/<voice_name>.md`. Rendering into a project is always a deliberate `sourced switch voice <voice_name>` step you run yourself.
@@ -125,7 +136,7 @@ Some voice rules are **iron**: they pass through every derived voice verbatim re
 
 Iron rules are enforced in three places:
 
-1. **Inside `voice-extractor`.** Step 3 identifies iron rules from the skeleton; step 5 preserves them verbatim; step 8 self-checks the draft before writing.
+1. **Inside `voice-extractor`.** Workflow step 4 identifies iron rules from the skeleton; steps 5-6 preserve them verbatim; step 12 self-checks the draft before writing.
 2. **Caller-side in `academic-researcher`.** After `voice-extractor` returns, the agent substring-checks each iron rule against the produced file before surfacing the report. A missing iron rule blocks the report from being treated as success.
 3. **Install-time in `sourced install` / `sourced switch voice`.** `validate_iron_rules` normalizes both skeleton and candidate (lowercase, collapse whitespace, strip trailing punctuation), substring-matches each iron rule, and aborts install with non-zero exit on any miss.
 
@@ -153,6 +164,7 @@ If a writer legitimately uses a pattern on CLAUDE.md §10's Never list (em-dashe
 | `throat-clearing-openers` | Sentence-initial "Crucially," "Ultimately," etc. |
 | `demonstrative-openers` | Demonstrative-noun paragraph openers with a weak antecedent. |
 | `ornamental-compounds` | Hyphenated conceptual compounds that appear once and disappear. |
+| `aphoristic-closures` | Paragraph endings on rhetorically balanced pronouncements standing in for earned conclusion. |
 
 The IDs are extracted from `src/sourced/data/templates/CLAUDE.md` §10 at install time, so adding or renaming an ID in that file flows through to validation with no extra registration step.
 
