@@ -22,7 +22,6 @@ Branch / worktree: main
 ## Blocked / decisions needed
 
 - Next-thread choice is Hayden's call. With #32 done there is no `priority:high` item left; a real paper session would both exercise the new forced emissions (parent-audit line, refine-loop pass lines, grammar list) and generate the signal that parked/observe issues #29, #30, #31, #33 are waiting on.
-- Local branches `mental-verb-audit` and `handoff-mental-verb` can be deleted once their PRs are merged (deletion needs Hayden's explicit OK; `/clean_gone` handles the [gone] ones).
 
 ## Notes for next session
 
