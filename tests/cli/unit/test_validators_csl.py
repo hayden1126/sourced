@@ -1,4 +1,3 @@
-import pytest
 from pathlib import Path
 from sourced.validators.csl import validate_csl_title
 
