@@ -12,6 +12,7 @@ Design history lives in `docs/archive/{specs,plans}/`, each file carrying a `Sta
 sourced/
 ├── pyproject.toml              # Python package metadata; entry point sourced=sourced.cli:main.
 ├── README.md                   # User-facing install + quickstart.
+├── VISION.md                   # Why the project exists; the bar new work clears.
 ├── ARCHITECTURE.md             # This file.
 ├── ROADMAP.md                  # Forward-looking ideas + scope boundaries.
 ├── docs/                       # Topic guides (INSTALL, MODES, VOICES, STYLES, SKILLS).
