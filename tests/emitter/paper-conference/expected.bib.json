@@ -1,0 +1,12 @@
+[
+  {
+    "id": "okafor-2019",
+    "type": "paper-conference",
+    "author": [{"family": "Okafor", "given": "Adaeze"}],
+    "issued": {"date-parts": [[2019]]},
+    "title": "Streaming Consensus under Partial Synchrony",
+    "container-title": "Proceedings of the 38th ACM Symposium on Principles of Distributed Computing",
+    "page": "211-220",
+    "DOI": "10.1145/xxxx.yyyy"
+  }
+]

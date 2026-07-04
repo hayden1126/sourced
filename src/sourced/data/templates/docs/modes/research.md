@@ -110,6 +110,8 @@ When you log on the main thread (paste-in from {{USER}}, retry after subagent-re
 
 `location` must equal `printed_page_observed` for paginated sources (or the corresponding value for section-/chapter-/timestamp-keyed sources, per `~/.claude/citations/schema.md` §Verification fields). Page values in both fields use canonical `"p. N"` / `"pp. N-M"` form, matching the schema exemplars. `pdf_page_offset` records the offset once per source. Reference-work sources (dictionaries, wordlists) use the list-shape in `~/.claude/citations/schema.md` §Reference-work shape; per-item locators carry verification in place of `verification_trace`.
 
+Two more logging disciplines travel with every producer, main thread included: set the optional `source.type` when the source's class is evident (enum and per-source rule in `~/.claude/citations/schema.md` §Source type; conference papers, reports, theses, and datasets render as journal articles without it), and keep `source.doi_or_url` for the canonical DOI, with the retrieval URL in `retrieval.source_path` (a hosted-PDF URL in `doi_or_url` renders into the bibliography where the style wants a DOI or nothing).
+
 ### Byline re-verification (stale retrieved_at)
 
 11. **If the trigger was stale byline at write time**, re-fetch the source, confirm `source.authors` matches the printed byline, AND re-read the cited passage (the `exact_quote` context) before updating `retrieved_at` to the current timestamp. Do not update `retrieved_at` on the strength of a re-download or a visual scan of page 1 alone — the update claims you re-read the evidence, not just re-opened the file.
