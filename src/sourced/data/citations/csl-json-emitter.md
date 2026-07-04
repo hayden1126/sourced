@@ -14,16 +14,20 @@ One unique source → one CSL-JSON object. Deduplicate across multiple log entri
 | `source.authors` | `author` (array) | Parse each `"Lastname, First Middle"` string by splitting on the first comma: `{family: "Lastname", given: "First Middle"}`. Strings without a comma are corporate authors → `{literal: "Name"}`. |
 | `source.year` | `issued.date-parts: [[YEAR]]` | Integer. If `source.year` is `null` or the string `"n.d."`, omit the `issued` key entirely; CSL renders the style's no-date form. |
 | `source.title` | `title` | Pass-through string. |
-| `source.publication` | `container-title`, `publisher`, `publisher-place` (see §Source-type inference) | Free-form in the log; splitting depends on inferred type. |
-| `source.volume_issue_pages` | `volume`, `issue`, `page` | Parsing depends on the inferred type (see §Source-type inference). If the field is empty, omit all three. For `article-journal`: parse `"42(3), 12-34"` → `volume: "42"`, `issue: "3"`, `page: "12-34"`. If no parens, treat the whole first token as `volume`; if no comma, there is no page. For `chapter` and `book`: treat the whole value as `page` (these forms are page ranges, not journal volume/issue). For `webpage` and the fallback: apply the article-journal parsing. |
+| `source.publication` | `container-title`, `publisher`, `publisher-place` (see §Source-type inference) | Free-form in the log; splitting depends on the resolved type (explicit `source.type` or inferred; see §Source-type inference). |
+| `source.volume_issue_pages` | `volume`, `issue`, `page` | Parsing depends on the resolved type (see §Source-type inference). If the field is empty, omit all three. For `article-journal`: parse `"42(3), 12-34"` → `volume: "42"`, `issue: "3"`, `page: "12-34"`. If no parens, treat the whole first token as `volume`; if no comma, there is no page. For `chapter` and `book`: treat the whole value as `page` (these forms are page ranges, not journal volume/issue). For `paper-conference`: if the value contains a comma or parentheses, apply the article-journal parsing (serial-style proceedings); else treat the whole value as `page` (a bare page range). For `report`, `thesis`, and `dataset`: treat the whole value as `page`, same as `chapter` and `book`. For `webpage` and the fallback: apply the article-journal parsing. |
 | `source.doi_or_url` | `DOI` or `URL` | If the value starts with `https://doi.org/` or `http://dx.doi.org/`, strip the prefix and store as `DOI`. Else if the value is a non-empty URL, store as `URL`. If the field is empty, omit both. |
-| *(derived)* | `type` | Inferred per §Source-type inference below. |
+| `source.type` (optional) | `type` | Passed through when present and one of the eight schema enum values; otherwise inferred per §Source-type inference below. |
 
 Fields not listed above (`exact_quote`, `surrounding_context`, `context_description`, `claim_supported`, `citation_string`, `provisional_reference`, `draft_reference`, `verification_status`, `retrieval`, `retrieved_at`, `added_at`) and the `source.reliability_basis` sub-object are **not** emitted — they are logging metadata, not bibliographic data.
 
 ## Source-type inference
 
-The log has no `type` field today. Infer deterministically, in order:
+The optional `source.type` log field (schema.md §Source type) resolves `type` when present; inference is the absent-type path.
+
+0. If `source.type` is present and is one of the eight schema values (`article-journal`, `book`, `chapter`, `webpage`, `paper-conference`, `report`, `thesis`, `dataset`), use it as the CSL `type` directly. Skip the inference cascade below and do not emit the rule-5 fallback warning. Map fields per the matching rule below for the first four values, and per §Explicit-only types for the last four. If `source.type` is present but not one of the eight values, surface a tolerable warning naming the entry id and the illegal value, ignore the field, and continue with inference. When dedupe collapses sibling entries and only some carry `source.type`, use the value from any sibling that carries it; if siblings disagree (a state the merge protocol hard-fails), use the lowest-`NNN` sibling's value and surface a tolerable warning naming the ids and both values.
+
+When `source.type` is absent, infer deterministically, in order:
 
 1. If `source.volume_issue_pages` is non-empty AND `source.publication` does not start with `"Book"` AND `source.publication` does not contain `"edited by"` → `article-journal`.
    - `container-title`: the full `source.publication` string.
@@ -41,13 +45,25 @@ The log has no `type` field today. Infer deterministically, in order:
    - `URL` is already set from the field mapping.
 5. **Fallback:** default to `article-journal`, and apply the article-journal field-mapping rules above (`container-title`: full `source.publication`; omit `publisher`/`publisher-place`). Surface a tolerable warning naming the log entry id and the reason (e.g., "no volume/issue/pages present; no clear book/chapter markers; DOI present; defaulting type to `article-journal`"). The user can correct the log entry and re-run.
 
-CSL `type` is load-bearing: `article-journal` vs. `book` vs. `chapter` vs. `webpage` drives entirely different entry formats in every style. Fallback warnings should trigger human review before trusting the formatted output.
+### Explicit-only types
+
+Four enum values have no inference route and are reachable only through `source.type`:
+
+- `paper-conference`: `container-title`: the full `source.publication` string (the proceedings or conference name). `publisher`, `publisher-place`: omit. `source.volume_issue_pages` parses per the field-mapping table (serial form or bare page range).
+- `report`: `publisher`: the full `source.publication` string (the issuing institution or agency). `container-title`: omit. `publisher-place`: apply the book heuristic (§Known gaps).
+- `thesis`: `publisher`: the full `source.publication` string (the degree-granting institution). `container-title`: omit. `publisher-place`: apply the book heuristic.
+- `dataset`: `publisher`: the full `source.publication` string (the repository or distributor). `container-title`, `publisher-place`: omit. Styles that label datasets (APA renders "[Data set]") derive the label from `type`; nothing extra is emitted.
+
+The shipped styles render all eight types through their vendored CSL files. A style without an explicit branch for a type (ieee has none for `dataset`, mla9 none for `report`) falls through to its generic monographic form, which is still closer than a mistyped `article-journal`.
+
+CSL `type` is load-bearing: `article-journal` vs. `book` vs. `chapter` vs. `webpage` vs. the explicit-only four drives entirely different entry formats in every style. Fallback warnings should trigger human review before trusting the formatted output; an explicit `source.type` removes both the warning and the review.
 
 ## Known gaps (accepted residual)
 
 - `publisher-place` for `book` entries is heuristic. The log's `source.publication` is free prose; cities aren't structurally marked. Emit `publisher-place` only when a `, <CityName>` suffix is clearly present (capitalized word after a comma, not numeric, not containing digits). Else omit; citeproc renders the book without a place.
 - `chapter` editor parsing assumes the "edited by Firstname Lastname[ and Firstname Lastname...], Publisher" shape (multiple editors joined with `" and "` or `", and "` are supported). Other orderings (e.g., surname-first prose, role-suffixed names) produce best-effort output; the user can correct the log entry.
-- Untyped sources (conference papers, technical reports, theses, datasets) all map to the fallback. Future log schema additions (e.g., optional `source.type` field) would let the user bypass inference.
+- Untyped conference papers, technical reports, theses, and datasets still map to the fallback: those classes have no inference route, and only an explicit `source.type` reaches them. The residual is now producer discipline (set the field at logging time), not a missing schema field.
+- `thesis` entries carry no genre (doctoral vs. master's) and `dataset` entries no version: the log has no fields for either, and citeproc renders the entry without those slots.
 
 ## Worked examples
 
@@ -174,6 +190,73 @@ CSL-JSON output:
   "URL": "https://style.mla.org/citing-multiple-authors/"
 }
 ```
+
+### paper-conference (explicit `source.type`)
+
+Log entry:
+```json
+{
+  "id": "okafor-2019-001",
+  "source": {
+    "type": "paper-conference",
+    "authors": ["Okafor, Adaeze"],
+    "year": 2019,
+    "title": "Streaming Consensus under Partial Synchrony",
+    "publication": "Proceedings of the 38th ACM Symposium on Principles of Distributed Computing",
+    "volume_issue_pages": "211-220",
+    "doi_or_url": "https://doi.org/10.1145/xxxx.yyyy"
+  }
+}
+```
+
+CSL-JSON output:
+```json
+{
+  "id": "okafor-2019",
+  "type": "paper-conference",
+  "author": [{"family": "Okafor", "given": "Adaeze"}],
+  "issued": {"date-parts": [[2019]]},
+  "title": "Streaming Consensus under Partial Synchrony",
+  "container-title": "Proceedings of the 38th ACM Symposium on Principles of Distributed Computing",
+  "page": "211-220",
+  "DOI": "10.1145/xxxx.yyyy"
+}
+```
+
+No warning. Without `source.type`, rule 1 would fire (`volume_issue_pages` non-empty, no book or chapter markers) and silently type this `article-journal`; no fallback warning would surface the mistype.
+
+### report (explicit `source.type`)
+
+Log entry:
+```json
+{
+  "id": "sandoval-2021-001",
+  "source": {
+    "type": "report",
+    "authors": ["Sandoval, Maria"],
+    "year": 2021,
+    "title": "Rural Broadband Access After the 2020 Subsidy Round",
+    "publication": "Government Accountability Office",
+    "volume_issue_pages": "",
+    "doi_or_url": "https://www.gao.gov/products/gao-21-xxxx"
+  }
+}
+```
+
+CSL-JSON output:
+```json
+{
+  "id": "sandoval-2021",
+  "type": "report",
+  "author": [{"family": "Sandoval", "given": "Maria"}],
+  "issued": {"date-parts": [[2021]]},
+  "title": "Rural Broadband Access After the 2020 Subsidy Round",
+  "publisher": "Government Accountability Office",
+  "URL": "https://www.gao.gov/products/gao-21-xxxx"
+}
+```
+
+No warning. Without `source.type`, rule 4 would fire (non-DOI URL, empty `volume_issue_pages`) and type this `webpage`.
 
 ### fallback
 

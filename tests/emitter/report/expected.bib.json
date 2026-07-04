@@ -1,0 +1,11 @@
+[
+  {
+    "id": "sandoval-2021",
+    "type": "report",
+    "author": [{"family": "Sandoval", "given": "Maria"}],
+    "issued": {"date-parts": [[2021]]},
+    "title": "Rural Broadband Access After the 2020 Subsidy Round",
+    "publisher": "Government Accountability Office",
+    "URL": "https://www.gao.gov/products/gao-21-xxxx"
+  }
+]

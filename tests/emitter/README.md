@@ -9,4 +9,6 @@ Each subdirectory is one source-type case. To verify the emitter specification a
 
 The fallback fixture should also produce a warning message (format specified in the emitter spec). The warning is not in `expected.bib.json` — verify the message shape by reading the spec.
 
+The `paper-conference` and `report` fixtures carry an explicit `source.type`; verifying them exercises rule 0 (explicit-type pass-through, no warning).
+
 These fixtures are reference material for `[formatting mode]` when it emits `<draft>.bib.json` from a project's citation log (CLAUDE.md §7 step 4). They are not executable tests; the tool's procedures are LLM-followed. `test_fixtures_wellformed.py` only guards the fixture files against corruption (missing files, invalid JSON, entries without `id`/`type`).
