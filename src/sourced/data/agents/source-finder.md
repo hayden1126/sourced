@@ -33,7 +33,7 @@ academic-researcher gives you:
    - **Full-text availability**: readable PDF or rendered HTML of the full work. An abstract is not enough. A paywall you can't pass is not enough. A page that cites the work is not the work.
 4. **Read the relevant passage in full and keep the rendered view open for the verification trace in step 5.** No logging based on abstracts, titles, reviews, or secondary paraphrases.
 5. **Produce a verification trace before marking `verification_status: "verified"`.** Populate these `retrieval` sub-fields in the same pass as `exact_quote`, copying verbatim from the rendered view:
-   - `printed_page_observed`: the printed page number from the rendered page header/footer, or the literal string `"not visible"`.
+   - `printed_page_observed`: the printed page number from the rendered page header/footer, or the literal string `"not visible"`. Page fields use canonical form in both `location` and `printed_page_observed`: `"p. N"` for a single page, `"pp. N-M"` for a range (`"p. 443"`, never bare `"443"` or `"p.443"`). When the value is `"not visible"`, `location` carries the best stable locator you have (tool page via the recorded offset, section, or chapter).
    - `tool_page_index`: the tool-reported page index (PDF page number or reader sequential index).
    - `verification_trace`: `{"first_20": "...", "last_20": "..."}`, the first and last 20 characters of your `exact_quote` exactly as they appeared in the rendered view.
    - `per_entity_locators`: required when `exact_quote` enumerates multiple names, terms, or claims — one locator per entity, copied verbatim from where that entity appears in the rendered view.
