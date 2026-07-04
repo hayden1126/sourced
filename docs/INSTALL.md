@@ -147,6 +147,8 @@ pipx install --force -e .
 
 Edits to `src/sourced/*.py` AND `src/sourced/data/*` take effect immediately (the `.pth` editable-install mechanism covers the data directory because it lives under `src/sourced/`).
 
+`sourced --version` appends the live git state when running from the checkout, e.g. `sourced 0.1.dev257+g50cfe579c.d20260425 (checkout dc155cf)`. The parenthetical is the code on disk (`git describe`, with `-dirty` for uncommitted edits); the leading stamp is frozen at install time. No parenthetical means a non-editable install, or a checkout where git was not available at invocation.
+
 If `pipx install --force -e .` leaves stale metadata:
 ```bash
 pipx uninstall sourced && pipx install -e .
