@@ -2,11 +2,16 @@
 
 > Living state. Update at the end of every working block so a fresh session can resume from here after `/clear`.
 
-Last updated: 2026-07-03 (fourth block of the day)
+Last updated: 2026-07-04 (paper-session wrap-up)
 Branch / worktree: main
 
 ## Done
 
+- 2026-07-04 real paper session (the thread chosen from the three options below): full pipeline exercised end to end in a fresh project at `~/papers/cross-sex-empathy` (voice=hayden_essay, style=apa7), essay finished and rendered (md + docx). The essay is instrumental; the yield is framework evidence, distilled from `~/papers/cross-sex-empathy/notes/observations.md` into GitHub:
+  - Comments posted on #53 (emitter mis-typed 3 of 12 bibliography entries; observe trigger met, recommend act), #29 (two evidence pieces: prose-drafter structural self-audit passed a content contradiction only the parent §4 check caught; a staged 3-persona blind reader review found reader-load and term-order defects no editing pass audits), and #51 (no direct voice failures logged and readers found no AI-signature, but section-scale density failures shipped despite sentence-level pacing rules: the decomposition diagnosis at a new level; staged reader review is a candidate fidelity-measure primitive).
+  - New issues #58 (snippet-only access reaches "verified"; surrounding_context accepts placeholders), #59 (page-format canonicalization across finders), #60 (rejection enum lacks conflict-of-interest; Science got tagged "predatory"), #61 (--version stale on editable installs).
+  - reliability_basis (#48) validated in the field: sibling-consistency rule caught real within-finder author-spelling drift; parent spot-check caught the snippet-verified entry (#58 is the fix for the gap it exposed).
+  - Reader review verdict on the essay itself: unanimous minor revision; deliberately not applied (essay is a probe, not a product).
 - 2026-07-03 (block 4) issue batch + quick fixes, commit range `66f06dd..3006c80` (PRs #55, #56, #57, all merged, CI green; issues #50, #52, #54 closed):
   - Issues #50-#54 filed. #51 is the big one: voice extraction v2 design spike (fidelity measure, representation, stylometry, coverage; in-repo vs standalone-tool fork is the spike's OUTPUT). It carries Hayden's core diagnosis, added after filing: the failure is decomposition, not shallowness (rules and atomized exemplars are marginals; voice lives in the joint distribution; cut patterns only subtract). #53 (source.type escape hatch) is observe-labeled: act when a real bibliography emits a wrong type.
   - PR #55 (issue #50): voice-extractor intake honesty. Per-file skip manifest in preflight, `### Sample stats`, and inside `under-sample` rejections, with a conversion pointer when skips dominate; floor runs on the matched set and reads 3-file consistently (was self-contradicting 3-vs-5); report format gained `### Excluded files` and `### Corpus contamination notes` (the dispatch doc referenced both; the agent never defined them); stale workflow step numbers fixed. Agents are single-source, no goldens touched.
@@ -20,12 +25,13 @@ Branch / worktree: main
 
 ## In flight
 
-- Nothing half-done. Clean boundary: main at `3006c80`, tree clean, all PRs merged, branches deleted, suite green.
-- Next concrete step: pick the next thread (see Blocked below).
+- Nothing half-done. Clean boundary: paper session complete, evidence distilled to issues, tree has only this STATUS update to commit.
+- Next concrete step: pick from the actionable backlog the session created (see Blocked below).
 
 ## Blocked / decisions needed
 
-- Next-thread choice is Hayden's call, three live options: (1) a real paper session, which now exercises the #46 forced emissions, the reliability_basis merge lines, AND generates fresh flow-failure evidence for #51 while feeding the observe issues #29, #30, #31, #33; (2) the ROADMAP `next` set (CLI phase-5 tail, annotated-bib phase 3, peer review mode, babble-as-ideation, extract-pdf-highlights, extract-jstor); (3) the #51 spike itself (design doc deciding in-repo vs standalone voice extraction).
+- Next-thread choice is Hayden's call again, now with session-informed options: (1) the quick-fix batch the session filed (#58, #59, #60, plus #53 now act-ready and #61 trivial), all small and spec'd in their issue bodies; (2) the #51 spike, now with real evidence attached (see the 2026-07-04 comment: the fidelity-measure question has a candidate primitive in staged reader review); (3) the #29 editing-critic design, which the session gave two concrete requirements (independent re-read of paraphrase vs exact_quote; staged reader-simulation pass after formatting); (4) the ROADMAP `next` set.
+- Observation-logging lesson for any future session: modes in flow do not log at-the-moment; evidence lands at gates (merge, format, post-review). #30/#31/#33 sections came back empty for this reason, not because nothing happened.
 
 ## Notes for next session
 
