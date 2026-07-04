@@ -2,7 +2,7 @@
 
 > Living state. Update at the end of every working block so a fresh session can resume from here after `/clear`.
 
-Last updated: 2026-07-04 (quick-fix batch shipped)
+Last updated: 2026-07-04 (quick-fix batch shipped, housekeeping done)
 Branch / worktree: main
 
 ## Done
@@ -14,6 +14,7 @@ Branch / worktree: main
   - PR #65 (issue #60): `conflict-of-interest` rejection category; `predatory` tightened to venue failures. No use-with-framing disposition (Hayden's call; `### Alternative framings` is the routing).
   - PR #66 (issue #53): optional `source.type` (closed 8-value enum), emitter rule 0 + §Explicit-only types + 2 worked examples + 2 reference fixtures; merge-time publication parseability check (4 tokens, `publication-parse-risk` report line, surfaced not blocking); doi_or_url discipline (canonical DOI there, retrieval URL in `retrieval.source_path`). Style-coverage claims verified against the vendored .csl files.
   - `sourced global-install` re-run after the batch; ~/.claude mirror is current (23 files).
+  - Housekeeping after the batch: all merged fix-* branches deleted (5 remote from this batch, 8 local including three leftovers from #55-#57); GitHub repo description set (was empty).
 
 - 2026-07-04 real paper session (the thread chosen from the three options below): full pipeline exercised end to end in a fresh project at `~/papers/cross-sex-empathy` (voice=hayden_essay, style=apa7), essay finished and rendered (md + docx). The essay is instrumental; the yield is framework evidence, distilled from `~/papers/cross-sex-empathy/notes/observations.md` into GitHub:
   - Comments posted on #53 (emitter mis-typed 3 of 12 bibliography entries; observe trigger met, recommend act), #29 (two evidence pieces: prose-drafter structural self-audit passed a content contradiction only the parent §4 check caught; a staged 3-persona blind reader review found reader-load and term-order defects no editing pass audits), and #51 (no direct voice failures logged and readers found no AI-signature, but section-scale density failures shipped despite sentence-level pacing rules: the decomposition diagnosis at a new level; staged reader review is a candidate fidelity-measure primitive).
@@ -33,7 +34,7 @@ Branch / worktree: main
 
 ## In flight
 
-- Nothing half-done. Clean boundary: quick-fix batch merged, issues closed, mirror refreshed, tree has only this STATUS update to commit.
+- Nothing half-done. Clean boundary: quick-fix batch merged, issues closed, mirror refreshed, branches cleaned, tree clean after this STATUS commit.
 - Next concrete step: pick the next thread (see Blocked below).
 
 ## Blocked / decisions needed
@@ -43,7 +44,8 @@ Branch / worktree: main
 
 ## Notes for next session
 
-- Verification target: `pytest` (267 tests after the batch: 260 base + 5 version tests + 2 emitter fixtures; parity needs pandoc 3.1.3 on PATH), `ruff check src tests`, `python3 -m sourced check --invariants` (11/11). All green on main at the batch wrap-up (HEAD `20d0d65`).
+- Verification target: `pytest` (267 tests after the batch: 260 base + 5 version tests + 2 emitter fixtures; parity needs pandoc 3.1.3 on PATH), `ruff check src tests`, `python3 -m sourced check --invariants` (11/11). All green at the batch tip `20d0d65`; code untouched since, STATUS-only commits above it.
+- Session commit range for the batch: `3e60806..20d0d65` (PRs #62-#66, 16 commits including merges); STATUS/housekeeping commits sit above the tip.
 - CI actions are current: checkout@v7, setup-python@v6, ruff-action@v4.0.0 (exact pin; no moving v4 major tag upstream yet).
 - Golden snapshot policy unchanged: skeletons/voices/styles/CLAUDE.md are snapshotted, mode bodies and agents are single-source. Skeleton edits regen via `pytest tests/cli/golden/ --snapshot-update`, folded into the same commit (held in #57).
 - `~/writing` is the evidence base for #50/#51: stale and slightly broken by Hayden's description, but its `config/voice.md` (hayden_essay, phase-3 render) is real extraction output, and its `hayden_personal` sibling reference resolves again now that the voice library is restored.
