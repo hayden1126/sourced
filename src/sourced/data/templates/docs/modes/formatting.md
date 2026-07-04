@@ -86,7 +86,7 @@ Skipping pre-flight ships a rendered document that may contain unresolved verifi
 
    - One entry per unique source, keyed to the collapsed id (post-step-3 form).
    - Filter to ids actually referenced in source prose; dead log entries are not emitted.
-   - Tolerable emitter warnings (per the emitter spec's §Source-type inference fallback rule) are collected for the step 8 report but do not halt.
+   - Tolerable emitter warnings (per the emitter spec's §Source-type inference rules: the rule-5 fallback and the rule-0 explicit-type warnings) are collected for the step 8 report but do not halt.
 
 ### Pandoc invocation
 
