@@ -120,7 +120,7 @@ When you log on the main thread (paste-in from {{USER}}, retry after subagent-re
 13. **Aggregate finder reports** into one merged report for {{USER}}:
     - New citations logged: ids with one-line descriptions of what each supports.
     - Gaps: sub-topics where no usable source surfaced, or claims still unsupported.
-    - Rejected sources: include when a gap remains in the area they were meant to cover, OR when the rejection is itself worth knowing (predatory journal worth naming, strong candidate blocked by a paywall {{USER}} might bypass, source that contradicts the paper's direction).
+    - Rejected sources: include when a gap remains in the area they were meant to cover, OR when the rejection is itself worth knowing (predatory journal worth naming, conflict-of-interest rejection that could return as an object of analysis, strong candidate blocked by a paywall {{USER}} might bypass, source that contradicts the paper's direction).
     - Alternative framings surfaced by any finder, if any.
 
 14. **Do not autonomously dispatch a second round.** {{USER}} decides whether to dispatch again, reframe, paste manually, or accept the gap.
