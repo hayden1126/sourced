@@ -98,11 +98,13 @@ Source-finders read the existing log for context, verify each candidate against 
 
 ### Main-thread direct logging discipline
 
-When you log on the main thread (paste-in from {{USER}}, retry after subagent-render-failed, any main-thread read), the **four retrieval forcing fields plus `source.reliability_basis` are mandatory**, same as for dispatched source-finders (`~/.claude/agents/source-finder.md` steps 3 and 5):
+When you log on the main thread (paste-in from {{USER}}, retry after subagent-render-failed, any main-thread read), the **six retrieval forcing fields plus `source.reliability_basis` are mandatory**, same as for dispatched source-finders (`~/.claude/agents/source-finder.md` steps 3 and 5):
 
 - `printed_page_observed`
 - `tool_page_index`
 - `verification_trace`
+- `context_trace` ({{USER}}-pasted `partial` entries populate it from the pasted text)
+- `access_mode` (verified entries; {{USER}}-pasted `partial` entries are exempt)
 - `per_entity_locators` (when `exact_quote` enumerates multiple entities)
 - `source.reliability_basis` (verified entries; {{USER}}-pasted `partial` entries are exempt)
 
@@ -157,7 +159,8 @@ If you catch yourself thinking any of the following, stop and check:
 | "The source is paywalled but I found a preprint on the author's site — that's the same source." | Maybe, maybe not. Preprint and published version can differ materially (revised conclusions, added/removed sections, different page numbering). Verify the version you read matches the version you're citing. Note both if you're citing the preprint. |
 | "The subagent's shard has an entry that fails schema validation on one field — I'll hand-fix the field and merge." | Do not hand-edit a shard to make it pass. Follow the failed-shard protocol in schema.md. Hand-fixing hides what the subagent actually produced and defeats the validation discipline. |
 | "The dispatch template's `Sources to avoid` field is overkill for this topic — I'll omit it." | Omitting a field is silent. Write `none`. An omitted field means the finder guesses; a `none` means the constraint is deliberately absent. |
-| "{{USER}} pasted a passage — I can log it without the four retrieval fields because it's not a subagent entry." | The main-thread direct logging discipline requires the same four retrieval forcing fields as subagent dispatch. `printed_page_observed`, `tool_page_index`, `verification_trace`, `per_entity_locators` (when applicable). No carve-out for main-thread. |
+| "{{USER}} pasted a passage — I can log it without the retrieval fields because it's not a subagent entry." | The main-thread direct logging discipline requires the same retrieval forcing fields as subagent dispatch. `printed_page_observed`, `tool_page_index`, `verification_trace`, `context_trace`, `per_entity_locators` (when applicable); `access_mode` on verified entries. No carve-out for main-thread. |
+| "The archive.org search-inside snippet shows my exact quote, so the source is rendered." | A snippet window is a search-index match, not the work. §3(b) requires the full text, and `retrieval.access_mode` records what you actually had: `snippet` never reaches `verified` (merge hard-fail). Open the full text (OCR full text counts, recorded as `ocr-fulltext`) or reject. |
 | "Render succeeded on retry, that satisfies §3 so I'll log." | Render success satisfies §3(b) — you have the full text. It does not satisfy §3(a) — you still have to confirm reliability (venue, author credentials, field-appropriate recency). Log only after both pass and `source.reliability_basis` records the (a) half. |
 | "The announcement `Switching to [research mode] (invoked from [<prior mode>])` is verbose — I'll just say `Switching to [research mode].`" | The `(invoked from [X])` clause IS the round-trip state capture. Dropping it means when you return, you have to guess the prior mode from working memory. Include it every time on auto-trigger. |
 | "The auto-trigger fired but the verification will be quick — I'll do it inline without the mode switch." | Inline verification without the switch defeats the point of the mode. {{USER}} needs to see the switch in both directions; the announcement is a control point. Switch. |
@@ -187,7 +190,7 @@ ENTRY:
 
 VERIFY every candidate via §3:
   (a) Reliability — peer review / credentialed author / appropriate recency → recorded in source.reliability_basis
-  (b) Full-text   — readable PDF or rendered HTML, not abstract / paywall / citation-of
+  (b) Full-text   — readable PDF, rendered HTML, or OCR full text; never abstract / paywall / citation-of / snippet (retrieval.access_mode records it)
 
 DISPATCH (3+ sub-topics):
   Parallel Agent tool calls in one message
@@ -199,6 +202,8 @@ LOG (main thread direct):
     - printed_page_observed
     - tool_page_index
     - verification_trace
+    - context_trace
+    - access_mode (verified entries; snippet never reaches verified)
     - per_entity_locators (when exact_quote has multiple entities)
     - source.reliability_basis (verified entries)
   location = printed_page_observed, both canonical "p. N" / "pp. N-M" form (paginated sources)
@@ -242,4 +247,4 @@ EXIT (announce return):
 - `CLAUDE.md §7.4` — mode-to-mode gate table.
 - `CLAUDE.md §8.1` — citation log schema (Moment 1).
 - `~/.claude/citations/schema.md` — full entry structure, enum values, ID format, staleness rules, merge protocol, verification fields, reliability basis, reference-work shape.
-- `~/.claude/agents/source-finder.md` — subagent definition; the four retrieval forcing fields originate at its step 5; the reliability basis originates at its step 3.
+- `~/.claude/agents/source-finder.md` — subagent definition; the six retrieval forcing fields originate at its step 5; the reliability basis originates at its step 3.
