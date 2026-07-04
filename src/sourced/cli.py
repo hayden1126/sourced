@@ -6,7 +6,10 @@ plain Python args, not argparse.Namespace.
 from __future__ import annotations
 import argparse
 import os
+import shutil
+import subprocess
 import sys
+from pathlib import Path
 from typing import NoReturn
 
 from . import __version__
@@ -15,9 +18,60 @@ from .errors import SourcedError
 from .ui import print_error, print_unexpected, should_color
 
 
+def _git_checkout_state() -> str | None:
+    """Live git state when running from an editable install inside the checkout.
+
+    Returns raw ``git describe --tags --always --dirty`` output (today a bare
+    short SHA; ``-dirty`` when the tree has uncommitted changes), or None when
+    this is not a src-layout checkout or git is unavailable. None means the
+    caller shows only the frozen install-time metadata, same as before #61.
+    """
+    pkg = Path(__file__).resolve().parent
+    if pkg.parent.name != "src":  # wheel / site-packages install
+        return None
+    root = pkg.parent.parent
+    if not (root / ".git").exists():  # .git is a file in worktrees
+        return None
+    if shutil.which("git") is None:
+        return None
+    try:
+        out = subprocess.run(
+            ["git", "describe", "--tags", "--always", "--dirty"],
+            capture_output=True, text=True, check=True, timeout=5, cwd=root,
+        ).stdout.strip()
+    except (subprocess.SubprocessError, OSError):
+        return None
+    return out or None
+
+
+def _version_string() -> str:
+    state = _git_checkout_state()
+    if state is None:
+        return f"sourced {__version__}"
+    return f"sourced {__version__} (checkout {state})"
+
+
+class _LazyVersionAction(argparse.Action):
+    """Like action="version", but the string is computed only when invoked.
+
+    Keeps the git subprocess off the hot path: normal subcommands never pay
+    for it, and a broken git can never break them.
+    """
+
+    def __init__(self, option_strings: list[str], dest: str, **kwargs: object) -> None:
+        kwargs.setdefault("help", "show program's version number and exit")
+        super().__init__(
+            option_strings, dest, nargs=0, default=argparse.SUPPRESS, **kwargs
+        )
+
+    def __call__(self, parser, namespace, values, option_string=None) -> None:
+        print(_version_string())
+        parser.exit()
+
+
 def _build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="sourced", description="sourced framework CLI")
-    p.add_argument("--version", action="version", version=f"sourced {__version__}")
+    p.add_argument("--version", action=_LazyVersionAction)
     p.add_argument("-v", "--verbose", action="count", default=0)
     p.add_argument("-q", "--quiet", action="store_true")
     p.add_argument("--color", choices=["auto", "always", "never"], default="auto")

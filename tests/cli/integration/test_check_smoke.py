@@ -8,7 +8,11 @@ def test_sourced_version_runs(clean_ansi):
         capture_output=True, text=True,
     )
     assert result.returncode == 0
-    assert "sourced" in result.stdout
+    assert result.stdout.startswith("sourced ")
+    # Dev and CI both run the suite from an editable checkout with git on
+    # PATH (ci.yml: pip install -e .[test], fetch-depth 0), so the live
+    # checkout marker must survive end to end.
+    assert "(checkout " in result.stdout
 
 
 def test_sourced_check_runs(clean_ansi):
