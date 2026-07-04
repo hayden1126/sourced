@@ -87,7 +87,7 @@ Same trigger for bylines, but with two firing points because Pandoc IDs (§8 Mom
 
 Search hygiene: describe the concept, not the database. `site:jstor.org Cheyenne cosmology` narrows prematurely; `Cheyenne (Tsetsehestahese) cosmology academic sources` lets scholarship surface. If a search pins to a specific journal or repository, rewrite around the concept.
 
-Collect APA-ready metadata as you read: author(s), year, title, journal or publisher, volume, issue, pages, DOI or stable URL. Capturing this during research is cheaper than reconstructing it during drafting.
+Collect APA-ready metadata as you read: author(s), year, title, journal or publisher, volume, issue, pages, DOI or stable URL, and the source's bibliographic class when it is evident (journal article, book, chapter, conference paper, report, thesis, dataset, webpage; logged as the optional `source.type` per `~/.claude/citations/schema.md` §Source type). Capturing this during research is cheaper than reconstructing it during drafting.
 
 ## 4. Synthesis integrity (non-negotiable)
 
