@@ -106,7 +106,7 @@ When you log on the main thread (paste-in from {{USER}}, retry after subagent-re
 - `per_entity_locators` (when `exact_quote` enumerates multiple entities)
 - `source.reliability_basis` (verified entries; {{USER}}-pasted `partial` entries are exempt)
 
-`location` must equal `printed_page_observed` for paginated sources (or the corresponding value for section-/chapter-/timestamp-keyed sources, per `~/.claude/citations/schema.md` §Verification fields). `pdf_page_offset` records the offset once per source. Reference-work sources (dictionaries, wordlists) use the list-shape in `~/.claude/citations/schema.md` §Reference-work shape; per-item locators carry verification in place of `verification_trace`.
+`location` must equal `printed_page_observed` for paginated sources (or the corresponding value for section-/chapter-/timestamp-keyed sources, per `~/.claude/citations/schema.md` §Verification fields). Page values in both fields use canonical `"p. N"` / `"pp. N-M"` form, matching the schema exemplars. `pdf_page_offset` records the offset once per source. Reference-work sources (dictionaries, wordlists) use the list-shape in `~/.claude/citations/schema.md` §Reference-work shape; per-item locators carry verification in place of `verification_trace`.
 
 ### Byline re-verification (stale retrieved_at)
 
@@ -201,9 +201,9 @@ LOG (main thread direct):
     - verification_trace
     - per_entity_locators (when exact_quote has multiple entities)
     - source.reliability_basis (verified entries)
-  location = printed_page_observed (paginated sources)
+  location = printed_page_observed, both canonical "p. N" / "pp. N-M" form (paginated sources)
 
-MERGE: per schema.md protocol. Hand-fix forbidden.
+MERGE: per schema.md protocol. Hand-fix forbidden (page-form normalization at merge is the validator's write-back, not a hand-fix).
 
 SUBAGENT-RENDER-FAILED: retry from main thread BEFORE calling it a gap.
 
