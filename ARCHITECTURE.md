@@ -133,7 +133,7 @@ Each moment is owned by exactly one mode family.
 
 1. **Logging** (`[research mode]`) — verify source, append JSON entry to the citation log. Every entry carries:
    - Core source fields: `source.authors`, `source.year`, `exact_quote`, `surrounding_context`, `retrieved_at`, `verification_status`.
-   - Externalized verification sub-fields under `retrieval`: `retrieval.printed_page_observed`, `retrieval.tool_page_index`, `retrieval.pdf_page_offset`, `retrieval.verification_trace`, and `retrieval.per_entity_locators` (required when `exact_quote` enumerates multiple named entities). See [`citations/schema.md`](./citations/schema.md) §Verification fields for when each is required.
+   - Externalized verification sub-fields under `retrieval`: `retrieval.access_mode`, `retrieval.printed_page_observed`, `retrieval.tool_page_index`, `retrieval.pdf_page_offset`, `retrieval.verification_trace`, `retrieval.context_trace`, and `retrieval.per_entity_locators` (required when `exact_quote` enumerates multiple named entities). See [`citations/schema.md`](./citations/schema.md) §Verification fields for when each is required.
    - Reliability basis under `source`: `reliability_basis.venue_type` / `.venue_basis` / `.author_credentials`, required on every `verified` entry (not on `partial`). See [`citations/schema.md`](./citations/schema.md) §Reliability basis.
 2. **In-prose IDs** (`[outlining mode]`, `[writing mode]`, `[editing mode]`) — prose carries `[@id]` / `@id` / `[@id, p. N]` Pandoc syntax. Never rendered author-year strings.
 3. **Rendering** (`[formatting mode]`) — resolve IDs against the log, emit style-specific inline citations and a References list into a sibling file.
