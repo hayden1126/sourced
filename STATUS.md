@@ -35,7 +35,7 @@ Branch / worktree: main
 
 ## Notes for next session
 
-- Verification target unchanged: `pytest` (260 tests; parity needs pandoc 3.1.3 on PATH), `ruff check src tests`, `python3 -m sourced check --invariants` (11/11). All green on merged main at `3006c80`.
+- Verification target unchanged: `pytest` (260 tests; parity needs pandoc 3.1.3 on PATH), `ruff check src tests`, `python3 -m sourced check --invariants` (11/11). All green on main at the 2026-07-04 wrap-up (commit range `dc155cf..HEAD`; code untouched since `3006c80`, STATUS-only commits since).
 - CI actions are current: checkout@v7, setup-python@v6, ruff-action@v4.0.0 (exact pin; no moving v4 major tag upstream yet).
 - Golden snapshot policy unchanged: skeletons/voices/styles/CLAUDE.md are snapshotted, mode bodies and agents are single-source. Skeleton edits regen via `pytest tests/cli/golden/ --snapshot-update`, folded into the same commit (held in #57).
 - `~/writing` is the evidence base for #50/#51: stale and slightly broken by Hayden's description, but its `config/voice.md` (hayden_essay, phase-3 render) is real extraction output, and its `hayden_personal` sibling reference resolves again now that the voice library is restored.
