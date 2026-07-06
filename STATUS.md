@@ -2,8 +2,8 @@
 
 > Living state. Update at the end of every working block so a fresh session can resume from here after `/clear`.
 
-Last updated: 2026-07-06 (handoff: drift audit run, pass-renumber ripple fixed on fix-pass-renumber-drift)
-Branch / worktree: fix-pass-renumber-drift (one commit ahead of main; PR pending Hayden's go)
+Last updated: 2026-07-06 (session closed: PR #76 merged, post-merge steps done, clean boundary)
+Branch / worktree: main
 
 ## Done
 
@@ -45,9 +45,8 @@ Branch / worktree: fix-pass-renumber-drift (one commit ahead of main; PR pending
 
 ## In flight
 
-- One thing in flight: PR #76 (fix-pass-renumber-drift, two commits: the drift sweep + a syrupy CI pin), CI green, awaits Hayden's merge. After merge: re-run `sourced global-install` (voices and the sourced-helper agent changed; both are mirrored surfaces), then delete the branch.
-- Everything else at a clean boundary: all three thread PRs merged (#68, #69, #75), issues #29/#34/#51 closed, follow-ups #70-#74 filed, ROADMAP queue re-ranked, worktrees removed and all feature branches (local and remote) deleted, ~/.claude mirror current as of e0b49cd.
-- Next concrete step after this branch merges: ROADMAP §Next queue row 1 (#70, the staged-reader-review bundle skill).
+- Nothing half-done. Clean boundary: the 2026-07-06 session's five PRs all merged (#67 restructure, #68 spike, #69 consistency suite, #75 payload critic, #76 drift sweep + syrupy pin), issues #29/#34/#51 closed, follow-ups #70-#74 filed, worktrees and all feature branches deleted, ~/.claude mirror current as of the #76 merge (4fe8884), 336 tests + 11/11 invariants green on main.
+- Next concrete step: ROADMAP §Next queue row 1 (#70, the staged-reader-review bundle skill).
 
 ## Blocked / decisions needed
 
