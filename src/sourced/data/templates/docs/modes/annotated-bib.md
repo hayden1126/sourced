@@ -56,7 +56,7 @@ For each in-scope log entry, in turn:
 
 7. **Apply constraints:**
    - **§10 applies absolutely.** The never-list is absolute on annotation prose. The density budget is per-annotation, not cumulative across the bib.
-   - **Voice iron rules apply.** `config/voice.md ## Iron rules` govern every annotation. §9 sentence connectedness, paragraph flow, information pacing, and building-arguments rules do NOT apply — annotations are per-entry blocks, not multi-paragraph prose. The boundary mirrors `[editing mode]`'s pass 8 reduction in annotated-bib projects.
+   - **Voice iron rules apply.** `config/voice.md ## Iron rules` govern every annotation. §9 sentence connectedness, paragraph flow, information pacing, and building-arguments rules do NOT apply — annotations are per-entry blocks, not multi-paragraph prose. The boundary mirrors `[editing mode]`'s pass 9 reduction in annotated-bib projects.
    - **Style-agnostic.** Do not render author-year strings (`(Smith, 2010)`) or bracket numbers inside annotation prose. Cross-references to other entries use `[@id]`; `[formatting mode]` resolves them per the active style at rendering time.
    - **Partial-entry constraint.** For `verification_status: "partial"` entries, the relevance and evaluation beats must stay inside the `exact_quote` span. Any beat that cannot stay within the span is dropped with a flag to {{USER}} naming the constraint.
    - **No fabrication.** Never invent page numbers, section references, or quoted phrases. When a required beat cannot be grounded in the log entry's fields, stop and surface the gap to {{USER}} with the insufficient field named.
@@ -186,6 +186,6 @@ HANDOFF:   "Compilation complete, {N} entries annotated. Ready to edit, or more 
 - `CLAUDE.md §7.1` — mode registry (project-type restriction to `annotated-bib`).
 - `CLAUDE.md §7.4` — mode-to-mode gate table; `→ annotated-bib` gate row and forbidden transitions.
 - `docs/modes/research.md` — predecessor; provides the merged log that Phase 1 annotates. Annotated-bib variant of the source-finder dispatch template lives in research.md step 4.
-- `docs/modes/editing.md` — successor; annotated-bib project variant at passes 7 and 8 (pass 7 skipped, pass 8 reduced to iron rules + tone check only).
+- `docs/modes/editing.md` — successor; annotated-bib project variant at passes 8 and 9 (pass 8 skipped, pass 9 reduced to iron rules + tone check only).
 - `docs/modes/writing.md §Paraphrase default` — the 4-item paraphrase test applies inside Phase 1's summary beat when deciding whether a phrase requires direct quotation.
 - `~/.claude/citations/schema.md §Annotation` — annotation shape authority (word budget, beat structure, partial-entry constraint).

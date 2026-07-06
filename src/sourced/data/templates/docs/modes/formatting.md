@@ -8,13 +8,13 @@ Formatting converts source prose carrying Pandoc citation IDs into a fully-rende
 
 **Enter when:**
 - **Explicit trigger.** {{USER}} says "format this" / "render this" / "paste this" / "format for X" (see manifest §7.2). The paste target must be named in the invocation or supplied immediately after asking — formatting does not begin without a target.
-- **Gate satisfied.** The editing → formatting handoff gate has passed: §4 audit list is clean, voice audit surface-scan report is emitted, and {{USER}} has confirmed the prose is ready. Do not enter on your own judgment that editing looks "done."
+- **Gate satisfied.** The editing → formatting handoff gate has passed: revision report clean, §4 audit list clean, citation-payload re-read list clean, voice audit surface-scan report emitted, and {{USER}} has confirmed the prose is ready. Do not enter on your own judgment that editing looks "done."
 
 **Do not enter when:**
 - The draft has not been through `[editing mode]` with a confirmed handoff. Formatting without the upstream gate is a gate violation.
 - No paste target has been named. If {{USER}} says "format this" without a target, ask: "Which paste target? Supported targets are listed in `config/style.md §Paste target expression rules`."
 - `config/style.md` is missing. Stop and ask {{USER}} to run `sourced switch style <name>` rather than guessing rules. Do not attempt to infer a style.
-- The voice audit surface-scan report has not been emitted in the editing handoff turn. Per manifest §7.4, editing → formatting requires §4 audit list clean + voice audit surface-scan report emitted + paste target named; a handoff without the report is an incomplete gate. Ask {{USER}} to complete the editing handoff before entering formatting.
+- The voice audit surface-scan report has not been emitted in the editing handoff turn. Per manifest §7.4, editing → formatting requires revision report clean + §4 audit list clean + citation-payload re-read list clean + voice audit surface-scan report emitted + paste target named; a handoff without the report is an incomplete gate. Ask {{USER}} to complete the editing handoff before entering formatting.
 
 **Announcement rule.** The first output of every formatting entry names the target: `Switching to [formatting mode for <target>].` (e.g., `Switching to [formatting mode for google-docs].`).
 
@@ -177,7 +177,7 @@ Re-running is cheap and idempotent. Style change: re-run on the same source afte
 - *"The ambiguous-citation warning means pandoc still rendered something — output looks fine, I'll proceed."* — No. Ambiguous citation is blocking. Halt before writing output.
 - *"I'll modify the source prose to fix the inline quote threshold hit."* — No. Return to `[editing mode]`. Formatting does not rewrite prose.
 - *"`config/style.md` is cached from last session — I'll work from memory."* — Re-read `config/style.md` in full on every entry. Do not work from memory.
-- *"{{USER}} seems ready, the editing looked clean — I'll skip the formal gate check."* — Enter only after a confirmed editing handoff with both forcing artifacts. "Looked clean" is not a gate.
+- *"{{USER}} seems ready, the editing looked clean — I'll skip the formal gate check."* — Enter only after a confirmed editing handoff with all four forcing artifacts. "Looked clean" is not a gate.
 
 ## Rationalizations
 
@@ -256,7 +256,7 @@ FORCING ARTIFACT (pre-flight):
 - `CLAUDE.md §7.6` — precedence rules; §4 verbatim governs block-quote handling inside formatting (delegate to pandoc+CSL; do not rewrite block-quoted spans).
 - `CLAUDE.md §8` — citation log three-moment model; Moment 3 is this mode.
 - `CLAUDE.md §11` — style pointer; `config/style.md` is the authority on CSL provenance, paste-target rules, and post-pandoc transforms.
-- `docs/modes/editing.md` — predecessor mode; emits the two forcing artifacts that gate editing → formatting.
+- `docs/modes/editing.md` — predecessor mode; emits the four forcing artifacts that gate editing → formatting (revision report, §4 audit list, citation-payload re-read list, voice audit surface-scan report).
 - `docs/modes/research.md` — target for stale-entry re-verify dispatches from step 2.
 - `config/style.md §Style identity.CSL provenance.file` — CSL file path; verified at step 1.
 - `config/style.md §Document layout.Block quotes` — threshold value read by pre-flight check 6.
