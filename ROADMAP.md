@@ -177,7 +177,7 @@ Knowledge-base integration. Citation IDs resolve to wiki-links in the destinatio
 The `browser-reader-extract` pattern extends to several other extraction tasks. Each is a new directory under `src/sourced/data/skills/` with its own `SKILL.md`.
 
 ### `extract-pdf-highlights`
-**Effort:** S · **Status:** open · **Serves:** citation integrity · **Trigger:** queued (Next queue row 5).
+**Effort:** S · **Status:** open · **Serves:** citation integrity · **Trigger:** queued (Next queue row 4).
 
 Pull the user's highlights and annotations from an annotated PDF into the citation log as paste-entry candidates. Solves the "I already read and annotated this" gap: the writer has done the reading and wants the quotes plus page numbers extracted without retyping. Prerequisite: `pdftotext` plus annotation parsing.
 
@@ -217,7 +217,7 @@ Cross-cutting features that touch multiple modes.
 **Shipped (history).** Per-project directory restructure, 2026-04-24 via PR #26: projects group into `config/`, `sources/`, `samples/`, `failures/`, with auto-migration on `sourced update` and invariant I11 guarding against flat-path regressions. Design spec: [`docs/archive/specs/2026-04-24-per-project-directory-restructure-design.md`](docs/archive/specs/2026-04-24-per-project-directory-restructure-design.md).
 
 ### Python CLI (`sourced`) — phase 5 tail
-**Effort:** S–M each · **Status:** phases 1–4 shipped (PRs #19–#26); phase 5 open · **Serves:** ergonomics · **Trigger:** `sourced doctor` diagnostics queued (Next queue row 4); the remaining items act when the matching friction artifact lands.
+**Effort:** S–M each · **Status:** phases 1–4 shipped (PRs #19–#26); phase 5 open · **Serves:** ergonomics · **Trigger:** `sourced doctor` diagnostics queued (Next queue row 3); the remaining items act when the matching friction artifact lands.
 
 The CLI decomposition shipped in four phases between 2026-04-22 and 2026-04-25: phase 1 ported `install.sh` to the Python CLI (PRs #19–#23), phase 2 extracted the CLAUDE.md dispatch manifest + externalized mode bodies (PR #24), phase 3 shipped the voice pipeline (PR #25), phase 4 the per-project directory restructure (PR #26). Design specs: [`docs/archive/specs/2026-04-21-sourced-cli-decomposition-design.md`](./docs/archive/specs/2026-04-21-sourced-cli-decomposition-design.md), [`docs/archive/specs/2026-04-23-claude-md-manifest-extraction-design.md`](./docs/archive/specs/2026-04-23-claude-md-manifest-extraction-design.md).
 

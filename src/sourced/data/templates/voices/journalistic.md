@@ -1,6 +1,6 @@
 # Voice rules
 
-Voice calibration tuned to {{USER}}'s journalistic writing — news stories, feature pieces, commentary, reported essays. Encodes journalistic-register defaults under the phase-3 sub-register contract: tone (lede-first, active voice, attributed), structure (inverted pyramid, news-peg argumentation), dimension (illustrative anecdotes, plain punctuation, formatting light). Applies in `[outlining mode]` (Paragraph Flow at outline time), `[writing mode]` (Phase 1 plan + Phase 2 `prose-drafter` dispatch), and `[editing mode]` (Pass 0 Revision + Pass 8 voice audit).
+Voice calibration tuned to {{USER}}'s journalistic writing — news stories, feature pieces, commentary, reported essays. Encodes journalistic-register defaults under the phase-3 sub-register contract: tone (lede-first, active voice, attributed), structure (inverted pyramid, news-peg argumentation), dimension (illustrative anecdotes, plain punctuation, formatting light). Applies in `[outlining mode]` (Paragraph Flow at outline time), `[writing mode]` (Phase 1 plan + Phase 2 `prose-drafter` dispatch), and `[editing mode]` (Pass 0 Revision + Pass 9 voice audit).
 
 Read this file in full on entry to any of those modes; do not work from memory of prior sessions. The rules are load-bearing for the project's voice-preservation promise.
 
