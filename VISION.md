@@ -30,10 +30,14 @@ Rules are forced artifacts, not mental verbs. A rule that asks the model to "ver
 
 - Not a reference manager. Zotero owns that model; a one-way export is the most sourced would add.
 - Not a slide generator. Different medium, different rules.
-- Not an argument mapper. The §4 audit catches inference drift without graph tooling.
+- Not an argument mapper. The §4 audit catches inference drift, and the staged reader review catches whole-essay coherence, without graph tooling.
 - Not a general grammar checker. The editing passes target ambiguity and AI-specific failure modes; a dedicated tool can do the rest.
 - Not a plagiarism detector. The discipline here is preventive; post-hoc corpus comparison is Turnitin's job.
 - Not a real-time collaboration tool. Single-writer by design, as above.
+- Not a co-authoring tool. One author, one voice, one accountable person per paper; a blended voice makes voice preservation unfalsifiable.
+- Not a writing tutor. Mode discipline already announces every mode entry and gate; a pedagogy layer serves a user class this private tool does not have.
+- Not a distributed product. One writer runs it from a checkout; release engineering extends none of the six values.
+- Not a legal-citation system. Bluebook is a structurally different citation model; if it ever matters, it is a standalone subproject.
 
 Full rationale for each: [ROADMAP §Scope boundaries](./ROADMAP.md#scope-boundaries-declined-with-rationale).
 
