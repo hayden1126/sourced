@@ -2,11 +2,11 @@
 
 ## Overview
 
-Editing audits a drafted prose section against the refined outline and prose plan, the citation log, the grammar, the mechanics, the §10 generation signatures, the `config/voice.md` cut patterns, the quote-density budget, and the voice rules — in that order, as nine discrete passes. The failure mode this mode exists to prevent is **silent polish** — tightening prose in ways that paper over argument-level incoherence, citation drift, mechanical errors, or voice violations, and handing off an AI-flavored draft to `[formatting mode]` without surfacing the hits. Each pass is a separate audit with its own forcing list; skipping or collapsing passes defeats the discipline the §4 audit, revision phase, and voice audit were designed to carry.
+Editing audits a drafted prose section against the refined outline and prose plan, the citation log, the grammar, the mechanics, the §10 generation signatures, the `config/voice.md` cut patterns, the quote-density budget, and the voice rules — in that order, as ten discrete passes. The failure mode this mode exists to prevent is **silent polish** — tightening prose in ways that paper over argument-level incoherence, citation drift, mechanical errors, or voice violations, and handing off an AI-flavored draft to `[formatting mode]` without surfacing the hits. Each pass is a separate audit with its own forcing list; skipping or collapsing passes defeats the discipline the §4 audit, revision phase, and voice audit were designed to carry.
 
 **Pass 0 (Revision)** is new in phase 3. It audits argument-level coherence — whether the draft serves the thesis, whether sub-claims are supported, whether paragraphs have one job and flow into each other, whether the draft matches the outline and prose plan. Structural deviation still punts back to `[refining mode]` at step 5; Pass 0 runs on drafts that have passed structural check but may still have argument-level problems prose editing alone cannot fix.
 
-This is a **rigid** mode. The nine-pass order is load-bearing; the handoff to `[formatting mode]` is artifact-gated. §4 in root CLAUDE.md is the iron rule; this body is the operational protocol.
+This is a **rigid** mode. The ten-pass order is load-bearing; the handoff to `[formatting mode]` is artifact-gated. §4 in root CLAUDE.md is the iron rule; this body is the operational protocol.
 
 ## When to Use
 
@@ -27,7 +27,7 @@ This is a **rigid** mode. The nine-pass order is load-bearing; the handoff to `[
 │  NO HANDOFF WITHOUT §4 AUDIT LIST + CITATION-PAYLOAD RE-READ  │
 │  LIST + VOICE AUDIT SURFACE-SCAN + REVISION REPORT (PASS 0).  │
 │  NO PROSE-LEVEL FIX OF STRUCTURAL DEVIATION — REFINING DOES IT │
-│  NO PASS COLLAPSE: 9 PASSES, IN ORDER, EACH EMITS ITS LIST.    │
+│  NO PASS COLLAPSE: 10 PASSES, IN ORDER, EACH EMITS ITS LIST.  │
 └───────────────────────────────────────────────────────────────┘
 ```
 
@@ -53,7 +53,7 @@ Editing emits four forcing artifacts at handoff: the **revision report** (Pass 0
 
 5. **On detected deviation, do not fix at prose level.** Announce `Switching back to [refining mode] — structural deviation detected at <heading / paragraph>.` Name the specific mismatch. Refining realigns the outline and prose; re-enter `[editing mode]` only once the outline and prose agree. Structural fixes applied at prose level are expensive; the refining/editing boundary exists to prevent that cost from compounding — bypassing it is the single largest latent cost in the pipeline.
 
-### The nine passes (in order)
+### The ten passes (in order)
 
 Each pass operates on the section being edited. Passes that produce forced-field lists emit them in the running mode's report; an empty list (`no hits`) is a valid emission and required when the pass finds no issues. A pass that does not emit its list has not run.
 
@@ -208,7 +208,7 @@ Each pass operates on the section being edited. Passes that produce forced-field
 
 ## Annotated-bib project variant
 
-In annotated-bib projects (project type `annotated-bib`), the nine-pass audit applies to annotation prose with three modifications:
+In annotated-bib projects (project type `annotated-bib`), the ten-pass audit applies to annotation prose with three modifications:
 
 - **Pass 0 (Revision) is reduced.** Run 0a (main-claim per annotation, typically one sentence), 0b (sub-claim support — only if the annotation has multiple claims), and 0c (outline correspondence — confirm annotation matches its assigned slot in the annotated-bib plan). Skip 0d (transitions — annotations don't handoff) and 0e (paragraph one-job — annotations ARE paragraphs with one job by definition). Skip `0-plan` unless the project uses prose plans per annotation.
 - **Pass 8 (Quote-density) does not apply.** Quote density is a paragraph-level metric; annotations are per-entry blocks with hard word budgets (150–250 per the annotation shape in `~/.claude/citations/schema.md` §Annotation), and reaching for direct quotation inside an annotation is already constrained by `[annotated-bib mode]` phase 1's "at most one short phrase from `exact_quote`" rule. Skip pass 8 entirely; do not emit an empty quote-density list.
@@ -231,7 +231,7 @@ If you catch yourself thinking any of the following, stop and check:
 - *"The §10 hits are stylistic disagreements — I'll leave them for {{USER}}'s judgment."* — No. §10 hits either get restructured or get `mark as intentional` from {{USER}} explicitly. Silent retention is not allowed.
 - *"Pass 7 overlaps with Pass 6 for aphoristic-closures — I'll just skip Pass 7."* — No. Pass 6 emits canonical §10 IDs; Pass 7 emits voice-specific cut patterns. Both lists are required. An aphoristic-closure appears in both, with different metadata, and future audits parse the two separately.
 - *"This quote is slightly over 15% but it's powerful — I'll keep it."* — Paraphrase default applies. Powerful-feel is not a carve-out; load-bearing wording (the 4-item test) is.
-- *"Running all nine passes for a one-paragraph edit is overkill."* — Run them anyway. The cost of a ninth pass on one paragraph is seconds; the cost of a skipped audit is a silent §4 violation shipped to {{USER}}.
+- *"Running all ten passes for a one-paragraph edit is overkill."* — Run them anyway. The cost of a tenth pass on one paragraph is seconds; the cost of a skipped audit is a silent §4 violation shipped to {{USER}}.
 - *"`retrieved_at` is only a little stale — not worth the re-verify."* — Stale means stale. Re-open the source, update the timestamp, move on. Estimating staleness is the rationalization; the schema sets the threshold.
 - *"The paste-artifact I see is obvious; I'll fix it without adding to the list."* — Fix it AND add the entry to the list. The list is the auditable trail.
 - *"Pass 0's 0c (outline correspondence) is the same as step 4 (structural deviation)."* — They aren't. Step 4 catches outline-level changes (missing heading, reordered sections); 0c catches paragraph-level claim drift inside an unchanged outline. Step 4 punts back to refining; 0c fixes in-parent or re-plans.

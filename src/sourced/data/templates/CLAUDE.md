@@ -382,7 +382,7 @@ Rules (semantic, not structural):
 
 Voice rules live in `config/voice.md`. Every rule in `config/voice.md` is load-bearing for per-author calibration; category-level prohibitions that apply regardless of voice live in §10. If `config/voice.md` is missing, stop and ask {{USER}} to run `sourced switch voice <name>` rather than proceeding with guessed rules.
 
-Voice application procedure — when to read `config/voice.md`, which rules apply at outline vs write vs edit time, how voice interacts with §10 (including the `## §10 exemptions` mechanism): `docs/modes/writing.md` §Voice and `docs/modes/editing.md` §Voice audit (pass 8). Read on mode entry.
+Voice application procedure — when to read `config/voice.md`, which rules apply at outline vs write vs edit time, how voice interacts with §10 (including the `## §10 exemptions` mechanism): `docs/modes/writing.md` §Voice and `docs/modes/editing.md` §Voice audit (pass 9). Read on mode entry.
 
 **Adding a new library voice from writing samples.** Dispatch the `voice-extractor` subagent via the Agent tool. Full dispatch template, iron-rule caller-side check procedure, and post-dispatch steps: `docs/voice-extractor.md`. Read that file before dispatching; the subagent runs in isolated context and the dispatch has several load-bearing parameters. Voice-extractor is **not a mode** and does **not** auto-trigger; it fires only on explicit {{USER}} request.
 
