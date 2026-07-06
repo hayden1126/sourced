@@ -2,11 +2,12 @@
 
 > Living state. Update at the end of every working block so a fresh session can resume from here after `/clear`.
 
-Last updated: 2026-07-04 (quick-fix batch shipped, housekeeping done)
-Branch / worktree: main
+Last updated: 2026-07-06 (roadmap reevaluated and restructured; worktree split decided)
+Branch / worktree: roadmap-restructure (Phase 0 of the 2026-07-06 plan)
 
 ## Done
 
+- 2026-07-06 roadmap reevaluation (this branch): a 5-agent read-only panel (vision-bar, field-evidence, and sequencing judges; a structure designer; a worktree conflict mapper) reevaluated every ROADMAP entry against VISION and the 2026-07-04 session evidence. Headline: #51's fidelity measure, #29's reader-simulation critics, and Peer review mode converge on one primitive (staged reader review), so they get designed once; #29 splits, with its citation-payload critic (independent paraphrase-vs-exact_quote re-read) shipping as its own fork-independent thread. ROADMAP restructured to a ranked Next queue plus a Trigger tag (queued / act when <gate artifact> / none yet) replacing Priority; four entries declined to Scope boundaries (Voice-merging, Teaching mode, Single-binary, Bluebook, each with a reopen condition); three Serves retags to ergonomics (Grant proposal, Agent Teams, extract-scholar-citations); the circular cross-project-reuse/verified-claims gate replaced by a second-overlapping-project trigger; #51-fork gates recorded on Scoped subagents, Direct-API candidate 1, and Per-agent model selection; extract-pdf-highlights reworded for the #63/#64 schema (surrounding_context + access_mode are deliverables). VISION §What sourced is not gained four one-liners. Plan + panel findings: ~/.claude/plans/can-we-split-into-zesty-wilkinson.md.
 - 2026-07-04 (block 2) quick-fix batch: the five issues the paper session made actionable, five PRs (#62-#66, all merged, CI green; issues #53, #58, #59, #60, #61 closed). Landing order #61 -> #59 -> #58 -> #60 -> #53. Plans were adversarially critiqued before implementation; the critics' catches are in the PR bodies.
   - PR #62 (issue #61): `sourced --version` appends live `git describe` state when running from the checkout, computed lazily via a custom argparse action (no subprocess on normal commands), frozen-stamp fallback everywhere else. Output: `sourced <stamp> (checkout <sha>[-dirty])`. 5 new unit tests + strengthened smoke test (TDD, red first).
   - PR #63 (issue #59): canonical page form "p. N" / "pp. N-M" in `location` and `printed_page_observed`; merge bullet compares the page token (Arabic or Roman), writes back canonical form, skips "not visible"; finder dispatch names the form.
@@ -34,13 +35,13 @@ Branch / worktree: main
 
 ## In flight
 
-- Nothing half-done. Clean boundary: quick-fix batch merged, issues closed, mirror refreshed, branches cleaned, tree clean after this STATUS commit.
-- Next concrete step: pick the next thread (see Blocked below).
+- Phase 0: this branch (roadmap-restructure) holds the ROADMAP/VISION/STATUS restructure; PR pending Hayden's go. After merge: comment on #29 (the split) and #51 (the combined-spike decision), then Phase 1.
+- Phase 1 (decided 2026-07-06): three parallel worktrees on disjoint surfaces. spike-51-29 (combined #51+#29 design spike, doc-only, lands in docs/archive/specs); payload-critic (citation-payload critic implementation, the ONLY thread allowed to touch src/sourced/data/templates or regen goldens); 34-consistency (#34 re-inventory plus option-C consistency test). Rules: STATUS.md is never edited inside a worktree, handoffs go in PR bodies and get folded here at merge; merge non-golden threads first; goldens regen in the same commit on rebase.
 
 ## Blocked / decisions needed
 
-- Next-thread choice is Hayden's call, options now: (1) the #51 spike, with real evidence attached (see the 2026-07-04 comment: the fidelity-measure question has a candidate primitive in staged reader review); (2) the #29 editing-critic design, which the paper session gave two concrete requirements (independent re-read of paraphrase vs exact_quote; staged reader-simulation pass after formatting); (3) the ROADMAP `next` set; (4) the remaining observe-labeled and parked issues (#30, #31, #33, #34, #35, #36).
-- Observation-logging lesson for any future session: modes in flow do not log at-the-moment; evidence lands at gates (merge, format, post-review). #30/#31/#33 sections came back empty for this reason, not because nothing happened.
+- None. The next-thread ranking now lives in ROADMAP §Next queue (single source; it changes in the same commit as the Status change that justifies it). Decisions taken 2026-07-06: decline batch (Voice-merging, Teaching mode, Single-binary, Bluebook), roadmap structure Option A, worktree lineup spike + payload-critic + #34.
+- Observation-logging lesson for any future session: modes in flow do not log at-the-moment; evidence lands at gates (merge, format, post-review). #30/#31/#33 sections came back empty for this reason, not because nothing happened. This is now encoded in ROADMAP's Trigger vocabulary.
 
 ## Notes for next session
 
