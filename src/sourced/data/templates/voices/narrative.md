@@ -1,6 +1,6 @@
 # Voice rules
 
-Voice calibration tuned to {{USER}}'s narrative writing — personal essays, reflection pieces, college application essays, memoir-adjacent work. Encodes narrative-register defaults under the phase-3 sub-register contract: tone (first-person, scene-aware, reflective), structure (chronological or thematic arcs, scene → reflection alternation), dimension (specific sensory detail, deliberate punctuation for rhythm, minimal formatting). Applies in `[outlining mode]` (Paragraph Flow at outline time), `[writing mode]` (Phase 1 plan + Phase 2 `prose-drafter` dispatch), and `[editing mode]` (Pass 0 Revision + Pass 8 voice audit).
+Voice calibration tuned to {{USER}}'s narrative writing — personal essays, reflection pieces, college application essays, memoir-adjacent work. Encodes narrative-register defaults under the phase-3 sub-register contract: tone (first-person, scene-aware, reflective), structure (chronological or thematic arcs, scene → reflection alternation), dimension (specific sensory detail, deliberate punctuation for rhythm, minimal formatting). Applies in `[outlining mode]` (Paragraph Flow at outline time), `[writing mode]` (Phase 1 plan + Phase 2 `prose-drafter` dispatch), and `[editing mode]` (Pass 0 Revision + Pass 9 voice audit).
 
 Read this file in full on entry to any of those modes; do not work from memory of prior sessions. The rules are load-bearing for the project's voice-preservation promise.
 

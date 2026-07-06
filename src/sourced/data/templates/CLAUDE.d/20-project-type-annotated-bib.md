@@ -54,7 +54,7 @@ No patches. The base-manifest forcing artifacts apply unchanged:
 - Inline-quote-threshold list still gates `formatting → (terminal)`.
 - Scope-delta list still fires on §6 scope-growth soft-stop during any mode.
 
-The annotated-bib variant's modified pass application (Pass 7 skipped; Pass 8
+The annotated-bib variant's modified pass application (Pass 8 skipped; Pass 9
 reduced) is documented in `docs/modes/editing.md` and `docs/modes/annotated-bib.md`;
 it does not change which artifacts are emitted, only which passes fire.
 
