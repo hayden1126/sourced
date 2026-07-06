@@ -10,7 +10,10 @@ dynamic = ["version"]
 dependencies = []
 
 [project.optional-dependencies]
-test = ["pytest>=8.0", "syrupy>=4.6"]
+# syrupy ceiling: 5.5.0 registers the xdist-only pytest_testnodedown hook unconditionally,
+# which pluggy rejects as an unknown hook when pytest-xdist is absent (INTERNALERROR at
+# collection; reproduced 2026-07-06). Lift the ceiling when a fixed release lands.
+test = ["pytest>=8.0", "syrupy>=4.6,<5.5"]
 dev = ["sourced[test]", "ruff>=0.15"]
 
 [project.scripts]
