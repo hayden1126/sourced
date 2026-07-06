@@ -305,13 +305,6 @@ DERIVED_COUNTS: tuple[DerivedCount, ...] = (
         count_editing_passes(),
         "distinct numbered passes in templates/docs/modes/editing.md",
         (CountMirror(DOCS / "MODES.md", r"(\w+)-pass audit"),),
-        xfail=(
-            "Known drift (issue #34 re-inventory): the canonical editing.md body defines "
-            "passes 0-9 (Pass 0 Revision and Pass 7 Cut-pattern were added in phase 3), but "
-            "docs/MODES.md still summarizes it as an 'Eight-pass audit' and numbers "
-            "quote-density as pass 7 / voice as pass 8, contradicting the body (Pass 8 / "
-            "Pass 9). Fix docs/MODES.md, then remove this xfail."
-        ),
     ),
 )
 

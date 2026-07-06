@@ -24,7 +24,7 @@ Two project types select different mode graphs:
 | `[refining]` | Stress-test the outline against the citation log. Runs the §4 audit (scope, attribution, inference, cherry-pick, synthesis) and integrity checks before prose exists. | essay |
 | `[writing]` | Outline to prose. Applies voice rules (§9), generation signatures (§10), paraphrase default, Pandoc citation IDs. | essay |
 | `[annotated-bib]` | Per-entry annotation (4-beat: summary / relevance / location / evaluation) and draft compile. Grounded only in log fields; §3 verification inherited. | annotated-bib |
-| `[editing]` | Eight-pass audit on prose: ID validation → §4 citation → partial-entry recheck → grammar → proofreading → AI-tell (§10) → quote-density → voice (§9). In annotated-bib projects, passes 7 (quote-density) and the §9 flow-rules part of pass 8 are skipped. | all |
+| `[editing]` | Ten-pass audit on prose: revision → ID validation → §4 citation → partial-entry recheck → grammar → proofreading → AI-tell (§10) → cut-pattern → quote-density → voice (§9). In annotated-bib projects, pass 8 (quote-density) and the §9 flow-rules part of pass 9 are skipped. | all |
 | `[finetuning]` | Bounded local substitution: produce 3–5 alternatives with declared tradeoff axes for a word-to-paragraph span; never ships a single-option change without explicit selection. {{USER}}-only, via explicit or implicit trigger. | all |
 | `[formatting]` | Render prose into style-specific output for a named paste target. Terminal stage; source prose never modified. | all |
 
@@ -42,7 +42,7 @@ One end-to-end session, showing where modes announce and where the gates fire:
 6. Agent switches to `[outlining mode]`, builds paragraph-level structure with citations attached by id. **Gate:** you approve ("ready to refine, or more outlining?").
 7. `[refining mode]` runs the §4 audit (scope, attribution, inference, cherry-pick, synthesis) against the log. **Gate:** you approve the refined outline.
 8. `[writing mode]` turns outline into prose, applying voice rules, §10 generation signatures, and the paraphrase default. The draft lands at `<draft>.md` with Pandoc citation IDs (`[@id]`, `@id`).
-9. `[editing mode]` runs the eight-pass audit. The handoff gate blocks on any unresolved §10 voice-audit hits; you must "address or mark intentional" before format. Silence ≠ override.
+9. `[editing mode]` runs the ten-pass audit. The handoff gate blocks on any unresolved §10 voice-audit hits; you must "address or mark intentional" before format. Silence ≠ override.
 10. `[formatting mode for <target>]` (e.g., `google-docs`, `plain-markdown`, `word`) renders `<draft>.md` into `<draft>.<target>.md`. Source prose is unchanged; the formatted sibling carries resolved `(Author Year, page)` citations and a References list per `config/style.md`. The `word` target (supported by all 5 shipped styles via pandoc+CSL) additionally runs pandoc + CSL and emits a `<draft>.docx` submission binary.
 
 At any point, `[red team]` and `[babble]` are available for stress-testing or unstructured thinking. `[non-academic]` escapes the framework for one turn.
