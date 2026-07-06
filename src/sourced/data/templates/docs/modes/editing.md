@@ -2,11 +2,11 @@
 
 ## Overview
 
-Editing audits a drafted prose section against the refined outline and prose plan, the citation log, the grammar, the mechanics, the §10 generation signatures, the `config/voice.md` cut patterns, the quote-density budget, and the voice rules — in that order, as nine discrete passes. The failure mode this mode exists to prevent is **silent polish** — tightening prose in ways that paper over argument-level incoherence, citation drift, mechanical errors, or voice violations, and handing off an AI-flavored draft to `[formatting mode]` without surfacing the hits. Each pass is a separate audit with its own forcing list; skipping or collapsing passes defeats the discipline the §4 audit, revision phase, and voice audit were designed to carry.
+Editing audits a drafted prose section against the refined outline and prose plan, the citation log, the grammar, the mechanics, the §10 generation signatures, the `config/voice.md` cut patterns, the quote-density budget, and the voice rules — in that order, as ten discrete passes. The failure mode this mode exists to prevent is **silent polish** — tightening prose in ways that paper over argument-level incoherence, citation drift, mechanical errors, or voice violations, and handing off an AI-flavored draft to `[formatting mode]` without surfacing the hits. Each pass is a separate audit with its own forcing list; skipping or collapsing passes defeats the discipline the §4 audit, revision phase, and voice audit were designed to carry.
 
 **Pass 0 (Revision)** is new in phase 3. It audits argument-level coherence — whether the draft serves the thesis, whether sub-claims are supported, whether paragraphs have one job and flow into each other, whether the draft matches the outline and prose plan. Structural deviation still punts back to `[refining mode]` at step 5; Pass 0 runs on drafts that have passed structural check but may still have argument-level problems prose editing alone cannot fix.
 
-This is a **rigid** mode. The nine-pass order is load-bearing; the handoff to `[formatting mode]` is artifact-gated. §4 in root CLAUDE.md is the iron rule; this body is the operational protocol.
+This is a **rigid** mode. The ten-pass order is load-bearing; the handoff to `[formatting mode]` is artifact-gated. §4 in root CLAUDE.md is the iron rule; this body is the operational protocol.
 
 ## When to Use
 
@@ -24,14 +24,14 @@ This is a **rigid** mode. The nine-pass order is load-bearing; the handoff to `[
 
 ```
 ┌───────────────────────────────────────────────────────────────┐
-│  NO HANDOFF WITHOUT §4 AUDIT LIST + VOICE AUDIT SURFACE-SCAN  │
-│    + REVISION REPORT (PASS 0).                                │
+│  NO HANDOFF WITHOUT §4 AUDIT LIST + CITATION-PAYLOAD RE-READ  │
+│  LIST + VOICE AUDIT SURFACE-SCAN + REVISION REPORT (PASS 0).  │
 │  NO PROSE-LEVEL FIX OF STRUCTURAL DEVIATION — REFINING DOES IT │
-│  NO PASS COLLAPSE: 9 PASSES, IN ORDER, EACH EMITS ITS LIST.    │
+│  NO PASS COLLAPSE: 10 PASSES, IN ORDER, EACH EMITS ITS LIST.  │
 └───────────────────────────────────────────────────────────────┘
 ```
 
-Editing emits three forcing artifacts at handoff: the **revision report** (Pass 0: purpose/thesis, sub-claim support, outline correspondence, transitions, paragraph one-job); the **§4 audit list** (one row per citation audited, pass/`flagged: <reason>` per §4 items 1, 2, 4, 5, 6); and the **voice audit surface-scan report** (§10 never-list hits + `config/voice.md` cut-pattern hits + density-list overruns with line references). A handoff turn that does not emit all three has not run the mode. A `[formatting mode]` entry without these artifacts is a gate violation (manifest §7.4). "I ran the audits mentally" is not the same as emitting the lists; the lists **are** the audits. Per-pass lists (proper-noun consistency, paste-artifact, punctuation mechanics) are required in their respective passes; a pass that doesn't produce its list has not run.
+Editing emits four forcing artifacts at handoff: the **revision report** (Pass 0: purpose/thesis, sub-claim support, outline correspondence, transitions, paragraph one-job); the **§4 audit list** (one row per citation audited, pass/`flagged: <reason>` per §4 items 1, 2, 4, 5, 6); the **citation-payload re-read list** (Pass 2: one row per citation instance carrying the draft sentence, the verbatim `exact_quote` span it rests on, and a `fidelity-hold`/`fidelity-drift` verdict read off the payload with fresh eyes); and the **voice audit surface-scan report** (§10 never-list hits + `config/voice.md` cut-pattern hits + density-list overruns with line references). A handoff turn that does not emit all four has not run the mode. A `[formatting mode]` entry without these artifacts is a gate violation (manifest §7.4). "I ran the audits mentally" is not the same as emitting the lists; the lists **are** the audits. Per-pass lists (proper-noun consistency, paste-artifact, punctuation mechanics) are required in their respective passes; a pass that doesn't produce its list has not run.
 
 ## Steps
 
@@ -53,7 +53,7 @@ Editing emits three forcing artifacts at handoff: the **revision report** (Pass 
 
 5. **On detected deviation, do not fix at prose level.** Announce `Switching back to [refining mode] — structural deviation detected at <heading / paragraph>.` Name the specific mismatch. Refining realigns the outline and prose; re-enter `[editing mode]` only once the outline and prose agree. Structural fixes applied at prose level are expensive; the refining/editing boundary exists to prevent that cost from compounding — bypassing it is the single largest latent cost in the pipeline.
 
-### The nine passes (in order)
+### The ten passes (in order)
 
 Each pass operates on the section being edited. Passes that produce forced-field lists emit them in the running mode's report; an empty list (`no hits`) is a valid emission and required when the pass finds no issues. A pass that does not emit its list has not run.
 
@@ -77,7 +77,41 @@ Each pass operates on the section being edited. Passes that produce forced-field
 
    **Reference-list heading regression.** Scan source prose for any line matching the regex `^#\s+(References|Bibliography|Works Cited)\s*$`. These are legacy-draft regressions: `[formatting mode]` step 5 emits the reference-list heading itself via `--metadata reference-section-title=` (sourced from `config/style.md §Style identity 'List heading:'`), so source `.md` ends at the last body paragraph. A surviving hand-authored heading ships under the wrong style if the project's style is later switched (the bug closed by issue #15). Same shape as the rendered-citation regression: surface every hit to {{USER}} with `{line, heading_text}`; ask whether to drop (typical case) or keep (rare: writer is documenting an example heading inside body prose, in which case escape with backticks or move into a code fence so the regex no longer matches); convert per response. No log update required (this is a prose-only regression). Hits do not gate-block the way unconverted rendered citations do, because the formatting metadata flag emits the correct heading regardless of source-prose state — but a handoff turn that surfaces hits and skips conversion records each pending instance in the voice audit surface-scan report so {{USER}} sees the residual debt.
 
-8. **Pass 2 — §4 citation audit.** For every citation in the section, run the §4 audit against the current prose: scope (item 1), attribution (item 2), byline (item 3), inference (item 4), cherry-pick (item 5), plus synthesis (item 6) for multi-citation claims. **Emit the §4 audit list** — one row per citation; item 3 (byline) is recorded via `retrieved_at` updates on the log entry, not in this list.
+8. **Pass 2 — §4 citation audit.** Pass 2 runs two emissions in order: first the **citation-payload re-read list**, an independent re-read of every paraphrase against the log payload; then the **§4 audit list**, whose scope, attribution, inference, and cherry-pick verdicts are read from that re-read. For every citation in the section, run the §4 audit against the current prose: scope (item 1), attribution (item 2), byline (item 3), inference (item 4), cherry-pick (item 5), plus synthesis (item 6) for multi-citation claims. Item 3 (byline) is recorded via `retrieved_at` updates on the log entry, not in either list.
+
+   **Independent payload re-read (emit first; forcing artifact).** Before rendering any §4 verdict, re-read each citation-bearing sentence against its log entry's payload with fresh eyes. Open the entry, copy its `exact_quote` verbatim, and hold the draft sentence next to it; where the fidelity judgment depends on the neighbors (cherry-pick, attribution), copy the relevant `surrounding_context` span too. This re-read never consults, and is never back-filled from, the drafter's self-audit, the prose plan, the writing-mode parent-audit, or the refining §4 list. An upstream "no flags" is not evidence of content accuracy: in the 2026-07-04 session a structural self-audit passed prose calling a cross-sectional study "the most developed longitudinal program," and only an independent payload re-read caught it. The self-audit maps sentence roles; it never re-reads the payload.
+
+   Emit the **citation-payload re-read list**, one row per citation instance in the section:
+
+   ```
+   <@id> @ <draft location>:
+     draft:   "<the draft sentence, verbatim>"
+     payload: "<the exact_quote span the sentence rests on, verbatim from the log>"
+              [+ surrounding_context span, verbatim, when scope hinges on neighbors]
+     verdict: <fidelity-hold | fidelity-drift: <what the prose asserts the payload does not support>>
+   ```
+
+   The verdict cell is exactly one of:
+   - `fidelity-hold` when the draft sentence stays inside what the quoted payload supports: every qualifier survives, attribution is not collapsed, no inference past the payload is left unmarked, and `surrounding_context` does not reverse the reading.
+   - `fidelity-drift: <reason>` when the draft sentence claims more than, or other than, the quoted payload supports; the reason names the specific over-reach (dropped qualifier, collapsed attribution, unmarked inference, or cherry-pick against context).
+   - `fidelity-drift → resolved: <action>` when a drift is found and resolved in this same turn (`action` is one of `prose revised`, `log updated`, `citation dropped`, `citation replaced with @<id>`, or a short equivalent).
+
+   A bare verdict does not satisfy a row: both quoted spans must be present, so the verdict is spot-checkable against the payload the reader can see. A pending `fidelity-drift: <reason>` closes the editing → formatting gate (manifest §7.4); only `fidelity-hold` and `fidelity-drift → resolved: <action>` rows pass. A section with citations always produces rows; a genuinely citation-free section emits `no citations in section` in place of the list rather than omitting it. Example rows:
+
+   ```
+   wong-2018-004 @ P7 S3:
+     draft:   "Wong et al. offer the most developed longitudinal program in the field."
+     payload: "No longitudinal data yet exist; the present cross-sectional design cannot
+              speak to developmental change, and we call for longitudinal follow-up."
+     verdict: fidelity-drift: prose asserts "longitudinal" and "most developed" where the
+              payload is cross-sectional and calls for the longitudinal work it says is missing.
+   smith-2010-001 @ P2 S4:
+     draft:   "Under condition Z the effect appears only intermittently."
+     payload: "X sometimes causes Y under conditions Z."
+     verdict: fidelity-hold
+   ```
+
+   **Emit the §4 audit list**, one row per citation. Items 1 (scope), 2 (attribution), 4 (inference), and 5 (cherry-pick) are the verdicts read from the payload re-read above: a `fidelity-drift` there is the same finding, recorded here per item with the reason. Item 6 (synthesis) and the multi-citation independence check are Pass 2's own.
 
    **Row grammar (canonical shape; `sourced check` I5 parses against this).** Each row is:
 
@@ -168,13 +202,13 @@ Each pass operates on the section being edited. Passes that produce forced-field
 
 17. **Blocker discipline on hits.** If the report is non-empty, do not silently ship. Present it as a blocker: `Voice audit found N hits at lines X, Y, Z: [list with context]. Address before format, or mark as intentional?` Force engagement; force a reason. Silence is not an override; `mark as intentional` from {{USER}} is the only override path, and the acknowledgment is logged in the handoff.
 
-18. **Handoff gate.** Once the revision report is emitted (zero unresolved `flagged` rows or explicit `mark as intentional` acknowledgments), the §4 audit list is clean, and the voice audit surface-scan report is emitted (empty or explicitly-acknowledged), present the edited section and ask: `Editing is at a place I'd call complete. Ready to format, or more editing?` On `ready`, ask for the paste target. On `more editing`, stay in `[editing mode]`. **Never skip the handoff** — a silent transition to formatting bypasses the artifact gates.
+18. **Handoff gate.** Once the revision report is emitted (zero unresolved `flagged` rows or explicit `mark as intentional` acknowledgments), the §4 audit list is clean, the citation-payload re-read list is clean (zero unresolved `fidelity-drift` rows), and the voice audit surface-scan report is emitted (empty or explicitly-acknowledged), present the edited section and ask: `Editing is at a place I'd call complete. Ready to format, or more editing?` On `ready`, ask for the paste target. On `more editing`, stay in `[editing mode]`. **Never skip the handoff** — a silent transition to formatting bypasses the artifact gates.
 
 19. **Announce return.** On gate pass with paste target named: `Switching to [formatting mode].` On {{USER}} request for more editing: stay in editing until explicit next-turn handoff. On {{USER}} request to return to refining (e.g., structural issue surfaced mid-edit): `Switching to [refining mode].`
 
 ## Annotated-bib project variant
 
-In annotated-bib projects (project type `annotated-bib`), the nine-pass audit applies to annotation prose with three modifications:
+In annotated-bib projects (project type `annotated-bib`), the ten-pass audit applies to annotation prose with three modifications:
 
 - **Pass 0 (Revision) is reduced.** Run 0a (main-claim per annotation, typically one sentence), 0b (sub-claim support — only if the annotation has multiple claims), and 0c (outline correspondence — confirm annotation matches its assigned slot in the annotated-bib plan). Skip 0d (transitions — annotations don't handoff) and 0e (paragraph one-job — annotations ARE paragraphs with one job by definition). Skip `0-plan` unless the project uses prose plans per annotation.
 - **Pass 8 (Quote-density) does not apply.** Quote density is a paragraph-level metric; annotations are per-entry blocks with hard word budgets (150–250 per the annotation shape in `~/.claude/citations/schema.md` §Annotation), and reaching for direct quotation inside an annotation is already constrained by `[annotated-bib mode]` phase 1's "at most one short phrase from `exact_quote`" rule. Skip pass 8 entirely; do not emit an empty quote-density list.
@@ -190,12 +224,14 @@ If you catch yourself thinking any of the following, stop and check:
 - *"I'll fix this structural issue at prose level instead of sending it back to refining."* — No. Step 5 is load-bearing; the refining/editing boundary exists exactly here.
 - *"The §4 audit is ceremonial; {{USER}} won't read the list."* — No. The list is the forcing artifact for the formatting handoff (manifest §7.4). Without it, the gate has not been satisfied.
 - *"I ran the audits mentally; I can describe the results."* — No. The audits ARE the lists. A descriptive summary without the rows doesn't emit the artifact.
+- *"The drafter's self-audit and the writing-mode parent-audit already cleared these citations, so the payload re-read is redundant."* Not so: the self-audit is structural (sentence roles, closures) and never re-reads the payload, so an upstream "no flags" is not evidence of content accuracy. The 2026-07-04 near-miss ("most developed longitudinal program" on a cross-sectional source) passed a clean self-audit. The payload re-read is the independent catch; run it against the log, not against any prior report.
+- *"I can mark the §4 audit list's scope and inference cells `pass` from reading the prose, and skip emitting the payload re-read."* A `pass` you cannot back with the quoted `exact_quote` span is the silent assent the re-read exists to block. Emit the draft sentence and the payload span first; the §4 verdicts are read from them, not rendered independently.
 - *"This section's structural deviation is minor; I'll note it but keep editing."* — No. Any deviation returns to refining. "Minor" is the rationalization; deviation is a gate trigger regardless of magnitude.
 - *"The proper-noun consistency list is empty — I'll skip emitting it."* — No. Empty lists are required emissions. They distinguish "ran and found nothing" from "didn't run."
 - *"The §10 hits are stylistic disagreements — I'll leave them for {{USER}}'s judgment."* — No. §10 hits either get restructured or get `mark as intentional` from {{USER}} explicitly. Silent retention is not allowed.
 - *"Pass 7 overlaps with Pass 6 for aphoristic-closures — I'll just skip Pass 7."* — No. Pass 6 emits canonical §10 IDs; Pass 7 emits voice-specific cut patterns. Both lists are required. An aphoristic-closure appears in both, with different metadata, and future audits parse the two separately.
 - *"This quote is slightly over 15% but it's powerful — I'll keep it."* — Paraphrase default applies. Powerful-feel is not a carve-out; load-bearing wording (the 4-item test) is.
-- *"Running all nine passes for a one-paragraph edit is overkill."* — Run them anyway. The cost of a ninth pass on one paragraph is seconds; the cost of a skipped audit is a silent §4 violation shipped to {{USER}}.
+- *"Running all ten passes for a one-paragraph edit is overkill."* — Run them anyway. The cost of a tenth pass on one paragraph is seconds; the cost of a skipped audit is a silent §4 violation shipped to {{USER}}.
 - *"`retrieved_at` is only a little stale — not worth the re-verify."* — Stale means stale. Re-open the source, update the timestamp, move on. Estimating staleness is the rationalization; the schema sets the threshold.
 - *"The paste-artifact I see is obvious; I'll fix it without adding to the list."* — Fix it AND add the entry to the list. The list is the auditable trail.
 - *"Pass 0's 0c (outline correspondence) is the same as step 4 (structural deviation)."* — They aren't. Step 4 catches outline-level changes (missing heading, reordered sections); 0c catches paragraph-level claim drift inside an unchanged outline. Step 4 punts back to refining; 0c fixes in-parent or re-plans.
@@ -207,6 +243,8 @@ Pre-empt the excuses. Each row is an excuse you might generate and the correct r
 | Excuse | Reality |
 |--------|---------|
 | "Refining already audited the citations; running §4 again is redundant." | Refining audits the outline against the log (claim-level drift). Editing audits the prose against the log (sentence-level drift). The two catch different failure modes. Run both — that's why the mode system separates them. |
+| "The citation-payload re-read duplicates the §4 audit list." | It is the evidence the §4 items 1/2/4/5 verdicts are read from, not a second verdict. The §4 list records per-item pass/flag; the re-read holds the draft sentence next to the verbatim `exact_quote` so the verdict is spot-checkable. Drop the re-read and the passing §4 cells become bare counters, which is the hole the 2026-07-04 near-miss slipped through. |
+| "The payload re-read is long; I'll quote spans only for the citations I suspect." | Emit a row for every citation instance. Selective quoting reintroduces the trust-the-earlier-read shortcut; the drift that shipped was on a citation nobody suspected. Length is not a cost; a missing row is. |
 | "Pass 0 is impressionistic; hard to emit a structured list." | Each of 0a–0e has a specific question with a binary answer (pass vs flagged) plus a one-line reason on flag. The structure is no softer than §4's. If it feels impressionistic, you are asking the wrong question — re-read the pass description. |
 | "Pass 5's lists feel bureaucratic for a clean section." | Bureaucracy is the wrong framing. The lists are cheap to emit when empty; they are the only way to distinguish "passed" from "skipped." Future audits rely on the shape, not the absence of hits. |
 | "The §10 em-dash is part of {{USER}}'s voice — I won't flag it." | Check `config/voice.md` for a `## §10 exemptions` bullet with `em-dashes` as the canonical ID. If present, suspend the rule for {{USER}}-voice prose. If absent, the em-dash is a hit regardless of how familiar the pattern feels — silence is not permission (manifest §7.6). |
@@ -246,7 +284,9 @@ PASSES (in order; each pass emits its list):
   0. Revision.              Lists: 0a purpose / 0b sub-claim / 0c outline-¶ /
                               0d transitions / 0e paragraph one-job / 0-plan.
   1. ID validation.         List: unresolved IDs, rendered-citation regressions.
-  2. §4 citation audit.     List: §4 audit list (one row per citation).
+  2. §4 citation audit.     Lists: citation-payload re-read (draft sentence vs
+                              exact_quote, fidelity-hold/drift), THEN §4 audit list
+                              (one row per citation). Items 1/2/4/5 read off the re-read.
                             Forced re-verify: stale retrieved_at / "not visible" pages.
   3. Partial-entry recheck. List: partial entries where prose has drifted.
   4. Grammar.               Flag: ambiguity (unambiguity is the target).
@@ -271,6 +311,7 @@ HANDOFF:
 
 FORCING ARTIFACTS (required at handoff):
   - Revision report (Pass 0)
+  - Citation-payload re-read list (Pass 2)
   - §4 audit list (Pass 2)
   - Voice audit surface-scan report (hits from Passes 6, 7, 8, 9)
 ```
@@ -286,7 +327,7 @@ FORCING ARTIFACTS (required at handoff):
 ## Exit Gates
 
 **Allowed transitions (from editing):**
-- → `[formatting mode]`. Gate: revision report clean + §4 audit list clean + voice audit surface-scan report emitted (empty or explicitly-acknowledged) + paste target named. Use `Switching to [formatting mode].`
+- → `[formatting mode]`. Gate: revision report clean + §4 audit list clean + citation-payload re-read list clean (zero unresolved `fidelity-drift` rows) + voice audit surface-scan report emitted (empty or explicitly-acknowledged) + paste target named. Use `Switching to [formatting mode].`
 - → `[refining mode]` on structural deviation detected at step 4–5, OR on Pass 0 sub-check findings that require outline-level rework (e.g., 0a purpose flag indicates the thesis has shifted, 0b flags indicate a sub-claim is unsupportable and a claim needs to be cut or the outline restructured). Announce `Switching back to [refining mode] — <reason>.`
 - → `[writing mode]` on Pass 0 findings that require re-drafting (0c claim drift within an unchanged outline → re-plan the paragraph in Phase 1 of writing mode and re-draft; 0e topic-sentence flag → same). Use `Switching back to [writing mode] for revision of P<N>.`
 - → `[research mode]` on (a) unresolved ID (pass 1), (b) source-drift incident (pass 2 character mismatch), or (c) unsourced-claim auto-fire surfaced mid-pass. Return to editing once the gap is resolved with `Switching back to [editing mode].`
@@ -294,7 +335,7 @@ FORCING ARTIFACTS (required at handoff):
 - → `[collaborative mode]` if {{USER}} pauses the edit to discuss something meta (scope, approach, autonomy level). Explicit switch only; editing does not auto-downgrade.
 
 **Forbidden transitions:**
-- → `[formatting mode]` without the three forcing artifacts. Gate violation; halts with the missing-artifact named.
+- → `[formatting mode]` without the four forcing artifacts (revision report, citation-payload re-read list, §4 audit list, voice audit surface-scan report). Gate violation; halts with the missing-artifact named.
 - → `[outlining mode]` / `[plan mode]` direct. Upstream of writing; reaching them from editing implies the ask is scope-level, which routes through `[refining mode]` or `[collaborative mode]` first.
 - → `[annotated-bib mode]` direct. Annotated-bib is a project-type-gated drafting mode; entering it from editing implies the section is in the wrong project type.
 
@@ -304,8 +345,8 @@ FORCING ARTIFACTS (required at handoff):
 - `CLAUDE.md §6` — brief schema; Pass 0's 0a purpose check reads the brief's thesis field.
 - `CLAUDE.md §7.2` — explicit triggers (source of truth).
 - `CLAUDE.md §7.3` — implicit / auto-fire triggers, including stale-byline at write time and unsourced-claim auto-fire.
-- `CLAUDE.md §7.4` — mode-to-mode gate table; the editing → formatting gate and its forcing artifacts (now three: revision report + §4 audit list + voice audit surface-scan report).
-- `CLAUDE.md §7.5` — forcing artifact definitions.
+- `CLAUDE.md §7.4` — mode-to-mode gate table; the editing → formatting gate and its four forcing artifacts (revision report + §4 audit list + citation-payload re-read list + voice audit surface-scan report).
+- `CLAUDE.md §7.5` — forcing artifact definitions, including the citation-payload re-read list emitted at Pass 2.
 - `CLAUDE.md §7.6` — precedence rules, canonical §10 ID list, direct-quotations carve-out.
 - `CLAUDE.md §8` — citation log + three moments; Moment 1 schema loaded at step 0.
 - `docs/modes/writing.md#never-list` — full §10 never-list prose, density list, restructure guidance. Read at pass 6.
@@ -313,7 +354,8 @@ FORCING ARTIFACTS (required at handoff):
 - `docs/modes/writing.md §Phase 1 — Plan` — prose-plan artifact; Pass 0's `0-plan` sub-check audits against this if available.
 - `docs/modes/research.md` — target for pass 1 unresolved-ID handoff and pass 2 source-drift handoff.
 - `docs/modes/refining.md` — target for structural-deviation handoff at step 5 AND Pass 0 outline-level flags.
-- `docs/modes/formatting.md` — target of editing → formatting handoff; consumes all three forcing artifacts.
+- `docs/modes/formatting.md` — target of editing → formatting handoff; consumes all four forcing artifacts.
+- `~/.claude/citations/schema.md` §Verification fields — `exact_quote` and `surrounding_context` are the ground truth the Pass 2 payload re-read reads against.
 - `~/.claude/citations/schema.md` §Staleness — `retrieved_at` staleness threshold used at pass 2.
 - `~/.claude/citations/schema.md` §Annotation — annotation shape referenced by the annotated-bib variant.
 - `config/voice.md` — voice rules loaded at step 0 and applied in passes 6, 7, and 9; `## Worked paragraphs` consumed by `0-plan` check; `## Cut patterns` consumed by pass 7.

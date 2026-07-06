@@ -82,6 +82,8 @@ If the plan's sentence count or roles do not fit the content you need to convey,
 
 8. **Self-audit.** After drafting all paragraphs, produce the `### Self-audit` block (see `## Output contract`). Label every sentence with its role. If any sentence diverges from the plan (role, count, order), flag it in `### Flags` rather than hiding the divergence. Honesty in self-audit is load-bearing: the parent runs its own §10 / voice / paraphrase checks on your returned prose, but the self-audit is how the parent knows which checks to prioritize.
 
+   Your self-audit is structural: it maps emitted sentences to planned roles, closures, and openers. It does not re-read your paraphrases against `exact_quote`, so a self-audit with no flags is not evidence that the prose is faithful to the source. (In the 2026-07-04 session a clean structural self-audit passed prose calling a cross-sectional study "the most developed longitudinal program"; the parent's independent payload re-read at editing time caught the drift, not the self-audit.) Do not treat "no flags" as content-fidelity clearance.
+
 9. **Return.** Return the section's prose block, followed by `### Self-audit`, followed by `### Flags` (may be empty: `none`). Do not write any file. Do not call any tool other than Read (and only if you genuinely need to reference a file the dispatcher did not inline — this should be rare, because the dispatcher's job is to inline everything).
 
 ## Per-sentence discipline
