@@ -385,7 +385,7 @@
   | outlining → refining | outline sign-off from TestUser | — |
   | refining → writing | §4 audit emitted with zero unresolved `flagged` rows; refined outline approved by TestUser | §4 audit list |
   | writing → editing | TestUser-initiated only | — |
-  | editing → formatting | revision report + §4 audit clean (zero unresolved flagged rows) + voice audit surface-scan report emitted (empty or `mark as intentional`) + paste target named | revision report, §4 audit list, voice audit surface-scan report |
+  | editing → formatting | revision report + §4 audit clean (zero unresolved flagged rows) + citation-payload re-read list clean (zero unresolved `fidelity-drift` rows) + voice audit surface-scan report emitted (empty or `mark as intentional`) + paste target named | revision report, §4 audit list, citation-payload re-read list, voice audit surface-scan report |
   | formatting → (terminal) | pre-flight pass (all checks in `docs/modes/formatting.md` step 2) | inline-quote-threshold list |
   | * → research (auto) | §3 self-correction trigger OR unsourced-claim detected | — |
   | research → (return to invoking mode) | source logged per §8 Moment 1 OR TestUser accepts the gap | — |
@@ -403,6 +403,7 @@
   A gate that requires an artifact has not been satisfied unless the artifact is emitted in the same turn as the claim of completion. An audit or check that doesn't produce its artifact has not been run.
   
   - **§4 audit list.** One row per citation audited, each row recording pass/`flagged: <reason>` for items 1, 2, 4, 5, 6 of §4. Emitted by `[refining]` on outline and `[editing]` pass 2 on prose. Gates: `refining → writing`, `editing → formatting`.
+  - **Citation-payload re-read list.** One row per citation instance in the edited prose, each row carrying `@id`, the draft sentence verbatim, the `exact_quote` span (verbatim from the log, plus the relevant `surrounding_context` span where scope hinges on neighbors), and a verdict of `fidelity-hold` or `fidelity-drift: <what the prose asserts that the payload does not support>`. Read off the log payload independently, not from any upstream self-audit, prose plan, or drafter report; the quoted spans make each verdict spot-checkable. Emitted by `[editing]` Pass 2; it is the evidence the §4 items 1, 2, 4, 5 verdicts are read from. A `fidelity-drift` row closes the gate until resolved. Gate: `editing → formatting`.
   - **Scope-delta list.** Entries of the form `{trigger_observed, original_scope, proposed_scope_change, load_bearing?}`. Emitted by §6 scope-growth soft-stop in any mode. Empty iff no drift observed in the triggering turn. A triggered self-check that doesn't produce the list has not run.
   - **Inline-quote-threshold list.** Per flagged span: `{paragraph_ref, quote_word_count, threshold, @id (if attached)}`. Emitted by `[formatting mode]` pre-flight step 2. Empty list required on zero hits. Gate: formatting pre-flight.
   - **Revision report.** Emitted by `[editing mode]` Pass 0: one row per sub-check (0a purpose/main-claim, 0b sub-claim support, 0c outline correspondence at paragraph level, 0d transition evaluation, 0e paragraph one-job), each recording `pass` or `flagged: <reason>`. Plus an optional `0-plan: <pass | flagged | n/a>` row for prose-plan correspondence when a plan exists. Gate: `editing → formatting`.
@@ -496,7 +497,7 @@
   
   Voice rules live in `config/voice.md`. Every rule in `config/voice.md` is load-bearing for per-author calibration; category-level prohibitions that apply regardless of voice live in §10. If `config/voice.md` is missing, stop and ask TestUser to run `sourced switch voice <name>` rather than proceeding with guessed rules.
   
-  Voice application procedure — when to read `config/voice.md`, which rules apply at outline vs write vs edit time, how voice interacts with §10 (including the `## §10 exemptions` mechanism): `docs/modes/writing.md` §Voice and `docs/modes/editing.md` §Voice audit (pass 8). Read on mode entry.
+  Voice application procedure — when to read `config/voice.md`, which rules apply at outline vs write vs edit time, how voice interacts with §10 (including the `## §10 exemptions` mechanism): `docs/modes/writing.md` §Voice and `docs/modes/editing.md` §Voice audit (pass 9). Read on mode entry.
   
   **Adding a new library voice from writing samples.** Dispatch the `voice-extractor` subagent via the Agent tool. Full dispatch template, iron-rule caller-side check procedure, and post-dispatch steps: `docs/voice-extractor.md`. Read that file before dispatching; the subagent runs in isolated context and the dispatch has several load-bearing parameters. Voice-extractor is **not a mode** and does **not** auto-trigger; it fires only on explicit TestUser request.
   
