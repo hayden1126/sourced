@@ -8,17 +8,18 @@ This file is different from [GitHub Issues](https://github.com/hayden1126/source
 
 ## Next queue
 
-What gets picked up next, ranked. A thread absent from this table is by definition not next. Reranking evidence: the 2026-07-04 paper session, the first full end-to-end real use (see the comments on [#51](https://github.com/hayden1126/sourced/issues/51) and [#29](https://github.com/hayden1126/sourced/issues/29)).
+What gets picked up next, ranked. A thread absent from this table is by definition not next. Reranking evidence: the 2026-07-04 paper session (the first full end-to-end real use) and the 2026-07-06 spike spec ([`docs/archive/specs/2026-07-06-staged-reader-review-and-voice-v2-design.md`](docs/archive/specs/2026-07-06-staged-reader-review-and-voice-v2-design.md), PR #68).
 
 | # | Thread | Why now | Serves | Effort | Where |
 |---|--------|---------|--------|--------|-------|
-| 1 | Combined #51 + #29 design spike: staged-reader-review primitive, voice-v2 questions, critic architecture | The staged reader review is the only mechanism that has ever caught a joint-level failure; a working prototype exists in the user skill library; the spike's fork recommendation gates four catalog entries | voice preservation, synthesis integrity | L | [#51](https://github.com/hayden1126/sourced/issues/51), [#29](https://github.com/hayden1126/sourced/issues/29) |
-| 2 | Citation-payload critic: independent per-sentence re-read of each paraphrase against `exact_quote`, emitted as a forced artifact | Caught a real content contradiction the drafter's structural self-audit passed clean; fork-independent, so it does not wait for the spike | synthesis integrity | M | [#29](https://github.com/hayden1126/sourced/issues/29), split half |
-| 3 | Issue #34 re-inventory plus an option-C consistency test | Guards the multi-file bundle edits rows 1 and 2 will make; cheap now that CI exists | ergonomics | S | [#34](https://github.com/hayden1126/sourced/issues/34) |
-| 4 | `sourced doctor` deeper diagnostics | Field-evidenced: the 2026-07-03 `~/.claude` wipe and the #61 stale-version incident are exactly its use cases | ergonomics | S | Python CLI phase 5 tail, below |
-| 5 | Slack between design blocks: `extract-pdf-highlights`, after its containment-aware rewording | S-effort citation-integrity skill that collides with nothing above | citation integrity | S | Skills, below |
+| 1 | Staged-reader-review bundle skill plus the review artifact schema | Spec merged; mostly codification of a field-proven prototype; immediately upgrades every future paper session and carries the #33 option-2 record | synthesis integrity | M | [#70](https://github.com/hayden1126/sourced/issues/70) |
+| 2 | The `sourced voice` code arc: corpus index, then the blinded author-verification A/B | The fork decision landed in-repo; the A/B delivers the Track B fidelity score and stopping rule, and resolves Direct-API offload candidate 1 | voice preservation | M each | [#71](https://github.com/hayden1126/sourced/issues/71), [#72](https://github.com/hayden1126/sourced/issues/72) |
+| 3 | `sourced doctor` deeper diagnostics | Field-evidenced: the 2026-07-03 `~/.claude` wipe and the #61 stale-version incident are exactly its use cases | ergonomics | S | Python CLI phase 5 tail, below |
+| 4 | Slack between blocks: `extract-pdf-highlights`, after its containment-aware rewording | S-effort citation-integrity skill that collides with nothing above | citation integrity | S | Skills, below |
 
-Rows 1 and 2 draw on the same session evidence but are different primitives; the spike's decomposed-issue list may reorder this queue.
+Sequenced behind the queue, not in it: [#73](https://github.com/hayden1126/sourced/issues/73) (passage retrieval) activates when a real paper session exists to validate against; [#74](https://github.com/hayden1126/sourced/issues/74) (extraction v2 intake) rides with the first extractor touch after #71.
+
+2026-07-06 round shipped: the #51+#29 design spike (PR #68, #51 closed, follow-ups #70-#74), the citation-payload critic (PR #75, #29 closed), and the #34 consistency suite plus pass-count drift fix (PRs #69 and #75, #34 closed).
 
 ## Reading the entries
 
@@ -118,11 +119,11 @@ Tight word limits, specific formatting per conference. Ships as a brief-template
 New modes that extend integrity discipline into adjacent workflows.
 
 ### Peer review mode
-**Effort:** M · **Status:** open · **Serves:** synthesis integrity · **Trigger:** act when the staged-reader-review primitive design lands (Next queue row 1).
+**Effort:** M · **Status:** open · **Serves:** synthesis integrity · **Trigger:** act when a real draft needs a rubric review once the primitive skill ([#70](https://github.com/hayden1126/sourced/issues/70)) ships.
 
 Rubric-driven review of a complete draft. Reshaped 2026-07-06: the 2026-07-04 session discredited the original whole-draft single-reviewer shape. All three blind readers converged on defects (cumulative reader load, term-introduction order, argument strands left unjoined across sections) that whole-document review smooths over; only staged section-by-section reading caught them. Evidence on [#29](https://github.com/hayden1126/sourced/issues/29) and [#51](https://github.com/hayden1126/sourced/issues/51).
 
-This entry is now the rubric-persona consumer of the staged-reader-review primitive the #51 + #29 spike designs: personas parameterized by rubric axis (argument clarity, evidence adequacy, counterargument handling, methods rigor, writing quality), each running the staged sectional protocol, producing a durable numbered review. Differs from red-team as before: durable output artifact, runs against a complete draft, rubric rather than ad-hoc counterpoints.
+This entry is the rubric-persona consumer of the staged-reader-review primitive designed in the 2026-07-06 spec (§3, §9): personas parameterized by rubric axis (argument clarity, evidence adequacy, counterargument handling, methods rigor, writing quality), each running the staged sectional protocol, producing a durable numbered review. Differs from red-team as before: durable output artifact, runs against a complete draft, rubric rather than ad-hoc counterpoints.
 
 ### Revision mode
 **Effort:** M · **Status:** open · **Serves:** synthesis integrity · **Trigger:** act when a real paper enters a revision round with reviewer comments in hand.
@@ -131,7 +132,7 @@ Respond to editor / reviewer comments with citation-linked revisions. Given a re
 
 Schema extension: revision-cycle log tracking which comment maps to which change.
 
-Design note (2026-07-06): the natural input is the staged-reader-review primitive's per-section artifact, not freeform comment text; this entry is the primitive's third consumer, so its comment-to-change schema waits for that artifact schema. The 2026-07-04 session produced the first real review artifact (unanimous minor revision, deliberately unapplied).
+Design note (2026-07-06): the natural input is the staged-reader-review primitive's per-section artifact, not freeform comment text; this entry is the primitive's third consumer, and the artifact schema it will consume now exists (spec §3.3, stable RR/RN ids, shipping with [#70](https://github.com/hayden1126/sourced/issues/70)). The 2026-07-04 session produced the first real review artifact (unanimous minor revision, deliberately unapplied).
 
 ### Primary-source research
 **Effort:** M · **Status:** open · **Serves:** citation integrity · **Trigger:** act when a real project cites an archival, interview, or field source.
@@ -230,7 +231,7 @@ The CLI decomposition shipped in four phases between 2026-04-22 and 2026-04-25: 
 Phase 3 spike (mode bodies as skills, spec OQ6) is tracked in [issue #36](https://github.com/hayden1126/sourced/issues/36).
 
 ### Per-agent model selection via `sourced model`
-**Effort:** S · **Status:** scoping · **Serves:** ergonomics · **Trigger:** none yet; the voice-extractor half is gated on the #51 spike's fork recommendation.
+**Effort:** S · **Status:** scoping · **Serves:** ergonomics · **Trigger:** none yet; the voice half lands as CLI config in the `sourced voice` arc (spec §6.3, the config-overlay shape this entry already favored), leaving only the non-voice agents for this entry.
 
 Each shipped agent (`source-finder`, `voice-extractor`, `sourced-helper`, `prose-drafter`) currently has a hardcoded `model:` in its frontmatter. A `sourced model <agent> <model>` subcommand would let the user override the model per agent — e.g., switch `source-finder` from `sonnet` to `opus` for a more expensive but more thorough research run, or downgrade `sourced-helper` to `haiku` for cost.
 
@@ -241,7 +242,7 @@ Each shipped agent (`source-finder`, `voice-extractor`, `sourced-helper`, `prose
 Option 2 is the favored read; needs spec work before commit.
 
 ### Scoped subagents (private to `sourced` commands)
-**Effort:** M · **Status:** scoping · **Serves:** mode discipline · **Trigger:** act when the #51 spike's fork recommendation lands.
+**Effort:** M · **Status:** scoping · **Serves:** mode discipline · **Trigger:** resolved by migration; the entry retires when `sourced voice extract` ships (spec §6.3: extraction's long-run home is the CLI, which removes the agent from the dispatcher's tree; no interim scoping work).
 
 Some shipped agents (notably `voice-extractor`) shouldn't auto-trigger when Claude Code's agent dispatcher decides a "voice corpus extraction" sounds relevant to general academic-researcher work. They're meant to run only when explicitly invoked by a sourced subcommand (`sourced voice extract`, not yet shipped). Today every agent in `~/.claude/agents/` is fair game for the dispatcher.
 
@@ -264,7 +265,7 @@ Phase 1 shipped `sourced-helper.md` — a `haiku` agent that knows the CLI surfa
 Decision TBD per item; ship in order of observed friction.
 
 ### Direct-API offload for deterministic workflows
-**Effort:** L · **Status:** scoping · **Serves:** ergonomics · **Trigger:** candidate 1 gated on the #51 spike's fork recommendation; candidates 2 and 3 none yet.
+**Effort:** L · **Status:** scoping · **Serves:** ergonomics · **Trigger:** candidate 1 resolved: `sourced voice ab` ([#72](https://github.com/hayden1126/sourced/issues/72)) is the direct-API path (spec §6.3); candidates 2 and 3 none yet.
 
 Today `sourced` is a Python CLI for file mirroring + validation; the cognitive work happens inside Claude Code where `academic-researcher` dispatches subagents. Some workflows are well-defined enough to offload to direct Anthropic API calls inside the CLI — deterministic Python flow control, tuned prompts, cheaper models per step (`haiku` for boring extraction, `sonnet` for judgment, `opus` only when warranted). Candidates:
 
@@ -274,7 +275,7 @@ Today `sourced` is a Python CLI for file mirroring + validation; the cognitive w
 
 **Architecture decision TBD.** The hybrid is the leading read: keep Claude Code as the substrate for interactive writing/research, use direct API for narrow workflows where flow control matters more than dispatcher creativity. Tradeoff: each migrated workflow needs careful prompt engineering plus golden tests, and the codebase grows a runtime dependency on the `anthropic` SDK. Don't rebuild Claude Code wholesale — a separate platform is months of effort that competes with `sourced` rather than complementing it.
 
-Candidate 1 note (2026-07-06): the prompt sequence it would script is the v1 extractor, and #51's diagnosis is that v1 is broken by construction (decomposition: rules and atomized exemplars are marginals; voice lives in the joint distribution). Automating it would fossilize the failure. The spike's fork recommendation decides this candidate.
+Candidate 1 note (updated 2026-07-06 post-spike): resolved. The spike went in-repo, and [#72](https://github.com/hayden1126/sourced/issues/72) implements the A/B judges as direct API calls from the CLI with pinned prompts, which is this candidate in its corrected v2 shape (the original idea, scripting the v1 extractor, would have fossilized the decomposition failure #51 diagnosed).
 
 ### Cross-project citation reuse
 **Effort:** L · **Status:** open · **Serves:** citation integrity · **Trigger:** act when a merge-time overlap check reports a DOI or `source_hash` shared with a prior project's citation log.
@@ -331,7 +332,7 @@ Touch points. §7.4 transition table (new allowed transitions: `babble → plan`
 No schema change to the citation log; no new gate. The artifact format is the only new schema, and it's writer-facing markdown rather than runtime-parsed JSON.
 
 ### Claude Code Agent Teams integration
-**Effort:** M–L · **Status:** open · **Serves:** ergonomics · **Trigger:** none yet; angles 2 and 3 are evaluated inside the staged-reader-review primitive's implementation design, not as their own thread.
+**Effort:** M–L · **Status:** open · **Serves:** ergonomics · **Trigger:** none yet. The 2026-07-06 spec evaluated the substrate for the primitive and did not adopt it (one-shot subagents with lockstep messaging and parent-owned consolidation; spec §3.5); angle 1 is the only open angle.
 
 Claude Code's Agent Teams feature (`TeamCreate` / `TeamDelete` / `SendMessage` tool family) lets subagents coordinate as a structured team — shared context or explicit handoffs rather than one-shot dispatch-and-consolidate. Current `sourced` subagents (`source-finder`, `voice-extractor`) are one-shot utilities; the main agent dispatches, receives a report, and does the merging itself.
 
