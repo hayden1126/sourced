@@ -45,7 +45,7 @@ Branch / worktree: fix-pass-renumber-drift (one commit ahead of main; PR pending
 
 ## In flight
 
-- One thing in flight: the fix-pass-renumber-drift branch (this commit) awaits push + PR + merge. After merge: re-run `sourced global-install` (voices and the sourced-helper agent changed; both are mirrored surfaces), then delete the branch.
+- One thing in flight: PR #76 (fix-pass-renumber-drift, two commits: the drift sweep + a syrupy CI pin), CI green, awaits Hayden's merge. After merge: re-run `sourced global-install` (voices and the sourced-helper agent changed; both are mirrored surfaces), then delete the branch.
 - Everything else at a clean boundary: all three thread PRs merged (#68, #69, #75), issues #29/#34/#51 closed, follow-ups #70-#74 filed, ROADMAP queue re-ranked, worktrees removed and all feature branches (local and remote) deleted, ~/.claude mirror current as of e0b49cd.
 - Next concrete step after this branch merges: ROADMAP §Next queue row 1 (#70, the staged-reader-review bundle skill).
 
@@ -58,6 +58,7 @@ Branch / worktree: fix-pass-renumber-drift (one commit ahead of main; PR pending
 
 - Verification target: `pytest` (336 tests: 267 pre-round + 66 consistency + 2 critic wiring + 1 un-xfailed pass-count case; parity needs pandoc 3.1.3 on PATH), `ruff check src tests`, `python3 -m sourced check --invariants` (11/11). All green at the round tip `db84050`.
 - Worktree gotcha (bit this round, will bite again): the editable install's `.pth` pins the `sourced` package to ~/sourced, so in a git worktree, in-process pytest and `--snapshot-update` read the MAIN checkout's bundle. Prefix `PYTHONPATH=<worktree>/src` for every pytest/invariants/snapshot run in a worktree. The consistency suite is immune (anchors at `__file__`), but golden regen and `test_check_invariants_exits_4_on_any_failure` are not.
+- Dependency ceiling (block 3): syrupy pinned `>=4.6,<5.5` in pyproject. 5.5.0 (released 2026-07-06) registers the xdist-only `pytest_testnodedown` hook unconditionally and pluggy INTERNALERRORs at collection without pytest-xdist; reproduced in an isolated venv. Lift the ceiling when a fixed release lands (rationale comment sits on the pin).
 - Renumbering lesson (block 3): renumbering editing passes rippled into 8 bundle files beyond the 3 the #75 doc-fix caught. The consistency suite guards fragments and counts, not cross-file pass-number references. If pass numbers ever move again, grep the whole bundle for `pass [0-9]` / `Pass [0-9]`; consider a consistency-registry entry for pass-number references if it happens twice.
 - Session commit range for the batch: `3e60806..20d0d65` (PRs #62-#66, 16 commits including merges); STATUS/housekeeping commits sit above the tip.
 - CI actions are current: checkout@v7, setup-python@v6, ruff-action@v4.0.0 (exact pin; no moving v4 major tag upstream yet).
