@@ -1,6 +1,6 @@
 # Voice rules
 
-Voice calibration tuned to {{USER}}'s academic writing. The shipped `academic` voice encodes academic-register defaults for tone (stance, sentence shape, stance markers), structure (connectedness, pacing, argument building), and dimension (analogies, punctuation habits, formatting). Copy to a new name and edit for a different author within the academic register; for a different register (casual, technical, journalistic, narrative) start from the matching shipped skeleton instead. Applies in `[outlining mode]` (Paragraph Flow at outline time), `[writing mode]` (Phase 1 plan + Phase 2 `prose-drafter` dispatch), and `[editing mode]` (Pass 0 Revision + Pass 8 voice audit).
+Voice calibration tuned to {{USER}}'s academic writing. The shipped `academic` voice encodes academic-register defaults for tone (stance, sentence shape, stance markers), structure (connectedness, pacing, argument building), and dimension (analogies, punctuation habits, formatting). Copy to a new name and edit for a different author within the academic register; for a different register (casual, technical, journalistic, narrative) start from the matching shipped skeleton instead. Applies in `[outlining mode]` (Paragraph Flow at outline time), `[writing mode]` (Phase 1 plan + Phase 2 `prose-drafter` dispatch), and `[editing mode]` (Pass 0 Revision + Pass 9 voice audit).
 
 Read this file in full on entry to any of those modes; do not work from memory of prior sessions. The rules are load-bearing for the project's voice-preservation promise.
 
@@ -264,7 +264,7 @@ Direct quotations follow CLAUDE.md §10 *Direct quotations* and §4 *Quote verba
 
 ## Cut patterns
 
-Named failure modes observed in AI-drafted prose that `voice-extractor` and `[editing mode]` Pass 8 explicitly flag. Each pattern carries a provisional-name tag; mining `failures_dir` pairs (`<stem>.ai.md` / `<stem>.edit.md`) populates author-specific instances into this section at extraction time. Shipped patterns are register-default; the extractor adds or removes based on corpus evidence.
+Named failure modes observed in AI-drafted prose that `voice-extractor` and `[editing mode]` Pass 7 explicitly flag. Each pattern carries a provisional-name tag; mining `failures_dir` pairs (`<stem>.ai.md` / `<stem>.edit.md`) populates author-specific instances into this section at extraction time. Shipped patterns are register-default; the extractor adds or removes based on corpus evidence.
 
 Canonical patterns (shipped defaults):
 

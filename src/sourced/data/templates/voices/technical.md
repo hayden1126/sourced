@@ -1,6 +1,6 @@
 # Voice rules
 
-Voice calibration tuned to {{USER}}'s technical writing — documentation, API references, procedural guides, RFCs, postmortems. Encodes technical-register defaults under the phase-3 sub-register contract: tone (imperative, precise, minimal ornament), structure (one-step-per-sentence, parallel form, bulleted sequences), dimension (diagrams-not-analogies, precise punctuation, code-block-friendly formatting). Applies in `[outlining mode]` (Paragraph Flow at outline time), `[writing mode]` (Phase 1 plan + Phase 2 `prose-drafter` dispatch), and `[editing mode]` (Pass 0 Revision + Pass 8 voice audit).
+Voice calibration tuned to {{USER}}'s technical writing — documentation, API references, procedural guides, RFCs, postmortems. Encodes technical-register defaults under the phase-3 sub-register contract: tone (imperative, precise, minimal ornament), structure (one-step-per-sentence, parallel form, bulleted sequences), dimension (diagrams-not-analogies, precise punctuation, code-block-friendly formatting). Applies in `[outlining mode]` (Paragraph Flow at outline time), `[writing mode]` (Phase 1 plan + Phase 2 `prose-drafter` dispatch), and `[editing mode]` (Pass 0 Revision + Pass 9 voice audit).
 
 Read this file in full on entry to any of those modes; do not work from memory of prior sessions. The rules are load-bearing for the project's voice-preservation promise.
 

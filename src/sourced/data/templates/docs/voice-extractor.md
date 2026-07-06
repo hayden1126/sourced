@@ -83,5 +83,5 @@ If voice-extractor is run again with `overwrite: true`, both consumers transpare
 - `CLAUDE.md §9` — voice rules; when `config/voice.md` is read by each mode.
 - `CLAUDE.md §10` and `CLAUDE.md §7.6` — §10 canonical IDs; how `config/voice.md`'s `## §10 exemptions` section overrides the never-list.
 - `docs/modes/writing.md` §Voice and §Phase 2 dispatch — voice application + `prose-drafter` invocation.
-- `docs/modes/editing.md` §Voice audit (Pass 8) and §Cut-pattern audit (Pass 7) — voice-derived audits on the draft.
+- `docs/modes/editing.md` §Voice audit (Pass 9) and §Cut-pattern audit (Pass 7) — voice-derived audits on the draft.
 - `~/.claude/agents/prose-drafter.md` — the isolated drafter subagent dispatched from `[writing mode]` Phase 2.

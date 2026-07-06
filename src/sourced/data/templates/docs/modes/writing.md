@@ -379,7 +379,7 @@ In all other cases, paraphrase and run the §4 audit against the paraphrase usin
 
 When a paragraph trips either flag, identify which quotes pass items (a)–(d) and convert the rest to paraphrase. Powerful-feel and vivid phrasing are not items (e) and (f); they are the rationalization for over-quoting.
 
-**[editing mode] pass 7** re-applies this test to the finished prose and references this section by anchor. The 4-item test is the same at both write time and edit time; catching over-quoting at write time is cheaper.
+**[editing mode] pass 8** re-applies this test to the finished prose and references this section by anchor. The 4-item test is the same at both write time and edit time; catching over-quoting at write time is cheaper.
 
 ---
 
@@ -395,7 +395,7 @@ When a paragraph trips either flag, identify which quotes pass items (a)–(d) a
 
 **Interaction with §10.** §10 > `config/voice.md` prose (manifest §7.6, precedence rule 2). A voice rule that conflicts with a §10 pattern has no runtime effect unless `config/voice.md` carries a `## §10 exemptions` bullet naming the canonical ID. Inline voice prose — even prose that says "em dashes are acceptable in this voice" — is not an exemption unless it appears as a bullet under `## §10 exemptions` with a canonical ID. Conflict surfacing: if `config/voice.md` and §10 conflict without an exemption, surface the conflict on first occurrence.
 
-**At write time, voice rules are generative**, not just corrective: draft sentences toward the voice, not against §10. The edit-time voice audit (editing.md pass 8) is corrective; the write-time discipline is to build sentences that already fit both. `prose-drafter` inherits this discipline via the inlined rule sections + cut patterns; the parent's post-dispatch per-sentence audit is the safety net.
+**At write time, voice rules are generative**, not just corrective: draft sentences toward the voice, not against §10. The edit-time voice audit (editing.md pass 9) is corrective; the write-time discipline is to build sentences that already fit both. `prose-drafter` inherits this discipline via the inlined rule sections + cut patterns; the parent's post-dispatch per-sentence audit is the safety net.
 
 ---
 
@@ -464,7 +464,7 @@ The block-quote convention is style-agnostic at source-prose level. [formatting 
 - `CLAUDE.md §7.6` — precedence rules, canonical §10 ID list, direct-quotations carve-out.
 - `CLAUDE.md §8` — citation three-moment system; Moment 2 in-prose IDs (this file's §In-prose IDs).
 - `docs/modes/refining.md` — predecessor; the §4 audit list this mode requires at entry.
-- `docs/modes/editing.md` — successor; Pass 0 revision audits drafts against plans; pass 6 reads `docs/modes/writing.md#never-list`; pass 7 reads `docs/modes/writing.md §Paraphrase default`.
+- `docs/modes/editing.md` — successor; Pass 0 revision audits drafts against plans; pass 6 reads `docs/modes/writing.md#never-list`; pass 8 reads `docs/modes/writing.md §Paraphrase default`.
 - `docs/modes/research.md` — target for stale-byline and unsourced-claim auto-triggers fired during writing.
 - `config/voice.md` — voice rules loaded at step 2; `## §10 exemptions` bullets read at step 3; `## Worked paragraphs`, `## Cut patterns`, `## Sub-register taxonomy` consumed by Phase 2 dispatch.
 - `~/.claude/agents/prose-drafter.md` — the subagent dispatched in Phase 2; its input contract is the dispatch shape in step 14.

@@ -2,11 +2,16 @@
 
 > Living state. Update at the end of every working block so a fresh session can resume from here after `/clear`.
 
-Last updated: 2026-07-06 (worktree round shipped: spike, payload critic, consistency suite; integration folded)
-Branch / worktree: main
+Last updated: 2026-07-06 (handoff: drift audit run, pass-renumber ripple fixed on fix-pass-renumber-drift)
+Branch / worktree: fix-pass-renumber-drift (one commit ahead of main; PR pending Hayden's go)
 
 ## Done
 
+- 2026-07-06 (block 3) handoff drift audit (3 read-only auditors over the session's range 58f37dc..e0b49cd) and fix batch on branch fix-pass-renumber-drift:
+  - Caught from today's own actions: two ROADMAP entry back-references still pointing at pre-re-rank queue rows (extract-pdf-highlights row 5, doctor row 4; now 4 and 3), and the STATUS cleanup-pending line below (cleanup had already run).
+  - Caught pre-existing, exposed by the #75 pass renumbering: formatting.md still gated on TWO forcing artifacts while citing §7.4 (now four, all named); writing.md, all six voice skeletons (snapshotted, goldens regenerated), voice-extractor.md, annotated-bib.md + CLAUDE.d overlay, and sourced-helper.md all carried pre-renumber pass numbers (voice audit 8 -> 9, quote-density test 7 -> 8, annotated-bib skip/reduce 7/8 -> 8/9, "8-pass" -> ten-pass). academic.md's cut-pattern header was also the lone Pass 8 outlier vs its five Pass 7 siblings.
+  - Left alone by convention: archived specs' historical pass mentions; the 2026-07-06 spec's point-in-time "Next queue row 2" pointer.
+  - Verified: 336 passed, ruff clean, invariants 11/11, .ambr delta = exactly the 7 voice-file lines.
 - 2026-07-06 (block 2) parallel worktree round, three threads dispatched to agent sessions after PR #67, all merged same day:
   - PR #68 (spike-51-29): the combined #51+#29 design spike, `docs/archive/specs/2026-07-06-staged-reader-review-and-voice-v2-design.md`. Staged-reader-review primitive designed once (protocol codified from the prototype skill, `<draft>.reader-review.md` artifact schema with stable S/RR/RN ids, post-format gate placement, #33 option-2 record as pre-flight, one-shot subagents not Teams). Two-track fidelity measure (Track A reader experience; Track B blinded same-author A/B with control-pair floor and a stopping rule). Representation: rules keep constraints, generation grounds in retrieved register-matched passages. Fork recommendation: in-repo, `sourced voice` subcommand family; resolves Direct-API candidate 1. #51 closed; follow-ups filed as #70-#74 (#70 bundle skill first per spec §12).
   - PR #75 (payload-critic): citation-payload re-read list, a fourth gate-blocking forcing artifact at editing Pass 2 (draft sentence + verbatim exact_quote side by side, fidelity-hold/drift verdicts; §4 items 1/2/4/5 verdicts now read from it). In-mode placement chosen over a dispatched critic agent (fork documented in the PR; dispatched variant stays the follow-up if primed reading ships a miss). prose-drafter.md caveat: structural self-audit "no flags" is not content-fidelity clearance. Second commit fixed the pass-count drift #34 found (MODES.md and editing.md to ten passes 0-9, CLAUDE.md voice cross-ref to pass 9, consistency xfail removed). #29 closed.
@@ -40,8 +45,9 @@ Branch / worktree: main
 
 ## In flight
 
-- Nothing half-done. Clean boundary: all three thread PRs merged (#68, #69, #75), issues #29/#34/#51 closed, follow-ups #70-#74 filed, ROADMAP queue re-ranked, mirror refresh in this block. Worktree/branch cleanup pending Hayden's approval.
-- Next concrete step: ROADMAP §Next queue row 1 (#70, the staged-reader-review bundle skill).
+- One thing in flight: PR #76 (fix-pass-renumber-drift, two commits: the drift sweep + a syrupy CI pin), CI green, awaits Hayden's merge. After merge: re-run `sourced global-install` (voices and the sourced-helper agent changed; both are mirrored surfaces), then delete the branch.
+- Everything else at a clean boundary: all three thread PRs merged (#68, #69, #75), issues #29/#34/#51 closed, follow-ups #70-#74 filed, ROADMAP queue re-ranked, worktrees removed and all feature branches (local and remote) deleted, ~/.claude mirror current as of e0b49cd.
+- Next concrete step after this branch merges: ROADMAP §Next queue row 1 (#70, the staged-reader-review bundle skill).
 
 ## Blocked / decisions needed
 
@@ -52,6 +58,8 @@ Branch / worktree: main
 
 - Verification target: `pytest` (336 tests: 267 pre-round + 66 consistency + 2 critic wiring + 1 un-xfailed pass-count case; parity needs pandoc 3.1.3 on PATH), `ruff check src tests`, `python3 -m sourced check --invariants` (11/11). All green at the round tip `db84050`.
 - Worktree gotcha (bit this round, will bite again): the editable install's `.pth` pins the `sourced` package to ~/sourced, so in a git worktree, in-process pytest and `--snapshot-update` read the MAIN checkout's bundle. Prefix `PYTHONPATH=<worktree>/src` for every pytest/invariants/snapshot run in a worktree. The consistency suite is immune (anchors at `__file__`), but golden regen and `test_check_invariants_exits_4_on_any_failure` are not.
+- Dependency ceiling (block 3): syrupy pinned `>=4.6,<5.5` in pyproject. 5.5.0 (released 2026-07-06) registers the xdist-only `pytest_testnodedown` hook unconditionally and pluggy INTERNALERRORs at collection without pytest-xdist; reproduced in an isolated venv. Lift the ceiling when a fixed release lands (rationale comment sits on the pin).
+- Renumbering lesson (block 3): renumbering editing passes rippled into 8 bundle files beyond the 3 the #75 doc-fix caught. The consistency suite guards fragments and counts, not cross-file pass-number references. If pass numbers ever move again, grep the whole bundle for `pass [0-9]` / `Pass [0-9]`; consider a consistency-registry entry for pass-number references if it happens twice.
 - Session commit range for the batch: `3e60806..20d0d65` (PRs #62-#66, 16 commits including merges); STATUS/housekeeping commits sit above the tip.
 - CI actions are current: checkout@v7, setup-python@v6, ruff-action@v4.0.0 (exact pin; no moving v4 major tag upstream yet).
 - Golden snapshot policy unchanged: skeletons/voices/styles/CLAUDE.md are snapshotted, mode bodies and agents are single-source. Skeleton edits regen via `pytest tests/cli/golden/ --snapshot-update`, folded into the same commit (held in #57).
