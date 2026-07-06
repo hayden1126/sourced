@@ -225,6 +225,26 @@ def test_i5_fails_on_orphan_artifact():
     assert any("Orphan artifact" in f.message for f in findings)
 
 
+# ----- citation-payload critic wiring (issue #29 evidence 1) -----
+
+def test_citation_payload_reread_declared_as_forcing_artifact():
+    """The citation-payload critic's output is a §7.5 forcing artifact."""
+    artifacts = parse_forcing_artifacts(inv._load_bundled_template())
+    assert "Citation-payload re-read list" in artifacts
+
+
+def test_citation_payload_reread_gates_editing_to_formatting():
+    """The re-read list is required at the editing → formatting gate, alongside
+    the revision report, §4 audit list, and voice audit surface-scan report."""
+    gates = parse_gate_table(inv._load_bundled_template())
+    editing_gate = next(
+        (g for g in gates if g["Transition"] == "editing → formatting"), None
+    )
+    assert editing_gate is not None, "editing → formatting gate row missing"
+    # §7.4 gate cells reference §7.5 artifacts in lowercase (house convention).
+    assert "citation-payload re-read list" in editing_gate["Forcing artifact"].lower()
+
+
 # ----- I6 user-addition markers -----
 
 def test_i6_passes_on_shipped_bundle():
