@@ -17,7 +17,7 @@ The primary agent (academic-researcher) lives in each project's `CLAUDE.md`. Fou
 - **Mode discipline.** Twelve cognitive modes, one announced per transition. Gates between stages require explicit approval; silence is not an override.
 - **Defense-in-depth for iron rules.** Category-level voice prohibitions ("no em dashes") are checked in three places: inside `voice-extractor` at generation time, inside `academic-researcher` at caller-return time, and inside the `sourced` CLI at render time. Any one layer missing doesn't ship a broken voice.
 - **Per-voice exemption syntax with install-time validation.** §10's Never list carries stable IDs; a voice library file can exempt specific rules via `## §10 exemptions` bullets. The `sourced` CLI validates the IDs against the canonical set extracted from CLAUDE.md and aborts on typos. Silence is not permission.
-- **Bundled skills for extraction tasks.** `browser-reader-extract` connects to a user-launched Chrome and extracts text with `[p. N]` page markers from DRM'd browser readers (OverDrive Read proven; Kindle Cloud Reader, Scribd extendable via a documented pattern). Installed into `~/.claude/skills/` by default; writers who never need it pay zero setup cost.
+- **Bundled skills.** `browser-reader-extract` connects to a user-launched Chrome and extracts text with `[p. N]` page markers from DRM'd browser readers (OverDrive Read proven; Kindle Cloud Reader, Scribd extendable via a documented pattern). `staged-reader-review` runs blind persona readers over a rendered draft section by section, in lockstep, and consolidates their ratings and trip points into a durable review artifact. Installed into `~/.claude/skills/` by default; writers who never need them pay zero setup cost.
 
 ## Prerequisites
 
@@ -104,7 +104,7 @@ For deeper troubleshooting (pipx gotchas, conda interference, port-22-blocked ne
 - [`docs/MODES.md`](./docs/MODES.md) — modes reference + end-to-end workflow walkthrough + gate discipline.
 - [`docs/VOICES.md`](./docs/VOICES.md) — voice system, `voice-extractor` usage, iron rules, defense-in-depth, §10 exemption syntax, direct-quote carve-out.
 - [`docs/STYLES.md`](./docs/STYLES.md) — citation styles, paste targets (including the `word` pandoc+CSL pipeline), on-demand style references, `[formatting mode]`, authoring a custom style.
-- [`docs/SKILLS.md`](./docs/SKILLS.md) — shipped skills (`browser-reader-extract`), when to reach for them, how to author new ones.
+- [`docs/SKILLS.md`](./docs/SKILLS.md) — shipped skills (`browser-reader-extract`, `staged-reader-review`), when to reach for them, how to author new ones.
 
 ## License
 

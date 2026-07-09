@@ -239,6 +239,7 @@ FORCING ARTIFACT (pre-flight):
 
 **Allowed transitions (from formatting):**
 - Formatting is the terminal stage. On successful step 8 report, the session typically returns to `[collaborative mode]` for review or next steps. No formal mode announcement is required for returning to collaborative unless {{USER}} directs otherwise.
+- After the step 8 report, {{USER}} may invoke the `staged-reader-review` skill from `[collaborative mode]` on the rendered output: blind persona readers read it section by section, and the review lands as `<draft>.reader-review.md` per the skill's artifact schema. Recommended before a multi-section draft leaves {{USER}}'s hands. The review never self-triggers and does not block formatting; formatting stays the terminal pipeline stage.
 - → `[editing mode]` when {{USER}} chooses to return to editing (inline quote hits, rendered-citation conversion, structural prose fix needed). Announce `Switching to [editing mode].`
 - → `[research mode]` when step 2 stale-entry resolution requires re-fetch and re-verify for one or more entries. Announce `Switching to [research mode] (invoked from [formatting mode]).` Return to formatting after re-verify completes.
 
