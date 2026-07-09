@@ -44,6 +44,7 @@ One end-to-end session, showing where modes announce and where the gates fire:
 8. `[writing mode]` turns outline into prose, applying voice rules, §10 generation signatures, and the paraphrase default. The draft lands at `<draft>.md` with Pandoc citation IDs (`[@id]`, `@id`).
 9. `[editing mode]` runs the ten-pass audit. The handoff gate blocks on any unresolved §10 voice-audit hits; you must "address or mark intentional" before format. Silence ≠ override.
 10. `[formatting mode for <target>]` (e.g., `google-docs`, `plain-markdown`, `word`) renders `<draft>.md` into `<draft>.<target>.md`. Source prose is unchanged; the formatted sibling carries resolved `(Author Year, page)` citations and a References list per `config/style.md`. The `word` target (supported by all 5 shipped styles via pandoc+CSL) additionally runs pandoc + CSL and emits a `<draft>.docx` submission binary.
+11. Optionally, before the draft goes out, you ask for a staged reader review: the `staged-reader-review` skill (see [SKILLS.md](./SKILLS.md)) runs blind persona readers over the rendered sibling section by section and writes `<draft>.reader-review.md`.
 
 At any point, `[red team]` and `[babble]` are available for stress-testing or unstructured thinking. `[non-academic]` escapes the framework for one turn.
 
