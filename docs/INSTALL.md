@@ -235,7 +235,7 @@ sourced/
 ├── docs/
 │   ├── INSTALL.md               # this file
 │   ├── MODES.md
-│   ├── SKILLS.md                # shipped skills (e.g. browser-reader-extract)
+│   ├── SKILLS.md                # shipped skills (e.g. browser-reader-extract, staged-reader-review)
 │   ├── VOICES.md
 │   └── STYLES.md
 ├── src/

@@ -46,7 +46,7 @@ sourced/
     │   ├── unit/               # Per-module unit tests (170 tests).
     │   ├── integration/        # Subprocess-driven end-to-end tests (58 tests).
     │   └── golden/             # syrupy snapshots for 14 shipped templates.
-    ├── consistency/            # Registry-driven duplication guards (67 tests; one entry per shared fragment, issue #34).
+    ├── consistency/            # Registry-driven duplication guards (73 tests; one entry per shared fragment, issue #34).
     ├── emitter/                # CSL-JSON emitter reference fixtures + well-formedness tests.
     └── parity/                 # 5 styles × 4 paste targets = 20 goldens (the long-lived render parity suite).
 ```
