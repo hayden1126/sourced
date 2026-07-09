@@ -36,6 +36,20 @@ Wrong shape for a skill:
 
 See `~/.claude/skills/browser-reader-extract/SKILL.md` for the full setup and operational walkthrough.
 
+### `staged-reader-review`
+
+**Use when:** a multi-section draft is about to leave the writer's hands and whole-document review would smooth over per-section pacing problems, undefined terms, and scope drift. In a sourced project, run it after `[formatting mode]` completes, on the rendered output (`<draft>.gdocs.md`, `<draft>.plain.md`), invoked from `[collaborative mode]`.
+
+**What it does.** N blind reader personas (default 3, at least one outsider to the field) read the rendered draft one section at a time, in lockstep, with no peek ahead. Each writes a reaction, then rates clarity and coherence 1–5 per section on anchored scales; reading is sequential and stateful, so a reader lost early struggles later, and surfacing that cascade is the instrument. The parent consolidates convergent findings (`RR` ids), single-reader notes (`RN` ids), and a fixed three-value verdict (`accept | minor revision | major revision`) into the forced artifact `<draft>.reader-review.md`: a review that produced no file has not run.
+
+**Pre-flight record.** Before reading starts, the skill records in the artifact whether each editing-gate artifact was emitted where `[editing mode]` requires it (`present` or `absent`): the revision report, §4 audit list, citation-payload re-read list, and voice audit surface-scan report at handoff, plus the three pass-5 lists in their pass turns. It records; it does not halt (issue [#33](https://github.com/hayden1126/sourced/issues/33)'s option-2 record, one gate downstream).
+
+**Field evidence.** The prototype run on the 2026-07-04 paper session (3 readers, 6 sections) converged on cumulative-load, term-order, and unjoined-strand defects that the editing-mode audit, which works sentence by sentence, never flags.
+
+**Scope and limits.** Read-only over the rendered sibling; produces exactly one artifact; never self-triggers and never blocks formatting. Measures reader experience, not authorial voice.
+
+See `~/.claude/skills/staged-reader-review/SKILL.md` for the full protocol and artifact schema.
+
 ## Authoring a new skill
 
 A skill is a directory under `src/sourced/data/skills/<name>/` with at minimum a `SKILL.md`. The model discovers the skill via its frontmatter when Claude Code loads `~/.claude/skills/`:

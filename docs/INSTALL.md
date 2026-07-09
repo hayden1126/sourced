@@ -197,7 +197,7 @@ Global files (installed once, shared across projects) and per-project files (ren
 | `~/.claude/voice/<name>.md` | voice library (shipped + custom voices available for project selection) |
 | `~/.claude/style/<name>.md` | style library (shipped + custom styles) |
 | `~/.claude/style/<name>/<asset>` | per-style asset dir (CSL file, reference.docx, on-demand reference tables like `classical-abbreviations.md`) |
-| `~/.claude/skills/<name>/` | skill library; Claude Code auto-discovers skills globally (currently ships `browser-reader-extract`) |
+| `~/.claude/skills/<name>/` | skill library; Claude Code auto-discovers skills globally (currently ships `browser-reader-extract` and `staged-reader-review`) |
 | `<project>/CLAUDE.md` | per-project; the academic-researcher dispatch manifest (managed block) |
 | `<project>/docs/modes/<name>.md` | per-project; mode bodies read on mode entry (deployed by install/update) |
 | `<project>/CLAUDE.d/` | per-project; project-type overlay drop-ins |
@@ -261,10 +261,12 @@ sourced/
 │           │   └── csl-json-emitter.md
 │           ├── filters/         # Pandoc Lua filters (promoted from templates/filters/)
 │           ├── skills/
-│           │   └── browser-reader-extract/
-│           │       ├── SKILL.md
-│           │       ├── package.json
-│           │       └── overdrive.mjs
+│           │   ├── browser-reader-extract/
+│           │   │   ├── SKILL.md
+│           │   │   ├── package.json
+│           │   │   └── overdrive.mjs
+│           │   └── staged-reader-review/
+│           │       └── SKILL.md
 │           └── templates/
 │               ├── CLAUDE.md
 │               ├── CLAUDE.d/            # project-type overlay drop-ins + README

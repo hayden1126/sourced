@@ -32,7 +32,7 @@ sourced/
 │       └── data/               # Bundled, read-only at runtime; mirrored to ~/.claude/ by global-install.
 │           ├── agents/         # Subagent definitions: source-finder, voice-extractor, sourced-helper, prose-drafter.
 │           ├── citations/      # Citation log schema + CSL-JSON emitter spec.
-│           ├── skills/         # Skill library (e.g. browser-reader-extract).
+│           ├── skills/         # Skill library (browser-reader-extract, staged-reader-review).
 │           ├── filters/        # Pandoc Lua filters (promoted from templates/filters in PR 3).
 │           └── templates/
 │               ├── CLAUDE.md   # Primary agent operating instructions: always-on dispatch manifest (§7).
