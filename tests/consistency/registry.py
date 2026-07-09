@@ -111,6 +111,11 @@ def count_editing_passes() -> int:
     return len({int(n) for n in re.findall(r"\*\*Pass (\d+)", text)})
 
 
+def skill_names() -> tuple[str, ...]:
+    """Basenames of the shipped skill directories."""
+    return tuple(sorted(d.name for d in SKILLS.iterdir() if d.is_dir()))
+
+
 def node_min_version() -> str:
     """Minimum Node version declared in the skill's package.json engines field."""
     pkg = (SKILLS / "browser-reader-extract" / "package.json").read_text(encoding="utf-8")
@@ -330,6 +335,17 @@ DERIVED_SETS: tuple[DerivedSet, ...] = (
         (
             ARCH,
             ROADMAP,
+        ),
+    ),
+    DerivedSet(
+        "shipped-skill-names",
+        skill_names(),
+        "src/sourced/data/skills/* directory names",
+        (
+            DOCS / "SKILLS.md",
+            DOCS / "INSTALL.md",
+            README,
+            ARCH,
         ),
     ),
 )
