@@ -12,12 +12,13 @@ What gets picked up next, ranked. A thread absent from this table is by definiti
 
 | # | Thread | Why now | Serves | Effort | Where |
 |---|--------|---------|--------|--------|-------|
-| 1 | Staged-reader-review bundle skill plus the review artifact schema | Spec merged; mostly codification of a field-proven prototype; immediately upgrades every future paper session and carries the #33 option-2 record | synthesis integrity | M | [#70](https://github.com/hayden1126/sourced/issues/70) |
-| 2 | The `sourced voice` code arc: corpus index, then the blinded author-verification A/B | The fork decision landed in-repo; the A/B delivers the Track B fidelity score and stopping rule, and resolves Direct-API offload candidate 1 | voice preservation | M each | [#71](https://github.com/hayden1126/sourced/issues/71), [#72](https://github.com/hayden1126/sourced/issues/72) |
-| 3 | `sourced doctor` deeper diagnostics | Field-evidenced: the 2026-07-03 `~/.claude` wipe and the #61 stale-version incident are exactly its use cases | ergonomics | S | Python CLI phase 5 tail, below |
-| 4 | Slack between blocks: `extract-pdf-highlights`, after its containment-aware rewording | S-effort citation-integrity skill that collides with nothing above | citation integrity | S | Skills, below |
+| 1 | The `sourced voice` code arc: corpus index, then the blinded author-verification A/B | The fork decision landed in-repo; the A/B delivers the Track B fidelity score and stopping rule, and resolves Direct-API offload candidate 1 | voice preservation | M each | [#71](https://github.com/hayden1126/sourced/issues/71), [#72](https://github.com/hayden1126/sourced/issues/72) |
+| 2 | `sourced doctor` deeper diagnostics | Field-evidenced: the 2026-07-03 `~/.claude` wipe and the #61 stale-version incident are exactly its use cases | ergonomics | S | Python CLI phase 5 tail, below |
+| 3 | Slack between blocks: `extract-pdf-highlights`, after its containment-aware rewording | S-effort citation-integrity skill that collides with nothing above | citation integrity | S | Skills, below |
 
 Sequenced behind the queue, not in it: [#73](https://github.com/hayden1126/sourced/issues/73) (passage retrieval) activates when a real paper session exists to validate against; [#74](https://github.com/hayden1126/sourced/issues/74) (extraction v2 intake) rides with the first extractor touch after #71.
+
+2026-07-09 shipped: the staged-reader-review bundle skill plus review artifact schema (PR #77, #70 closed; the #33 option-2 record now lands in the skill's pre-flight, one gate downstream, and #33 stays open on its own trigger).
 
 2026-07-06 round shipped: the #51+#29 design spike (PR #68, #51 closed, follow-ups #70-#74), the citation-payload critic (PR #75, #29 closed), and the #34 consistency suite plus pass-count drift fix (PRs #69 and #75, #34 closed).
 
@@ -119,7 +120,7 @@ Tight word limits, specific formatting per conference. Ships as a brief-template
 New modes that extend integrity discipline into adjacent workflows.
 
 ### Peer review mode
-**Effort:** M · **Status:** open · **Serves:** synthesis integrity · **Trigger:** act when a real draft needs a rubric review once the primitive skill ([#70](https://github.com/hayden1126/sourced/issues/70)) ships.
+**Effort:** M · **Status:** open · **Serves:** synthesis integrity · **Trigger:** act when a real draft needs a rubric review; the primitive skill shipped ([#70](https://github.com/hayden1126/sourced/issues/70), PR #77).
 
 Rubric-driven review of a complete draft. Reshaped 2026-07-06: the 2026-07-04 session discredited the original whole-draft single-reviewer shape. All three blind readers converged on defects (cumulative reader load, term-introduction order, argument strands left unjoined across sections) that whole-document review smooths over; only staged section-by-section reading caught them. Evidence on [#29](https://github.com/hayden1126/sourced/issues/29) and [#51](https://github.com/hayden1126/sourced/issues/51).
 
@@ -132,7 +133,7 @@ Respond to editor / reviewer comments with citation-linked revisions. Given a re
 
 Schema extension: revision-cycle log tracking which comment maps to which change.
 
-Design note (2026-07-06): the natural input is the staged-reader-review primitive's per-section artifact, not freeform comment text; this entry is the primitive's third consumer, and the artifact schema it will consume now exists (spec §3.3, stable RR/RN ids, shipping with [#70](https://github.com/hayden1126/sourced/issues/70)). The 2026-07-04 session produced the first real review artifact (unanimous minor revision, deliberately unapplied).
+Design note (2026-07-06): the natural input is the staged-reader-review primitive's per-section artifact, not freeform comment text; this entry is the primitive's third consumer, and the artifact schema it will consume now exists (spec §3.3, stable RR/RN ids, shipped with [#70](https://github.com/hayden1126/sourced/issues/70) in PR #77). The 2026-07-04 session produced the first real review artifact (unanimous minor revision, deliberately unapplied).
 
 ### Primary-source research
 **Effort:** M · **Status:** open · **Serves:** citation integrity · **Trigger:** act when a real project cites an archival, interview, or field source.
@@ -177,7 +178,7 @@ Knowledge-base integration. Citation IDs resolve to wiki-links in the destinatio
 The `browser-reader-extract` pattern extends to several other extraction tasks. Each is a new directory under `src/sourced/data/skills/` with its own `SKILL.md`.
 
 ### `extract-pdf-highlights`
-**Effort:** S · **Status:** open · **Serves:** citation integrity · **Trigger:** queued (Next queue row 4).
+**Effort:** S · **Status:** open · **Serves:** citation integrity · **Trigger:** queued (Next queue row 3).
 
 Pull the user's highlights and annotations from an annotated PDF into the citation log as paste-entry candidates. Solves the "I already read and annotated this" gap: the writer has done the reading and wants the quotes plus page numbers extracted without retyping. Prerequisite: `pdftotext` plus annotation parsing.
 
@@ -217,7 +218,7 @@ Cross-cutting features that touch multiple modes.
 **Shipped (history).** Per-project directory restructure, 2026-04-24 via PR #26: projects group into `config/`, `sources/`, `samples/`, `failures/`, with auto-migration on `sourced update` and invariant I11 guarding against flat-path regressions. Design spec: [`docs/archive/specs/2026-04-24-per-project-directory-restructure-design.md`](docs/archive/specs/2026-04-24-per-project-directory-restructure-design.md).
 
 ### Python CLI (`sourced`) — phase 5 tail
-**Effort:** S–M each · **Status:** phases 1–4 shipped (PRs #19–#26); phase 5 open · **Serves:** ergonomics · **Trigger:** `sourced doctor` diagnostics queued (Next queue row 3); the remaining items act when the matching friction artifact lands.
+**Effort:** S–M each · **Status:** phases 1–4 shipped (PRs #19–#26); phase 5 open · **Serves:** ergonomics · **Trigger:** `sourced doctor` diagnostics queued (Next queue row 2); the remaining items act when the matching friction artifact lands.
 
 The CLI decomposition shipped in four phases between 2026-04-22 and 2026-04-25: phase 1 ported `install.sh` to the Python CLI (PRs #19–#23), phase 2 extracted the CLAUDE.md dispatch manifest + externalized mode bodies (PR #24), phase 3 shipped the voice pipeline (PR #25), phase 4 the per-project directory restructure (PR #26). Design specs: [`docs/archive/specs/2026-04-21-sourced-cli-decomposition-design.md`](./docs/archive/specs/2026-04-21-sourced-cli-decomposition-design.md), [`docs/archive/specs/2026-04-23-claude-md-manifest-extraction-design.md`](./docs/archive/specs/2026-04-23-claude-md-manifest-extraction-design.md).
 

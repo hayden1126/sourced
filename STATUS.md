@@ -2,10 +2,17 @@
 
 > Living state. Update at the end of every working block so a fresh session can resume from here after `/clear`.
 
-Last updated: 2026-07-06 (session closed: PR #76 merged, post-merge steps done, clean boundary)
+Last updated: 2026-07-09 (session closed: PR #77 merged, post-merge steps done, clean boundary)
 Branch / worktree: main
 
 ## Done
+
+- 2026-07-09 staged-reader-review bundle skill, issue #70 (PR #77 merged, CI green, #70 closed):
+  - `src/sourced/data/skills/staged-reader-review/SKILL.md` codifies the field prototype per spike spec §3.2-3.5: persona-neutral protocol intact, the forced artifact `<draft>.reader-review.md` (stable S/RR/RN ids, ratings table, fixed three-value verdict), the #33 option-2 pre-flight, and gate placement (post-format, from `[collaborative mode]`, never self-triggers, never blocks formatting). formatting.md Exit Gates gained the pointer; docs sweep hit SKILLS.md (new entry), README (two spots), INSTALL.md (two spots), ARCHITECTURE.md, MODES.md (optional step 11). No CLAUDE.md touch, zero golden delta.
+  - Flagged deviation, in the PR body: the pre-flight records all four current handoff forcing artifacts (the spec's five-item list predates #75's citation-payload re-read list) plus the three pass-5 lists, each checked where editing.md requires it (handoff turn vs pass turns). The pre-commit diff review caught that pass-5 lists are per-pass emissions, not handoff artifacts; recording them as handoff-turn items would have marked compliant runs `absent`.
+  - Tests: `shipped-skill-names` derived set (disk-globbed from the skills dir, so future skills are auto-guarded; mirrors SKILLS.md, INSTALL.md, README, ARCHITECTURE) plus `tests/consistency/test_skill_frontmatter.py` (SKILL.md present, frontmatter parses, name matches dir, description non-empty; covers browser-reader-extract retroactively). 342 tests total.
+  - Dual-home decision (Hayden's call): the skill lives in BOTH the bundle and `~/dotclaude/skills/` (his shareable no-sourced distribution). The `~/.claude/skills/staged-reader-review` symlink into dotclaude STAYS as the sync channel: global-install writes through it; with identical content the write-through is clean, and a future bundle change surfaces as a dotclaude diff to commit. Identical content written to dotclaude this session (commit in dotclaude is Hayden's, still pending).
+  - Post-merge: `sourced global-install` run (write-through verified clean); `sourced update` run in `~/papers/cross-sex-empathy` (exit-gate pointer deployed; managed CLAUDE.md block refreshed from its pre-#75 state, user-additions preserved, old file at `CLAUDE.md.sourced.bak`); #33 commented (record shipped, issue stays open on its own trigger); queue renumbered with a back-ref sweep (extract-pdf-highlights row 4 to 3, doctor row 3 to 2); branch deleted.
 
 - 2026-07-06 (block 3) handoff drift audit (3 read-only auditors over the session's range 58f37dc..e0b49cd) and fix batch on branch fix-pass-renumber-drift:
   - Caught from today's own actions: two ROADMAP entry back-references still pointing at pre-re-rank queue rows (extract-pdf-highlights row 5, doctor row 4; now 4 and 3), and the STATUS cleanup-pending line below (cleanup had already run).
@@ -45,17 +52,19 @@ Branch / worktree: main
 
 ## In flight
 
-- Nothing half-done. Clean boundary: the 2026-07-06 session's five PRs all merged (#67 restructure, #68 spike, #69 consistency suite, #75 payload critic, #76 drift sweep + syrupy pin), issues #29/#34/#51 closed, follow-ups #70-#74 filed, worktrees and all feature branches deleted, ~/.claude mirror current as of the #76 merge (4fe8884), 336 tests + 11/11 invariants green on main.
-- Next concrete step: ROADMAP §Next queue row 1 (#70, the staged-reader-review bundle skill).
+- Nothing half-done. Clean boundary: PR #77 merged, #70 closed, post-merge steps done (global-install, paper-project update, #33 comment, queue renumber), branch deleted, ~/.claude mirror current as of the #77 merge (265e46a), 342 tests + 11/11 invariants green on main.
+- One pending action outside this repo: Hayden commits the updated `skills/staged-reader-review/SKILL.md` in `~/dotclaude` (content already written, byte-identical to the bundle).
+- Next concrete step: ROADMAP §Next queue row 1 (#71 then #72, the `sourced voice` code arc: corpus index, then the blinded author-verification A/B).
 
 ## Blocked / decisions needed
 
-- None. The next-thread ranking lives in ROADMAP §Next queue (single source; it changes in the same commit as the Status change that justifies it). Open design calls deferred with their entries: peer-review rubric parameterization waits on #70; Track B judge cost ceiling gets set in #72's implementation review.
+- None. The next-thread ranking lives in ROADMAP §Next queue (single source; it changes in the same commit as the Status change that justifies it). Open design calls deferred with their entries: peer-review rubric parameterization now unblocked (#70 shipped) but waits for a real draft needing a rubric review; Track B judge cost ceiling gets set in #72's implementation review.
 - Observation-logging lesson for any future session: modes in flow do not log at-the-moment; evidence lands at gates (merge, format, post-review). #30/#31/#33 sections came back empty for this reason, not because nothing happened. This is now encoded in ROADMAP's Trigger vocabulary.
 
 ## Notes for next session
 
-- Verification target: `pytest` (336 tests: 267 pre-round + 66 consistency + 2 critic wiring + 1 un-xfailed pass-count case; parity needs pandoc 3.1.3 on PATH), `ruff check src tests`, `python3 -m sourced check --invariants` (11/11). All green at the round tip `db84050`.
+- Verification target: `pytest` (342 tests: 336 pre-round + 4 shipped-skill-names mirrors + 2 skill-frontmatter cases; parity needs pandoc 3.1.3 on PATH), `ruff check src tests`, `python3 -m sourced check --invariants` (11/11). All green at the #77 merge `265e46a`.
+- Stray untracked `uv.lock` sits at the repo root (not from this session's work; predates it or landed via a tool run). Decide: gitignore it, commit it, or delete it.
 - Worktree gotcha (bit this round, will bite again): the editable install's `.pth` pins the `sourced` package to ~/sourced, so in a git worktree, in-process pytest and `--snapshot-update` read the MAIN checkout's bundle. Prefix `PYTHONPATH=<worktree>/src` for every pytest/invariants/snapshot run in a worktree. The consistency suite is immune (anchors at `__file__`), but golden regen and `test_check_invariants_exits_4_on_any_failure` are not.
 - Dependency ceiling (block 3): syrupy pinned `>=4.6,<5.5` in pyproject. 5.5.0 (released 2026-07-06) registers the xdist-only `pytest_testnodedown` hook unconditionally and pluggy INTERNALERRORs at collection without pytest-xdist; reproduced in an isolated venv. Lift the ceiling when a fixed release lands (rationale comment sits on the pin).
 - Renumbering lesson (block 3): renumbering editing passes rippled into 8 bundle files beyond the 3 the #75 doc-fix caught. The consistency suite guards fragments and counts, not cross-file pass-number references. If pass numbers ever move again, grep the whole bundle for `pass [0-9]` / `Pass [0-9]`; consider a consistency-registry entry for pass-number references if it happens twice.
