@@ -2,10 +2,14 @@
 
 > Living state. Update at the end of every working block so a fresh session can resume from here after `/clear`.
 
-Last updated: 2026-07-09 (session closed: PR #77 merged, post-merge steps done, clean boundary)
-Branch / worktree: main
+Last updated: 2026-08-15 (Path 1 section-scoped editing implemented on branch editing-section-scoped; not merged)
+Branch / worktree: editing-section-scoped
 
 ## Done
+
+- 2026-08-15 editing context-scaling, Path 1 (branch `editing-section-scoped`, not merged): refactored `[editing mode]` so the local (section-scoped) passes run per section in a new `section-editor` subagent fed only that section's prose and its `@id` citation entries, plus one thin whole-draft global pass (payload-stripped) for the cross-section checks (0a, cross-section proper-noun, terminology, definition-before-use, seams, argument threading). The ten `**Pass N` labels, the four forcing-artifact names, and the gate are unchanged; only scope changed (verified: I5 names intact, `editing-passes` count still 10, I8 sections in order). Five commits: consistency guard `shipped-agent-names`; `agents/section-editor.md` + README/ARCHITECTURE/INSTALL registration; the `editing.md` rewrite; the manifest §7.5 emitter phrasing + golden regen; the design spec + ROADMAP (Path 1 active, Paths 2-3 logged) + plan.
+  - Evidence: `docs/archive/specs/2026-08-15-editing-context-scaling-design.md` (diagnosis + four-thread research synthesis + three-path decision + design), `docs/archive/plans/2026-08-15-editing-context-scaling-plan.md`. Diagnosis measured on `~/writing/<project>`: old editing co-located the whole draft (~3.3K tok) + whole log (~21.7K tok) across all ten passes plus the Pass-2 re-emit, and the log grows linearly with paper size; under Path 1 each `section-editor` holds only its unit's citations (max ~2.9K tok, mean ~2K) plus a discarded fixed voice bundle, and the global pass sees ~3.3K tok of prose. Per-unit payload does not grow with total length.
+  - Verification: 345/345 pytest + 11/11 invariants + ruff green **in a clean checkout / worktree**. In the main checkout, `test_i10_fails_on_bare_string_return` spuriously fails because the `~/sourced -> ~/code/sourced` move is still queued in `pending-cc-migration.tsv` (unrun), so the editable install resolves the package via the stale path and `inspect.getsource` misreads. Not a code defect; fixed by running `~/hq/pending-cc-migration.sh` from a plain shell.
 
 - 2026-07-09 staged-reader-review bundle skill, issue #70 (PR #77 merged, CI green, #70 closed):
   - `src/sourced/data/skills/staged-reader-review/SKILL.md` codifies the field prototype per spike spec §3.2-3.5: persona-neutral protocol intact, the forced artifact `<draft>.reader-review.md` (stable S/RR/RN ids, ratings table, fixed three-value verdict), the #33 option-2 pre-flight, and gate placement (post-format, from `[collaborative mode]`, never self-triggers, never blocks formatting). formatting.md Exit Gates gained the pointer; docs sweep hit SKILLS.md (new entry), README (two spots), INSTALL.md (two spots), ARCHITECTURE.md, MODES.md (optional step 11). No CLAUDE.md touch, zero golden delta.
@@ -52,9 +56,10 @@ Branch / worktree: main
 
 ## In flight
 
-- Nothing half-done. Clean boundary: PR #77 merged, #70 closed, post-merge steps done (global-install, paper-project update, #33 comment, queue renumber), branch deleted, ~/.claude mirror current as of the #77 merge (265e46a), 342 tests + 11/11 invariants green on main.
-- One pending action outside this repo: the maintainer commits the updated `skills/staged-reader-review/SKILL.md` in `~/dotfiles` (content already written, byte-identical to the bundle).
-- Next concrete step: ROADMAP §Next queue row 1 (#71 then #72, the `sourced voice` code arc: corpus index, then the blinded author-verification A/B).
+- Path 1 (section-scoped editing) is implemented and green on branch `editing-section-scoped`, not merged. Five commits, `4c0dbdb..f93e762`. Awaiting review, then merge.
+- Deferred to deployment: `section-editor` ships in the bundle (`src/sourced/data/agents/`) but is not yet in `~/.claude/agents/`; a `sourced global-install` deploys it. Best done after the `~/sourced -> ~/code/sourced` migration is finished (see below), so the mirror writes from the correct path.
+- One pending action outside this repo (carried from before): the maintainer commits the updated `skills/staged-reader-review/SKILL.md` in `~/dotfiles` (content already written, byte-identical to the bundle).
+- Next concrete step: review and merge Path 1. Then ROADMAP §Next queue row 2 (the `sourced voice` code arc, #71 then #72). Path 2 (audit ledger + BM25/MMR retrieval) triggers when a real paper's per-section citation set is still too large after Path 1's by-id fetch.
 
 ## Blocked / decisions needed
 

@@ -16,6 +16,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: astral-sh/ruff-action@v4.0.0 # no moving v4 major tag yet; bump when one appears
         with:
+          version: 0.15.13 # pin the ruff binary: the action installs latest by default, which drifts onto new default rules and reddens pre-existing code. Keep in step with the pyproject dev floor.
           args: check src tests
 
   test:

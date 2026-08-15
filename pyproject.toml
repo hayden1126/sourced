@@ -14,7 +14,7 @@ dependencies = []
 # which pluggy rejects as an unknown hook when pytest-xdist is absent (INTERNALERROR at
 # collection; reproduced 2026-07-06). Lift the ceiling when a fixed release lands.
 test = ["pytest>=8.0", "syrupy>=4.6,<5.5"]
-dev = ["sourced[test]", "ruff>=0.15"]
+dev = ["sourced[test]", "ruff>=0.15,<0.16"]  # cap: 0.16 expands the default ruleset and reddens pre-existing code; CI pins the same in ci.yml. Lift deliberately with a lint cleanup.
 
 [project.scripts]
 sourced = "sourced.cli:main"

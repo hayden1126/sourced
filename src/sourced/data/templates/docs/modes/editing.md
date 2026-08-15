@@ -6,6 +6,8 @@ Editing audits a drafted prose section against the refined outline and prose pla
 
 **Pass 0 (Revision)** is new in phase 3. It audits argument-level coherence — whether the draft serves the thesis, whether sub-claims are supported, whether paragraphs have one job and flow into each other, whether the draft matches the outline and prose plan. Structural deviation still punts back to `[refining mode]` at step 5; Pass 0 runs on drafts that have passed structural check but may still have argument-level problems prose editing alone cannot fix.
 
+**How the passes run (section-scoped).** The ten passes do not run in one context over the whole draft. That co-locates the whole draft and the whole citation log across all ten passes, which overflows the window on a real-length paper and, per the context-rot evidence, degrades the audit even when it fits. Instead the passes run in two places: the **local** passes (per-sentence and per-paragraph audits that need only one section plus that section's own citations) run per section in a fresh `section-editor` subagent, fed only that section's prose and the citation entries for its `@id`s; the **global** passes (the cross-section checks that need a whole-draft view) run once in a thin global pass over the concatenated prose with the citation payloads stripped. The four forcing artifacts are assembled from the per-section local runs plus the global pass and surfaced as one consolidated set at handoff. The ten passes, their order within a section, and the four artifact names are unchanged; only the scope each runs at changes. See `### Pass scope and section-scoped dispatch` for the local/global split and `agents/section-editor.md` for the local-pass contract.
+
 This is a **rigid** mode. The ten-pass order is load-bearing; the handoff to `[formatting mode]` is artifact-gated. §4 in root CLAUDE.md is the iron rule; this body is the operational protocol.
 
 ## When to Use
@@ -31,7 +33,7 @@ This is a **rigid** mode. The ten-pass order is load-bearing; the handoff to `[f
 └───────────────────────────────────────────────────────────────┘
 ```
 
-Editing emits four forcing artifacts at handoff: the **revision report** (Pass 0: purpose/thesis, sub-claim support, outline correspondence, transitions, paragraph one-job); the **§4 audit list** (one row per citation audited, pass/`flagged: <reason>` per §4 items 1, 2, 4, 5, 6); the **citation-payload re-read list** (Pass 2: one row per citation instance carrying the draft sentence, the verbatim `exact_quote` span it rests on, and a `fidelity-hold`/`fidelity-drift` verdict read off the payload with fresh eyes); and the **voice audit surface-scan report** (§10 never-list hits + `config/voice.md` cut-pattern hits + density-list overruns with line references). A handoff turn that does not emit all four has not run the mode. A `[formatting mode]` entry without these artifacts is a gate violation (manifest §7.4). "I ran the audits mentally" is not the same as emitting the lists; the lists **are** the audits. Per-pass lists (proper-noun consistency, paste-artifact, punctuation mechanics) are required in their respective passes; a pass that doesn't produce its list has not run.
+Editing emits four forcing artifacts at handoff: the **revision report** (Pass 0: purpose/thesis, sub-claim support, outline correspondence, transitions, paragraph one-job); the **§4 audit list** (one row per citation audited, pass/`flagged: <reason>` per §4 items 1, 2, 4, 5, 6); the **citation-payload re-read list** (Pass 2: one row per citation instance carrying the draft sentence, the verbatim `exact_quote` span it rests on, and a `fidelity-hold`/`fidelity-drift` verdict read off the payload with fresh eyes); and the **voice audit surface-scan report** (§10 never-list hits + `config/voice.md` cut-pattern hits + density-list overruns with line references). A handoff turn that does not emit all four has not run the mode. A `[formatting mode]` entry without these artifacts is a gate violation (manifest §7.4). "I ran the audits mentally" is not the same as emitting the lists; the lists **are** the audits. Per-pass lists (proper-noun consistency, paste-artifact, punctuation mechanics) are required in their respective passes; a pass that doesn't produce its list has not run. Under section-scoping, each `section-editor` returns its section's rows for these artifacts and the global pass adds the cross-section findings; the parent consolidates them into the four named artifacts for the handoff turn. The gate is unchanged: the consolidated set must be present, with zero unresolved `flagged` or `fidelity-drift` rows across all sections and the global pass.
 
 ## Steps
 
@@ -41,7 +43,7 @@ Editing emits four forcing artifacts at handoff: the **revision report** (Pass 0
 
 2. **Read `config/voice.md` in full.** The voice audit (pass 9) and cut-pattern check (pass 7) operate against the specific rules there; do not run it from memory. If `config/voice.md` is missing, stop and ask {{USER}} to run `sourced switch voice <name>` rather than guessing rules. Phase-3 voice files also carry `## Worked paragraphs` and `## Cut patterns` sections used by Pass 0 (plan-correspondence check) and Pass 7 (cut-pattern audit). If those sections are missing, flag that the voice file is pre-phase-3 and continue; the passes degrade gracefully (Pass 7 runs against shipped-canonical patterns only).
 
-3. **Load the draft's citation log** (`sources/<draft>.citations.json`). Passes 1, 2, 3 cross-reference by id; the log is the source of truth. If the log is missing for a draft with citations, stop and ask {{USER}} — do not reconstruct from memory or from draft text.
+3. **Locate the draft's citation log** (`sources/<draft>.citations.json`). It is the source of truth for passes 1, 2, 3. Do not hold the whole log resident across passes: the parent reads it to pull the entries for a section's `@id`s when it builds that section's `section-editor` bundle (the by-id fetch is what keeps editing context bounded on a long paper), and the global pass runs on a payload-stripped thin view, not the log. If the log is missing for a draft with citations, stop and ask {{USER}}; do not reconstruct from memory or from draft text.
 
 ### Structural deviation (before the pass list)
 
@@ -53,9 +55,34 @@ Editing emits four forcing artifacts at handoff: the **revision report** (Pass 0
 
 5. **On detected deviation, do not fix at prose level.** Announce `Switching back to [refining mode] — structural deviation detected at <heading / paragraph>.` Name the specific mismatch. Refining realigns the outline and prose; re-enter `[editing mode]` only once the outline and prose agree. Structural fixes applied at prose level are expensive; the refining/editing boundary exists to prevent that cost from compounding — bypassing it is the single largest latent cost in the pipeline.
 
+### Pass scope and section-scoped dispatch
+
+The ten passes run in two places. Do not run them in one context over the whole draft.
+
+**Pass scope (local vs global).**
+
+- **Local** (run per section inside the `section-editor` subagent, fed only that section's prose and the citation entries for its `@id`s): Pass 1 (id validation for the section), Pass 2 (the citation-payload re-read list and the §4 audit list, against the section's inlined entries), Pass 3 (partial-entry recheck for the section), Pass 4 (grammar), Pass 5's paste-artifact, punctuation, and within-section proper-noun lists, Pass 6 (§10), Pass 7 (cut patterns), Pass 8 (quote-density), Pass 9 (voice), and Pass 0's per-paragraph sub-checks (0b, 0c, 0d, 0e, and 0-plan).
+- **Global** (run once by the parent in the global pass, over a payload-stripped thin view of the whole draft): Pass 0a (purpose and main-claim against the brief), the structural-deviation check (steps 4-5, already run at the parent), Pass 5's cross-section proper-noun consistency, terminology consistency, definition-before-use order, and the cross-section flow and argument-threading concerns of Pass 0d and Pass 9 that span non-adjacent sections. Forced re-verification of stale or `not visible` entries (Pass 2) is done by the parent, triggered by a `section-editor` flag, because a subagent does not re-open live sources.
+
+**Section dispatch loop (runs the local passes; mirrors `[writing mode]` Phase 2).** For each section, in document order:
+
+- Filter `config/voice.md` rules by the section's register; select 1 or 2 matching worked paragraphs; bundle the matching cut patterns; assemble the §10 never-list plus any `## §10 exemptions`.
+- Fetch citation entries: from `sources/<draft>.citations.json`, pull the full entry for every `@id` in the section (`id`, `source.authors`, `source.title`, `source.year`, `source.url`, `exact_quote`, `surrounding_context`, `reliability_basis`, `retrieval` including `retrieved_at` and `printed_page_observed`, `draft_reference`). Only this section's entries, not the whole log.
+- Stage boundary context: `prev_section_last_sentence`, `next_section_first_sentence`, and the section's `outline_slot`.
+- Dispatch `section-editor` with the bundle (`section_label`, `register_mode`, `section_prose`, `citation_entries`, `voice_rules`, `worked_paragraphs`, `cut_patterns`, `never_list`, `boundary_context`). Tool: `Agent` (subagent).
+- On return, run the parent's independent audit on the edited prose (re-check per sentence against §4, §10, voice, paraphrase default, and Pandoc IDs; treat the `section-editor`'s rows as a hint, not a substitute). Emit `parent-audit: <k> hits` or `parent-audit: no hits`. On a self-audit mismatch, re-dispatch once (budget 2).
+- Act on the returned flags: `rendered-citation-<line>` surfaces to {{USER}} before conversion; `needs-reverify-<id>` triggers the parent's forced re-verification (re-open the source, overwrite `retrieval.verification_trace` and `retrieval.context_trace` from the rendered view, update `retrieved_at`; a character mismatch is a source-drift incident to `[research mode]`); `unresolved-fidelity-drift-<id>` holds the gate until resolved; `structural-deviation-<ref>` switches to `[refining mode]`; `unsourced-claim-<ref>` routes to `[research mode]`.
+- Stitch the edited prose into `<draft>.md` (drop-in, no added separator), and collect the section's artifact rows into the running per-draft artifacts.
+
+**The global pass (runs the global passes).** After every section has run locally:
+
+- Build the thin whole-draft view: concatenate the stitched section prose, keep the `@id` markers, drop the quote payloads. Build the running skeleton: one line per section (its claim in a sentence) plus a term list mapping each technical term to its defining section.
+- Run the global checks against the thin view and skeleton: Pass 0a (purpose and thesis against `config/<draft>.brief.md`); cross-section proper-noun consistency (compare each proper noun across sections to its first occurrence, restore from the log's `exact_quote` on mismatch); terminology consistency; definition-before-use order (flag any term whose first use precedes its defining section); section-boundary seams and cross-section flow; argument threading across non-adjacent sections. Re-descend into a section's full text only at a specifically flagged seam.
+- Fold the global findings into the consolidated artifacts (0a into the revision report, cross-section proper-noun into the voice audit surface-scan, and so on).
+
 ### The ten passes (in order)
 
-Each pass operates on the section being edited. Passes that produce forced-field lists emit them in the running mode's report; an empty list (`no hits`) is a valid emission and required when the pass finds no issues. A pass that does not emit its list has not run.
+The ten passes below are the semantic spec for each audit; `### Pass scope and section-scoped dispatch` above says which run inside the `section-editor` per section and which run in the global pass. Within a section the order is load-bearing and unchanged. Passes that produce forced-field lists emit them (an empty list, `no hits`, is a valid emission and required when the pass finds no issues); a pass that does not emit its list has not run.
 
 6. **Pass 0 — Revision.** Argument-level coherence audit before prose-level passes. The failure mode this pass exists to prevent is silent argument drift: prose that flows at the sentence level but does not serve the thesis, carry its sub-claims, or stay within the outline's planned scope. Pass 0 emits a **revision report** with five sub-checks; each sub-check produces at least one line in the report (even `no hits`).
 
@@ -198,11 +225,11 @@ Each pass operates on the section being edited. Passes that produce forced-field
 
 ### Handoff to formatting
 
-16. **Voice audit surface-scan.** Before asking {{USER}} to advance, run a final surface scan over the edited draft for §10 never-list hits, config/voice.md cut-pattern hits, and density-list overruns (em dashes, "not X but Y" variants, stacked "In this way" / "we come to see" beyond the per-essay budget, quote-density flags, sentence-initial AI adverbs, aphoristic closures, compression-stranded verbs, abstract-nominalization cascades, register-drift flags). **Emit the voice audit surface-scan report** — a list of hits with line references and per-hit context.
+16. **Voice audit surface-scan.** Before asking {{USER}} to advance, run a final surface scan over the edited draft for §10 never-list hits, config/voice.md cut-pattern hits, and density-list overruns (em dashes, "not X but Y" variants, stacked "In this way" / "we come to see" beyond the per-essay budget, quote-density flags, sentence-initial AI adverbs, aphoristic closures, compression-stranded verbs, abstract-nominalization cascades, register-drift flags). **Emit the voice audit surface-scan report** as a list of hits with line references and per-hit context. Consolidate the per-section hits each `section-editor` returned (Passes 6, 7, 8, 9) with the global pass's cross-section hits into this one report.
 
 17. **Blocker discipline on hits.** If the report is non-empty, do not silently ship. Present it as a blocker: `Voice audit found N hits at lines X, Y, Z: [list with context]. Address before format, or mark as intentional?` Force engagement; force a reason. Silence is not an override; `mark as intentional` from {{USER}} is the only override path, and the acknowledgment is logged in the handoff.
 
-18. **Handoff gate.** Once the revision report is emitted (zero unresolved `flagged` rows or explicit `mark as intentional` acknowledgments), the §4 audit list is clean, the citation-payload re-read list is clean (zero unresolved `fidelity-drift` rows), and the voice audit surface-scan report is emitted (empty or explicitly-acknowledged), present the edited section and ask: `Editing is at a place I'd call complete. Ready to format, or more editing?` On `ready`, ask for the paste target. On `more editing`, stay in `[editing mode]`. **Never skip the handoff** — a silent transition to formatting bypasses the artifact gates.
+18. **Handoff gate.** Once the four artifacts are consolidated across all sections and the global pass and are clean (the revision report has zero unresolved `flagged` rows or explicit `mark as intentional` acknowledgments, the §4 audit list is clean, the citation-payload re-read list has zero unresolved `fidelity-drift` rows, and the voice audit surface-scan report is emitted, empty or explicitly-acknowledged), present the edited draft and ask: `Editing is at a place I'd call complete. Ready to format, or more editing?` On `ready`, ask for the paste target. On `more editing`, stay in `[editing mode]`. **Never skip the handoff** — a silent transition to formatting bypasses the artifact gates.
 
 19. **Announce return.** On gate pass with paste target named: `Switching to [formatting mode].` On {{USER}} request for more editing: stay in editing until explicit next-turn handoff. On {{USER}} request to return to refining (e.g., structural issue surfaced mid-edit): `Switching to [refining mode].`
 
@@ -275,12 +302,21 @@ Pre-empt the excuses. Each row is an excuse you might generate and the correct r
 ENTRY:   Switching to [editing mode]. editing <section>.
 
 STEP 0:  Read config/voice.md (full, including ## Worked paragraphs + ## Cut patterns).
-         Load citation log.
+         Citation log = source of truth; fetch a section's @id entries when building its
+         section-editor bundle (do not hold the whole log resident across passes).
 
-STEP 1:  Detect structural deviation from refined outline.
+STEP 1:  Detect structural deviation from refined outline (global).
            Deviation → Switching back to [refining mode]. Halt editing.
 
-PASSES (in order; each pass emits its list):
+DISPATCH (per section, in document order): build the section-editor bundle (section prose,
+  the section's @id entries, register-filtered voice rules, worked paragraphs, cut patterns,
+  never-list, boundary context); dispatch via the Agent tool; run the parent-audit on the
+  return; act on flags; stitch into <draft>.md; collect the section's artifact rows.
+
+PASSES (in order within a section; each pass emits its list):
+  Run locally in section-editor EXCEPT these, which run in the global pass:
+  Pass 0a (purpose/thesis), cross-section proper-noun (Pass 5), terminology +
+  definition-before-use order, and cross-section flow/argument-threading (Pass 0d/9).
   0. Revision.              Lists: 0a purpose / 0b sub-claim / 0c outline-¶ /
                               0d transitions / 0e paragraph one-job / 0-plan.
   1. ID validation.         List: unresolved IDs, rendered-citation regressions.
@@ -301,15 +337,21 @@ PASSES (in order; each pass emits its list):
                             Register-match check (rules' [register:] tags vs section register).
                             (Reduced in annotated-bib projects.)
 
+GLOBAL PASS (after all sections): thin whole-draft view (prose only, @id markers kept,
+  payloads stripped) + skeleton (per-section summary + term list). Run 0a, cross-section
+  proper-noun, terminology, definition-before-use order, seams, argument threading.
+  Fold findings into the consolidated artifacts.
+
 HANDOFF:
+  Consolidate the four artifacts across all sections + the global pass.
   Run voice audit surface-scan. Emit report (list of §10 + cut-pattern + density hits
     with line refs).
   Non-empty → present as blocker: "fix, or mark as intentional?"
-  Clean → present section, ask: "Ready to format, or more editing?"
+  Clean → present draft, ask: "Ready to format, or more editing?"
   On ready, ask paste target.
   On format: Switching to [formatting mode].
 
-FORCING ARTIFACTS (required at handoff):
+FORCING ARTIFACTS (required at handoff; consolidated across all sections + the global pass):
   - Revision report (Pass 0)
   - Citation-payload re-read list (Pass 2)
   - §4 audit list (Pass 2)
