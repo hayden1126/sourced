@@ -189,6 +189,7 @@ Global files (installed once, shared across projects) and per-project files (ren
 | `~/.claude/agents/source-finder.md` | global subagent (parallel source research) |
 | `~/.claude/agents/voice-extractor.md` | global subagent (one-shot voice calibration from samples) |
 | `~/.claude/agents/prose-drafter.md` | global subagent (isolated section drafting during `[writing mode]`) |
+| `~/.claude/agents/section-editor.md` | global subagent (isolated section editing during `[editing mode]`) |
 | `~/.claude/agents/sourced-helper.md` | global subagent (read-only framework Q&A) |
 | `~/.claude/citations/schema.md` | global citation log schema |
 | `~/.claude/filters/` | pandoc Lua filters (smart-quotes) |
@@ -255,6 +256,7 @@ sourced/
 │           │   ├── source-finder.md
 │           │   ├── voice-extractor.md
 │           │   ├── prose-drafter.md
+│           │   ├── section-editor.md
 │           │   └── sourced-helper.md
 │           ├── citations/
 │           │   ├── schema.md
