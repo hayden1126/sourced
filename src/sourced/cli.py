@@ -129,6 +129,11 @@ def _build_parser() -> argparse.ArgumentParser:
         help="run structural invariants I1-I11 against the bundled template + shipped mode bodies",
     )
 
+    # doctor
+    sub.add_parser(
+        "doctor", help="deeper read-only diagnostics + remediation for a broken setup"
+    )
+
     return p
 
 
@@ -170,6 +175,9 @@ def _dispatch(args: argparse.Namespace) -> int:
     if sub == "check":
         from .commands import check
         return check.run(ctx, project=args.project, invariants=args.invariants)
+    if sub == "doctor":
+        from .commands import doctor
+        return doctor.run(ctx)
 
     # No subcommand → print help, exit 2.
     _build_parser().print_help(sys.stderr)

@@ -5,23 +5,16 @@ import re
 import shutil
 import subprocess
 import sys
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
 from ..context import Context
 from ..render import read_template
-from ..ui import ok, err, bold, warn, should_color
+from ..ui import should_color
 from ..validators import iron_rules as iron_rules_validator
 from ..validators import exemptions as exemptions_validator
 from ..validators import invariants as invariants_validator
-
-
-@dataclass(frozen=True)
-class CheckResult:
-    name: str
-    status: Literal["pass", "fail", "warn"]
-    detail: str | None = None
+from ._report import CheckResult, print_section
 
 
 PREREQ_TOOLS = ["pdftotext", "pdfinfo", "pdftoppm", "pandoc", "python3"]
@@ -141,27 +134,6 @@ def check_path_duplicates() -> list[CheckResult]:
     return []
 
 
-def _print_section(name: str, results: list[CheckResult], use_color: bool, verbose: int) -> None:
-    failed = [r for r in results if r.status == "fail"]
-    if not results:
-        return
-    pass_count = sum(1 for r in results if r.status == "pass")
-    if verbose >= 1 or failed:
-        print(bold(f"{name}:", use_color))
-        for r in results:
-            if r.status == "pass":
-                marker = ok("✓", use_color)
-            elif r.status == "warn":
-                marker = warn("!", use_color)
-            else:
-                marker = err("✗", use_color)
-            detail = f" — {r.detail}" if r.detail else ""
-            if verbose >= 1 or r.status != "pass":
-                print(f"  {marker} {r.name}{detail}")
-    else:
-        print(f"{bold(name + ':', use_color)} {pass_count}/{len(results)} passing")
-
-
 def check_invariants() -> list[CheckResult]:
     """Run the manifest-structural invariants I1-I11 against the bundled
     template + shipped mode bodies. Each invariant surfaces as its own
@@ -187,7 +159,7 @@ def run(ctx: Context, project: str | None = None, invariants: bool = False) -> i
     if invariants:
         results = check_invariants()
         if not ctx.quiet:
-            _print_section("Invariants (I1-I11)", results, use_color, ctx.verbose)
+            print_section("Invariants (I1-I11)", results, use_color, ctx.verbose)
             failed = [r for r in results if r.status == "fail"]
             passed = [r for r in results if r.status == "pass"]
             print(f"\n{len(failed)} failed, {len(passed)} passed.")
@@ -209,7 +181,7 @@ def run(ctx: Context, project: str | None = None, invariants: bool = False) -> i
 
     if not ctx.quiet:
         for name, results in sections:
-            _print_section(name, results, use_color, ctx.verbose)
+            print_section(name, results, use_color, ctx.verbose)
         print(f"\n{len(failed)} failed, {len(passed)} passed.")
 
     return 4 if failed else 0
