@@ -28,7 +28,7 @@ sourced --version
 sourced check
 ```
 
-`sourced check` verifies prerequisites (`pdftotext`, `pdfinfo`, `pdftoppm`, `pandoc`, `python3`) and the `~/.claude/` baseline. It does not run sudo or touch system packages.
+`sourced check` verifies prerequisites (`pdftotext`, `pdfinfo`, `pdftoppm`, `pandoc`, `python3`) and the `~/.claude/` baseline. It does not run sudo or touch system packages. If a setup breaks, `sourced doctor` deepens those checks into read-only diagnostics (each with a copy-paste fix command) and covers the pipx gotchas below: conda poisoning, PATH shadowing, and a stale editable-install path.
 
 First-run global setup:
 
