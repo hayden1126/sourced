@@ -60,3 +60,24 @@ def test_strict_escalates_a_warning_to_failure(tmp_home, clean_ansi):
         capture_output=True, text=True, env=env,
     )
     assert strict.returncode == 4
+
+
+def test_mirror_currency_flags_a_deleted_managed_file(tmp_home, clean_ansi):
+    # A fresh install is mirror-current; deleting one shipped file surfaces it as
+    # a missing-managed-file warning (not a hard failure).
+    env = _bootstrap(tmp_home)
+    clean = subprocess.run(
+        [sys.executable, "-m", "sourced", "doctor"],
+        capture_output=True, text=True, env=env,
+    )
+    assert "differ from the bundle" not in clean.stdout
+    assert "not installed" not in clean.stdout
+
+    (tmp_home / ".claude" / "filters" / "smart-quotes.lua").unlink()
+    after = subprocess.run(
+        [sys.executable, "-m", "sourced", "doctor"],
+        capture_output=True, text=True, env=env,
+    )
+    assert after.returncode == 0  # advisory
+    assert "not installed" in after.stdout
+    assert "smart-quotes.lua" in after.stdout

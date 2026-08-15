@@ -6,11 +6,16 @@ actionable finding and prints the exact remediation command. It is strictly
 read-only — it never mutates ~/.claude/, re-runs global-install, or deletes
 anything. Every problem row carries a `Fix:` clause the user can copy-paste.
 
-v1 scope (lean): prerequisites, ~/.claude/ health + wipe detection, the
-editable-install stale-path check (issue #61's mechanism), conda poisoning, and
-PATH shadowing. Orphan-file detection and stale-mirror content-diffing are the
-deferred v2 follow-up; both need an ownership model to separate user-authored
-voices/config from sourced-managed files, which lean v1 does not build.
+Checks: prerequisites, ~/.claude/ health + wipe detection, bundle-mirror currency
+(installed managed files that are stale or missing vs the bundle, plus broken
+symlinks), the editable-install stale-path check (issue #61's mechanism), conda
+poisoning, and PATH shadowing.
+
+Mirror currency is stateless and bundle-derived (see _pipeline.iter_managed_files):
+it only ever inspects paths the bundle ships, so user-authored voices and skills are
+structurally invisible and never flagged. Detecting a *removed*-from-bundle orphan
+would need an install manifest, which sourced deliberately does not keep; that case
+is declined, not deferred.
 
 Each problem row carries a structured `fix` (rendered on its own line), never a
 mutation. Warnings are advisory (exit 0) unless the user passes --strict, which
@@ -26,6 +31,10 @@ from ..context import Context
 from ..ui import ok, should_color
 from ._report import CheckResult, print_section
 from . import check
+from . import _pipeline
+
+
+_MAX_NAMES = 5
 
 
 EXPECTED_SUBDIRS = ("agents", "citations", "voice", "style", "skills", "filters")
@@ -177,6 +186,81 @@ def check_path_shadowing(path_env: str | None = None) -> list[CheckResult]:
     )]
 
 
+def _name_list(files: list[str]) -> str:
+    shown = ", ".join(files[:_MAX_NAMES])
+    extra = len(files) - _MAX_NAMES
+    return f"{shown}, +{extra} more" if extra > 0 else shown
+
+
+def check_mirror_currency(managed=None, claude_home: Path | None = None) -> list[CheckResult]:
+    """Compare each bundle-shipped file against its installed copy in ~/.claude/.
+
+    Stateless and bundle-derived: it only ever looks at paths the bundle ships, so
+    user-authored voices/skills (not in the bundle) are structurally invisible and
+    never flagged. A byte difference means the installed copy is stale (the "old
+    protocol text silently running" case) or was hand-edited; a missing copy means
+    a shipped file was never deployed (e.g. a freshly added agent). Reads follow
+    symlinks, so a skill symlinked through to another repo compares by content.
+    """
+    home = claude_home if claude_home is not None else _claude_home()
+    if not home.exists():
+        return []  # a missing global surface is check_claude_health's to report.
+    pairs = managed if managed is not None else _pipeline.iter_managed_files()
+
+    stale: list[str] = []
+    missing: list[str] = []
+    for relpath, data in pairs:
+        dest = home / relpath
+        if not dest.exists():
+            missing.append(relpath)
+        elif dest.read_bytes() != data:
+            stale.append(relpath)
+
+    results: list[CheckResult] = []
+    if missing:
+        results.append(CheckResult(
+            "mirror completeness", "warn",
+            f"{len(missing)} shipped file(s) not installed: {_name_list(missing)}",
+            fix="sourced global-install",
+        ))
+    if stale:
+        results.append(CheckResult(
+            "mirror currency", "warn",
+            f"{len(stale)} installed file(s) differ from the bundle "
+            f"(stale, or hand-edited): {_name_list(stale)}",
+            fix="sourced global-install",
+        ))
+    if not results:
+        results.append(CheckResult("bundle mirror", "pass", "matches the bundle"))
+    return results
+
+
+def check_dead_symlinks(claude_home: Path | None = None) -> list[CheckResult]:
+    """Flag broken symlinks among the top-level entries of the managed subdirs.
+
+    Only provably-dead links (target gone) are flagged, so a valid user symlink
+    (e.g. a skill linked to another repo) is never touched. Scans one level deep
+    per subdir, which is where the symlink arrangement lives, and never descends
+    through a symlink into a foreign tree.
+    """
+    home = claude_home if claude_home is not None else _claude_home()
+    dead: list[str] = []
+    for sub in EXPECTED_SUBDIRS:
+        d = home / sub
+        if not d.is_dir():
+            continue
+        for p in sorted(d.iterdir()):
+            if p.is_symlink() and not p.exists():
+                dead.append(str(p))
+    if not dead:
+        return []
+    return [CheckResult(
+        "dead symlinks", "warn",
+        f"{len(dead)} broken symlink(s): {_name_list(dead)}",
+        fix="remove or re-point the link(s)",
+    )]
+
+
 def run(ctx: Context) -> int:
     use_color = should_color(ctx.color, sys.stdout)
 
@@ -184,6 +268,7 @@ def run(ctx: Context) -> int:
         ("Prerequisites", check.check_prereqs()),
         ("~/.claude/ writable", check.check_claude_writable()),
         ("~/.claude/ health", check_claude_health()),
+        ("Bundle mirror", check_mirror_currency() + check_dead_symlinks()),
         ("Editable install", check_editable_install()),
     ]
     hygiene = check_conda_poisoning() + check_path_shadowing()

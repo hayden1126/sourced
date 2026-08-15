@@ -154,3 +154,74 @@ def test_path_single_entry_yields_no_rows(tmp_path):
     d.mkdir()
     (d / "sourced").write_text("#!/bin/sh\n", encoding="utf-8")
     assert doctor.check_path_shadowing(path_env=str(d)) == []
+
+
+# ----- check_mirror_currency -----
+
+def test_mirror_currency_all_match(tmp_path):
+    home = tmp_path / ".claude"
+    (home / "agents").mkdir(parents=True)
+    (home / "agents" / "a.md").write_bytes(b"content")
+    results = doctor.check_mirror_currency(
+        managed=[("agents/a.md", b"content")], claude_home=home,
+    )
+    assert len(results) == 1
+    assert results[0].status == "pass"
+
+
+def test_mirror_currency_detects_drift(tmp_path):
+    home = tmp_path / ".claude"
+    (home / "agents").mkdir(parents=True)
+    (home / "agents" / "a.md").write_bytes(b"OLD stale bytes")
+    results = doctor.check_mirror_currency(
+        managed=[("agents/a.md", b"NEW bundle bytes")], claude_home=home,
+    )
+    row = next(r for r in results if r.name == "mirror currency")
+    assert row.status == "warn"
+    assert "agents/a.md" in row.detail
+    assert "global-install" in row.fix
+
+
+def test_mirror_currency_detects_missing(tmp_path):
+    home = tmp_path / ".claude"
+    (home / "agents").mkdir(parents=True)  # dir exists but file was never written
+    results = doctor.check_mirror_currency(
+        managed=[("agents/section-editor.md", b"x")], claude_home=home,
+    )
+    row = next(r for r in results if r.name == "mirror completeness")
+    assert row.status == "warn"
+    assert "section-editor.md" in row.detail
+
+
+def test_mirror_currency_missing_home_defers(tmp_path):
+    # A missing global surface is check_claude_health's to report, not this check's.
+    assert doctor.check_mirror_currency(
+        managed=[("agents/a.md", b"x")], claude_home=tmp_path / "nope",
+    ) == []
+
+
+# ----- check_dead_symlinks -----
+
+def test_dead_symlink_flagged(tmp_path):
+    home = tmp_path / ".claude"
+    skills = home / "skills"
+    skills.mkdir(parents=True)
+    real = tmp_path / "real-skill"
+    real.mkdir()
+    (skills / "ok").symlink_to(real)                       # valid link
+    (skills / "dead").symlink_to(tmp_path / "gone")        # broken link
+    results = doctor.check_dead_symlinks(claude_home=home)
+    assert len(results) == 1
+    assert results[0].status == "warn"
+    assert str(skills / "dead") in results[0].detail
+    assert str(skills / "ok") not in results[0].detail
+
+
+def test_dead_symlink_none_when_all_valid(tmp_path):
+    home = tmp_path / ".claude"
+    skills = home / "skills"
+    skills.mkdir(parents=True)
+    real = tmp_path / "real-skill"
+    real.mkdir()
+    (skills / "ok").symlink_to(real)
+    assert doctor.check_dead_symlinks(claude_home=home) == []

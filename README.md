@@ -30,7 +30,7 @@ The primary agent (academic-researcher) lives in each project's `CLAUDE.md`. Fiv
 - **pandoc** 3.1+. Required by every `[formatting mode]` paste target (`word`, `google-docs`, `plain-markdown`, `latex`); all four render through the pandoc + citeproc + CSL pipeline.
 - **TeX Live** (optional). Only needed if you'll compile the `[formatting mode for latex]` output to PDF. `sourced` emits a `.tex` file; compilation is your job. Not checked by `sourced check`. See [`docs/INSTALL.md`](./docs/INSTALL.md#optional-tex-live-for-the-latex-paste-target) for package guidance per platform.
 
-Run `sourced check` to verify all prereqs are present + `~/.claude/` is healthy + installed voices are intact. It does not install missing tools for you; use your package manager. When something is off, `sourced doctor` runs the same surface conditions as read-only deeper diagnostics (wipe detection, editable-install path, conda poisoning, PATH shadowing) and prints the exact fix command for each; it never modifies anything.
+Run `sourced check` to verify all prereqs are present + `~/.claude/` is healthy + installed voices are intact. It does not install missing tools for you; use your package manager. When something is off, `sourced doctor` runs the same surface conditions as read-only deeper diagnostics (wipe detection, bundle-mirror currency, editable-install path, conda poisoning, PATH shadowing) and prints the exact fix command for each; it never modifies anything. Pass `--strict` to make warnings a hard failure for CI.
 
 Install on Debian, Ubuntu, or WSL (python3 is typically already present):
 

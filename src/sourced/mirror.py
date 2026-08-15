@@ -1,7 +1,10 @@
 """File-tree mirroring. shutil.copytree wrapper.
 
-dirs_exist_ok=True: overwrite per-file, never delete. Orphan cleanup is a
-future `sourced doctor` concern, not mirroring's.
+dirs_exist_ok=True: overwrite per-file, never delete. `sourced doctor` reports a
+stale or missing managed file (and broken symlinks) read-only, but cleanup of a
+file the bundle no longer ships stays out of scope: without an install manifest
+(which sourced deliberately does not keep) a removed-from-bundle orphan cannot be
+told apart from a user-authored file, so mirroring never deletes.
 copy_function=shutil.copy2 preserves mtimes (so npm install doesn't re-run
 on mirrored skill dirs).
 symlinks=True future-proofs: if a bundled tree ever contains symlinks they
