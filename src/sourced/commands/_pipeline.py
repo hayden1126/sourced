@@ -16,6 +16,7 @@ Pipeline shape (per spec §5.3):
   7. write_atomic OR mirror_tree
 """
 from __future__ import annotations
+from collections.abc import Iterator
 from pathlib import Path
 
 from ..context import Context
@@ -118,6 +119,48 @@ def install_global(ctx: Context, *, force: bool = False) -> dict:
                 mirror_tree(style_assets, asset_dest, dry_run=False)
 
     return counts
+
+
+def iter_managed_files() -> Iterator[tuple[str, bytes]]:
+    """Yield (dest_relpath_under_~/.claude, bundled_bytes) for every file
+    install_global() writes.
+
+    A single stateless enumeration of the bundle -> ~/.claude mapping, derived
+    from the same bundled sources install_global mirrors. doctor's mirror-currency
+    check consumes it to spot a stale or missing managed file without a manifest.
+    It intentionally mirrors install_global's iteration; the two are kept in
+    lockstep by tests/cli/integration/test_managed_files_parity.py, which fails if
+    global-install writes a file this does not enumerate (or vice versa).
+    """
+    # Wholesale tree mirrors.
+    for subdir in ("agents", "citations", "skills", "filters"):
+        with bundled_path(subdir) as src:
+            base = Path(src)
+            for f in sorted(base.rglob("*")):
+                if f.is_file():
+                    yield (f"{subdir}/{f.relative_to(base).as_posix()}", f.read_bytes())
+
+    # Brief templates (only these two land in ~/.claude/templates/).
+    for brief_name in ("brief.template.md", "brief.template.annotated-bib.md"):
+        with bundled_path(f"templates/{brief_name}") as src:
+            yield (f"templates/{brief_name}", Path(src).read_bytes())
+
+    # Voice library: bundled skeletons -> ~/.claude/voice/<name>.md.
+    with bundled_path("templates/voices") as src:
+        for f in sorted(Path(src).glob("*.md")):
+            yield (f"voice/{f.name}", f.read_bytes())
+
+    # Style library: top-level <style>.md plus per-style asset trees.
+    with bundled_path("templates/styles") as src:
+        base = Path(src)
+        for f in sorted(base.glob("*.md")):
+            yield (f"style/{f.name}", f.read_bytes())
+        for style_assets in sorted(base.iterdir()):
+            if not style_assets.is_dir():
+                continue
+            for f in sorted(style_assets.rglob("*")):
+                if f.is_file():
+                    yield (f"style/{f.relative_to(base).as_posix()}", f.read_bytes())
 
 
 def render_voice(name: str, user: str, ctx: Context) -> str:
