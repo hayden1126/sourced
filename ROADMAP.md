@@ -12,11 +12,14 @@ What gets picked up next, ranked. A thread absent from this table is by definiti
 
 | # | Thread | Why now | Serves | Effort | Where |
 |---|--------|---------|--------|--------|-------|
-| 1 | The `sourced voice` code arc: corpus index, then the blinded author-verification A/B | The fork decision landed in-repo; the A/B delivers the Track B fidelity score and stopping rule, and resolves Direct-API offload candidate 1 | voice preservation | M each | [#71](https://github.com/hayden1126/sourced/issues/71), [#72](https://github.com/hayden1126/sourced/issues/72) |
-| 2 | `sourced doctor` deeper diagnostics | Field-evidenced: the 2026-07-03 `~/.claude` wipe and the #61 stale-version incident are exactly its use cases | ergonomics | S | Python CLI phase 5 tail, below |
-| 3 | Slack between blocks: `extract-pdf-highlights`, after its containment-aware rewording | S-effort citation-integrity skill that collides with nothing above | citation integrity | S | Skills, below |
+| 1 | Editing context-scaling (Path 1): section-scoped editing + one thin global pass | In flight. Editing is the confirmed context bottleneck (whole draft + whole citation log in one context, Pass 2 re-emits every payload); context rot degrades the §4 prose-time audit at length even when it fits. Mirrors the writing-mode pattern; research-backed | synthesis integrity | M | [spec](docs/archive/specs/2026-08-15-editing-context-scaling-design.md); Paths 2-3 in §Framework extensions |
+| 2 | The `sourced voice` code arc: corpus index, then the blinded author-verification A/B | The fork decision landed in-repo; the A/B delivers the Track B fidelity score and stopping rule, and resolves Direct-API offload candidate 1 | voice preservation | M each | [#71](https://github.com/hayden1126/sourced/issues/71), [#72](https://github.com/hayden1126/sourced/issues/72) |
+| 3 | `sourced doctor` deeper diagnostics | Field-evidenced: the 2026-07-03 `~/.claude` wipe and the #61 stale-version incident are exactly its use cases | ergonomics | S | Python CLI phase 5 tail, below |
+| 4 | Slack between blocks: `extract-pdf-highlights`, after its containment-aware rewording | S-effort citation-integrity skill that collides with nothing above | citation integrity | S | Skills, below |
 
-Sequenced behind the queue, not in it: [#73](https://github.com/hayden1126/sourced/issues/73) (passage retrieval) activates when a real paper session exists to validate against; [#74](https://github.com/hayden1126/sourced/issues/74) (extraction v2 intake) rides with the first extractor touch after #71.
+Sequenced behind the queue, not in it: [#73](https://github.com/hayden1126/sourced/issues/73) (passage retrieval) activates when a real paper session exists to validate against; [#74](https://github.com/hayden1126/sourced/issues/74) (extraction v2 intake) rides with the first extractor touch after #71. Path 1 above and #73 are adjacent: #73 scopes passages at draft time, Path 1 scopes citation payloads at editing time; Path 2 (below) is where they share the retrieval layer.
+
+2026-08-15: editing context-scaling diagnosed (editing is the single-context bottleneck; the gender essay measured ~850 tokens per citation instance, so a real paper's log alone is ~60K resident across ten passes). Path 1 in flight on branch `editing-section-scoped`; design spec at [docs/archive/specs/2026-08-15-editing-context-scaling-design.md](docs/archive/specs/2026-08-15-editing-context-scaling-design.md); Paths 2-3 logged in §Framework extensions.
 
 2026-07-09 shipped: the staged-reader-review bundle skill plus review artifact schema (PR #77, #70 closed; the #33 option-2 record now lands in the skill's pre-flight, one gate downstream, and #33 stays open on its own trigger).
 
@@ -316,6 +319,24 @@ GraphRAG ruled out: multi-step entity-extraction pipelines, brittle on long-tail
 Touch points (provisional): `~/.claude/citations/schema.md` (claim-node and source-tree schema additions); `src/sourced/data/agents/source-finder.md` (database-first dispatch); the shipped `docs/modes/research.md` mode body (database lookup ahead of online search); new `sourced library` subcommand (build/list/prune/inspect); CLI integration with PageIndex (or a vendored subset thereof).
 
 Related: `### Cross-project citation reuse` (above, smaller cousin — supersedes on landing); `### Direct-API offload for deterministic workflows` (database build/index workflows are candidates for direct-API automation).
+
+### Editing audit ledger + embedding-free payload retrieval (context-scaling Path 2)
+**Effort:** M–L · **Status:** scoping · **Serves:** synthesis integrity · **Trigger:** act when a real paper's per-section citation set is still too large after Path 1's by-id fetch, or a citation-dense section (e.g. a literature review) overflows the `section-editor` even scoped to its own entries.
+
+Builds on Path 1 (Next queue row 1; design spec [2026-08-15-editing-context-scaling-design.md](docs/archive/specs/2026-08-15-editing-context-scaling-design.md)). Path 1 scopes editing to one section plus that section's citations fetched by id, and keeps a lightweight running skeleton (section summaries + term list). Path 2 hardens that skeleton into a durable, Re3-style **audit ledger** (thesis, claims mapped to citation ids, a term glossary keyed to defining section, a citation-id to location index) that every pass consults instead of re-deriving structure, and adds **layered embedding-free retrieval** (metadata filter by section or claim, then BM25 + MMR diversity) so a citation-dense section loads only the relevant, non-redundant entries.
+
+Two risks recorded now so they gate the design later: (1) the ledger must resync as editing cuts or moves claims, or it produces wrong audits (staleness is a correctness hazard, not a nicety); (2) MMR trimming can drop an entry that turns out relevant, so it needs a hard "never drop an entry cited in this very sentence" rule, because completeness is the point of the citation audit. The retrieval literature argues for exactly this ordering: metadata filter first (Path 1), BM25 + MMR only when the filtered set is still large (Path 2).
+
+Related: `### Verified-claims database (PageIndex-style retrieval)` (shares the vectorless tree-index / retrieval substrate; a cross-project claim store and an editing-time payload retriever want the same layer), [#73](https://github.com/hayden1126/sourced/issues/73) (passage retrieval at draft time is the writing-side mirror of this editing-side scoping).
+
+### Stateless file-driven pipeline driver (context-scaling Path 3)
+**Effort:** XL · **Status:** scoping · **Serves:** ergonomics · **Trigger:** act when book or thesis-length work is a real target, or when the prompt-cache economics (a byte-identical shared prefix reused across every section) justify moving orchestration to direct-API.
+
+Generalizes Paths 1 and 2 from editing to the whole pipeline. An outer **driver** (a CLI orchestrator, or a loop-engineering-style outer loop) runs each stage and each section in a fresh context spawned from the durable files, writing results back to files; the conversation is never the source of truth. Prompt-cached shared prefixes make the repeated setup cheap; compaction is the airbag for any unit that still overflows. Buys unbounded length at every stage, per-unit context-budget enforcement, checkpoint/resume, and real cache economics. It also protects the integrity audits at extreme length (context rot), though the entry itself is orchestration infrastructure, hence the ergonomics tag.
+
+Cost and coupling: this is the largest change, touches all modes, and requires owning request construction, so it overlaps the Direct-API offload lane below. It raises a real question about `loop-engineering` (a sibling project that is already a deterministic outer-loop driver for Claude Code sessions): does sourced depend on it or reinvent a slice of it? Decide that before any code.
+
+Related: `### Direct-API offload for deterministic workflows` (prefix reuse across units requires the raw API; this is that lane at pipeline scale), `### Claude Code Agent Teams integration` (an alternative orchestration substrate), and the design spec above.
 
 ### Babble-as-ideation across plan / research / refining
 **Effort:** M · **Status:** open · **Serves:** ergonomics · **Trigger:** act when gate-time evidence from a real paper records premature convergence on one angle.
