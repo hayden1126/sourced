@@ -30,7 +30,7 @@ sourced/
 │       ├── errors.py           # SourcedError hierarchy + exit-code mapping.
 │       ├── ui.py               # Color/print helpers; should_color tty-gates auto.
 │       └── data/               # Bundled, read-only at runtime; mirrored to ~/.claude/ by global-install.
-│           ├── agents/         # Subagent definitions: source-finder, voice-extractor, sourced-helper, prose-drafter.
+│           ├── agents/         # Subagent definitions: source-finder, voice-extractor, sourced-helper, prose-drafter, section-editor.
 │           ├── citations/      # Citation log schema + CSL-JSON emitter spec.
 │           ├── skills/         # Skill library (browser-reader-extract, staged-reader-review).
 │           ├── filters/        # Pandoc Lua filters (promoted from templates/filters in PR 3).
@@ -111,6 +111,7 @@ The canonical registry is the dispatch manifest in the shipped CLAUDE.md §7.1: 
 | `source-finder` | academic-researcher during `[research mode]` | Vet and log sources for one sub-topic; return a structured report (`### Logged / ### Rejected / ### Gaps / ### Alternative framings`). | Yes — 3+ per dispatch batch. Each writes to its own shard; parent merges with ID-collision resolution. |
 | `voice-extractor` | academic-researcher (from `[collaborative mode]` only, on explicit user request) | Read a writing-samples corpus, mirror the skeleton voice file's section structure, emit a per-author voice library file at `~/.claude/voice/<name>.md`. Iron rules preserved verbatim. | No. One-shot utility. |
 | `prose-drafter` | academic-researcher during `[writing mode]` | Draft one section from a prose plan in isolated context (no conversation bleed); return prose plus a self-audit. Never user-triggered. | No. One section per dispatch. |
+| `section-editor` | academic-researcher during `[editing mode]` | Run the section-scoped (local) editing passes on one drafted section in isolated context; return the edited prose plus the section's rows for the four forcing artifacts. Never user-triggered. | No. One section per dispatch. |
 | `sourced-helper` | Claude Code dispatcher, on framework questions ("how do I switch styles?") | Read-only Q&A about the CLI surface, file layout, voices, styles, and modes. `haiku`-backed for cost. | No. |
 
 ## Per-project files
