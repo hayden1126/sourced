@@ -116,6 +116,11 @@ def skill_names() -> tuple[str, ...]:
     return tuple(sorted(d.name for d in SKILLS.iterdir() if d.is_dir()))
 
 
+def agent_names() -> tuple[str, ...]:
+    """Basenames (without extension) of the shipped agent files."""
+    return tuple(sorted(p.stem for p in AGENTS.glob("*.md")))
+
+
 def node_min_version() -> str:
     """Minimum Node version declared in the skill's package.json engines field."""
     pkg = (SKILLS / "browser-reader-extract" / "package.json").read_text(encoding="utf-8")
@@ -346,6 +351,16 @@ DERIVED_SETS: tuple[DerivedSet, ...] = (
             DOCS / "INSTALL.md",
             README,
             ARCH,
+        ),
+    ),
+    DerivedSet(
+        "shipped-agent-names",
+        agent_names(),
+        "src/sourced/data/agents/*.md basenames",
+        (
+            README,
+            ARCH,
+            DOCS / "INSTALL.md",
         ),
     ),
 )
