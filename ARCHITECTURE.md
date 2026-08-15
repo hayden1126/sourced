@@ -20,7 +20,7 @@ sourced/
 │   └── sourced/
 │       ├── cli.py              # argparse root + dispatch + error→exit-code mapping.
 │       ├── __main__.py         # python -m sourced entry point.
-│       ├── commands/           # One file per subcommand: install, global_install, new, update, switch, check + _pipeline.
+│       ├── commands/           # One file per subcommand: install, global_install, new, update, switch, check, doctor + _pipeline (shared install pipeline), _report (shared check/doctor findings).
 │       ├── validators/         # Stateless: csl (pre-render), iron_rules + exemptions (post-render), invariants (I1-I11, `check --invariants`). Return list[Finding], never raise.
 │       ├── render.py           # Pure {{USER}} substitution + bundled-data Path resolution via importlib.resources.
 │       ├── project.py          # Per-project sentinels, markers, .sourced.bak rollback.
