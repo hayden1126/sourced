@@ -8,7 +8,7 @@ This file is different from [GitHub Issues](https://github.com/hayden1126/source
 
 ## Next queue
 
-What gets picked up next, ranked. A thread absent from this table is by definition not next. Reranking evidence: the 2026-07-04 paper session (the first full end-to-end real use) and the 2026-07-06 spike spec ([`docs/archive/specs/2026-07-06-staged-reader-review-and-voice-v2-design.md`](docs/archive/specs/2026-07-06-staged-reader-review-and-voice-v2-design.md), PR #68).
+What gets picked up next, ranked. A thread absent from this table is by definition not next. Reranking evidence: the 2026-07-04 paper session (the first full end-to-end real use) and the 2026-07-06 spike spec (PR #68).
 
 | # | Thread | Why now | Serves | Effort | Where |
 |---|--------|---------|--------|--------|-------|
@@ -19,7 +19,7 @@ Sequenced behind the queue, not in it: [#73](https://github.com/hayden1126/sourc
 
 2026-08-15 shipped: `sourced doctor` (v1 + v2): a new read-only diagnostics command that deepens `check`'s surface warnings into specific findings, each with a copy-paste fix and no mutation. v1 covers wipe detection (present-but-empty `~/.claude/` subdirs + missing config), the editable-install stale-path check (issue #61's mechanism), conda poisoning (interpreter actually inside `CONDA_PREFIX`), and PATH shadowing (names the winner); shaped from a 15-tool prior-art survey (`--strict` escalates warnings, structured `fix` field, `skip` for not-applicable checks, clean-run affirmation). v2 adds bundle-mirror currency: for every file `install_global` writes (enumerated statelessly by `_pipeline.iter_managed_files`, bound to the installer by a parity test), it flags an installed copy that is stale ("old protocol text silently running") or missing (a shipped file never deployed, e.g. `section-editor.md` today), plus broken symlinks. It is name-/bundle-derived, so user-authored voices and skills are structurally invisible and never false-flagged. Report primitive extracted to `commands/_report.py`, shared with `check`. **Declined** (not deferred): detecting a *removed-from-bundle* orphan, which cannot be told from a user file without an install manifest that sourced deliberately does not keep; reopen only if a manifest is justified otherwise.
 
-2026-08-15 shipped: editing context-scaling Path 1 (PR #78): `[editing mode]` refactored to per-section local passes in a new `section-editor` subagent plus one thin whole-draft global pass, so editing context stays bounded (measured on the gender essay: per-section citation payload ~2K tok vs the whole ~21.7K-token log the old mode co-located across ten passes). Design spec at [docs/archive/specs/2026-08-15-editing-context-scaling-design.md](docs/archive/specs/2026-08-15-editing-context-scaling-design.md); Paths 2-3 logged in §Framework extensions. Deploy the agent with `sourced global-install` after the `~/sourced -> ~/code/sourced` migration.
+2026-08-15 shipped: editing context-scaling Path 1 (PR #78): `[editing mode]` refactored to per-section local passes in a new `section-editor` subagent plus one thin whole-draft global pass, so editing context stays bounded (measured on a real paper: per-section citation payload ~2K tok vs the whole ~21.7K-token log the old mode co-located across ten passes). Paths 2-3 logged in §Framework extensions. Deploy the agent with `sourced global-install` after the checkout-path migration.
 
 2026-07-09 shipped: the staged-reader-review bundle skill plus review artifact schema (PR #77, #70 closed; the #33 option-2 record now lands in the skill's pre-flight, one gate downstream, and #33 stays open on its own trigger).
 
@@ -51,7 +51,7 @@ Current shipped: `apa7`, `chicago17-ad`, `chicago17-nb`, `ieee`, `mla9` — all 
 ### Tier-2 rollout (pinning table)
 **Effort:** S each · **Status:** open · **Serves:** decoupled rendering · **Trigger:** act when a real paper needs a style outside the shipped five at the formatting gate.
 
-Eight styles queued behind the shipped five. Per [`docs/archive/specs/2026-04-19-csl-direct-consumption-design.md`](docs/archive/specs/2026-04-19-csl-direct-consumption-design.md) §11, each targets ~15 minutes of per-style work now that the slim schema has shipped — a slim `style.md`, a vendored CSL, and parity fixtures. This table pre-resolves the CSL filename + authority-URL lookups so rollout PRs stay mechanical; edition-pinning caveats flag where upstream drift (e.g., CMOS 17 → 18) requires a suffixed-filename pin rather than the plain variant.
+Eight styles queued behind the shipped five. Per the 2026-04-19 CSL direct-consumption design §11, each targets ~15 minutes of per-style work now that the slim schema has shipped — a slim `style.md`, a vendored CSL, and parity fixtures. This table pre-resolves the CSL filename + authority-URL lookups so rollout PRs stay mechanical; edition-pinning caveats flag where upstream drift (e.g., CMOS 17 → 18) requires a suffixed-filename pin rather than the plain variant.
 
 | Style | CSL filename | Authority URL | Edition pinning caveats |
 |---|---|---|---|
@@ -73,7 +73,7 @@ Beyond "argumentative essay with sources." Each new type probably extends the mo
 ### Annotated bibliography — phase 3
 **Effort:** M · **Status:** phases 1+2 shipped 2026-04-20; phase 3 open · **Serves:** decoupled rendering · **Trigger:** act when a real annotated-bib project reaches [formatting mode].
 
-Phases 1+2 shipped the `annotated-bib` project type end to end: schema extension (`citations/schema.md §Annotation`), brief template, `--type annotated-bib` install flag + `.sourced-project-type` marker, `[annotated-bib mode]` + mode adaptations. Design spec: [`docs/archive/specs/2026-04-20-annotated-bibliography-design.md`](docs/archive/specs/2026-04-20-annotated-bibliography-design.md).
+Phases 1+2 shipped the `annotated-bib` project type end to end: schema extension (`citations/schema.md §Annotation`), brief template, `--type annotated-bib` install flag + `.sourced-project-type` marker, `[annotated-bib mode]` + mode adaptations. Design spec: the 2026-04-20 annotated-bibliography design.
 
 **Phase 3 open.** Per-style paste-target variants (`apa7-annotated-bib`, `chicago17-ad-annotated-bib`, etc.) that render per-entry bibliography entries followed by annotation blocks via `pandoc --citeproc` + CSL. Open design question: inject annotations via CSL `note` field mapping plus custom CSL-JSON emitter path, or post-pandoc merge of rendered bibliography + log's `annotation` field by id match. Upstream citation-style-language/styles has `apa-annotated-bibliography.csl` for APA; other styles may need vendored variants. LaTeX `template.tex` adjustments per style for annotation-block layout. Test fixtures per style. Originally sized S; resized M after design work surfaced the project-type fork cost.
 
@@ -218,12 +218,12 @@ Harvest citations from a Google Scholar author page or search results with autom
 
 Cross-cutting features that touch multiple modes.
 
-**Shipped (history).** Per-project directory restructure, 2026-04-24 via PR #26: projects group into `config/`, `sources/`, `samples/`, `failures/`, with auto-migration on `sourced update` and invariant I11 guarding against flat-path regressions. Design spec: [`docs/archive/specs/2026-04-24-per-project-directory-restructure-design.md`](docs/archive/specs/2026-04-24-per-project-directory-restructure-design.md).
+**Shipped (history).** Per-project directory restructure, 2026-04-24 via PR #26: projects group into `config/`, `sources/`, `samples/`, `failures/`, with auto-migration on `sourced update` and invariant I11 guarding against flat-path regressions. Design spec: the 2026-04-24 per-project directory-restructure design.
 
 ### Python CLI (`sourced`) — phase 5 tail
 **Effort:** S–M each · **Status:** phases 1–4 shipped (PRs #19–#26); `doctor` v1 shipped; remaining phase-5 items open · **Serves:** ergonomics · **Trigger:** the remaining items act when the matching friction artifact lands.
 
-The CLI decomposition shipped in four phases between 2026-04-22 and 2026-04-25: phase 1 ported `install.sh` to the Python CLI (PRs #19–#23), phase 2 extracted the CLAUDE.md dispatch manifest + externalized mode bodies (PR #24), phase 3 shipped the voice pipeline (PR #25), phase 4 the per-project directory restructure (PR #26). Design specs: [`docs/archive/specs/2026-04-21-sourced-cli-decomposition-design.md`](./docs/archive/specs/2026-04-21-sourced-cli-decomposition-design.md), [`docs/archive/specs/2026-04-23-claude-md-manifest-extraction-design.md`](./docs/archive/specs/2026-04-23-claude-md-manifest-extraction-design.md).
+The CLI decomposition shipped in four phases between 2026-04-22 and 2026-04-25: phase 1 ported `install.sh` to the Python CLI (PRs #19–#23), phase 2 extracted the CLAUDE.md dispatch manifest + externalized mode bodies (PR #24), phase 3 shipped the voice pipeline (PR #25), phase 4 the per-project directory restructure (PR #26). Design specs: the 2026-04-21 CLI decomposition design and the 2026-04-23 CLAUDE.md manifest-extraction design.
 
 **Phase 5 items still open** (GitHub Actions CI shipped 2026-07-03 in the cleanup pass):
 
@@ -288,7 +288,7 @@ One writer, many papers, overlapping sources. A cross-project citation library (
 
 Schema extension: add `source_hash` (content-addressed or DOI-based) that dedupes across project log files. Staleness thresholds still apply per use; re-verification may still be needed for web sources.
 
-Gate note (2026-07-06): the old mutual gate with the Verified-claims database was circular (the database promoted when this landed, then superseded it on landing, which plans a throwaway). Both entries now share one trigger: a second real project overlapping sources with an existing log. Reuse demand was structurally unobservable until now because <project> was the first project ever run; a one-line merge-time DOI/`source_hash` overlap report makes the trigger fire automatically. At trigger time, choose once between this dedup-lite version and the full database below.
+Gate note (2026-07-06): the old mutual gate with the Verified-claims database was circular (the database promoted when this landed, then superseded it on landing, which plans a throwaway). Both entries now share one trigger: a second real project overlapping sources with an existing log. Reuse demand was structurally unobservable until now because the first real paper was the first project ever run; a one-line merge-time DOI/`source_hash` overlap report makes the trigger fire automatically. At trigger time, choose once between this dedup-lite version and the full database below.
 
 ### Verified-claims database (PageIndex-style retrieval)
 **Effort:** XL · **Status:** scoping · **Serves:** citation integrity · **Trigger:** act when the cross-project overlap trigger fires and the brainstorming plus design-spec session this entry requires has run.
@@ -323,7 +323,7 @@ Related: `### Cross-project citation reuse` (above, smaller cousin — supersede
 ### Editing audit ledger + embedding-free payload retrieval (context-scaling Path 2)
 **Effort:** M–L · **Status:** scoping · **Serves:** synthesis integrity · **Trigger:** act when a real paper's per-section citation set is still too large after Path 1's by-id fetch, or a citation-dense section (e.g. a literature review) overflows the `section-editor` even scoped to its own entries.
 
-Builds on Path 1 (Next queue row 1; design spec [2026-08-15-editing-context-scaling-design.md](docs/archive/specs/2026-08-15-editing-context-scaling-design.md)). Path 1 scopes editing to one section plus that section's citations fetched by id, and keeps a lightweight running skeleton (section summaries + term list). Path 2 hardens that skeleton into a durable, Re3-style **audit ledger** (thesis, claims mapped to citation ids, a term glossary keyed to defining section, a citation-id to location index) that every pass consults instead of re-deriving structure, and adds **layered embedding-free retrieval** (metadata filter by section or claim, then BM25 + MMR diversity) so a citation-dense section loads only the relevant, non-redundant entries.
+Builds on Path 1 (Next queue row 1; the 2026-08-15 editing context-scaling design). Path 1 scopes editing to one section plus that section's citations fetched by id, and keeps a lightweight running skeleton (section summaries + term list). Path 2 hardens that skeleton into a durable, Re3-style **audit ledger** (thesis, claims mapped to citation ids, a term glossary keyed to defining section, a citation-id to location index) that every pass consults instead of re-deriving structure, and adds **layered embedding-free retrieval** (metadata filter by section or claim, then BM25 + MMR diversity) so a citation-dense section loads only the relevant, non-redundant entries.
 
 Two risks recorded now so they gate the design later: (1) the ledger must resync as editing cuts or moves claims, or it produces wrong audits (staleness is a correctness hazard, not a nicety); (2) MMR trimming can drop an entry that turns out relevant, so it needs a hard "never drop an entry cited in this very sentence" rule, because completeness is the point of the citation audit. The retrieval literature argues for exactly this ordering: metadata filter first (Path 1), BM25 + MMR only when the filtered set is still large (Path 2).
 

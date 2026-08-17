@@ -1,6 +1,6 @@
 # Vision
 
-Sourced exists so one writer can put Claude in the loop of real academic writing and still defend every line. The bar is scholarship the writer can stand behind without rewriting it sentence by sentence: every citation verified, every paraphrase honest, every word in the writer's own voice. It is a private, professional-grade tool for real papers, not a product.
+Sourced exists so one writer can put Claude in the loop of real academic writing and still defend every line. The bar is scholarship the writer can stand behind without rewriting it sentence by sentence: every citation verified, every paraphrase honest, every word in the writer's own voice. It is a private, professional-grade tool for real papers, not a product. The source is public under MIT so anyone can read it or fork it; that is a licensing fact, not a product commitment.
 
 ## Who it serves
 
@@ -24,7 +24,7 @@ Six values define the project. Everything sourced ships must extend at least one
 
 ## Enforcement principle
 
-Rules are forced artifacts, not mental verbs. A rule that asks the model to "verify," "confirm," or "re-check" can be satisfied by silent assent, and silent assent is how fabrications ship. Every check must produce something inspectable: a log field, a list, a validator result, a report row. If a rule cannot name its artifact, it is not yet a rule. The 2026-07-03 audit ([docs/archive/audits/2026-07-03-mental-verb-audit.md](docs/archive/audits/2026-07-03-mental-verb-audit.md)) converted the bundle; issue [#45](https://github.com/hayden1126/sourced/issues/45) closed the last gap by forcing the §3(a) reliability judgment into `source.reliability_basis`.
+Rules are forced artifacts, not mental verbs. A rule that asks the model to "verify," "confirm," or "re-check" can be satisfied by silent assent, and silent assent is how fabrications ship. Every check must produce something inspectable: a log field, a list, a validator result, a report row. If a rule cannot name its artifact, it is not yet a rule. The 2026-07-03 mental-verb audit converted the bundle; issue [#45](https://github.com/hayden1126/sourced/issues/45) closed the last gap by forcing the §3(a) reliability judgment into `source.reliability_basis`.
 
 ## What sourced is not
 

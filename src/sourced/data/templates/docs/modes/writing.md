@@ -56,7 +56,7 @@ In Phase 1 you produce a structured prose-plan for the section being drafted. Th
    - **Section label** — short name for the section.
    - **Rhetorical arc** — 1 sentence: what this section does in the paper (sets up the problem, develops the central contrast, delivers the synthesis, etc.).
    - **Register mode** — the sub-register label you declared in step 5.
-   - **Voice-alignment notes** — 1–2 lines naming which rules are load-bearing for this section specifically (e.g., "parenthetical gloss on Cheyenne terms — high density here"; "cut patterns to watch: aphoristic-closure at paragraph ends, first-person-commitment-in-academic-report at S1 of ¶2").
+   - **Voice-alignment notes** — 1–2 lines naming which rules are load-bearing for this section specifically (e.g., "parenthetical gloss on Latin terms — high density here"; "cut patterns to watch: aphoristic-closure at paragraph ends, first-person-commitment-in-academic-report at S1 of ¶2").
    - **Per-paragraph plan** — one block per paragraph in the section:
 
      ```

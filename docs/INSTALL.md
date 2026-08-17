@@ -8,13 +8,12 @@ Prerequisites:
 - Python 3.10+
 - `pipx` (install via `brew install pipx` on macOS, `sudo apt install pipx python3-venv` on Ubuntu/WSL, `winget install pipx` on Windows-not-WSL)
 - After installing pipx: `pipx ensurepath`, then **open a new terminal** (don't `source ~/.zshrc` — `ensurepath` may write to `.zprofile` instead)
-- Read access to `github.com/hayden1126/sourced` (request from maintainer)
 
 Install:
 
 ```bash
 # HTTPS (default for non-dev users; works through corporate firewalls):
-pipx install 'git+https://<TOKEN>@github.com/hayden1126/sourced.git'
+pipx install git+https://github.com/hayden1126/sourced.git
 
 # SSH (power-user path; pre-seed known_hosts on a fresh machine):
 ssh-keyscan github.com >> ~/.ssh/known_hosts

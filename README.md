@@ -50,7 +50,7 @@ brew install poppler pandoc
 
 ```bash
 # HTTPS (default for non-dev users; works through corporate firewalls):
-pipx install 'git+https://<TOKEN>@github.com/hayden1126/sourced.git'
+pipx install git+https://github.com/hayden1126/sourced.git
 
 # SSH (power-user path; pre-seed known_hosts on a fresh machine):
 ssh-keyscan github.com >> ~/.ssh/known_hosts
@@ -109,7 +109,7 @@ For deeper troubleshooting (pipx gotchas, conda interference, port-22-blocked ne
 
 ## License
 
-Private repo; no license granted. Direction and scope live in [`VISION.md`](./VISION.md).
+MIT. See [`LICENSE`](./LICENSE). Direction and scope live in [`VISION.md`](./VISION.md).
 
 ## Migration from earlier versions
 

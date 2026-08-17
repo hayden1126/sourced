@@ -4,7 +4,7 @@ Orientation for someone reading the repo. Read `README.md` for installation; rea
 
 Canonical-source policy: the shipped bundle under `src/sourced/data/` is the source of truth for agent behavior (the CLAUDE.md dispatch manifest, the `docs/modes/` bodies, voices, styles, agents). Repo docs summarize and link; they do not restate protocol text. Each concept has one in-depth topic guide: workflow and gates in `docs/MODES.md`, voice and iron rules in `docs/VOICES.md`, rendering in `docs/STYLES.md`, setup in `docs/INSTALL.md`, skills in `docs/SKILLS.md`. This file is the map.
 
-Design history lives in `docs/archive/{specs,plans}/`, each file carrying a `Status: Shipped <date> (PR #N)` banner. In-flight specs and plans, when they exist, live at `docs/specs/` and `docs/plans/` (created on demand) and move to the archive with a banner when the work lands.
+Design history (the per-change specs, plans, and audits behind each shipped feature) is kept locally and is not published with the repo. The public record of what a change did is its PR and the entry it leaves in `ROADMAP.md`.
 
 ## File layout
 
@@ -79,7 +79,7 @@ Pipeline shape (per spec §5.3):
 6. `_maybe_raise(findings, ctx)` — halt on errors / strict warnings.
 7. Dry-run guard, then `write_atomic` (tempfile + rename) or `mirror_tree`.
 
-Reference design: [`docs/archive/specs/2026-04-21-sourced-cli-decomposition-design.md`](./docs/archive/specs/2026-04-21-sourced-cli-decomposition-design.md).
+The shape above comes from the 2026-04-21 CLI decomposition design; the code in `src/sourced/` is the canonical statement of it.
 
 ## The primary agent
 

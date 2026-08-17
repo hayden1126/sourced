@@ -19,3 +19,9 @@ build/
 # Local virtualenvs (subagent task workflow)
 .venv/
 venv/
+
+# Internal design history (specs, plans, audits): kept on disk, not published
+docs/archive/
+
+# Resolved lockfile: not a published artifact for this checkout-run tool
+uv.lock

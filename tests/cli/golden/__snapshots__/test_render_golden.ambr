@@ -1124,39 +1124,39 @@
   
   Paragraph-scale exhibits with per-sentence annotation. Each exhibit's annotation shape (`S1=…; S2=…; closure-type=…`) matches the prose-plan's sentence-role sequence — the plan uses the same vocabulary, so an exhibit IS a model for a plan block.
   
-  ### Exhibit 1 — academic-report
+  ### Exhibit 1 — academic-report (illustrative)
   
-  > The material manifestation of this religious ideology is concentrated in two primary sacred objects: the <object> Hat (*<term>*) and the Sacred Arrows (*<term>*). The <object> Hat was brought to the Cheyenne by the cultural hero <figure>, who received the gift from the Creator after entering a sacred mountain alongside a woman. This journey represents a passage into the <place> (*<term>*), a subterranean realm that corresponds to the absolute downward direction of the universe, or the nadir. Because the Hat originates from this realm, this explains why the Cheyenne recognize it as "the female power." This identity is further reflected in the Hat's name; while *<term>* colloquially translates to "female bison," its linguistic roots mean "Something Coming Out of the Ground."
+  > The administrative core of the Roman water supply is concentrated in two structures: the distribution tank (*castellum aquae*) and the monumental fountain (*nymphaeum*). The distribution tank sat at the point where the aqueduct met the city wall, dividing one channel into the three outlets that served the baths, the public basins, and the private lessees. This placement made the tank the only point in the system where a magistrate could measure delivery, since flow upstream of it was continuous and unmetered. Because allocation was decided at the tank rather than at the source, the surviving inscriptions record disputes about outlet width rather than about the aqueduct itself. The name preserves the same emphasis; while *castellum* elsewhere denotes a fort, its use here retains the older sense of an enclosed holding, a place where something is kept under control.
   
   <!-- annotation:
-  S1=opener-claim (names the two objects, sets up the pair structure); opener-shape=state-claim-flat
-  S2=development-narrative (origin story of object A); parenthetical-gloss on <term>
-  S3=development-connect (connects origin to cosmological location); parenthetical-gloss on <term>
-  S4=development-interpret (because-clause ties location to gender coding)
-  S5=closure-etymological-confirmation (translation pairing confirms the gender reading); closure-type=synthesis
-  paragraph-pattern: state-pair → develop-A → connect-to-cosmology → interpret → confirm-via-etymology
-  handoff-to-next: transitions from "the Hat" to the Arrows, which structures the next paragraph
-  source: my_writing/report.txt (adapted for brevity)
+  S1=opener-claim (names the two structures, sets up the pair structure); opener-shape=state-claim-flat
+  S2=development-narrative (siting and function of structure A); parenthetical-gloss on castellum aquae
+  S3=development-connect (connects siting to administrative consequence)
+  S4=development-interpret (because-clause ties the consequence to the epigraphic record)
+  S5=closure-etymological-confirmation (sense pairing confirms the control reading); closure-type=synthesis
+  paragraph-pattern: state-pair → develop-A → connect-to-administration → interpret → confirm-via-etymology
+  handoff-to-next: transitions from the tank to the fountain, which structures the next paragraph
+  source: illustrative; voice-extractor replaces with corpus paragraph at extraction time
   -->
   
-  ### Exhibit 2 — prospectus
+  ### Exhibit 2 — prospectus (illustrative)
   
-  > Cheyenne personal names function as morphologically transparent predicates: small claims about their bearers, assembled from parts with identifiable meanings. And these place their bearers along a vertical cosmological axis. Standing at the top of the cosmological axis is the Creator, *Ma'heo'o*. Contrarily, *Ma'heo'o* is not morphologically transparent. Its translation, "All-Father," does not hold up under Cheyenne phonology, and no alternatives accurately translate.
+  > Old English place-names function as morphologically transparent descriptions: small claims about the sites they label, assembled from parts with identifiable meanings. And these place their sites within a settled agricultural landscape. Standing outside that landscape is the habitative element *-ey*, "island." Contrarily, *-ey* is not transparent in its later attestations. Its standard gloss, "island," does not hold up against the inland distribution of the sites that carry it, and no alternative gloss covers them all.
   
   <!-- annotation:
   S1=opener-thesis-flat (declarative thesis, no lure); opener-shape=state-claim-flat
-  S2=thesis-amplifier (adds the cosmological placement claim)
-  S3=thesis-specialize (introduces the Creator as the apex of the axis)
+  S2=thesis-amplifier (adds the landscape placement claim)
+  S3=thesis-specialize (introduces the exceptional element)
   S4=pivot (names the contrast that drives the paper)
-  S5=closure-problem-statement (sets up the phonological argument for body paragraphs); closure-type=transitional
+  S5=closure-problem-statement (sets up the distributional argument for body paragraphs); closure-type=transitional
   paragraph-pattern: thesis → amplifier → specialize → pivot → problem-statement
-  handoff-to-next: "All-Father" becomes the load-bearing term of the next paragraph, which explains transparent predicates
-  source: report_3.pdf (the maintainer's edited prospectus opening)
+  handoff-to-next: "island" becomes the load-bearing term of the next paragraph, which explains transparent compounds
+  source: illustrative; voice-extractor replaces with corpus paragraph at extraction time
   -->
   
-  ### Exhibit 3 — personal-essay
+  ### Exhibit 3 — personal-essay (illustrative)
   
-  > I believe language itself can be <concept> — both a bridge and a boundary. Heritage language instruction creates spaces where bilingual students can think in their native tongue, preserving cultural identity while engaging with dominant academic discourse. Yet this same instruction risks reinforcing the separation it seeks to dismantle. If students develop fluency in their <topic> but never build comparable capacity in the surrounding society's language of power, the classroom becomes a refuge rather than a bridge. Would it create an environment so comfortable that there is no incentive to engage with the broader society?
+  > I believe a restored building can be both a record and a fiction. Careful restoration returns a structure to a legible state, letting a neighborhood read its own history in a form that has not decayed past recognition. Yet the same work erases the evidence of the decay it repairs. If restorers replace every weathered stone but never document what the weathering showed, the building becomes a picture of a period rather than a record of one. Would a visitor standing inside it learn anything the interpretive panel outside does not already say?
   
   <!-- annotation:
   S1=opener-first-person-commitment (stance claim); opener-shape=state-commitment-I
@@ -1165,8 +1165,8 @@
   S4=development-counter-case (builds the risk)
   S5=closure-question-out (question that opens the next paragraph); closure-type=question-out
   paragraph-pattern: I-commit → amplify → pivot-Yet → counter-case → question-out
-  handoff-to-next: question asked in S5 is answered in the next paragraph, which picks up the "environment" frame
-  source: my_writing/Essay 2.pdf (condensed from multiple paragraphs)
+  handoff-to-next: question asked in S5 is answered in the next paragraph, which picks up the "record" frame
+  source: illustrative; voice-extractor replaces with corpus paragraph at extraction time
   -->
   
   Voice-extractor replaces these shipped exhibits with corpus-derived paragraphs when run against an author's samples. The shipped exhibits are illustrative of the shape, not defaults to retain; the extractor's output file carries the author's actual patterns.
@@ -1180,16 +1180,16 @@
   **Rule `[register: academic-report, prospectus]`.** State views in third-person declarative. First-person stance markers ("I think," "I believe," "my claim is") are genre-wrong in formal academic writing; they mark undergraduate-essay register where the genre expects scholarly-voice. First-person is acceptable only in process statements about the paper itself ("In the poster I will extend...", "In the next section I address..."). Commit to positions through the structure of the sentence (what it asserts, how it handles counterpoints) rather than through pronoun markers.
   
   **Exemplars `[personal-essay]`:**
-  - "I believe language itself can be <concept> — both a bridge and a boundary."
-  <!-- source: Essay 2.pdf -->
-  - "The more I consider it, the less certain I become on supporting either model."
-  <!-- source: Essay 2.pdf -->
+  - "I believe a restored building can be both a record and a fiction."
+  <!-- source: illustrative -->
+  - "The more I read the case files, the less certain I become on supporting either model."
+  <!-- source: illustrative -->
   
   **Exemplars `[academic-report, prospectus]`:**
-  - "Cheyenne personal names function as morphologically transparent predicates: small claims about their bearers, assembled from parts with identifiable meanings."
-  <!-- source: report_3.pdf -->
-  - "For the Cheyenne people, or *Tsétsėhéstȧhese*, the universe is an animate system that requires constant spiritual maintenance to survive."
-  <!-- source: my_writing/report.txt -->
+  - "Old English place-names function as morphologically transparent descriptions: small claims about the sites they label, assembled from parts with identifiable meanings."
+  <!-- source: illustrative -->
+  - "For the Roman water board, or *cura aquarum*, the supply was a civic system that required constant physical maintenance to survive."
+  <!-- source: illustrative -->
   
   **Not:** "It is evident that..." / "Perhaps one might consider possibly..." (register-neutral hedging). In academic-report: "I think the evidence suggests..." (first-person import from personal-essay).
   
@@ -1198,10 +1198,10 @@
   **Rule.** Sentences are medium to long by default, with connective tissue binding them. Short declaratives ("Likely not." "Change will not come easily.") mark pivots and emphatic endpoints — they are not the baseline. Do not default to fragments; the short form signals that the argument has reached a turning point.
   
   **Exemplars:**
-  - "This deep spiritual connection is reflected in Cheyenne grammar, which spiritually imbues certain objects with peoplehood, the state of being a person."
-  <!-- source: my_writing/report.txt -->
-  - "Change will not come easily. But if we succeed, perhaps we will witness a world where minorities are no longer fighting to be heard."
-  <!-- source: Essay 2.pdf -->
+  - "This civic priority is reflected in the building code, which extends protected status to structures carrying no architectural distinction at all, the ordinary fabric of a street."
+  <!-- source: illustrative -->
+  - "Restoration will never be neutral. But if we say so plainly, perhaps we can stop pretending the choice is a technical one."
+  <!-- source: illustrative -->
   
   **Not:** a paragraph composed entirely of short isolated declaratives, with no causal or contrastive links between them.
   
@@ -1210,10 +1210,10 @@
   **Rule.** Claims along the way read as exploration; verdicts are reserved for conclusions. Hold questions open for multiple paragraphs before resolving them. Body paragraphs may end with a question (especially in `personal-essay`) rather than a closed statement. Reserve decisive framings for synthesis at section ends, not for every sentence en route.
   
   **Exemplars `[personal-essay]`:**
-  - "Would it create an environment so comfortable that there is no incentive to engage with the broader society?"
-  <!-- source: Essay 2.pdf -->
-  - "Have our genes made us too 'selfish'? How can we claim greater value if we increasingly sabotage the survival of the very copies we are meant to protect?"
-  <!-- source: Essay 3.pdf -->
+  - "Would a visitor standing inside it learn anything the interpretive panel outside does not already say?"
+  <!-- source: illustrative -->
+  - "Have we made authenticity too cheap? How can a facade claim to testify to a century it no longer holds any material from?"
+  <!-- source: illustrative -->
   
   ### Including the Reader
   
@@ -1222,14 +1222,14 @@
   **Rule `[register: academic-report, prospectus]`.** "We" is rare; "the reader," "one," "this paper" are also flattening if overused. Default to third-person declarative about the subject matter; the argument speaks through what it claims, not through a rhetorical reader-address.
   
   **Exemplars `[personal-essay]`:**
-  - "If we neglect this, we risk reinforcing the very <concept> that bilingual education seeks to dismantle. We risk creating a new era of separation, of prejudice."
-  <!-- source: Essay 2.pdf -->
+  - "If we neglect this, we risk preserving the surface and losing the record that justified preserving it. We risk a street of accurate copies with nothing left to check them against."
+  <!-- source: illustrative -->
   
   **Not:** "The reader must recognize..." / "One should consider..." — these lecture rather than invite.
   
   ### Weak Adverbs
   
-  **Rule.** Cut "really," "very," "quite," "somewhat," "fairly," "rather," "basically," "actually," "honestly." Ground claims with numbers, specific conditions, or concrete comparisons — not vague qualifiers. "Perhaps" appears in genuine uncertainty ("Perhaps the Walled City warns us...") but not as padding. When in doubt, cut it and check whether the claim is weaker or just more honest.
+  **Rule.** Cut "really," "very," "quite," "somewhat," "fairly," "rather," "basically," "actually," "honestly." Ground claims with numbers, specific conditions, or concrete comparisons — not vague qualifiers. "Perhaps" appears in genuine uncertainty ("Perhaps the demolition record warns us...") but not as padding. When in doubt, cut it and check whether the claim is weaker or just more honest.
   
   ### No Preamble
   
@@ -1262,10 +1262,10 @@
   **Rule.** Sentences hand off. Each connects to the previous through a causal, contrastive, or sequencing connective ("because," "since," "while," "instead," "so that," "as," "when"). Sentence-initial connectives ("Yet," "Still," "Whereas," "Nevertheless," "However," "While") appear throughout the corpus — this is the defining structural habit. A paragraph of complete-on-their-own declaratives makes the reader do the connecting and reads as a stream of verdicts rather than an argument.
   
   **Exemplars:**
-  - "Whereas Benjamin laments that the original's aura 'withers' through reproduction, French sociologist Jean <scholar> questions whether an 'original' still exists at all."
-  <!-- source: Essay 3.pdf -->
-  - "While the Hat embodies generative female power, it functions alongside the Sacred Arrows, which is operated under a male-governed framework."
-  <!-- source: my_writing/report.txt -->
+  - "Whereas Aldridge argues that a replaced element 'forfeits its testimony,' the architectural historian Navarro questions whether a continuously repaired building ever had a single original to forfeit."
+  <!-- source: illustrative -->
+  - "While the distribution tank governed allocation, it operated alongside the settling basins, which were maintained under a separate municipal contract."
+  <!-- source: illustrative -->
   
   Academic prose defaults to longer connected sentences; the short form is for emphasis at pivots, not the baseline.
   
@@ -1274,34 +1274,34 @@
   **Rule.** Paragraphs set up, develop, and hand off. End a paragraph on a transition that opens the next paragraph's topic, not on a verdict that closes the door. Open the next paragraph with a contrastive connector, a concept the prior paragraph positioned, or a direct reference back.
   
   **Exemplar (paragraph-pair handoff):**
-  - A paragraph on the balanced bilingual model ends on Rodriguez's critique of it; the next opens "The transitional model uses the <topic> as a temporary bridge..." — the handoff is the contrast between the two models, not a summary verdict on the first.
-  <!-- source: Essay 2.pdf -->
+  - A paragraph on the full-restoration model ends on Navarro's critique of it; the next opens "The conservation model treats decay as evidence to be stabilized rather than reversed..." and the handoff is the contrast between the two models, not a summary verdict on the first.
+  <!-- source: illustrative -->
   
-  **Not:** ending a paragraph on "And so copies of art, however cherished, cannot fully match the original in aura or value" and then opening the next paragraph cold on <scholar> without a bridging connector.
+  **Not:** ending a paragraph on "And so a rebuilt facade, however faithful, cannot fully carry the testimony of the fabric it replaced" and then opening the next paragraph cold on Navarro without a bridging connector.
   
   ### Information Pacing
   
   **Rule.** Not every sentence carries a new claim plus citation. Interleave elaboration sentences that develop a prior claim without introducing new evidence. After citing a scholar, typically add a sentence of implication or synthesis before moving to the next source.
   
   **Exemplar:**
-  - "Aura and authenticity may not belong solely then, to original 'originals.'" (elaboration after the description of the Tuscan painting) — the synthesis sentence precedes the next scholar.
-  <!-- source: Essay 3.pdf -->
+  - "Testimony may not belong solely then, to original fabric." (elaboration after the description of the rebuilt chapel) The synthesis sentence precedes the next scholar.
+  <!-- source: illustrative -->
   
   ### Concept Setup
   
-  **Rule.** Introduce technical or specialized terms with a one-clause framing on first use. Define inline: "<concept>," "simulacra," "hyperreality," "<term>," "obviative" all get framed before use. Do not drop terminology and move on.
+  **Rule.** Introduce technical or specialized terms with a one-clause framing on first use. Define inline: "toponym," "hydraulic gradient," "habitative element," "obviative" all get framed before use. Do not drop terminology and move on.
   
   **Exemplar:**
-  - "The term *<concept>*, first introduced by philosopher Michel Foucault, describes spaces that exist as 'other': 'effectively enacted utopias' that 'represent' yet simultaneously 'challenge and invert' the societies that surround them."
-  <!-- source: Essay 2.pdf -->
+  - "The term *hydraulic gradient*, borrowed into archaeology from civil engineering, describes the slope a channel needs to keep water moving: the 'minimum fall' below which 'flow stalls and sediment settles.'"
+  <!-- source: illustrative -->
   
   ### Building Arguments
   
   **Rule.** Walk through reasoning. When there is a counterpoint worth addressing, address it. Present multiple competing scholars' positions within a single essay and adjudicate between them rather than ignoring the competition. Say when an argument is compelling and when it is incomplete.
   
   **Exemplar `[personal-essay]`:**
-  - "I want to believe in Villanueva's vision: that bilingual education empowers marginalized students in America. Yet Rodriguez's concern lingers: does linguistic comfort foster 'public alienation'?"
-  <!-- source: Essay 2.pdf -->
+  - "I want to believe in Aldridge's vision: that restoration hands a neighborhood back a history it can walk through. Yet Navarro's concern lingers: does a repaired surface teach anything it has not first erased?"
+  <!-- source: illustrative -->
   
   ### Paragraph Length
   
@@ -1314,18 +1314,18 @@
   Prefer the explicit "that" when the sentence already has a long subject, a cataphoric reference, or multiple clauses. The word savings are not worth the parse cost. This is a principled exception to the Core Rule's cut bias: "that" is optional grammatically but load-bearing for readability once a sentence carries other parse-load elements.
   
   **Exemplars:**
-  - Stacked (violates): "The axis Moore's data reveals is one the names themselves display across the census record, and the morphological contrast this prospectus has traced reads onto it directly." Three reduced relatives plus a cataphoric "one"; the reader backtracks.
-  - Split (fix): "Moore's data reveals a vertical axis, and the names themselves display the same axis across the census record. The morphological contrast between transparent names and *Ma'heo'o* reads onto that axis directly."
-  <!-- source: report_3 (before/after from tmp.md §2) -->
+  - Stacked (violates): "The distribution Whitfield's survey reveals is one the place-names themselves display across the parish record, and the morphological contrast this prospectus has traced reads onto it directly." Three reduced relatives plus a cataphoric "one"; the reader backtracks.
+  - Split (fix): "Whitfield's survey reveals an inland distribution, and the place-names themselves display the same distribution across the parish record. The morphological contrast between transparent compounds and *-ey* reads onto that distribution directly."
+  <!-- source: illustrative -->
   
   ### Weak Nominalizations
   
   **Rule.** Prefer verbs over nouns made from verbs. Prefer concrete subjects over abstract ones. A chain of abstract nouns ("the scope of X… the widening into Y… the strategies Z uses to place W in relation to…") reads as institutional padding even when every word passes the Core Rule's cut test. Opposite failure mode of over-compression: when the cut-bias stops firing, prose expands into abstract-noun cascades.
   
   **Exemplars:**
-  - Nominalized: "widening the scope to the morphological strategies the Cheyenne lexicon uses to place bearers in relation to what the culture considers sacred"
-  - Verbed: "widening the scope to the Cheyenne morphology that marks which bearers the culture treats as sacred"
-  <!-- source: tmp.md §1 -->
+  - Nominalized: "widening the scope to the morphological strategies the Old English lexicon uses to place settlements in relation to what the landscape made farmable"
+  - Verbed: "widening the scope to the Old English morphology that marks which settlements the landscape made farmable"
+  <!-- source: illustrative -->
   
   Watch especially for sentences whose subject is an abstract noun made from a verb ("the argument," "the question," "the distinction," "the tension," "the refusal") when every clause extends the cascade. Rewrite around a concrete agent and an active verb when the subject doesn't need to stay abstract. Small-word redundancy is a related tell; repeated "as" ("read as X rather than as Y" should be "read as X rather than Y") survives the Core Rule because individual words pass but the pattern is compression-artifact slack.
   
@@ -1334,12 +1334,12 @@
   **Rule.** Introduce transliterated terms, proper nouns from a non-English language, or specialized vocabulary with a parenthetical gloss inline on first use. Use `(English gloss)` after a native term or `(native term)` after an English gloss, not footnotes. On second and later appearances, no gloss needed — the term is established. This is one of the most consistently visible structural habits in academic prose that touches non-English material.
   
   **Exemplars:**
-  - "For the Cheyenne people, or *Tsétsėhéstȧhese*, the universe is an animate system..."
-  <!-- source: my_writing/report.txt -->
-  - "...a passage into the <place> (*<term>*), a subterranean realm..."
-  <!-- source: my_writing/report.txt -->
-  - "at the axis's nadir (downward direction)"
-  <!-- source: report_3.pdf -->
+  - "For the Roman water board, or *cura aquarum*, the supply was a civic system..."
+  <!-- source: illustrative -->
+  - "...a channel into the distribution tank (*castellum aquae*), a masonry chamber..."
+  <!-- source: illustrative -->
+  - "at the siphon's *venter* (belly, the lowest run of the pipe)"
+  <!-- source: illustrative -->
   
   ## Dimension
   
@@ -1381,13 +1381,13 @@
   **Fix.** Restructure to a `transitional` or `synthesis` closure: end on what the next paragraph picks up, or end on a factual consequence the argument has earned.
   
   **Before / after:**
-  - AI: "The grammar of placement has a ceiling, and the Creator's name sits above it."
+  - AI: "The morphology of description has a limit, and the island element sits outside it."
   - Edit: (cut entirely; the claim is redundant given the preceding paragraph's setup)
-  <!-- source: report_3 v2 → pdf -->
+  <!-- source: illustrative -->
   
-  - AI: "*Ma'heo'o*'s exemption is itself the interesting linguistic fact: it holds both phonetically and morphologically."
-  - Edit: (cut; the next paragraph's phonological argument makes the point directly)
-  <!-- source: report_3 v2 → pdf -->
+  - AI: "*-ey*'s exemption is itself the interesting linguistic fact: it holds both phonologically and distributionally."
+  - Edit: (cut; the next paragraph's distributional argument makes the point directly)
+  <!-- source: illustrative -->
   
   This pattern corresponds to canonical §10 ID `aphoristic-closures`. A `## §10 exemptions` bullet naming `aphoristic-closures` is required to use this pattern in writer prose.
   
@@ -1402,11 +1402,11 @@
   **Before / after:**
   - AI: "none of the three resolves"
   - Edit: "none of the three readings settles the meaning"
-  <!-- source: tmp.md §1 -->
+  <!-- source: illustrative -->
   
   - AI: "where is the 'there' the stem points at?"
   - Edit: "what 'there' does the stem point to?"
-  <!-- source: tmp.md §1 -->
+  <!-- source: illustrative -->
   
   ### abstract-nominalization-cascade
   
@@ -1418,7 +1418,7 @@
   
   ### reduced-relative-stacking
   
-  **Pattern.** Two or three reduced relative clauses (dropped "that") stacked in a single sentence, often combined with a cataphoric pronoun. Signature: "the axis Moore's data reveals is one the names themselves display across the census record, and the morphological contrast this prospectus has traced reads onto it directly."
+  **Pattern.** Two or three reduced relative clauses (dropped "that") stacked in a single sentence, often combined with a cataphoric pronoun. Signature: "the distribution Whitfield's survey reveals is one the place-names themselves display across the parish record, and the morphological contrast this prospectus has traced reads onto it directly."
   
   **Why it reads as AI.** Each reduced relative is individually grammatical; three in one sentence force the reader to backtrack. Same root as `compression-stranded-verb` — optimization for word count at the cost of parseability.
   
@@ -1433,9 +1433,9 @@
   **Fix.** Rewrite as third-person declarative. First-person only in process statements about the paper itself ("In the poster I will extend...").
   
   **Before / after:**
-  - AI: "I think that irresolution is worth the analysis. My claim in this paper is this: Cheyenne personal names are..."
-  - Edit: "Cheyenne personal names function as morphologically transparent predicates: small claims about their bearers, assembled from parts with identifiable meanings."
-  <!-- source: report_3 v2 → pdf -->
+  - AI: "I think that irresolution is worth the analysis. My claim in this paper is this: Old English place-names are..."
+  - Edit: "Old English place-names function as morphologically transparent descriptions: small claims about the sites they label, assembled from parts with identifiable meanings."
+  <!-- source: illustrative -->
   
   ### citation-atomization
   

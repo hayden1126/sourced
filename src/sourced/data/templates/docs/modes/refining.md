@@ -36,7 +36,7 @@ Skipping the §4 audit list at refining means it will be run at editing on prose
 
 ### Entry
 
-1. **Announce entry.** First output of the turn: `Switching to [refining mode].` Name the outline in one clause after the announcement: "refining the Cheyenne essay outline" / "refining the working outline".
+1. **Announce entry.** First output of the turn: `Switching to [refining mode].` Name the outline in one clause after the announcement: "refining the water-policy essay outline" / "refining the working outline".
 
 2. **Load the outline and citation log.** Read the outline file (or the outline section of the working document). Load the citation log (`sources/<draft>.citations.json` or `sources/working.citations.json`). Both are required before the iterative loop begins; do not run the audit from memory.
 

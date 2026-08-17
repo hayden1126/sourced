@@ -4,7 +4,7 @@
 
 Voice rules live in a per-project `config/voice.md` rendered from a named voice in the voice library. Voice is per-project, so concurrent Claude Code sessions on different projects can carry different voices without conflict.
 
-The shipped `academic` voice is the author's own: personal register plus specific analogy anchors (Clever Hans, chicken sexing, split-brain) calibrated to one writer. Treat it as an example, not a neutral academic default. For a different author or a different register, copy it to a new name and edit, or generate one from a corpus (see below).
+The shipped `academic` voice is a generic academic-register skeleton like the other five: its worked paragraphs and exemplars are invented illustrations of the shape, and its Anchors block is left TBD. Treat it as a starting template, not a calibrated voice. For a specific author or a different register, copy it to a new name and edit, or generate one from a corpus (see below).
 
 ## Shipped skeletons
 

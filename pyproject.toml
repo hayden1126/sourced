@@ -5,9 +5,11 @@ build-backend = "hatchling.build"
 [project]
 name = "sourced"
 description = "Claude Code framework for academic papers"
+license = { text = "MIT" }
 requires-python = ">=3.10"
 dynamic = ["version"]
 dependencies = []
+classifiers = ["License :: OSI Approved :: MIT License"]
 
 [project.optional-dependencies]
 # syrupy ceiling: 5.5.0 registers the xdist-only pytest_testnodedown hook unconditionally,
